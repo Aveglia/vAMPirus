@@ -1,0 +1,7 @@
+reads/
+results/
+work/
+DBs/
+nextflow
+.nextflow/
+.nextflow.log*
