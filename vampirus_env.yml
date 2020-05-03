@@ -1,0 +1,20 @@
+# You can use this file to create a conda environment for this pipeline:
+#   conda env create -f env.yml
+name: vAMPirus
+channels:
+  - conda-forge
+  - bioconda
+  - anaconda
+  - defaults
+  - genomedk
+dependencies:
+  - python=3.6
+  - diamond=0.9.30
+  - fastqc=0.11.9
+  - fastp=0.20.1
+  - clustalo=1.2.4
+  - raxml-ng=0.6.0
+  - modeltest-ng=0.1.6
+  - mafft=7.464
+  - vsearch=2.14.2
+  - biopython=1.76
