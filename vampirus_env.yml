@@ -18,3 +18,4 @@ dependencies:
   - mafft=7.464
   - vsearch=2.14.2
   - biopython=1.76
+  - bbmap=38.79
