@@ -12,14 +12,6 @@
 
 def helpMessage() {
     log.info """
-cat << "EOF"
-
-          ,---.,-.-.,---.o
-    .    ,|---|| | ||---'.,---..   .,---.
-     \  / |   || | ||    ||    |   |`---.
-      `'  `   `` ` ``    ``    `---``---`
-EOF
-echo "
 vAMPirus: A program for non-rRNA amplicon seq data analysis currenlty tailored towards viruses
 
 If you have any comments or questions, feel free to contact Alex Veglia at ajv5@rice.edu
@@ -302,28 +294,28 @@ process diamond_db {
             echo -e "-- Folder is not present, creating one and the Diamond database --\\n"
             mkdir -p DBs/diamonddb_custom/
             cd DBs/diamonddb_custom
-            cp ${params.virprot} .
-            diamond makedb --in ${params.virprot} -d ${params.virprot}
-            export virdb=`pwd`/${params.virprot}
+            cp ${params.dbdir} .
+            diamond makedb --in ${params.dbname} -d ${params.dbname}
+            export virdb=`pwd`/${params.dbname}
             cd ../
         elif [ -d DBs/diamonddb_custom/ ];then
             echo -e "-- Folder is present. Checking if Diamond database is built --\\n"
             cd DBs/diamonddb_custom
-            if [ ! -e ${params.virprot}.dmnd ];then
+            if [ ! -e ${params.dbname}.dmnd ];then
                 echo -e "-- Diamond database not present, creating one --\\n"
-                cp ${params.virprot} .
-                diamond makedb --in ${params.virprot} -d ${params.virprot}
-                export virdb=`pwd`/${params.virprot}
-            elif [ -e ${params.virprot}.dmnd  ];then
+                cp ${params.dbdir} .
+                diamond makedb --in ${params.dbname} -d ${params.dbname}
+                export virdb=`pwd`/${params.dbname}
+            elif [ -e ${params.dbname}.dmnd  ];then
                 echo -e "-- Diamond database already created --\\n"
-                export virdb=`pwd`/${params.virprot}
+                export virdb=`pwd`/${params.dbname}
             fi
             cd ../
         fi
         """
 }
 
-if (params.con-todos) {
+if (params.conTodos) {
 
     println("\n\tRunning vAMPirus \n")
 
@@ -375,6 +367,7 @@ if (params.con-todos) {
             --average_qual 25 --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
             --report_title ${sample_id}
             """
+        }
     } else {
         reads_ch
             .set{ reads_fastp_ch }
@@ -399,9 +392,9 @@ if (params.con-todos) {
 
         script:
             // check if we need to check this outside processes
-            if ( params.fwd == "" && params.rev == "" ):
+            if ( params.fwd == "" && params.rev == "" ) {
                 """
-                bbduk.sh in=${reads[0]} out=${sample_id}_bbduck_R1.fastq.gz ftl=${params.FTRIM} t=${task.cpus}
+                bbduk.sh in1=${reads[0]} in2=${reads[1]} out1=${sample_id}_bbduck_R1.fastq.gz out2=${sample_id}_bbduck_R2.fastq.gz ftl=${params.FTRIM} t=${task.cpus}
                 bbduk.sh in=${reads[1]} out=${sample_id}_bbduck_R2.fastq.gz ftl=${params.RTRIM} t=${task.cpus}
                 """
             } else if ( params.GlobTrim && !params.GlobTrim == "" ) {
@@ -416,7 +409,8 @@ if (params.con-todos) {
                 bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduck_R1.fastq.gz out2=${sample_id}_bbduck_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus}
                 """
             }
-        }
+	  }
+    
     } else {
         reads_fastp_ch
             .set{ reads_bbduk_ch }
@@ -616,11 +610,11 @@ if (params.con-todos) {
 
         output:
             file("*.fasta") into ( diamond_ch, diamond_clustal_ch, ntmafft, prottrans )
-            file("*_sumPHYtab.csv"), file("*_summarytable.tsv"), file("*dmd.out") into summary_diamond
+            tuple file("*_sumPHYtab.csv"), file("*_summarytable.tsv"), file("*dmd.out") into summary_diamond
 
         script:
             """
-            virdb=${params.mypwd}/DBs/diamonddb_custom/${params.virprot}
+            virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
             name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
             diamond blastx -q \${reads} -d ${virdb} -p \$threads --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
             echo "Preparing lists to generate summary .csv's"
@@ -751,7 +745,7 @@ if (params.con-todos) {
             file("all_merged_clean.fasta") from mergedforcounts
 
         output:
-            file("*_counts.txt"), file("*_counts.biome") into counts_vsearch
+            tuple file("*_counts.txt"), file("*_counts.biome") into counts_vsearch
 
         script:
             """
@@ -777,7 +771,7 @@ if (params.con-todos) {
             file(reads) from diamond_clustal_ch
 
         output:
-            file(*.matrix) into clustmatrices
+            file("*.matrix") into clustmatrices
 
         script:
             """
@@ -864,7 +858,7 @@ if (params.con-todos) {
         } else if (params.ntmodelt) {
             """
             pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
-            mod="$(tail -14 ${log} | head -1 | awk -F "--model " '{print \$2}')"
+            mod=\$(tail -14 ${log} | head -1 | awk -F "--model " '{print \$2}')
             raxml --all --msa ${align} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
             """
         } else {
@@ -875,11 +869,11 @@ if (params.con-todos) {
         }
     }
 
-    process translation_VAP {
+    process proteinstage_VAP {
 
         label 'norm_cpus'
 
-        conda 'python=2.4'
+        //conda 'python=2.4'
 
         publishDir "${params.mypwd}/${params.outdir}/translation", mode: "copy", overwrite: true
 
@@ -887,14 +881,14 @@ if (params.con-todos) {
             file(fasta) from prottrans
 
         output:
-            file("*_prot.fasta") into prot_clustal, prot_mafft, prot_counts
+            file("*_prot.fasta") into ( prot_clustal, prot_mafft, prot_counts )
             file("*_vr_report") into report_vr
 
         script:
             """
-            if [ `echo ${reads} | grep -c "fin"` -eq 1 ];then
-            name=\$( echo ${reads} | awk -F "_fin" '{print \$1}')
-            $tools/virtualribosomev2/dna2pep.py ${fasta} -r all -a -o none --fasta ${name}_prot.fasta --report ${name}_vr_report
+            if [ `echo ${fasta} | grep -c "fin"` -eq 1 ];then
+            name=\$( echo ${fasta} | awk -F "_fin" '{print \$1}')
+            ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -a -o none --fasta \${name}_prot.fasta --report \${name}_vr_report
             fi
             """
     }
@@ -906,7 +900,7 @@ if (params.con-todos) {
         publishDir "${params.mypwd}/${params.outdir}/proclust", mode: "copy", overwrite: true
 
         input:
-            file(prot) into prot_clustal
+            file(prot) from prot_clustal
 
         output:
             file("*.matrix") into proclustmatrices
@@ -971,7 +965,7 @@ if (params.con-todos) {
         publishDir "${params.mypwd}/${params.outdir}/raxml_prot", mode: "copy", overwrite: true
 
         input:
-            file(palign) from ptrax_align
+            file(palign) from protrax_align
             file(ptree) from protree_rax
             file(plog) from prolog_rax
 
@@ -987,7 +981,7 @@ if (params.con-todos) {
             } else if (params.ptmodeltrax) {
                 """
                 pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
-                mod="$(tail -14 ${plog} | head -1 | awk -F "--model " '{print \$2}')"
+                mod=\$(tail -14 ${plog} | head -1 | awk -F "--model " '{print \$2}')
                 raxml --all --msa ${palign} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
                 """
             } else {
@@ -1009,7 +1003,7 @@ if (params.con-todos) {
             file(merged) from mergeforprotcounts
 
         output:
-            file("*_protcounts.csv"), file("*derep.fasta") into counts_summary
+            tuple file("*_protcounts.csv"), file("*derep.fasta") into counts_summary
 
         script:
             """
