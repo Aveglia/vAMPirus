@@ -1,4 +1,4 @@
-#!/home/generaluse/programs/miniconda3/envs/python2.7/bin/python2.7
+#!/usr/bin/env python2
 
 #    Copyright 2006 Rasmus Wernersson, Technical University of Denmark
 #
