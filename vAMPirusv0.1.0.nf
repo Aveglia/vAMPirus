@@ -260,8 +260,8 @@ log.info """\
         Project name:                ${params.projtag}
         Email:                       ${params.email}
         Working directory:           ${params.mypwd}
-        Minimum read length:	     ${params.min_rd_len}
-        Maximum read length:         ${params.max_rd_len}
+        Minimum read length:	     ${params.minLen}
+        Maximum read length:         ${params.maxLen}
         OTU cluster percentages:     ${params.clustid}
         Alpha value:                 ${params.alpha}
         Database directory:          ${params.dbdir}
@@ -388,21 +388,23 @@ if (params.conTodos) {
             tuple sample_id, file(reads) from reads_fastp_ch
 
         output:
-            tuple sample_id, file("*.fastq.gz") into reads_bbduk_ch
+            tuple sample_id, file("*bbduk*.fastq.gz") into reads_bbduk_ch
 
         script:
             // check if we need to check this outside processes
             if ( params.fwd == "" && params.rev == "" ) {
                 """
-                bbduk.sh in1=${reads[0]} in2=${reads[1]} out1=${sample_id}_bbduck_R1.fastq.gz out2=${sample_id}_bbduck_R2.fastq.gz ftl=${params.FTRIM} t=${task.cpus}
-                bbduk.sh in=${reads[1]} out=${sample_id}_bbduck_R2.fastq.gz ftl=${params.RTRIM} t=${task.cpus}
+                bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.FTRIM} t=${task.cpus}
+                bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.RTRIM} t=${task.cpus}
+		repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair 
                 """
             } else if ( params.GlobTrim && !params.GlobTrim == "" ) {
                 """
                 FTRIM=\$( echo ${GlobTrim} | cut -f 1 -d "," )
                 RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
-                bbduk.sh in=${reads[0]} out=${sample_id}_bbduck_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
-                bbduk.sh in=${reads[1]} out=${sample_id}_bbduck_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
+                bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
+                bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
+		repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
                 """
             } else {
                 """
@@ -471,7 +473,7 @@ if (params.conTodos) {
 
         script:
             """
-            fastp -i ${reads} -o all_merged_cln.fq -b ${params.maxlen} -l ${params.minlen} --thread ${task.cpus} -n 1
+            fastp -i ${reads} -o all_merged_cln.fq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
 
             # reformat.sh from BBtools
             reformat.sh in=all_merged_cln.fq out=all_merged_clean.fasta t=${task.cpus}
@@ -528,11 +530,12 @@ if (params.conTodos) {
 
         script:
             """
-            vsearch --uchime3_denovo asv_chim.fasta --relabel ASV --nonchimeras ${params.projtag}_ASVs_all.fasta
+        
+	    vsearch --uchime3_denovo asv_chim.fasta --relabel ASV --nonchimeras ${params.projtag}_ASVs_all.fasta
             """
     }
 
-    process cull_VAP {
+    process lengthfilter_VAP {
 
         label 'norm_cpus'
 
@@ -542,33 +545,38 @@ if (params.conTodos) {
             file(fasta) from reads_vsearch5_ch
 
         output:
-            file("*_ASVs_all.fasta") into reads_vsearch6_ch
+            file("*_ASVs.fasta") into reads_vsearch6_ch
 
         script:
         if (params.rangeCull && !params.range == "" ) {
             """
-            stats.sh in=${fasta} gc=${params.projtag}_gc.txt gcformat=4
-            for x in \$(awk '{print \$2}' ${params.projtag}_gc.txt); do if [[ \$x -gt 1 ]]; then echo "\$x" >>lenny.list; fi ; done
+            stats.sh in=${fasta} gc=${params.projtag}_gc.txt gcformat=4 score=f >tmp.out
+            for x in \$(awk '{print \$2}' *_gc.txt);do if [[ \$x -gt 1 ]]; then echo "\$x" >>lenny.list; fi ; done
             culen=\$(cat lenny.list | sort | uniq -c | sort -bgr | head -1 | awk '{print \$2}')
             minl=\$( echo "\$culen - ${params.range}" | bc )
             maxl=\$( echo "\$culen + ${params.range}" | bc )
-            fastp -i ${reads} -o all_merged_cln.fq -b \$maxl -l \$minl --thread ${task.cpus}
-            in=${params.projtag}_ncASVs_all.fasta out=${params.projtag}_ASVs_all.fasta minlength=\$minl maxlength=\$maxl t=${task.cpus}
+            
+	    bbduk.sh in=${fasta} out=${params.projtag}_ASVs.fasta minlength=\$minl maxlength=\$maxl t=${task.cpus}
             """
         } else if (params.trimCull && !params.trimCull == "" ) {
             """
-            fastp -i ${reads} -o all_merged_cln.fq -b ${params.trimCull} -l ${params.trimCull} --thread ${task.cpus}
-            """
+            bbduk.sh in=${fasta} out=${params.projtag}_ASVs.fasta minlength=${params.trimCull} maxlength=${params.trimCull} t=${task.cpus}
+	    """
         } else {
             """
-            stats.sh in=${params.projtag}_ncASVs_all.fasta gc=${params.projtag}_gc.txt gcformat=4
-            for x in \$(awk '{print \$2}' ${params.projtag}_gc.txt); do if [[ \$x -gt 1 ]]; then echo "\$x" >>lenny.list; fi ; done
+            stats.sh in=${fasta} gc=gc.txt gcformat=4 score=f >tmp.out
+            for x in \$(cat gc.txt | awk '{print \$2}' | grep [0-9]);do
+		if [[ \$x -ge 1 ]];then 
+		echo "\$x" >>lenny.list 
+	       	fi  
+	    done
             culen=\$(cat lenny.list | sort | uniq -c | sort -bgr | head -1 | awk '{print \$2}')
-            fastp -i ${reads} -o all_merged_cln.fq -b \$culen -l \$culen --thread ${task.cpus}
+            bbduk.sh in=${fasta} out=${params.projtag}_ASVs.fasta minlength=\${culen} maxlength=\${culen} t=${task.cpus}
             """
         }
     }
 
+    if (params.clusterASV) {
     process vsearch_cluster_VAP {
 
         label 'norm_cpus'
@@ -576,26 +584,30 @@ if (params.conTodos) {
         publishDir "${params.mypwd}/${params.outdir}/nucl_fasta", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
 
         input:
-            file(reads) from reads_vsearch6_ch
+            file(fasta) from reads_vsearch6_ch
 
         output:
-            file("${params.projtag}_otu*.fasta") into reads_diamond_ch
-            file("${params.projtag}_ASVs_all.fasta") into asvfasta
+            file("*.fasta") into reads_diamond_ch
+            file("*_ASVs.fasta") into asvfasta
 
         script:
         if (params.idlist) {
             """
             for id in `echo ${params.idlist} | tr "," "\n"`;done
-                vsearch --cluster_fast ${params.projtag}_ASVs_all.fasta --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
+                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
             done
             """
         } else if (params.sinid) {
             """
             id=${params.sinid}
-            vsearch --cluster_fast ${params.projtag}_ASVs_all.fasta --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
+            vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
             """
         }
+    }
 
+    } else { reads_vsearch6_ch
+	.into{ asvfasta; reads_diamond_ch }
+	
     }
 
     process diamond_VAP {
@@ -616,7 +628,7 @@ if (params.conTodos) {
             """
             virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
             name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
-            diamond blastx -q \${reads} -d ${virdb} -p \$threads --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+            diamond blastx -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
             echo "Preparing lists to generate summary .csv's"
             echo "[Best hit accession number]" > access.list
             echo "[OTU sequence length]" > length.list
@@ -626,7 +638,7 @@ if (params.conTodos) {
             echo "[OTU#]" > otu.list
             echo "[Virus ID]" > "\$name"_virus.list
             echo "[Gene]" > "\$name"_genes.list
-            grep ">" \${reads} | awk -F ">" '{print \$2}' > seqids.lst
+            grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
             echo "extracting genes and names"
             touch new_"\$name"_asvnames.txt
             j=1
@@ -713,8 +725,8 @@ if (params.conTodos) {
             done
             echo "Now editing "\$name" fasta headers"
             ###### rename_seq.py
-            \$python rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_fin.fasta
-            awk 'BEGIN {RS=">";FS="\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_fin.fasta > "\$name"_tmpssasv.fasta
+            rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_fin.fasta
+            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_fin.fasta > "\$name"_tmpssasv.fasta
             echo "[Sequence header]" > newnames.list
             cat new_"\$name"_asvnames.txt >> newnames.list
             touch sequence.list
@@ -722,8 +734,7 @@ if (params.conTodos) {
             grep -E '^[ACGT]+\$' "\$name"_tmpssasv.fasta >> sequence.list
             rm "\$name"_tmpssasv.fasta
             paste -d',' sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_sumPHYtab.csv
-            paste -d' ' otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summarytable.tsv
-            mv "\$name"_sum*sv ./summaryfiles/
+            paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summarytable.tsv
             rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list ;
             rm new_"\$name"_asvnames.txt
             rm "\$name"_virus.list
@@ -750,9 +761,8 @@ if (params.conTodos) {
         script:
             """
              if [ `echo ${reads} | grep -c "fin"` -eq 1 ];then
-                ident=\$( echo ${reads} | awk -F "otu" '{print \$2}' | awk -F "_fin" '{print \$1}')
                 name=\$( echo ${reads} | awk -F "_fin" '{print \$1}')
-                vsearch --usearch_global all_merged_clean.fasta --db ${reads} --id \$ident --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
+                vsearch --usearch_global all_merged_clean.fasta --db ${reads} --id ${params.asvID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
             else
                 ident=\$( echo ${reads} | awk -F "otu" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                 name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}')
@@ -799,7 +809,7 @@ if (params.conTodos) {
             file(reads) from ntmafft
 
         output:
-            file("${name}_aln.fasta") into ( ntmodeltest, ntrax_align )
+            file("*_aln.fasta") into ( ntmodeltest, ntrax_align )
 
         script:
             """
@@ -828,10 +838,10 @@ if (params.conTodos) {
         script:
             """
             name=\$( echo ${reads} | awk -F "_aln" '{print \$1}')
-            modelng -i ${reads} -p ${task.cpus} -d nt -s 203 --disable-checkpoint
+            modeltest-ng -i ${reads} -p ${task.cpus} -d nt -s 203 --disable-checkpoint
             echo "Modeltest analysis complete :)"
             echo "Modeltest-ng results summary:" > \${name}_model.summary
-            tail -7 ${name}_aln.fasta.log >> \${name}_model.summary
+            tail -7 \${name}_aln.fasta.log >> \${name}_model.summary
             """
     }
 
@@ -839,7 +849,7 @@ if (params.conTodos) {
 
         label 'rax_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/raxml", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/raxml-ng", mode: "copy", overwrite: true
 
         input:
             file(align) from ntrax_align
@@ -853,18 +863,18 @@ if (params.conTodos) {
         if (params.ntraxcust) {
             """
             pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
-            raxml --all --msa ${align} --prefix \${pre} --threads ${task.cpus} ${params.ntraxcust}
+            raxml-ng --all --msa ${align} --prefix \${pre} --threads ${task.cpus} ${params.ntraxcust}
             """
         } else if (params.ntmodelt) {
             """
             pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
             mod=\$(tail -14 ${log} | head -1 | awk -F "--model " '{print \$2}')
-            raxml --all --msa ${align} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
+            raxml-ng --all --msa ${align} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
             """
         } else {
             """
             pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
-            raxml --all --msa ${align} --model GTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
+            raxml-ng --all --msa ${align} --model GTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
             """
         }
     }
@@ -873,7 +883,7 @@ if (params.conTodos) {
 
         label 'norm_cpus'
 
-        //conda 'python=2.4'
+        conda 'python=2.7'
 
         publishDir "${params.mypwd}/${params.outdir}/translation", mode: "copy", overwrite: true
 
@@ -907,7 +917,7 @@ if (params.conTodos) {
 
         script:
             """
-            name=\$( echo ${fasta} | awk -F ".fasta" '{print \$1}')
+            name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
             clustalo -i ${prot} --distmat-out=\${name}_dist.matrix --full --force --threads=${task.cpus}
             clustalo -i ${prot} --distmat-out=\${name}_id.matrix --percent-id --full --force --threads=${task.cpus}
             """
@@ -927,9 +937,8 @@ if (params.conTodos) {
 
         script:
             """
-                name=\$( echo \${prot}  | awk -F ".fasta" '{print \$1}')
-                mafft --maxiterate 5000 --auto \${prot} >\${name}_aln.fasta
-            fi
+            name=\$( echo ${prot}  | awk -F ".fasta" '{print \$1}')
+            mafft --maxiterate 5000 --auto ${prot} >\${name}_aln.fasta
             """
     }
 
@@ -941,7 +950,7 @@ if (params.conTodos) {
         publishDir "${params.mypwd}/${params.outdir}/aamodel_test/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
 
         input:
-            file(align) from protmodeltest
+            file(prot) from protmodeltest
 
         output:
             file("*.tree") into protree_rax
@@ -951,10 +960,10 @@ if (params.conTodos) {
         script:
             """
             name=\$( echo ${prot} | awk -F "_aln" '{print \$1}')
-            modelng -i ${prot} -p ${task.cpus} -d nt -s 203 --disable-checkpoint
+            modeltest-ng -i ${prot} -p ${task.cpus} -d aa -s 203 --disable-checkpoint
             echo "Modeltest analysis complete :)"
             echo "Modeltest-ng results summary:" > \${name}_model.summary
-            tail -7 ${name}_aln.fasta.log >> \${name}_model.summary
+            tail -7 \${name}_aln.fasta.log >> \${name}_model.summary
             """
     }
 
@@ -962,7 +971,7 @@ if (params.conTodos) {
 
         label 'rax_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/raxml_prot", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/raxml-ng_prot", mode: "copy", overwrite: true
 
         input:
             file(palign) from protrax_align
@@ -976,18 +985,18 @@ if (params.conTodos) {
             if (params.ptraxcust) {
                 """
                 pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
-                raxml --all --msa ${palign} --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
+                raxml-ng --all --msa ${palign} --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
                 """
             } else if (params.ptmodeltrax) {
                 """
                 pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
                 mod=\$(tail -14 ${plog} | head -1 | awk -F "--model " '{print \$2}')
-                raxml --all --msa ${palign} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
+                raxml-ng --all --msa ${palign} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
                 """
             } else {
                 """
                 pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
-                raxml --all --msa ${palign} --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
+                raxml-ng --all --msa ${palign} --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
                 """
             }
     }
