@@ -285,7 +285,7 @@ if (params.readsTest) {
         .into{ reads_ch; reads_qc_ch }
 }
 
-process diamond_db {
+process build_diamond_db {
     script:
         """
         cd ${params.mypwd}
@@ -319,15 +319,15 @@ if (params.conTodos) {
 
     println("\n\tRunning vAMPirus \n")
 
-    if (!params.skipQC) {
+    if (!params.skipFastQC) {
 
-        process fasqc_VAP {
+        process fastqc_VAP {
 
             label 'low_cpus'
 
             tag "${sample_id}"
 
-            publishDir "${params.mypwd}/${params.outdir}/fastqc", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Read_Processing/fastqc", mode: "copy", overwrite: true
 
             input:
                 tuple sample_id, file(reads) from reads_qc_ch
@@ -344,13 +344,13 @@ if (params.conTodos) {
 
     if (!params.skipFastP) {
 
-    process fastp_VAP {
+    process adapterremoval_fastp_VAP {
 
         label 'low_cpus'
 
         tag "${sample_id}"
 
-        publishDir "${params.mypwd}/${params.outdir}/filter", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
+        publishDir "${params.mypwd}/${params.outdir}/Read_Processing/adapter_removal", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
         input:
             tuple sample_id, file(reads) from reads_ch
@@ -376,55 +376,77 @@ if (params.conTodos) {
 
     if (!params.skipBBduk) {
 
-    process bbduk_VAP {
+        process primerremoval_bbduk_VAP {
 
-        label 'low_cpus'
+            label 'low_cpus'
 
-        tag "${sample_id}"
+            tag "${sample_id}"
 
-        publishDir "${params.mypwd}/${params.outdir}/bbduk", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Read_Processing/primer_removal", mode: "copy", overwrite: true
 
-        input:
-            tuple sample_id, file(reads) from reads_fastp_ch
+            input:
+                tuple sample_id, file(reads) from reads_fastp_ch
 
-        output:
-            tuple sample_id, file("*bbduk*.fastq.gz") into reads_bbduk_ch
+            output:
+                tuple sample_id, file("*bbduk*.fastq.gz") into ( reads_bbduk_ch, readsforqc2 )
 
-        script:
-            // check if we need to check this outside processes
-            if ( params.fwd == "" && params.rev == "" ) {
-                """
-                bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.FTRIM} t=${task.cpus}
-                bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.RTRIM} t=${task.cpus}
-		repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair 
-                """
-            } else if ( params.GlobTrim && !params.GlobTrim == "" ) {
-                """
-                FTRIM=\$( echo ${GlobTrim} | cut -f 1 -d "," )
-                RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
-                bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
-                bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
-		repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
-                """
-            } else {
-                """
-                bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduck_R1.fastq.gz out2=${sample_id}_bbduck_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus}
-                """
-            }
-	  }
-    
+            script:
+                // check if we need to check this outside processes
+                if ( params.fwd == "" && params.rev == "" ) {
+                    """
+                    bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.FTRIM} t=${task.cpus}
+                    bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.RTRIM} t=${task.cpus}
+    		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+                    """
+                } else if ( params.GlobTrim && !params.GlobTrim == "" ) {
+                    """
+                    FTRIM=\$( echo ${GlobTrim} | cut -f 1 -d "," )
+                    RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
+                    bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
+                    bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
+    		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+                    """
+                } else {
+                    """
+                    bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduck_R1.fastq.gz out2=${sample_id}_bbduck_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus}
+                    """
+                }
+    	  }
     } else {
         reads_fastp_ch
             .set{ reads_bbduk_ch }
     }
 
-    process vsearch_merge_VAP {
+    if (!params.skipFastQC) {
+
+        process fastqc2_VAP {
+
+            label 'low_cpus'
+
+            tag "${sample_id}"
+
+            publishDir "${params.mypwd}/${params.outdir}/Read_Processing/fastqc/fastqc2", mode: "copy", overwrite: true
+
+            input:
+                tuple sample_id, file(reads) from readsforqc2
+
+            output:
+                tuple sample_id, file("*_fastqc.{zip,html}") into fastqc2_results_OAS
+
+            script:
+                """
+                fastqc --quiet --threads $task.cpus $reads
+                """
+        }
+    }
+
+    process mergereads_vsearch_VAP {
 
         label 'norm_cpus'
 
         tag "${sample_id}"
 
-        publishDir "${params.mypwd}/${params.outdir}/vsearch_merge", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Read_Processing/read_merging", mode: "copy", overwrite: true
 
         input:
             tuple sample_id, file(reads) from reads_bbduk_ch
@@ -443,10 +465,9 @@ if (params.conTodos) {
 
         label 'low_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/combined_reads", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Read_Processing/readmerging", mode: "copy", overwrite: true
 
         input:
-            // check collect function here!!!!!!
             file(reads) from reads_vsearch1_ch
                 .collect()
 
@@ -456,38 +477,38 @@ if (params.conTodos) {
         script:
             """
             cat ${reads} >>all_merged.fq
-	    """
+	        """
     }
 
-    process trimming_VAP {
+    process readlength_trimming_VAP {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/vearch_trim", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Read_Processing/read_merging/clean", mode: "copy", overwrite: true
 
         input:
             file(reads) from collect_samples_ch
 
         output:
-            file("all_merged_clean.fasta") into ( mergedforcounts, mergeforprotcounts )
+            file("all_merged_clean.fasta") into ( mergedforcounts, mergeforprotcounts, mergeforpOTUcounts, mergeforpOTUaacounts )
             file("all_merged_clean_filter.fasta") into ( reads_vsearch2_ch )
 
         script:
             """
-            fastp -i ${reads} -o all_merged_cln.fq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1 
+            fastp -i ${reads} -o all_merged_cln.fq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
 
             # reformat.sh from BBtools
             reformat.sh in=all_merged_cln.fq out=all_merged_clean.fasta t=${task.cpus}
-            
+
             bbduk.sh in=all_merged_clean.fasta out=all_merged_clean_filter.fasta minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
-	    """
+	        """
     }
 
-    process vsearch_derep_VAP {
+    process uniques_vsearch_VAP {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/vearch_derep", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Read_Processing/uniques", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch2_ch
@@ -501,11 +522,11 @@ if (params.conTodos) {
             """
     }
 
-    process vsearch_unoise_VAP {
+    process asvs_vsearch_VAP {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/vearch_unoise", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Read_Processing/uniques/asvs/wchimeras", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch3_ch
@@ -519,71 +540,68 @@ if (params.conTodos) {
             """
     }
 
-    process vsearch_uchime_VAP {
+    process chimeradetection_vsearch_VAP {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/vearch_uchime", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Clustering/asvs", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch4_ch
 
         output:
-            file("*ASVs_all.fasta") into reads_vsearch5_ch
+            file("*ASVs_all.fasta") into reads_vsearch5_ch, nucl2aa
 
         script:
             """
-        
-	    vsearch --uchime3_denovo asv_chim.fasta --relabel ASV --nonchimeras ${params.projtag}_ASVs_all.fasta
+	        vsearch --uchime3_denovo asv_chim.fasta --relabel ASV --nonchimeras ${params.projtag}_ASVs_all.fasta
             """
     }
 
-    if (params.clusterASV) {
-    process vsearch_cluster_VAP {
+    if (params.clusterntASV) {
+        process nucleotide_cluster_VAP {
 
-        label 'norm_cpus'
+            label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/nucl_fasta", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
+            publishDir "${params.mypwd}/${params.outdir}/Clustering/nucleotide_OTU", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
 
-        input:
-            file(fasta) from reads_vsearch5_ch
+            input:
+                file(fasta) from reads_vsearch5_ch
 
-        output:
-            file("*.fasta") into reads_diamond_ch
-            file("*_ASVs.fasta") into asvfasta
+            output:
+                file("*_otu*.fasta") into reads_diamond_ch
+                file("*_ASVs_all.fasta") into ( asvfasta, asvfastaforcounts)
 
-        script:
-        if (params.idlist) {
-            """
-            for id in `echo ${params.idlist} | tr "," "\n"`;done
+            script:
+            if (params.idlist) {
+                """
+                for id in `echo ${params.idlist} | tr "," "\n"`;done
+                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
+                done
+                """
+            } else if (params.sinid) {
+                """
+                id=${params.sinid}
                 vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
-            done
-            """
-        } else if (params.sinid) {
-            """
-            id=${params.sinid}
-            vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
-            """
+                """
+            }
         }
-    }
-
     } else { reads_vsearch5_ch
-	.into{ asvfasta; reads_diamond_ch }
-	
+	.into{ reads_diamond_ch; asvfasta }
     }
 
     process diamond_VAP {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/summary_files", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
-        publishDir "${params.mypwd}/${params.outdir}/diamond_out", mode: "copy", overwrite: true, pattern: '*dmd.out'
+        publishDir "${params.mypwd}/${params.outdir}/Taxonomy/", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+        publishDir "${params.mypwd}/${params.outdir}/Taxonomy/diamond_outputs", mode: "copy", overwrite: true, pattern: '*dmd.out'
 
         input:
             file(reads) from reads_diamond_ch
 
         output:
-            file("*.fasta") into ( diamond_ch, diamond_clustal_ch, ntmafft, prottrans )
+            file("*.fasta") into ( diamond_ch, diamond_clustal_ch, ntmafft,  )
             tuple file("*_sumPHYtab.csv"), file("*_summarytable.tsv"), file("*dmd.out") into summary_diamond
 
         script:
@@ -714,8 +732,8 @@ if (params.conTodos) {
         publishDir "${params.mypwd}/${params.outdir}/nuclcounts_dir", mode: "copy", overwrite: true, pattern: '*.{biome,txt}'
 
         input:
-            file(reads) from diamond_ch
-            file("all_merged_clean.fasta") from mergedforcounts
+            file(reads) from (diamond_ch, asvfastaforcounts)
+            file(merged) from mergedforcounts
 
         output:
             tuple file("*_counts.txt"), file("*_counts.biome") into counts_vsearch
@@ -858,20 +876,20 @@ if (params.conTodos) {
             tuple file("*_prot.fasta"), file("*aminoTypes.fasta") into ( prot_clustal, prot_mafft )
             file("*aminoTypes.fasta") into ( prot_counts )
 	    tuple file ("*Report.clstr"), file("*_vr_report") into report_vr
-        
+
         script:
             """
             if [ `echo ${fasta} | grep -c "fin"` -eq 1 ];then
             name=\$( echo ${fasta} | awk -F "_fin" '{print \$1}')
             ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -a -x -o none --fasta \${name}_allprot.fasta --report \${name}_vr_report
             #cd-hit -i \${name}_allprot.fasta -c 1.0 -o  \${name}_aTypes.fasta
-	    #types=\$(grep -c ">" \${name}_aTypes.fasta)
-	    #for num in \$(seq 1 \${types} )
-	    #do      echo ">AminoType\${num}" > newnames.tmp
-	    #done	    
-	    #rename_seq.py \${name}_aTypes.fasta newnames.tmp  \${name}_aminoTypes.fasta
-	    #rename_seq.py \${name}_aTypes.clstr newnames.tmp \${name}_aminoTypes_clustReport.clstr
-	    fi
+            #types=\$(grep -c ">" \${name}_aTypes.fasta)
+	        #for num in \$(seq 1 \${types} )
+	        #do      echo ">AminoType\${num}" > newnames.tmp
+	        #done
+	        #rename_seq.py \${name}_aTypes.fasta newnames.tmp  \${name}_aminoTypes.fasta
+	        #rename_seq.py \${name}_aTypes.clstr newnames.tmp \${name}_aminoTypes_clustReport.clstr
+            fi
             """
     }
 
@@ -991,12 +1009,592 @@ if (params.conTodos) {
         script:
             """
             name=\$( echo ${fasta} | awk -F ".fasta" '{print \$1}')
-            #cd-hit -i ${fasta} -c 1.0 -o \${name}_amin.fasta 
+            #cd-hit -i ${fasta} -c 1.0 -o \${name}_amin.fasta
             diamond makedb --in \${name}_derep.fasta --db \${name}_derep.fasta
 
             paste -d',' tmp.col1.txt *col.txt > \${name}_protcounts.csv
             """
     }
+
+    if (params.clusteraaASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
+
+        process translateforclustering_VAP2 {
+
+            label 'norm_cpus'
+
+            conda 'python=2.7'
+
+            publishDir "${params.mypwd}/${params.outdir}/translation4clustering", mode: "copy", overwrite: true
+
+            input:
+                file(fasta) from nucl2aa
+
+            output:
+                file("*ASVprotforclust.fasta") into cluster_aa
+                file("*_vr_report") into reportaa_VR
+                file("*_ASVs_all.fasta") into asvfastaforaaclust
+
+            script:
+                """
+                name=\$( echo ${fasta} | awk -F "_ASV" '{print \$1}')
+                ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta \${name}_ASVprotforclust.fasta --report \${name}_vr_report
+                """
+        }
+
+        process cluster_AA {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/clusteringby_aminos", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
+
+            input:
+                file(fasta) from cluster_aa
+                file(asvs) from asvfastaforaaclust
+
+            output:
+                file("*_pOTU*.fasta") into pOTU_diamond_ch
+                file("*_ASVs_all.fasta") into asvfastados
+                file("*_pOTUaa*.fasta") into ( pOTUaaforanalysis, pOTUaa_diamondbp, pOTUaaformafft, pOTUaaforcounts )
+
+            script:
+            // add awk script to count seqs
+            if (params.aalist) {
+                """
+                for id in `echo ${params.aaidlist} | tr "," "\n"`;done
+                    awk 'BEGIN{RS=">";ORS=""}length(\$2)>${param.minAA}{print ">"\$0}' ${fasta} >filtered.fasta
+                    cd-hit -i filtered.fasta -c \${id} --fasta ${params.projtag}_pOTU\${id}.fasta
+                done
+                """
+            } else if (params.aaid) {
+                """
+                id=${params.aaid}
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)>${param.minAA}{print ">"\$0}' ${fasta} >filtered.fasta
+                cd-hit -i filtered.fasta -c ${param.aaid} --fasta ${params.projtag}_pOTU\${id}.fasta
+                """
+            }
+        }
+
+        process diamondpOTU_VAP2 {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/pOTU_summary_files", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+            publishDir "${params.mypwd}/${params.outdir}/pOTU_diamond_out", mode: "copy", overwrite: true, pattern: '*dmd.out'
+
+            input:
+                file(reads) from pOTU_diamond_ch
+
+            output:
+                file("*.fasta") into ( diamondAA_ch, diamondAA_clustal_ch, ntmafftAA )
+                tuple file("*_sumPHYtab.csv"), file("*_summarytable.tsv"), file("*dmd.out") into summary_AAdiamond
+
+            script:
+                """
+                virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
+                name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
+                diamond blastx -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                echo "Preparing lists to generate summary .csv's"
+                echo "[Best hit accession number]" >access.list
+                echo "[pOTU sequence length]" >length.list
+                echo "[e-value]" >evalue.list
+                echo "[Bitscore]" >bit.list
+                echo "[Percent ID (aa)]" >pid.list
+                echo "[pOTU#]" >otu.list
+                echo "[Virus ID]" >"\$name"_virus.list
+                echo "[Gene]" >"\$name"_genes.list
+                grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
+                echo "extracting genes and names"
+                touch new_"\$name"_asvnames.txt
+                j=1
+                for s in \$(cat seqids.lst);do
+                    echo "Checking for \$s hit in diamond output"
+                        if [[ ${params.refseq} == "T" ]];then
+                            echo "RefSeq headers specified"
+                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                echo "Yep, there was a hit for \$s"
+                                echo "Extracting the information now:"
+                                acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
+                                echo "\$s" >> otu.list
+                                echo "\$acc" >> access.list
+                                line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                echo "\$line" | awk '{print \$10}' >>evalue.list
+                                echo "\$line" | awk '{print \$11}' >>bit.list
+                                echo "\$line" | awk '{print \$12}' >>pid.list
+                                echo "\$line" | awk '{print \$2}' >>length.list
+                                echo "Extracting virus and gene ID for \$s now"
+                                gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                                virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
+                                echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                                echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                j=\$((\$j+1))
+                                echo "\$s done."
+                            else
+                                echo "Ugh, there was no hit for \$s .."
+                                echo "We still love \$s though and we will add it to the final fasta file"
+                                echo "\$s" >> otu.list
+                                echo "NO_HIT" >>access.list
+                                echo "NO_HIT" >>"\$name"_genes.list
+                                echo "NO_HIT" >>"\$name"_virus.list
+                                echo "NO_HIT" >>evalue.list
+                                echo "NO_HIT" >>bit.list
+                                echo "NO_HIT" >>pid.list
+                                echo "NO_HIT" >>length.list
+                                virus="NO"
+                                gene="HIT"
+                                echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                j=\$((\$j+1))
+                                echo "\$s done."
+                        fi
+                        else
+                            echo "Using RVDB headers."
+                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                echo "Yep, there was a hit for \$s"
+                                echo "Extracting the information now:"
+                                acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
+                                echo "\$s" >>otu.list
+                                echo "\$acc" >>access.list
+                                line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                echo "\$line" | awk '{print \$10}' >>evalue.list
+                                echo "\$line" | awk '{print \$11}' >>bit.list
+                                echo "\$line" | awk '{print \$12}' >>pid.list
+                                echo "\$line" | awk '{print \$2}' >>length.list
+                                echo "Extracting virus and gene ID for \$s now"
+                                gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                                echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
+                                virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                                echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
+                                echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
+                                j=\$((\$j+1))
+                                echo "\$s done."
+                            else
+                                echo "Ugh, there was no hit for \$s .."
+                                echo "We still love \$s though and we will add it to the final fasta file"
+                                echo "\$s" >>otu.list
+                                echo "NO_HIT" >>access.list
+                                echo "NO_HIT" >>"\$name"_genes.list
+                                echo "NO_HIT" >>"\$name"_virus.list
+                                echo "NO_HIT" >>evalue.list
+                                echo "NO_HIT" >>bit.list
+                                echo "NO_HIT" >>pid.list
+                                echo "NO_HIT" >>length.list
+                                virus="NO"
+                                gene="HIT"
+                                echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
+                                j=\$((\$j+1))
+                                echo "\$s done."
+                            fi
+                        fi
+                echo "Done with \$s"
+                done
+                echo "Now editing "\$name" fasta headers"
+                ###### rename_seq.py
+                rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_fin.fasta
+                awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_fin.fasta > "\$name"_tmpssasv.fasta
+                echo "[Sequence header]" > newnames.list
+                cat new_"\$name"_asvnames.txt >> newnames.list
+                touch sequence.list
+                echo "     " > sequence.list
+                grep -E '^[ACGT]+\$' "\$name"_tmpssasv.fasta >> sequence.list
+                rm "\$name"_tmpssasv.fasta
+                paste -d',' sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_sumPHYtab.csv
+                paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summarytable.tsv
+                rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list ;
+                rm new_"\$name"_asvnames.txt
+                rm "\$name"_virus.list
+                rm "\$name"_genes.list
+                rm newnames.list
+                rm access.list
+                echo "Done Assigning Taxonomy To : ${reads} "
+                """
+        }
+
+        process vsearch_globalpOTU_VAP2 {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/pOTUcounts_dir", mode: "copy", overwrite: true, pattern: '*.{biome,txt}'
+
+            input:
+                file(reads) from diamondAA_ch
+                file("all_merged_clean.fasta") from mergeforpOTUcounts
+
+            output:
+                tuple file("*_counts.txt"), file("*_counts.biome") into pOTUcounts_vsearch
+
+            script:
+                """
+                 if [ `echo ${reads} | grep -c "fin"` -eq 1 ];then
+                    name=\$( echo ${reads} | awk -F "_fin" '{print \$1}')
+                    vsearch --usearch_global all_merged_clean.fasta --db ${reads} --id ${params.asvID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
+                else
+                    ident=\$( echo ${reads} | awk -F "otu" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                    name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}')
+                    vsearch --usearch_global all_merged_clean.fasta --db ${reads} --id \$ident --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
+                fi
+                """
+        }
+
+        process pOTUclustalo_VAP2 {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/pOTU_matrices", mode: "copy", overwrite: true
+
+            input:
+                file(reads) from diamondAA_clustal_ch
+
+            output:
+                file("*.matrix") into pOTUclustmatrices
+
+            script:
+                """
+                if [ `echo ${reads} | grep -c "fin"` -eq 1 ];then
+                    dent=\$( echo ${reads} | awk -F "otu" '{print \$2}' | awk -F "_fin" '{print \$1}')
+                    name=\$( echo ${reads} | awk -F "_fin" '{print \$1}')
+                    clustalo -i ${reads} --distmat-out=\${name}_dist.matrix --full --force --threads=${task.cpus}
+                    clustalo -i ${reads} --distmat-out=\${name}_id.matrix --percent-id --full --force --threads=${task.cpus}
+                else
+                    ident=\$( echo ${reads} | awk -F "otu" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                    name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}')
+                    clustalo -i ${reads} --distmat-out=\${name}_dist.matrix --full --force --threads=${task.cpus}
+                    clustalo -i ${reads} --distmat-out=\${name}_id.matrix --percent-id --full --force --threads=${task.cpus}
+                fi
+                """
+        }
+
+        process pOTUmafft_VAP {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/pOTUmafft", mode: "copy", overwrite: true
+
+            input:
+                file(reads) from ntmafftAA
+
+            output:
+                file("*_aln.fasta") into ( pOTUntmodeltest, pOTUntrax_align )
+                file("${name}_aln.html") into align_html
+
+            script:
+                """
+                if [ `echo ${reads} | grep -c "fin"` -eq 1 ];then
+                    name=\$( echo ${reads} | awk -F "_fin" '{print \$1}' )
+                    mafft --maxiterate 5000 --auto ${reads} >\${name}_ALN.fasta
+                    trimal -in \${name}_ALN.fasta -out \${name}_aln.fasta -keepheader -fasta -automated1 -htmlout \${name}_aln.html
+                fi
+                """
+        }
+
+        process pOTUmodel_test_VAP2 {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/pOTUntmodeltest", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
+            publishDir "${params.mypwd}/${params.outdir}/pOTUntmodeltest/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
+
+            input:
+                file(reads) from pOTUntmodeltest
+
+            output:
+                file("*.tree") into tree_raxpOTU
+                file("*.log") into log_raxpOTU
+                file("*model.summary") into ntmodelsumpOTU
+
+            script:
+                """
+                name=\$( echo ${reads} | awk -F "_aln" '{print \$1}')
+                modeltest-ng -i ${reads} -p ${task.cpus} -d nt -s 203 --disable-checkpoint
+                echo "Modeltest analysis complete :)"
+                echo "Modeltest-ng results summary:" > \${name}_model.summary
+                tail -7 \${name}_aln.fasta.log >> \${name}_model.summary
+                """
+        }
+
+        process pOTUraxml_VAP2 {
+
+            label 'rax_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/pOTUraxml-ng", mode: "copy", overwrite: true
+
+            input:
+                file(align) from ntrax_alignpOTU
+                file(tree) from tree_raxpOTU
+                file(log) from log_raxpOTU
+
+            output:
+                file("*raxml*") into raxml_summary
+
+            script:
+            if (params.ntraxcust) {
+                """
+                pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
+                raxml-ng --all --msa ${align} --prefix \${pre} --threads ${task.cpus} ${params.ntraxcust}
+                """
+            } else if (params.ntmodelt) {
+                """
+                pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
+                mod=\$(tail -14 ${log} | head -1 | awk -F "--model " '{print \$2}')
+                raxml-ng --all --msa ${align} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
+                """
+            } else {
+                """
+                pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
+                raxml-ng --all --msa ${align} --model GTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
+                """
+            }
+        }
+
+        process pOTUclustalo_prot_VAP2 {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/pOTUaaMatrices", mode: "copy", overwrite: true
+
+            input:
+                file(prot) from pOTUaaforanalysis
+
+            output:
+                file("*.matrix") into pOTUaaMatrix
+
+            script:
+                """
+                name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
+                clustalo -i ${prot} --distmat-out=\${name}_dist.matrix --full --force --threads=${task.cpus}
+                clustalo -i ${prot} --distmat-out=\${name}_id.matrix --percent-id --full --force --threads=${task.cpus}
+                """
+        }
+
+        process pOTUaa_diamondblastp {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/pOTUaaDiamondblastp", mode: "copy", overwrite: true
+
+            input:
+                file(reads) from pOTUaa_diamondbp
+            output:
+                file("_dmd.out") into pOTUdiamblastp
+                file("*newheaders.list") into pOTUnewheaders
+
+            script:
+                """
+                virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
+                name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
+                diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                echo "Preparing lists to generate summary .csv's"
+                echo "[Best hit accession number]" >access.list
+                echo "[pOTU sequence length]" >length.list
+                echo "[e-value]" >evalue.list
+                echo "[Bitscore]" >bit.list
+                echo "[Percent ID (aa)]" >pid.list
+                echo "[pOTUaa#]" >otu.list
+                echo "[Virus ID]" >"\$name"_virus.list
+                echo "[Gene]" >"\$name"_genes.list
+                grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
+                echo "extracting genes and names"
+                touch new_"\$name"_asvnames.txt
+                j=1
+                for s in \$(cat seqids.lst);do
+                    echo "Checking for \$s hit in diamond output"
+                        if [[ ${params.refseq} == "T" ]];then
+                            echo "RefSeq headers specified"
+                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                echo "Yep, there was a hit for \$s"
+                                echo "Extracting the information now:"
+                                acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
+                                echo "\$s" >> otu.list
+                                echo "\$acc" >> access.list
+                                line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                echo "\$line" | awk '{print \$10}' >>evalue.list
+                                echo "\$line" | awk '{print \$11}' >>bit.list
+                                echo "\$line" | awk '{print \$12}' >>pid.list
+                                echo "\$line" | awk '{print \$2}' >>length.list
+                                echo "Extracting virus and gene ID for \$s now"
+                                gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                                virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
+                                echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                                echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                j=\$((\$j+1))
+                                echo "\$s done."
+                            else
+                                echo "Ugh, there was no hit for \$s .."
+                                echo "We still love \$s though and we will add it to the final fasta file"
+                                echo "\$s" >> otu.list
+                                echo "NO_HIT" >>access.list
+                                echo "NO_HIT" >>"\$name"_genes.list
+                                echo "NO_HIT" >>"\$name"_virus.list
+                                echo "NO_HIT" >>evalue.list
+                                echo "NO_HIT" >>bit.list
+                                echo "NO_HIT" >>pid.list
+                                echo "NO_HIT" >>length.list
+                                virus="NO"
+                                gene="HIT"
+                                echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                j=\$((\$j+1))
+                                echo "\$s done."
+                        fi
+                        else
+                            echo "Using RVDB headers."
+                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                echo "Yep, there was a hit for \$s"
+                                echo "Extracting the information now:"
+                                acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
+                                echo "\$s" >>otu.list
+                                echo "\$acc" >>access.list
+                                line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                echo "\$line" | awk '{print \$10}' >>evalue.list
+                                echo "\$line" | awk '{print \$11}' >>bit.list
+                                echo "\$line" | awk '{print \$12}' >>pid.list
+                                echo "\$line" | awk '{print \$2}' >>length.list
+                                echo "Extracting virus and gene ID for \$s now"
+                                gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                                echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
+                                virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                                echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
+                                echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
+                                j=\$((\$j+1))
+                                echo "\$s done."
+                            else
+                                echo "Ugh, there was no hit for \$s .."
+                                echo "We still love \$s though and we will add it to the final fasta file"
+                                echo "\$s" >>otu.list
+                                echo "NO_HIT" >>access.list
+                                echo "NO_HIT" >>"\$name"_genes.list
+                                echo "NO_HIT" >>"\$name"_virus.list
+                                echo "NO_HIT" >>evalue.list
+                                echo "NO_HIT" >>bit.list
+                                echo "NO_HIT" >>pid.list
+                                echo "NO_HIT" >>length.list
+                                virus="NO"
+                                gene="HIT"
+                                echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
+                                j=\$((\$j+1))
+                                echo "\$s done."
+                            fi
+                        fi
+                echo "Done with \$s"
+                done
+                echo "Now editing "\$name" fasta headers"
+                ###### rename_seq.py
+                rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_fin.fasta
+                awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_fin.fasta > "\$name"_tmpssasv.fasta
+                echo "[Sequence header]" > newnames.list
+                cat new_"\$name"_asvnames.txt >> newnames.list
+                touch sequence.list
+                awk 'BEGIN{RS=">";ORS=""}{print $2"\n"}' \$name"_tmpssasv.fasta >>sequence.list
+                rm "\$name"_tmpssasv.fasta
+                paste -d',' sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_sumPHYtab.csv
+                paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summarytable.tsv
+                rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list ;
+                rm new_"\$name"_asvnames.txt
+                rm "\$name"_virus.list
+                rm "\$name"_genes.list
+                rm newnames.list
+                rm access.list
+                echo "Done Assigning Taxonomy To : ${reads} "
+                """
+            }
+
+        process pOTUaamafft_prot_VAP2 {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/pOTUaaMafft", mode: "copy", overwrite: true
+
+            input:
+                file(prot) from pOTUaaformafft
+
+            output:
+                file("*_aln.fasta") into ( pOTUaamodeltest, pOTUaatrax_align )
+                file("${name}_aln.html") into pOTUaa_aln
+
+            script:
+                """
+                name=\$( echo ${prot}  | awk -F ".fasta" '{print \$1}' )
+                mafft --maxiterate 5000 --auto ${prot} >\${name}_ALN.fasta
+                trimal -in \${name}_ALN.fasta -out \${name}_aln.fasta -keepheader -fasta -automated1 -htmlout \${name}_aln.html
+                """
+        }
+
+        process modeltest_prot_VAP {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/aamodel_test", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
+            publishDir "${params.mypwd}/${params.outdir}/aamodel_test/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
+
+            input:
+                file(prot) from pOTUaamodeltest
+
+            output:
+                file("*.tree") into pOTUtree_rax
+                file("*.log") into pOTUlog_rax
+                file("*model.summary") into pOTUaamodelsum
+
+            script:
+                """
+                name=\$( echo ${prot} | awk -F "_aln" '{print \$1}')
+                modeltest-ng -i ${prot} -p ${task.cpus} -d aa -s 203 --disable-checkpoint
+                echo "Modeltest analysis complete :)"
+                echo "Modeltest-ng results summary:" > \${name}_model.summary
+                tail -7 \${name}_aln.fasta.log >> \${name}_model.summary
+                """
+        }
+
+        process raxml_pOTUaa_VAP2 {
+
+            label 'rax_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/raxml-ng_prot", mode: "copy", overwrite: true
+
+            input:
+                file(palign) from pOTUaatrax_align
+                file(ptree) from pOTUaatree_rax
+                file(plog) from pOTUaalog_rax
+
+            output:
+                file("*raxml*") into raxml_pOTUaa_summary
+
+            script:
+                if (params.ptraxcust) {
+                    """
+                    pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
+                    raxml-ng --all --msa ${palign} --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
+                    """
+                } else if (params.ptmodeltrax) {
+                    """
+                    pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
+                    mod=\$(tail -14 ${plog} | head -1 | awk -F "--model " '{print \$2}')
+                    raxml-ng --all --msa ${palign} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
+                    """
+                } else {
+                    """
+                    pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
+                    raxml-ng --all --msa ${palign} --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
+                    """
+                }
+        }
+
+        process prot_counts_VAP {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/prot_countsdir", mode: "copy", overwrite: true
+
+            input:
+                file(fasta) from pOTUaaforcounts
+                file(merged) from mergeforpOTUaacounts
+
+            output:
+                tuple file("*_protcounts.csv"), file("*derep.fasta") into counts_summary
+
+            script:
+                """
+
+                """
+        }
 
 } else {
     println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
