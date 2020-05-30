@@ -19,3 +19,6 @@ dependencies:
   - vsearch=2.14.2
   - biopython=1.76
   - bbmap=38.79
+  - trimal=1.4.1
+  - cd-hit=4.8.1
+  - emboss=6.5.7.0
