@@ -456,7 +456,7 @@ if (params.conTodos) {
         script:
             """
             cat ${reads} >>all_merged.fq
-            """
+	    """
     }
 
     process trimming_VAP {
@@ -469,15 +469,18 @@ if (params.conTodos) {
             file(reads) from collect_samples_ch
 
         output:
-            file("all_merged_clean.fasta") into ( reads_vsearch2_ch, mergedforcounts, mergeforprotcounts )
+            file("all_merged_clean.fasta") into ( mergedforcounts, mergeforprotcounts )
+            file("all_merged_clean_filter.fasta") into ( reads_vsearch2_ch )
 
         script:
             """
-            fastp -i ${reads} -o all_merged_cln.fq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
+            fastp -i ${reads} -o all_merged_cln.fq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1 
 
             # reformat.sh from BBtools
             reformat.sh in=all_merged_cln.fq out=all_merged_clean.fasta t=${task.cpus}
-            """
+            
+            bbduk.sh in=all_merged_clean.fasta out=all_merged_clean_filter.fasta minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
+	    """
     }
 
     process vsearch_derep_VAP {
@@ -535,47 +538,6 @@ if (params.conTodos) {
             """
     }
 
-    process lengthfilter_VAP {
-
-        label 'norm_cpus'
-
-        publishDir "${params.mypwd}/${params.outdir}/cull", mode: "copy", overwrite: true
-
-        input:
-            file(fasta) from reads_vsearch5_ch
-
-        output:
-            file("*_ASVs.fasta") into reads_vsearch6_ch
-
-        script:
-        if (params.rangeCull && !params.range == "" ) {
-            """
-            stats.sh in=${fasta} gc=${params.projtag}_gc.txt gcformat=4 score=f >tmp.out
-            for x in \$(awk '{print \$2}' *_gc.txt);do if [[ \$x -gt 1 ]]; then echo "\$x" >>lenny.list; fi ; done
-            culen=\$(cat lenny.list | sort | uniq -c | sort -bgr | head -1 | awk '{print \$2}')
-            minl=\$( echo "\$culen - ${params.range}" | bc )
-            maxl=\$( echo "\$culen + ${params.range}" | bc )
-            
-	    bbduk.sh in=${fasta} out=${params.projtag}_ASVs.fasta minlength=\$minl maxlength=\$maxl t=${task.cpus}
-            """
-        } else if (params.trimCull && !params.trimCull == "" ) {
-            """
-            bbduk.sh in=${fasta} out=${params.projtag}_ASVs.fasta minlength=${params.trimCull} maxlength=${params.trimCull} t=${task.cpus}
-	    """
-        } else {
-            """
-            stats.sh in=${fasta} gc=gc.txt gcformat=4 score=f >tmp.out
-            for x in \$(cat gc.txt | awk '{print \$2}' | grep [0-9]);do
-		if [[ \$x -ge 1 ]];then 
-		echo "\$x" >>lenny.list 
-	       	fi  
-	    done
-            culen=\$(cat lenny.list | sort | uniq -c | sort -bgr | head -1 | awk '{print \$2}')
-            bbduk.sh in=${fasta} out=${params.projtag}_ASVs.fasta minlength=\${culen} maxlength=\${culen} t=${task.cpus}
-            """
-        }
-    }
-
     if (params.clusterASV) {
     process vsearch_cluster_VAP {
 
@@ -584,7 +546,7 @@ if (params.conTodos) {
         publishDir "${params.mypwd}/${params.outdir}/nucl_fasta", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
 
         input:
-            file(fasta) from reads_vsearch6_ch
+            file(fasta) from reads_vsearch5_ch
 
         output:
             file("*.fasta") into reads_diamond_ch
@@ -605,7 +567,7 @@ if (params.conTodos) {
         }
     }
 
-    } else { reads_vsearch6_ch
+    } else { reads_vsearch5_ch
 	.into{ asvfasta; reads_diamond_ch }
 	
     }
@@ -810,12 +772,14 @@ if (params.conTodos) {
 
         output:
             file("*_aln.fasta") into ( ntmodeltest, ntrax_align )
+            file("${name}_aln.html") into align_html
 
         script:
             """
             if [ `echo ${reads} | grep -c "fin"` -eq 1 ];then
-                name=\$( echo ${reads} | awk -F "_fin" '{print \$1}')
-                mafft --maxiterate 5000 --auto ${reads} >\${name}_aln.fasta
+                name=\$( echo ${reads} | awk -F "_fin" '{print \$1}' )
+                mafft --maxiterate 5000 --auto ${reads} >\${name}_ALN.fasta
+                trimal -in \${name}_ALN.fasta -out \${name}_aln.fasta -keepheader -fasta -automated1 -htmlout \${name}_aln.html
             fi
             """
     }
@@ -891,15 +855,23 @@ if (params.conTodos) {
             file(fasta) from prottrans
 
         output:
-            file("*_prot.fasta") into ( prot_clustal, prot_mafft, prot_counts )
-            file("*_vr_report") into report_vr
-
+            tuple file("*_prot.fasta"), file("*aminoTypes.fasta") into ( prot_clustal, prot_mafft )
+            file("*aminoTypes.fasta") into ( prot_counts )
+	    tuple file ("*Report.clstr"), file("*_vr_report") into report_vr
+        
         script:
             """
             if [ `echo ${fasta} | grep -c "fin"` -eq 1 ];then
             name=\$( echo ${fasta} | awk -F "_fin" '{print \$1}')
-            ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -a -o none --fasta \${name}_prot.fasta --report \${name}_vr_report
-            fi
+            ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -a -x -o none --fasta \${name}_allprot.fasta --report \${name}_vr_report
+            #cd-hit -i \${name}_allprot.fasta -c 1.0 -o  \${name}_aTypes.fasta
+	    #types=\$(grep -c ">" \${name}_aTypes.fasta)
+	    #for num in \$(seq 1 \${types} )
+	    #do      echo ">AminoType\${num}" > newnames.tmp
+	    #done	    
+	    #rename_seq.py \${name}_aTypes.fasta newnames.tmp  \${name}_aminoTypes.fasta
+	    #rename_seq.py \${name}_aTypes.clstr newnames.tmp \${name}_aminoTypes_clustReport.clstr
+	    fi
             """
     }
 
@@ -934,11 +906,13 @@ if (params.conTodos) {
 
         output:
             file("*_aln.fasta") into ( protmodeltest, protrax_align )
+            file("${name}_aln.html") into prot_aln
 
         script:
             """
-            name=\$( echo ${prot}  | awk -F ".fasta" '{print \$1}')
-            mafft --maxiterate 5000 --auto ${prot} >\${name}_aln.fasta
+            name=\$( echo ${prot}  | awk -F ".fasta" '{print \$1}' )
+            mafft --maxiterate 5000 --auto ${prot} >\${name}_ALN.fasta
+            trimal -in \${name}_ALN.fasta -out \${name}_aln.fasta -keepheader -fasta -automated1 -htmlout \${name}_aln.html
             """
     }
 
@@ -1017,29 +991,9 @@ if (params.conTodos) {
         script:
             """
             name=\$( echo ${fasta} | awk -F ".fasta" '{print \$1}')
-            vsearch --cluster_fast ${fasta} --centroids \${name}_derep.fasta --relabel_keep --sizeout --id 1.0
+            #cd-hit -i ${fasta} -c 1.0 -o \${name}_amin.fasta 
             diamond makedb --in \${name}_derep.fasta --db \${name}_derep.fasta
-            diamond blastx -q ${merged} -d \${name}_derep.fasta -p ${task.cpus} --min-score 50 --more-sensitive -o \${name}_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-            echo "[Sequence]" > tmp.col1.txt
-            awk '{print \$1}' dmd.out | awk -F "." '{print \$1}' | sort | uniq > sampid.list
-            awk '{print \$3}' dmd.out | sort | uniq > otuid.list
-            cat otuid.list >> tmp.col1.txt
-            for x in \$( cat sampid.list );do
-                echo "Starting with \$x now ..."
-            	grep "\$x" dmd.out > tmp."\$x".out
-            	echo "Isolated hits"
-            	echo "Created uniq subject id list"
-            	echo "\$x" > "\$x"_col.txt
-            	echo "Starting my counts"
-            	for z in \$(cat otuid.list);do
-                echo "Counting \$z hits"
-            		echo "grep -wc "\$z" >> "\$x"_col.txt"
-            		grep -wc "\$z" tmp."\$x".out >> "\$x"_col.txt
-            		echo "\$z counted"
-            	done
-                rm tmp."\$x".out
-            	  echo "\$x done."
-            done
+
             paste -d',' tmp.col1.txt *col.txt > \${name}_protcounts.csv
             """
     }
@@ -1054,4 +1008,7 @@ workflow.onComplete {
         + "\n\033[0;32mDone! Open the following report in your browser --> ${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
+}
+
+def vampirus_header() {
 }
