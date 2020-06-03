@@ -6,7 +6,7 @@
 ========================================================================================
                        Virus Amplicon Sequencing Analysis Pipeline
                        Author: Alex J. Veglia
-                       Version: 0.1.0 (dev)
+                       Version: 0.1.0 (dev) LAST EDIT: 5/30/20
 ----------------------------------------------------------------------------------------
 */
 
@@ -729,7 +729,7 @@ if (params.conTodos) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/nuclcounts_dir", mode: "copy", overwrite: true, pattern: '*.{biome,txt}'
+        publishDir "${params.mypwd}/${params.outdir}/Counts", mode: "copy", overwrite: true, pattern: '*.{biome,txt}'
 
         input:
             file(reads) from (diamond_ch, asvfastaforcounts)
@@ -755,7 +755,7 @@ if (params.conTodos) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/clustaro", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Clustering/matrix", mode: "copy", overwrite: true
 
         input:
             file(reads) from diamond_clustal_ch
@@ -783,7 +783,7 @@ if (params.conTodos) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/mafft", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/alignment", mode: "copy", overwrite: true
 
         input:
             file(reads) from ntmafft
@@ -806,8 +806,8 @@ if (params.conTodos) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/model_test", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
-        publishDir "${params.mypwd}/${params.outdir}/model_test/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/model_test", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/model_test/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
 
         input:
             file(reads) from ntmodeltest
@@ -831,7 +831,7 @@ if (params.conTodos) {
 
         label 'rax_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/raxml-ng", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/trees", mode: "copy", overwrite: true
 
         input:
             file(align) from ntrax_align
@@ -867,7 +867,7 @@ if (params.conTodos) {
 
         conda 'python=2.7'
 
-        publishDir "${params.mypwd}/${params.outdir}/translation", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/AminoTypes/translation", mode: "copy", overwrite: true
 
         input:
             file(fasta) from prottrans
@@ -897,7 +897,7 @@ if (params.conTodos) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/proclust", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/AminoTypes/matrix", mode: "copy", overwrite: true
 
         input:
             file(prot) from prot_clustal
@@ -917,7 +917,7 @@ if (params.conTodos) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/mafft_prot", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/AminoTypes/alignment", mode: "copy", overwrite: true
 
         input:
             file(prot) from prot_mafft
@@ -938,8 +938,8 @@ if (params.conTodos) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/aamodel_test", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
-        publishDir "${params.mypwd}/${params.outdir}/aamodel_test/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
+        publishDir "${params.mypwd}/${params.outdir}/AminoTypes/model_test", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
+        publishDir "${params.mypwd}/${params.outdir}/AminoTypes/model_test/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
 
         input:
             file(prot) from protmodeltest
@@ -963,7 +963,7 @@ if (params.conTodos) {
 
         label 'rax_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/raxml-ng_prot", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/AminoTypes/trees", mode: "copy", overwrite: true
 
         input:
             file(palign) from protrax_align
@@ -997,7 +997,7 @@ if (params.conTodos) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/prot_countsdir", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/AminoTypes/counts", mode: "copy", overwrite: true
 
         input:
             file(fasta) from prot_counts
@@ -1024,7 +1024,7 @@ if (params.conTodos) {
 
             conda 'python=2.7'
 
-            publishDir "${params.mypwd}/${params.outdir}/translation4clustering", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Clustering/translation4clustering", mode: "copy", overwrite: true
 
             input:
                 file(fasta) from nucl2aa
@@ -1045,7 +1045,7 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/clusteringby_aminos", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
+            publishDir "${params.mypwd}/${params.outdir}/Clustering/", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
 
             input:
                 file(fasta) from cluster_aa
@@ -1078,8 +1078,8 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/pOTU_summary_files", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
-            publishDir "${params.mypwd}/${params.outdir}/pOTU_diamond_out", mode: "copy", overwrite: true, pattern: '*dmd.out'
+            publishDir "${params.mypwd}/${params.outdir}/Taxonomy/", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+            publishDir "${params.mypwd}/${params.outdir}/Taxonomy/diamond_out", mode: "copy", overwrite: true, pattern: '*dmd.out'
 
             input:
                 file(reads) from pOTU_diamond_ch
@@ -1213,7 +1213,7 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/pOTUcounts_dir", mode: "copy", overwrite: true, pattern: '*.{biome,txt}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/counts", mode: "copy", overwrite: true, pattern: '*.{biome,txt}'
 
             input:
                 file(reads) from diamondAA_ch
@@ -1239,7 +1239,7 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/pOTU_matrices", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Clustering/matrix", mode: "copy", overwrite: true
 
             input:
                 file(reads) from diamondAA_clustal_ch
@@ -1267,7 +1267,7 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/pOTUmafft", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/alignment", mode: "copy", overwrite: true
 
             input:
                 file(reads) from ntmafftAA
@@ -1290,8 +1290,8 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/pOTUntmodeltest", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
-            publishDir "${params.mypwd}/${params.outdir}/pOTUntmodeltest/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/modeltest", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/modeltest/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
 
             input:
                 file(reads) from pOTUntmodeltest
@@ -1315,7 +1315,7 @@ if (params.conTodos) {
 
             label 'rax_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/pOTUraxml-ng", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/trees", mode: "copy", overwrite: true
 
             input:
                 file(align) from ntrax_alignpOTU
@@ -1349,7 +1349,7 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/pOTUaaMatrices", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/protein/matrix", mode: "copy", overwrite: true
 
             input:
                 file(prot) from pOTUaaforanalysis
@@ -1369,7 +1369,7 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/pOTUaaDiamondblastp", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/protein/taxonomy", mode: "copy", overwrite: true
 
             input:
                 file(reads) from pOTUaa_diamondbp
@@ -1501,7 +1501,7 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/pOTUaaMafft", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/protein/alignment", mode: "copy", overwrite: true
 
             input:
                 file(prot) from pOTUaaformafft
@@ -1522,8 +1522,8 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/aamodel_test", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
-            publishDir "${params.mypwd}/${params.outdir}/aamodel_test/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/protein/modeltest", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/protein/modeltest/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
 
             input:
                 file(prot) from pOTUaamodeltest
@@ -1547,7 +1547,7 @@ if (params.conTodos) {
 
             label 'rax_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/raxml-ng_prot", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/protein/trees", mode: "copy", overwrite: true
 
             input:
                 file(palign) from pOTUaatrax_align
@@ -1581,7 +1581,7 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/prot_countsdir", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/protein/counts", mode: "copy", overwrite: true
 
             input:
                 file(fasta) from pOTUaaforcounts
