@@ -22,3 +22,4 @@ dependencies:
   - trimal=1.4.1
   - cd-hit=4.8.1
   - emboss=6.5.7.0
+  - seqtk=1.3
