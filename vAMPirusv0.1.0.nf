@@ -1603,7 +1603,7 @@ if (params.conTodos) {
 workflow.onComplete {
     log.info ( workflow.success ? \
         "---------------------------------------------------------------------------------" \
-        + "\n\033[0;32mDone! Open the following report in your browser --> ${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
+        + "\n\033[0;32mDone! Open the following report in your browser --> ${params.mypwd}/${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }
