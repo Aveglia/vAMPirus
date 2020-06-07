@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#Authored by Ramon Rivers
+#Authored by Ramon Rivera
 #
 # rename_sequences.py will rename a fasta file
 #
