@@ -452,10 +452,12 @@ if (params.conTodos) {
 
         output:
             tuple sample_id, file("*_mergered.fq") into reads_vsearch1_ch
+            file("*.name") into names
 
         script:
             """
             vsearch --fastq_mergepairs ${reads[0]} --reverse ${reads[1]} --threads ${task.cpus} --fastqout ${sample_id}_mergered.fq --fastq_maxee 1 --relabel ${sample_id}.
+            echo ${sample_id} > ${sample_id}.name
             """
 
     }
@@ -469,6 +471,8 @@ if (params.conTodos) {
         input:
             file(reads) from reads_vsearch1_ch
                 .collect()
+            file(names) from names
+                .collect()
 
         output:
             file("all_merged.fq") into collect_samples_ch
@@ -477,7 +481,9 @@ if (params.conTodos) {
         script:
             """
             cat ${reads} >>all_merged.fq
-            echo ${reads} | awk -F "_mergered." '{print \$1}' >>${params.projtag}_sample_ids.list
+            cat ${names} >>${params.projtag}_sample_ids.list
+            #Check about input.1
+            #echo ${reads} | awk -F "_mergered." '{print \$1}' >>${params.projtag}_sample_ids.list
 	        """
     }
 
@@ -609,6 +615,7 @@ if (params.conTodos) {
 
         script:
             """
+            cp ${params.mypwd}/bin/rename_seq.py .
             virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
             name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
             diamond blastx -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
@@ -708,13 +715,13 @@ if (params.conTodos) {
             done
             echo "Now editing "\$name" fasta headers"
             ###### rename_seq.py
-            rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_fin.fasta
-            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_fin.fasta > "\$name"_tmpssasv.fasta
+            ./rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_wTax.fasta
+            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_wTax.fasta >"\$name"_tmpssasv.fasta
             echo "[Sequence header]" > newnames.list
             cat new_"\$name"_asvnames.txt >> newnames.list
             touch sequence.list
             echo "     " > sequence.list
-            grep -E '^[ACGT]+\$' "\$name"_tmpssasv.fasta >> sequence.list
+            grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
             rm "\$name"_tmpssasv.fasta
             paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_sumPHYtab.csv
             paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summarytable.tsv
@@ -795,13 +802,12 @@ if (params.conTodos) {
 
         output:
             file("*_aln.fasta") into ( ntmodeltest, ntrax_align )
-            file("\${name}_aln.html") into align_html
+            file("${params.projtag}_aln.html") into align_html
 
         script:
             """
-            name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}' )
-            mafft --maxiterate 5000 --auto ${reads} >\${name}_ALN.fasta
-            trimal -in \${name}_ALN.fasta -out \${name}_aln.fasta -keepheader -fasta -automated1 -htmlout \${name}_aln.html
+            mafft --maxiterate 5000 --auto ${reads} >${params.projtag}_ALN.fasta
+            trimal -in ${params.projtag}_ALN.fasta -out ${params.projtag}_aln.fasta -keepheader -fasta -automated1 -htmlout ${params.projtag}_aln.html
             """
     }
 
@@ -903,6 +909,7 @@ if (params.conTodos) {
 
         script:
             """
+            cp ${params.mypwd}/bin/rename_seq.py .
             cd-hit -i ${prot} -c 1.0 -o ${params.projtag}_aTypes.fasta
             sed 's/>Cluster />Cluster_/g' ${params.projtag}_aTypes.fasta.clstr >${params.projtag}_aTypes.clstr
             grep ">Cluster_" ${params.projtag}_aTypes.clstr >tmpclusters.list
@@ -923,7 +930,7 @@ if (params.conTodos) {
             done
             paste -d "," tmpclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_aminoClus_sum.csv
             rm tmp*
-            rename_seq.py ${params.projtag}_aTypes.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_AminoTypes_noTax.fasta
+            ./rename_seq.py ${params.projtag}_aTypes.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_AminoTypes_noTax.fasta
             stats.sh in=${params.projtag}_AminoTypes_noTax.fasta gc=${params.projtag}_clustered.gc gcformat=4
             awk '{print \$2}' ${params.projtag}_clustered.gc | sort | uniq -c | sort -bgr | awk '{print \$2}' >>tmp.lenny
             awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_problematic_translations.fasta
@@ -968,16 +975,19 @@ if (params.conTodos) {
 
         script:
             """
+            cp ${params.mypwd}/bin/rename_seq.py .
             virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
-            name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
-            diamond blastx -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+            grep ">" \${virdb} >> headers.list
+            headers="headers.list"
+            name=\$(ls ${reads} | awk -F "_noTax" '{print \$1}')
+            diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
             echo "Preparing lists to generate summary .csv's"
             echo "[Best hit accession number]" >access.list
             echo "[pOTU sequence length]" >length.list
             echo "[e-value]" >evalue.list
             echo "[Bitscore]" >bit.list
             echo "[Percent ID (aa)]" >pid.list
-            echo "[pOTU#]" >otu.list
+            echo "[AminoType#]" >otu.list
             echo "[Virus ID]" >"\$name"_virus.list
             echo "[Gene]" >"\$name"_genes.list
             grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
@@ -1000,11 +1010,11 @@ if (params.conTodos) {
                             echo "\$line" | awk '{print \$12}' >>pid.list
                             echo "\$line" | awk '{print \$2}' >>length.list
                             echo "Extracting virus and gene ID for \$s now"
-                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g')
                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                            echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                            echo ">AminoType\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                             j=\$((\$j+1))
                             echo "\$s done."
                         else
@@ -1020,7 +1030,7 @@ if (params.conTodos) {
                             echo "NO_HIT" >>length.list
                             virus="NO"
                             gene="HIT"
-                            echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                            echo ">AminoType\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                             j=\$((\$j+1))
                             echo "\$s done."
                     fi
@@ -1038,11 +1048,11 @@ if (params.conTodos) {
                             echo "\$line" | awk '{print \$12}' >>pid.list
                             echo "\$line" | awk '{print \$2}' >>length.list
                             echo "Extracting virus and gene ID for \$s now"
-                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g')
                             echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
-                            virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                            virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g')
                             echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
-                            echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
+                            echo ">AminoType\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
                             j=\$((\$j+1))
                             echo "\$s done."
                         else
@@ -1058,7 +1068,7 @@ if (params.conTodos) {
                             echo "NO_HIT" >>length.list
                             virus="NO"
                             gene="HIT"
-                            echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
+                            echo ">AminoType\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
                             j=\$((\$j+1))
                             echo "\$s done."
                         fi
@@ -1067,13 +1077,13 @@ if (params.conTodos) {
             done
             echo "Now editing "\$name" fasta headers"
             ###### rename_seq.py
-            rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_fin.fasta
-            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_fin.fasta > "\$name"_tmpssasv.fasta
+            ./rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_wTax.fasta
+            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_wTax.fasta > "\$name"_tmpssasv.fasta
             echo "[Sequence header]" > newnames.list
             cat new_"\$name"_asvnames.txt >> newnames.list
             touch sequence.list
             echo "     " > sequence.list
-            grep -E '^[ACGT]+\$' "\$name"_tmpssasv.fasta >> sequence.list
+            grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
             rm "\$name"_tmpssasv.fasta
             paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_sumPHYtab.csv
             paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summarytable.tsv
@@ -1098,7 +1108,7 @@ if (params.conTodos) {
 
         output:
             file("*_aln.fasta") into ( protmodeltest, protrax_align )
-            file("${name}_aln.html") into prot_aln
+            file("*_aln.html") into prot_aln
 
         script:
             """
@@ -1198,10 +1208,10 @@ if (params.conTodos) {
                 echo "\$y" > "\$y"_col.txt
                 echo "Starting my counts"
                 for z in \$(cat otuid.list);do
-                        echo "Counting \$z hits"
-    	                echo "grep -wc "\$z" >> "\$y"_col.txt"
-    	                grep -wc "\$z" tmp."\$y".out >> "\$y"_col.txt
-		                    echo "\$z counted"
+                    echo "Counting \$z hits"
+    	            echo "grep -wc "\$z" >> "\$y"_col.txt"
+    	            grep -wc "\$z" tmp."\$y".out >> "\$y"_col.txt
+		            echo "\$z counted"
 	            done
            done
            paste -d "," tmp.col1.txt *col.txt > ${params.projtag}_protcounts.csv
@@ -1254,33 +1264,34 @@ if (params.conTodos) {
             // add awk script to count seqs
             if (params.aalist) {
                 """
-                for id in `echo ${params.aaidlist} | tr "," "\n"`;done
+                cp ${params.mypwd}/bin/rename_seq.py .
+                for id in `echo ${params.aaidlist} | tr "," "\n"`;do
                     awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                     cd-hit -i filtered.fasta -c \${id} --fasta ${params.projtag}_pOTU\${id}.fasta
                     sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
                     grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >tmpclusters.list
-                        for x in \$(cat tmpclusters.list);
-                        do 	    echo "Extracting \$x"
-                                name=\$( echo \$x | awk -F ">" '{print \$2}')
-	                            sed -n "/\$x/,/Cluster_/p" ${params.projtag}_pOTU\${id}.clstr > "\$name"_tmp.list
+                    for x in \$(cat tmpclusters.list);do
+                        echo "Extracting \$x"
+                        name=\$( echo \$x | awk -F ">" '{print \$2}')
+	                    sed -n "/\$x/,/Cluster_/p" ${params.projtag}_pOTU\${id}.clstr > "\$name"_tmp.list
+                    done
+                    j=1
+                    for x in *_tmp.list;do
+                        name=\$(echo \$x | awk -F "_tmp" '{print \$1}')
+                        cluster="pOTU"\${j}""
+                        grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > seqs_tmps.list
+                        seqtk subseq ${asvs} seqs_tmps.list > \${cluster}_nucleotide_sequence.fasta
+                        vsearch --cluster_fast \${cluster}_nucleotide_sequences.fasta --id 0.2--centroids \${name}_centroids.fasta
+                        grep ">" \${name}_centroids.fasta >> tmp_cemtroids.list
+                        u="1"
+                        for y in \$( cat tmp_centroids.list);do
+                            echo ">\${cluster}_type"\$u"" >> tmp_centroid.newheaders
+                            u=\$(( \$u+1 ))
                         done
-                        j=1
-                        for x in *_tmp.list
-                        do  	   name=\$(echo \$x | awk -F "_tmp" '{print \$1}')
-	                               cluster="pOTU"\${j}""
-	                               grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > seqs_tmps.list
-	                               seqtk subseq ${asvs} seqs_tmps.list > \${cluster}_nucleotide_sequence.fasta
-                                   vsearch --cluster_fast \${cluster}_nucleotide_sequences.fasta --id 0.2--centroids \${name}_centroids.fasta
-                                   grep ">" \${name}_centroids.fasta >> tmp_cemtroids.list
-                                   u="1"
-                                   for y in \$( cat tmp_centroids.list)
-                                   do   echo ">\${cluster}_type"\$u"" >> tmp_centroid.newheaders
-                                        u=\$(( \$u+1 ))
-                                   done
-                                   rename_seq.py \${name}_centroids.fasta tmp_centroid.newheaders \${cluster}_types_labeled.fasta
-                                   rm *tmp*
-                        done
-                        cat *_types_labeled.fasta >> ${params.projtag}_nucleotides_pOTU\${id}.fasta
+                        ./rename_seq.py \${name}_centroids.fasta tmp_centroid.newheaders \${cluster}_types_labeled.fasta
+                        rm *tmp*
+                    done
+                    cat *_types_labeled.fasta >> ${params.projtag}_nucleotides_pOTU\${id}.fasta
                     grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
                     grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
                     paste -d"," tmpclusters.list tmphead.list >tmp.info.csv
@@ -1298,8 +1309,8 @@ if (params.conTodos) {
                     done
                     paste -d "," tmpclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pOTUCluster_summary.csv
                     rm tmp*
-                    rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminos_pOTU\${id}_noTax.fasta
-                        stats.sh in=${params.projtag}_AminoTypes_noTax.fasta gc=${params.projtag}_clustered.gc gcformat=4
+                    ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminos_pOTU\${id}_noTax.fasta
+                    stats.sh in=${params.projtag}_AminoTypes_noTax.fasta gc=${params.projtag}_clustered.gc gcformat=4
                     awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_problematic_translations.fasta
                     grep ">" ${params.projtag}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
                     seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_problematic_nucleotides.fasta
@@ -1308,31 +1319,32 @@ if (params.conTodos) {
                 """
             } else if (params.aaid) {
                 """
+                cp ${params.mypwd}/bin/rename_seq.py .
                 id=${params.aaid}
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                 cd-hit -i filtered.fasta -c \${id} --fasta ${params.projtag}_pOTU\${id}.fasta
                 sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
                 grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >tmpclusters.list
-                for x in \$(cat tmpclusters.list);
-                do 	    echo "Extracting \$x"
-                        name=\$( echo \$x | awk -F ">" '{print \$2}')
-                        sed -n "/\$x/,/Cluster_/p" ${params.projtag}_pOTU\${id}.clstr > "\$name"_tmp.list
+                for x in \$(cat tmpclusters.list);do
+                    echo "Extracting \$x"
+                    name=\$( echo \$x | awk -F ">" '{print \$2}')
+                    sed -n "/\$x/,/Cluster_/p" ${params.projtag}_pOTU\${id}.clstr > "\$name"_tmp.list
                 done
                 j=1
-                for x in *_tmp.list
-                do  	   name=\$(echo \$x | awk -F "_tmp" '{print \$1}')
-                           cluster="pOTU"\${j}""
-                           grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > seqs_tmps.list
-                           seqtk subseq ${asvs} seqs_tmps.list > \${cluster}_nucleotide_sequence.fasta
-                           vsearch --cluster_fast \${cluster}_nucleotide_sequences.fasta --id 0.2--centroids \${name}_centroids.fasta
-                           grep ">" \${name}_centroids.fasta >> tmp_cemtroids.list
-                           u="1"
-                           for y in \$( cat tmp_centroids.list)
-                           do   echo ">\${cluster}_type"\$u"" >> tmp_centroid.newheaders
-                                u=\$(( \$u+1 ))
-                           done
-                           rename_seq.py \${name}_centroids.fasta tmp_centroid.newheaders \${cluster}_types_labeled.fasta
-                           rm *tmp*
+                for x in *_tmp.list;do
+                    name=\$(echo \$x | awk -F "_tmp" '{print \$1}')
+                    cluster="pOTU"\${j}""
+                    grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > seqs_tmps.list
+                    seqtk subseq ${asvs} seqs_tmps.list > \${cluster}_nucleotide_sequence.fasta
+                    vsearch --cluster_fast \${cluster}_nucleotide_sequences.fasta --id 0.2--centroids \${name}_centroids.fasta
+                    grep ">" \${name}_centroids.fasta >> tmp_cemtroids.list
+                    u="1"
+                    for y in \$( cat tmp_centroids.list);do
+                        echo ">\${cluster}_type"\$u"" >> tmp_centroid.newheaders
+                        u=\$(( \$u+1 ))
+                    done
+                    ./rename_seq.py \${name}_centroids.fasta tmp_centroid.newheaders \${cluster}_types_labeled.fasta
+                    rm *tmp*
                 done
                 cat *_types_labeled.fasta >> ${params.projtag}_nucleotides_pOTU\${id}.fasta
                 grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
@@ -1352,7 +1364,7 @@ if (params.conTodos) {
                 done
                 paste -d "," tmpclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pOTUCluster_summary.csv
                 rm tmp*
-                rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminos_pOTU\${id}_noTax.fasta
+                ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminos_pOTU\${id}_noTax.fasta
                 stats.sh in=${params.projtag}_AminoTypes_noTax.fasta gc=${params.projtag}_clustered.gc gcformat=4
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_problematic_translations.fasta
                 grep ">" ${params.projtag}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
@@ -1377,9 +1389,12 @@ if (params.conTodos) {
 
             script:
                 """
+                cp ${params.mypwd}/bin/rename_seq.py .
                 virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
+                grep ">" \${virdb} >> headers.list
+                headers="headers.list"
                 name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
-                diamond blastx -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
                 echo "Preparing lists to generate summary .csv's"
                 echo "[Best hit accession number]" >access.list
                 echo "[pOTU sequence length]" >length.list
@@ -1476,13 +1491,13 @@ if (params.conTodos) {
                 done
                 echo "Now editing "\$name" fasta headers"
                 ###### rename_seq.py
-                rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_fin.fasta
-                awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_fin.fasta > "\$name"_tmpssasv.fasta
+                ./rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_wTax.fasta
+                awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_wTax.fasta > "\$name"_tmpssasv.fasta
                 echo "[Sequence header]" > newnames.list
                 cat new_"\$name"_asvnames.txt >> newnames.list
                 touch sequence.list
                 echo "     " > sequence.list
-                grep -E '^[ACGT]+\$' "\$name"_tmpssasv.fasta >> sequence.list
+                grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                 rm "\$name"_tmpssasv.fasta
                 paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_sumPHYtab.csv
                 paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summarytable.tsv
@@ -1561,7 +1576,7 @@ if (params.conTodos) {
 
             output:
                 file("*_aln.fasta") into ( pOTUntmodeltest, pOTUntrax_align )
-                file("${name}_aln.html") into align_html
+                file("*_aln.html") into align_html
 
             script:
                 """
@@ -1666,6 +1681,7 @@ if (params.conTodos) {
 
             script:
                 """
+                cp ${params.mypwd}/bin/rename_seq.py .
                 virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
                 name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
                 diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
@@ -1765,7 +1781,7 @@ if (params.conTodos) {
                 done
                 echo "Now editing "\$name" fasta headers"
                 ###### rename_seq.py
-                rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_fin.fasta
+                ./rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_wTax.fasta
                 awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_fin.fasta > "\$name"_tmpssasv.fasta
                 echo "[Sequence header]" > newnames.list
                 cat new_"\$name"_asvnames.txt >> newnames.list
@@ -1795,7 +1811,7 @@ if (params.conTodos) {
 
             output:
                 file("*_aln.fasta") into ( pOTUaamodeltest, pOTUaatrax_align )
-                file("${name}_aln.html") into pOTUaa_aln
+                file("*_aln.html") into pOTUaa_aln
 
             script:
                 """
@@ -1895,10 +1911,10 @@ if (params.conTodos) {
                     echo "\$y" > "\$y"_col.txt
                     echo "Starting my counts"
                     for z in \$(cat otuid.list);do
-                            echo "Counting \$z hits"
-        	                echo "grep -wc "\$z" >> "\$y"_col.txt"
-        	                grep -wc "\$z" tmp."\$y".out >> "\$y"_col.txt
-    		                    echo "\$z counted"
+                        echo "Counting \$z hits"
+        	            echo "grep -wc "\$z" >> "\$y"_col.txt"
+        	            grep -wc "\$z" tmp."\$y".out >> "\$y"_col.txt
+    		            echo "\$z counted"
     	            done
                done
                paste -d "," tmp.col1.txt *col.txt > ${params.projtag}_\${potu}_counts.csv
