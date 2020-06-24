@@ -1296,7 +1296,6 @@ if (params.conTodos) {
 
             output:
                 file("${params.projtag}_nucleotides_pOTU*.fasta") into pOTU_diamond_ch
-                file("*_ASVs_all.fasta") into asvfastados
                 file("${params.projtag}_aminos_pOTU*_noTax.fasta") into ( pOTUaaforanalysis, pOTUaa_diamondbp, pOTUaaformafft, pOTUaaforcounts )
 
             script:
@@ -1978,4 +1977,3 @@ workflow.onComplete {
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }
-
