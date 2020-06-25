@@ -820,7 +820,7 @@ if (params.conTodos) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true  pattern: '*aln.*'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*aln.*'
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
@@ -931,8 +931,8 @@ if (params.conTodos) {
                     rm ${params.projtag}_problematic_translations.fasta
                 fi
                 """
-        }
-
+	    }        
+	
         process Generate_AminoType_Matrix {
 
             label 'norm_cpus'
@@ -1095,10 +1095,10 @@ if (params.conTodos) {
 
         if (!params.skipPhylogeny) {
 
-            process AminoType_Alignment {
+            process AminoType_Phylogeny {
 
                 label 'norm_cpus'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true  pattern: '*aln.*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
@@ -1124,74 +1124,15 @@ if (params.conTodos) {
                     tail -7 \${pre}_aln.fasta.log >> \${pre}_model.summary
 
                     # Protein_Phylogeny
-                    if [ "${params.aaraxcust}" != "" ];then
+                    if [ "${params.ptraxcust}" != "" ];then
                         raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
-                    elif [ "${params.ntmodelt}" != "" ];then
+                    elif [ "${params.aamodelt}" != "" ];then
                         mod=\$(tail -14 \${pre}_aln.fasta.log| head -1 | awk -F "--model " '{print \$2}')
                         raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
                     else
-                        raxml-ng --all --msa \${pre}_aln.fasta --model GTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
+                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
                     fi
                     """
-            }
-
-            process AminoTypes_ModelTest {
-
-                label 'norm_cpus'
-
-                publishDir "${params.mypwd}/${params.outdir}/AminoTypes/model_test", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
-                publishDir "${params.mypwd}/${params.outdir}/AminoTypes/model_test/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
-
-                input:
-                    file(prot) from protmodeltest
-
-                output:
-                    file("*.tree") into protree_rax
-                    file("*.log") into prolog_rax
-                    file("*model.summary") into aamodelsum
-
-                script:
-                    """
-                    name=\$( echo ${prot} | awk -F "_aln" '{print \$1}')
-                    modeltest-ng -i ${prot} -p ${task.cpus} -d aa -s 203 --disable-checkpoint
-                    echo "Modeltest analysis complete :)"
-                    echo "Modeltest-ng results summary:" > \${name}_model.summary
-                    tail -7 \${name}_aln.fasta.log >> \${name}_model.summary
-                    """
-            }
-
-            process AminoType_Phylogeny {
-
-                label 'rax_cpus'
-
-                publishDir "${params.mypwd}/${params.outdir}/AminoTypes/trees", mode: "copy", overwrite: true
-
-                input:
-                    file(palign) from protrax_align
-                    file(ptree) from protree_rax
-                    file(plog) from prolog_rax
-
-                output:
-                    file("*raxml*") into raxml_prot_summary
-
-                script:
-                    if (params.ptraxcust) {
-                        """
-                        pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
-                        raxml-ng --all --msa ${palign} --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
-                        """
-                    } else if (params.ptmodeltrax) {
-                        """
-                        pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
-                        mod=\$(tail -14 ${plog} | head -1 | awk -F "--model " '{print \$2}')
-                        raxml-ng --all --msa ${palign} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
-                        """
-                    } else {
-                        """
-                        pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
-                        raxml-ng --all --msa ${palign} --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
-                        """
-                    }
             }
         }
 
@@ -1670,7 +1611,7 @@ if (params.conTodos) {
                 """
             }
         }
-    }
+    
 
         process pOTU_Protein_Matrix {
 
@@ -1911,8 +1852,7 @@ if (params.conTodos) {
                     """
                 }
         }
-    }
-
+    
     process Generate_pOTU_Protein_Counts {
 
         label 'norm_cpus'
@@ -1957,8 +1897,14 @@ if (params.conTodos) {
            rm *col.txt
            """
        }
-    }
-} else if (params.generateAAcounts) {
+    } 
+} else {
+    	println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
+    	exit 0
+} 
+
+
+if (params.generateAAcounts) {
 
     if (params.proteinFasta && params.mergedFast && params.sampleList) {
 
@@ -2397,7 +2343,7 @@ if (params.dataCheck) {
                 done
             done
             """
-
+	}
     process Report_DataCheck {
 
         label 'norm_cpus'
@@ -2416,12 +2362,17 @@ if (params.dataCheck) {
             echo "Report"
             """
     }
-}
+} 
+
 
 workflow.onComplete {
     log.info ( workflow.success ? \
         "---------------------------------------------------------------------------------" \
-        + "\n\033[0;32mDone! Open the following report in your browser --> ${params.mypwd}/${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
+        + "\n\033[0;32mDone! Open the following report in your browser --> ${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }
+
+def vampirus_header() {
+}
+
