@@ -24,49 +24,108 @@ def fullHelpMessage() {
 
         Steps:
             1- Run the `precheck_TransPi.sh` to install tools, set up the databases and directories for
+
             2- Run vAMPirusv0.1.0.sh
 
             Usage:
 
                 nextflow run vAMPirusv0.1.0.sh --all (other_options_here)
 
+        Help options:
+
+                --help                          Print help information
+
+                --fullHelp                      Print even more help information
+
         Mandatory arguments (choose one):
 
-                --con-todos                    Run absolutely everything
+                --Analyze                      Run absolutely everything
 
-                --read-processing              Run only read processing steps
+                --dataCheck                    Assess how data performs with during processing and clustering
 
-        Other options:
+                --generateAAcounts             Provide vAMPirus with a translated fasta file and the merged reads you would like mapped and it will generate a protein counts file for you
 
-                [ -h ]                         Print help information
+                --generateReport               Provide vAMPirus with paths to necessary files to generate a vAMPirus report
 
-                --alpha                        Sets alpha parameter for denoising, default is a more strict value of 1. Higher the alpha the higher the chance of false positives.
+        Analysis-specific options (will override information in the config file):
 
-                --GlobTrim                     Remove primers by global trimming with BBduk.sh: chopping off specified amount of basepairs: f (forward) and r (reverse), or n (both).
+            General information
 
-                --refseq <F|T>          	   Set the database header format: F (default) - Reference Viral Database ; T - RefSeq format
+                --projtag                       Project name - Name that will be used as a prefix for namng files by vAMPirus
 
-                --idlist <.id1,.id2,.id3,..>
+                --metadata                      Path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
 
-                --clustid <.[0-99]>		       Sets OTU clustering percentage used by vsearch, default is $defid; can't be set with -I.
+                --mypwd                         Path to working directory that contains (i) the vAMPirus.nf script, (ii) the nextflow.config, and (iii) directory containing read libraries
 
+                --email                         Your email for notifications for when jobs are submitted and completed
 
-                [ -j <1|2|3> ]                 This option signals that the user would like to apply a custom RAxML-ng command for:
-                                                            1 - Nucleotide RAxML run only; default or for protein tree if set
-                                                            2 - Protein RAxML run only; default for nucleotide tree
-                                                            3 - Custom RAxML command supplied for both nucleotide and protein tree
-                                                                **NOTE: with this option set, you must have *.raxcom file set up and present in your working directory
+                --reads                         Path to directory containing read libraries, mus have *R{1,2}.fast{a,q} in the name
 
-                [ -p ]                         Signals to do prot counts with files from defined directory in config ${params.protdir}
+                --outdir                        Name of directory to store output of vAMPirus run
 
-                --min_rd_len <value>           Use this option to set the minimum read length to be included in the analysis. Default is 400 bp.
+        Merged read length filtering parameters
 
-                --max_rd_len <value>           Use this option to set the maximum read length to be included in the analysis. Default is 440 bp.
+                --minLen// Minimum merged read length - reads below the specified maximum read length wil be used for counts only
 
-                [ -t <value> ]			       Use this option to set the number of threads available for use in the analysis; default is 1.
+                    // Maximum merged read length - reads with length equal to the specified max read length will be used to generate uniques and ASVs
+                        maxLen="422"
 
-                [ -z ] 				           Set this option to include unclustered ASV file in counts table generation and all extra specified anlyses (e.g. model testing et al.)
+        Primer Removal parameters
+                    // If not specifying primer sequences, forward and reverse reads will be trimmed by number of bases specified using --GlobTrim #,#
+                        GlobTrim=""
+                    // Specific primer sequence on forward reads to be removed
+                        fwd="YTKCCTCGASCTRYTGGWCC"
+                    // Reverse primer sequence
+                        rev="MGCCAARTCASWCATATTAAAWGGCA"
 
+                // ASV generation and clustering parameters
+                    // Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
+                        alpha="1"
+                    // Default percent similarity to cluster nucleotide ASV sequences
+                        clusterNuclID=".85"
+                    // List of percent similarities to cluster nucleotide ASV sequnces - must be seperated by ".95,.96"
+                        clusterNuclIDlist=""
+                    // Default percent similarity to cluster aminoacid sequences
+                        clusterAAID=".97"
+                    // List of percent similarities to cluster aminoacid sequences - must be seperated by ".95,.96"
+                        clusterAAIDlist=""
+                    // minimum length of AA in cluster_AA
+                        minAA="50"
+
+                // Counts table generation parameters
+                    // Similarity ID to use for ASV counts table
+                        asvcountID=".97"
+                    // Protein counts table parameters
+                        // Minimum Bitscore for counts
+                            ProtCountsBit="50"
+                        // Minimum aminoacid sequence similarity for hit to count
+                            ProtCountID="85"
+                        // Minimum alignment length for hit to count
+                            ProtCountsLength="50"
+
+                // Taxonomy assignment parameters
+                    // Specify name of database to use for analysis
+                        dbname="U-RVDBv18.0-protc.fasta"
+                    // Path to Directory where database is being stored
+                        dbdir="/data/alex/PVID_dinorna/alltigs/U-RVDBv18.0-protc.fasta"
+                    // Toggle use of RefSeq header format; default is Reverence Viral DataBase (RVDB)
+                        refseq="F"
+
+                // Phylogeny analysis parameters
+                    // Customs options for RAxML (Example: "-option1 A -option2 B -option3 C -option4 D")
+                        ntraxcust=""
+                        ptraxcust=""
+                    // Signal for RAxML to use model from ModelTest Results_C50
+                        ntmodeltrax=false
+                        ptmodeltrax=false
+
+                // Paths to files needed for --generateAAcounts option
+                    // Path to protein sequence fasta file to be used for counts
+                        proteinFasta=""
+                    // Path to merged read fastq/fasta file to be used for counts
+                        mergedFast=""
+                    // Path to list of sample names which are mentioned in the sequence headers
+                        sampleList=""
         |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
         #################################################################################################
@@ -220,7 +279,7 @@ process Build_database {
         """
 }
 
-if (params.conTodos) {
+if (params.Analyze) {
 
     println("\n\tRunning vAMPirus \n")
 
@@ -1733,11 +1792,19 @@ if (params.conTodos) {
                     """
                 }
             }
+<<<<<<< HEAD
 
         if (!params.skipPhylogeny) {
 
             process pOTU_Protein_Phylogeny {
 
+=======
+
+        if (!params.skipPhylogeny) {
+
+            process pOTU_Protein_Phylogeny {
+
+>>>>>>> 40daf85dccaa549de6c41a4ea889f5ec46d5fe6f
                 label 'norm_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
