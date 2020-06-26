@@ -481,7 +481,7 @@ if (params.Analyze) {
 
     }
 
-    process Length_Filtering { \\\changed
+    process Length_Filtering { //changed
 
         label 'norm_cpus'
 
