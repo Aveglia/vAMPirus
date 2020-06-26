@@ -315,7 +315,7 @@ if (params.conTodos) {
                         """
                     } else {
                         """
-                        bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduck_R1.fastq.gz out2=${sample_id}_bbduck_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus}
+                        bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus}
                         """
                     }
         	  }
@@ -490,7 +490,7 @@ if (params.conTodos) {
 
     // UNTIL HERE DEFAULT
 
-    if (params.nOTU){
+    if (params.nOTU) {
 
         process NucleotideBased_ASV_clustering {
 
@@ -825,6 +825,7 @@ if (params.conTodos) {
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
+
             input:
                 file(reads) from fileforMafft
 
@@ -849,9 +850,9 @@ if (params.conTodos) {
                     raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ntraxcust}
                 elif [ "${params.ntmodelt}" != "" ];then
                     mod=\$(tail -14 \${pre}_aln.fasta.log| head -1 | awk -F "--model " '{print \$2}')
-                    raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
+                    raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
                 else
-                    raxml-ng --all --msa \${pre}_aln.fasta --model GTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
+                    raxml-ng --all --msa \${pre}_aln.fasta --model GTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
                 fi
                 """
         }
@@ -931,8 +932,8 @@ if (params.conTodos) {
                     rm ${params.projtag}_problematic_translations.fasta
                 fi
                 """
-	    }        
-	
+	    }
+
         process Generate_AminoType_Matrix {
 
             label 'norm_cpus'
@@ -1098,6 +1099,7 @@ if (params.conTodos) {
             process AminoType_Phylogeny {
 
                 label 'norm_cpus'
+
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
@@ -1126,11 +1128,11 @@ if (params.conTodos) {
                     # Protein_Phylogeny
                     if [ "${params.ptraxcust}" != "" ];then
                         raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
-                    elif [ "${params.aamodelt}" != "" ];then
+                    elif [ "${params.ptmodeltrax}" != "" ];then
                         mod=\$(tail -14 \${pre}_aln.fasta.log| head -1 | awk -F "--model " '{print \$2}')
-                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
+                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
                     else
-                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
+                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
                     fi
                     """
             }
@@ -1226,7 +1228,7 @@ if (params.conTodos) {
                 """
                 cp ${asvs} ${params.projtag}_ASVs_all.fasta
                 cp ${params.mypwd}/bin/rename_seq.py .
-                for id in `echo ${params.aaidlist} | tr "," "\n"`;do
+                for id in `echo ${params.clusterAAIDlist} | tr "," "\n"`;do
                     awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_filtered_proteins.fasta
                     cd-hit -i ${params.projtag}_filtered_proteins.fasta -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
                     sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
@@ -1285,7 +1287,7 @@ if (params.conTodos) {
                 """
                 cp ${asvs} ${params.projtag}_ASVs_all.fasta
                 cp ${params.mypwd}/bin/rename_seq.py .
-                id=${params.aaid}
+                id=${params.clusterAAID}
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                 cd-hit -i ${params.projtag}_filtered_proteins.fasta -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
                 sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
@@ -1343,145 +1345,145 @@ if (params.conTodos) {
             }
         }
 
-    if (!params.skipTaxonomy) {
+        if (!params.skipTaxonomy) {
 
-        process pOTU_Taxonomy_Assignment_1 {
+            process pOTU_Taxonomy_Assignment_1 {
 
-            label 'norm_cpus'
+                label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Taxonomy/Nucleotide", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Taxonomy/Nucleotide/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.out'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Taxonomy/Nucleotide", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Taxonomy/Nucleotide/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.out'
 
-            input:
-                file(reads) from pOTU_diamond_ch
+                input:
+                    file(reads) from pOTU_diamond_ch
 
-            output:
-                file("*.fasta") into ( diamondAA_ch, diamondAA_clustal_ch, ntmafftAA )
-                tuple file("*_sumPHYtab.csv"), file("*_summarytable.tsv"), file("*dmd.out") into summary_AAdiamond
+                output:
+                    file("*.fasta") into ( diamondAA_ch, diamondAA_clustal_ch, ntmafftAA )
+                    tuple file("*_sumPHYtab.csv"), file("*_summarytable.tsv"), file("*dmd.out") into summary_AAdiamond
 
-            script:
-                """
-                cp ${params.mypwd}/bin/rename_seq.py .
-                virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
-                grep ">" \${virdb} >> headers.list
-                headers="headers.list"
-                name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
-                diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
-                echo "Preparing lists to generate summary .csv's"
-                echo "[Best hit accession number]" >access.list
-                echo "[pOTU sequence length]" >length.list
-                echo "[e-value]" >evalue.list
-                echo "[Bitscore]" >bit.list
-                echo "[Percent ID (aa)]" >pid.list
-                echo "[pOTU#]" >otu.list
-                echo "[Virus ID]" >"\$name"_virus.list
-                echo "[Gene]" >"\$name"_genes.list
-                grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
-                echo "extracting genes and names"
-                touch new_"\$name"_headers.txt
-                j=1
-                for s in \$(cat seqids.lst);do
-                    echo "Checking for \$s hit in diamond output"
-                        if [[ ${params.refseq} == "T" ]];then
-                            echo "RefSeq headers specified"
-                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                echo "Yep, there was a hit for \$s"
-                                echo "Extracting the information now:"
-                                acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
-                                echo "\$s" >> otu.list
-                                echo "\$acc" >> access.list
-                                line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                echo "\$line" | awk '{print \$10}' >>evalue.list
-                                echo "\$line" | awk '{print \$11}' >>bit.list
-                                echo "\$line" | awk '{print \$12}' >>pid.list
-                                echo "\$line" | awk '{print \$2}' >>length.list
-                                echo "Extracting virus and gene ID for \$s now"
-                                gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
-                                echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
-                                virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
-                                echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
-                                j=\$((\$j+1))
-                                echo "\$s done."
-                            else
-                                echo "Ugh, there was no hit for \$s .."
-                                echo "We still love \$s though and we will add it to the final fasta file"
-                                echo "\$s" >> otu.list
-                                echo "NO_HIT" >>access.list
-                                echo "NO_HIT" >>"\$name"_genes.list
-                                echo "NO_HIT" >>"\$name"_virus.list
-                                echo "NO_HIT" >>evalue.list
-                                echo "NO_HIT" >>bit.list
-                                echo "NO_HIT" >>pid.list
-                                echo "NO_HIT" >>length.list
-                                virus="NO"
-                                gene="HIT"
-                                echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
-                                j=\$((\$j+1))
-                                echo "\$s done."
-                        fi
-                        else
-                            echo "Using RVDB headers."
-                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                echo "Yep, there was a hit for \$s"
-                                echo "Extracting the information now:"
-                                acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
-                                echo "\$s" >>otu.list
-                                echo "\$acc" >>access.list
-                                line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                echo "\$line" | awk '{print \$10}' >>evalue.list
-                                echo "\$line" | awk '{print \$11}' >>bit.list
-                                echo "\$line" | awk '{print \$12}' >>pid.list
-                                echo "\$line" | awk '{print \$2}' >>length.list
-                                echo "Extracting virus and gene ID for \$s now"
-                                gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
-                                echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
-                                virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
-                                echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
-                                echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
-                                j=\$((\$j+1))
-                                echo "\$s done."
-                            else
-                                echo "Ugh, there was no hit for \$s .."
-                                echo "We still love \$s though and we will add it to the final fasta file"
-                                echo "\$s" >>otu.list
-                                echo "NO_HIT" >>access.list
-                                echo "NO_HIT" >>"\$name"_genes.list
-                                echo "NO_HIT" >>"\$name"_virus.list
-                                echo "NO_HIT" >>evalue.list
-                                echo "NO_HIT" >>bit.list
-                                echo "NO_HIT" >>pid.list
-                                echo "NO_HIT" >>length.list
-                                virus="NO"
-                                gene="HIT"
-                                echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
-                                j=\$((\$j+1))
-                                echo "\$s done."
+                script:
+                    """
+                    cp ${params.mypwd}/bin/rename_seq.py .
+                    virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
+                    grep ">" \${virdb} >> headers.list
+                    headers="headers.list"
+                    name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
+                    diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                    echo "Preparing lists to generate summary .csv's"
+                    echo "[Best hit accession number]" >access.list
+                    echo "[pOTU sequence length]" >length.list
+                    echo "[e-value]" >evalue.list
+                    echo "[Bitscore]" >bit.list
+                    echo "[Percent ID (aa)]" >pid.list
+                    echo "[pOTU#]" >otu.list
+                    echo "[Virus ID]" >"\$name"_virus.list
+                    echo "[Gene]" >"\$name"_genes.list
+                    grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
+                    echo "extracting genes and names"
+                    touch new_"\$name"_headers.txt
+                    j=1
+                    for s in \$(cat seqids.lst);do
+                        echo "Checking for \$s hit in diamond output"
+                            if [[ ${params.refseq} == "T" ]];then
+                                echo "RefSeq headers specified"
+                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                    echo "Yep, there was a hit for \$s"
+                                    echo "Extracting the information now:"
+                                    acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
+                                    echo "\$s" >> otu.list
+                                    echo "\$acc" >> access.list
+                                    line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                    echo "\$line" | awk '{print \$10}' >>evalue.list
+                                    echo "\$line" | awk '{print \$11}' >>bit.list
+                                    echo "\$line" | awk '{print \$12}' >>pid.list
+                                    echo "\$line" | awk '{print \$2}' >>length.list
+                                    echo "Extracting virus and gene ID for \$s now"
+                                    gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                    echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                                    virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
+                                    echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                                    echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
+                                    j=\$((\$j+1))
+                                    echo "\$s done."
+                                else
+                                    echo "Ugh, there was no hit for \$s .."
+                                    echo "We still love \$s though and we will add it to the final fasta file"
+                                    echo "\$s" >> otu.list
+                                    echo "NO_HIT" >>access.list
+                                    echo "NO_HIT" >>"\$name"_genes.list
+                                    echo "NO_HIT" >>"\$name"_virus.list
+                                    echo "NO_HIT" >>evalue.list
+                                    echo "NO_HIT" >>bit.list
+                                    echo "NO_HIT" >>pid.list
+                                    echo "NO_HIT" >>length.list
+                                    virus="NO"
+                                    gene="HIT"
+                                    echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
+                                    j=\$((\$j+1))
+                                    echo "\$s done."
                             fi
-                        fi
-                echo "Done with \$s"
-                done
-                echo "Now editing "\$name" fasta headers"
-                ###### rename_seq.py
-                ./rename_seq.py ${reads} new_"\$name"_headers.txt "\$name"_wTax.fasta
-                awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_wTax.fasta > "\$name"_tmpssasv.fasta
-                echo "[Sequence header]" > newnames.list
-                cat new_"\$name"_headers.txt >> newnames.list
-                touch sequence.list
-                echo "     " > sequence.list
-                grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
-                rm "\$name"_tmpssasv.fasta
-                paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_sumPHYtab.csv
-                paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summarytable.tsv
-                rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list ;
-                rm "\$name"_virus.list
-                rm "\$name"_genes.list
-                rm newnames.list
-                rm access.list
-                echo "Done Assigning Taxonomy To : ${reads} "
-                """
+                            else
+                                echo "Using RVDB headers."
+                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                    echo "Yep, there was a hit for \$s"
+                                    echo "Extracting the information now:"
+                                    acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
+                                    echo "\$s" >>otu.list
+                                    echo "\$acc" >>access.list
+                                    line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                    echo "\$line" | awk '{print \$10}' >>evalue.list
+                                    echo "\$line" | awk '{print \$11}' >>bit.list
+                                    echo "\$line" | awk '{print \$12}' >>pid.list
+                                    echo "\$line" | awk '{print \$2}' >>length.list
+                                    echo "Extracting virus and gene ID for \$s now"
+                                    gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                                    echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
+                                    virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                                    echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
+                                    echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
+                                    j=\$((\$j+1))
+                                    echo "\$s done."
+                                else
+                                    echo "Ugh, there was no hit for \$s .."
+                                    echo "We still love \$s though and we will add it to the final fasta file"
+                                    echo "\$s" >>otu.list
+                                    echo "NO_HIT" >>access.list
+                                    echo "NO_HIT" >>"\$name"_genes.list
+                                    echo "NO_HIT" >>"\$name"_virus.list
+                                    echo "NO_HIT" >>evalue.list
+                                    echo "NO_HIT" >>bit.list
+                                    echo "NO_HIT" >>pid.list
+                                    echo "NO_HIT" >>length.list
+                                    virus="NO"
+                                    gene="HIT"
+                                    echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
+                                    j=\$((\$j+1))
+                                    echo "\$s done."
+                                fi
+                            fi
+                    echo "Done with \$s"
+                    done
+                    echo "Now editing "\$name" fasta headers"
+                    ###### rename_seq.py
+                    ./rename_seq.py ${reads} new_"\$name"_headers.txt "\$name"_wTax.fasta
+                    awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_wTax.fasta > "\$name"_tmpssasv.fasta
+                    echo "[Sequence header]" > newnames.list
+                    cat new_"\$name"_headers.txt >> newnames.list
+                    touch sequence.list
+                    echo "     " > sequence.list
+                    grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
+                    rm "\$name"_tmpssasv.fasta
+                    paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_sumPHYtab.csv
+                    paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summarytable.tsv
+                    rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list ;
+                    rm "\$name"_virus.list
+                    rm "\$name"_genes.list
+                    rm newnames.list
+                    rm access.list
+                    echo "Done Assigning Taxonomy To : ${reads} "
+                    """
+            }
         }
-    }
 
         process Generate_Nucleotide_pOTU_Counts {
 
@@ -1530,88 +1532,48 @@ if (params.conTodos) {
                 """
         }
 
-    if (!params.skipPhylogeny) {
+        if (!params.skipPhylogeny) {
 
-        process pOTU_Nucleotide_Alignment {
+            process pOTU_Nucleotide_Phylogeny {
 
-            label 'norm_cpus'
+                label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Alignment", mode: "copy", overwrite: true
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
 
-            input:
-                file(reads) from ntmafftAA
+                input:
+                    file(reads) from ntmafftAA
 
-            output:
-                file("*_aln.fasta") into ( pOTUntmodeltest, pOTUntrax_align )
-                file("*_aln.html") into align_html2
+                output:
+                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into pOTU_nucleotide_phylogeny_results
 
-            script:
-                """
-                name=\$( echo ${reads} | awk -F "wTax" '{print \$1}' )
-                mafft --maxiterate 5000 --auto ${reads} >\${name}_ALN.fasta
-                trimal -in \${name}_ALN.fasta -out \${name}_aln.fasta -keepheader -fasta -automated1 -htmlout \${name}_aln.html
-                """
-        }
+                script:
+                    """
+                    pre=\$( echo ${reads} | awk -F "wTax" '{print \$1}' )
+                    mafft --maxiterate 5000 --auto ${reads} >\${pre}_ALN.fasta
+                    trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
-        process pOTU_Nucleotide_ModelTest {
+                    # pOTU_Nucleotide_ModelTest
+                    modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -d nt -s 203 --disable-checkpoint
+                    echo "Modeltest analysis complete :)"
+                    echo "Modeltest-ng results summary:" > \${pre}_model.summary
+                    tail -7 \${pre}_aln.fasta.log >> \${pre}_model.summary
 
-            label 'norm_cpus'
-
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/nucleotide/modeltest", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/nucleotide/modeltest/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
-
-            input:
-                file(reads) from pOTUntmodeltest
-
-            output:
-                file("*.tree") into tree_raxpOTU
-                file("*.log") into log_raxpOTU
-                file("*model.summary") into ntmodelsumpOTU
-
-            script:
-                """
-                name=\$( echo ${reads} | awk -F "_aln" '{print \$1}')
-                modeltest-ng -i ${reads} -p ${task.cpus} -d nt -s 203 --disable-checkpoint
-                echo "Modeltest analysis complete :)"
-                echo "Modeltest-ng results summary:" > \${name}_model.summary
-                tail -7 \${name}_aln.fasta.log >> \${name}_model.summary
-                """
-        }
-
-        process pOTU_Nucleotide_Phylogeny {
-
-            label 'rax_cpus'
-
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/nucleotide/trees", mode: "copy", overwrite: true
-
-            input:
-                file(align) from pOTUntrax_align
-                file(tree) from tree_raxpOTU
-                file(log) from log_raxpOTU
-
-            output:
-                file("*raxml*") into raxml_summary2
-
-            script:
-            if (params.ntraxcust) {
-                """
-                pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
-                raxml-ng --all --msa ${align} --prefix \${pre} --threads ${task.cpus} ${params.ntraxcust}
-                """
-            } else if (params.ntmodelt) {
-                """
-                pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
-                mod=\$(tail -14 ${log} | head -1 | awk -F "--model " '{print \$2}')
-                raxml-ng --all --msa ${align} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
-                """
-            } else {
-                """
-                pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
-                raxml-ng --all --msa ${align} --model GTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${tree} --bs-trees autoMRE --prefix \${pre} --redo
-                """
+                    # pOTU_Nucleotide_Phylogeny
+                    if [ "${params.ntraxcust}" != "" ];then
+                        raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ntraxcust}
+                    elif [ "${params.ntmodelt}" != "" ];then
+                        mod=\$(tail -14 \${pre}_aln.fasta.log | head -1 | awk -F "--model " '{print \$2}')
+                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                    else
+                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                    fi
+                    """
             }
         }
-    
 
         process pOTU_Protein_Matrix {
 
@@ -1633,275 +1595,238 @@ if (params.conTodos) {
                 """
         }
 
-    if (!params.skipTaxonomy) {
+        if (!params.skipTaxonomy) {
 
-        process pOTUaa_Taxonomy_Assignment_2 {
+            process pOTUaa_Taxonomy_Assignment_2 {
 
-            label 'norm_cpus'
+                label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Taxonomy/pOTU/aminoacid", mode: "copy", overwrite: true
+                publishDir "${params.mypwd}/${params.outdir}/Taxonomy/pOTU/aminoacid", mode: "copy", overwrite: true
 
-            input:
-                file(reads) from pOTUaa_diamondbp
-            output:
-                file("*_dmd.out") into pOTUdiamblastp
-                file("*s*.*sv") into summaryfiles_potutax2
-                file("*_headers.txt") into pOTUnewheaders
+                input:
+                    file(reads) from pOTUaa_diamondbp
 
-            script:
-                """
-                cp ${params.mypwd}/bin/rename_seq.py .
-                virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
-                grep ">" \${virdb} >> headers.list
-                headers="headers.list"
-                name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
-                diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
-                echo "Preparing lists to generate summary .csv's"
-                echo "[Best hit accession number]" >access.list
-                echo "[pOTU sequence length]" >length.list
-                echo "[e-value]" >evalue.list
-                echo "[Bitscore]" >bit.list
-                echo "[Percent ID (aa)]" >pid.list
-                echo "[pOTUaa#]" >otu.list
-                echo "[Virus ID]" >"\$name"_virus.list
-                echo "[Gene]" >"\$name"_genes.list
-                grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
-                echo "extracting genes and names"
-                touch new_"\$name"_headers.txt
-                j=1
-                for s in \$(cat seqids.lst);do
-                    echo "Checking for \$s hit in diamond output"
-                        if [[ ${params.refseq} == "T" ]];then
-                            echo "RefSeq headers specified"
-                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                echo "Yep, there was a hit for \$s"
-                                echo "Extracting the information now:"
-                                acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
-                                echo "\$s" >> otu.list
-                                echo "\$acc" >> access.list
-                                line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                echo "\$line" | awk '{print \$10}' >>evalue.list
-                                echo "\$line" | awk '{print \$11}' >>bit.list
-                                echo "\$line" | awk '{print \$12}' >>pid.list
-                                echo "\$line" | awk '{print \$2}' >>length.list
-                                echo "Extracting virus and gene ID for \$s now"
-                                gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
-                                echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
-                                virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
-                                echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
-                                j=\$((\$j+1))
-                                echo "\$s done."
-                            else
-                                echo "Ugh, there was no hit for \$s .."
-                                echo "We still love \$s though and we will add it to the final fasta file"
-                                echo "\$s" >> otu.list
-                                echo "NO_HIT" >>access.list
-                                echo "NO_HIT" >>"\$name"_genes.list
-                                echo "NO_HIT" >>"\$name"_virus.list
-                                echo "NO_HIT" >>evalue.list
-                                echo "NO_HIT" >>bit.list
-                                echo "NO_HIT" >>pid.list
-                                echo "NO_HIT" >>length.list
-                                virus="NO"
-                                gene="HIT"
-                                echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
-                                j=\$((\$j+1))
-                                echo "\$s done."
-                        fi
-                        else
-                            echo "Using RVDB headers."
-                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                echo "Yep, there was a hit for \$s"
-                                echo "Extracting the information now:"
-                                acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
-                                echo "\$s" >>otu.list
-                                echo "\$acc" >>access.list
-                                line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                echo "\$line" | awk '{print \$10}' >>evalue.list
-                                echo "\$line" | awk '{print \$11}' >>bit.list
-                                echo "\$line" | awk '{print \$12}' >>pid.list
-                                echo "\$line" | awk '{print \$2}' >>length.list
-                                echo "Extracting virus and gene ID for \$s now"
-                                gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
-                                echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
-                                virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
-                                echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
-                                echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
-                                j=\$((\$j+1))
-                                echo "\$s done."
-                            else
-                                echo "Ugh, there was no hit for \$s .."
-                                echo "We still love \$s though and we will add it to the final fasta file"
-                                echo "\$s" >>otu.list
-                                echo "NO_HIT" >>access.list
-                                echo "NO_HIT" >>"\$name"_genes.list
-                                echo "NO_HIT" >>"\$name"_virus.list
-                                echo "NO_HIT" >>evalue.list
-                                echo "NO_HIT" >>bit.list
-                                echo "NO_HIT" >>pid.list
-                                echo "NO_HIT" >>length.list
-                                virus="NO"
-                                gene="HIT"
-                                echo ">pOTUaa\${j}_\${virus}_\${gene}" >>new_"\$name"_headers.txt
-                                j=\$((\$j+1))
-                                echo "\$s done."
+                output:
+                    file("*_dmd.out") into pOTUdiamblastp
+                    file("*s*.*sv") into summaryfiles_potutax2
+                    file("*_headers.txt") into pOTUnewheaders
+
+                script:
+                    """
+                    cp ${params.mypwd}/bin/rename_seq.py .
+                    virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
+                    grep ">" \${virdb} >> headers.list
+                    headers="headers.list"
+                    name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
+                    diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                    echo "Preparing lists to generate summary .csv's"
+                    echo "[Best hit accession number]" >access.list
+                    echo "[pOTU sequence length]" >length.list
+                    echo "[e-value]" >evalue.list
+                    echo "[Bitscore]" >bit.list
+                    echo "[Percent ID (aa)]" >pid.list
+                    echo "[pOTUaa#]" >otu.list
+                    echo "[Virus ID]" >"\$name"_virus.list
+                    echo "[Gene]" >"\$name"_genes.list
+                    grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
+                    echo "extracting genes and names"
+                    touch new_"\$name"_headers.txt
+                    j=1
+                    for s in \$(cat seqids.lst);do
+                        echo "Checking for \$s hit in diamond output"
+                            if [[ ${params.refseq} == "T" ]];then
+                                echo "RefSeq headers specified"
+                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                    echo "Yep, there was a hit for \$s"
+                                    echo "Extracting the information now:"
+                                    acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
+                                    echo "\$s" >> otu.list
+                                    echo "\$acc" >> access.list
+                                    line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                    echo "\$line" | awk '{print \$10}' >>evalue.list
+                                    echo "\$line" | awk '{print \$11}' >>bit.list
+                                    echo "\$line" | awk '{print \$12}' >>pid.list
+                                    echo "\$line" | awk '{print \$2}' >>length.list
+                                    echo "Extracting virus and gene ID for \$s now"
+                                    gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                    echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                                    virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
+                                    echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                                    echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
+                                    j=\$((\$j+1))
+                                    echo "\$s done."
+                                else
+                                    echo "Ugh, there was no hit for \$s .."
+                                    echo "We still love \$s though and we will add it to the final fasta file"
+                                    echo "\$s" >> otu.list
+                                    echo "NO_HIT" >>access.list
+                                    echo "NO_HIT" >>"\$name"_genes.list
+                                    echo "NO_HIT" >>"\$name"_virus.list
+                                    echo "NO_HIT" >>evalue.list
+                                    echo "NO_HIT" >>bit.list
+                                    echo "NO_HIT" >>pid.list
+                                    echo "NO_HIT" >>length.list
+                                    virus="NO"
+                                    gene="HIT"
+                                    echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
+                                    j=\$((\$j+1))
+                                    echo "\$s done."
                             fi
-                        fi
-                echo "Done with \$s"
-                done
-                echo "Now editing "\$name" fasta headers"
-                ###### rename_seq.py
-                ./rename_seq.py ${reads} new_"\$name"_headers.txt "\$name"_wTax.fasta
-                awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_wTax.fasta > "\$name"_tmpssasv.fasta
-                echo "[Sequence header]" > newnames.list
-                cat new_"\$name"_headers.txt >> newnames.list
-                touch sequence.list
-                awk 'BEGIN{RS=">";ORS=""}{print \$2"\\n"}' \${name}_tmpssasv.fasta >>sequence.list
-                rm "\$name"_tmpssasv.fasta
-                paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_summary_phyloseqObject.csv
-                paste -d"\\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summary_table.tsv
-                rm evalue.list sequence.list bit.list pid.list length.list
-                rm "\$name"_virus.list
-                rm "\$name"_genes.list
-                rm newnames.list
-                rm access.list
-                echo "Done Assigning Taxonomy To : ${reads} "
-                """
+                            else
+                                echo "Using RVDB headers."
+                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                    echo "Yep, there was a hit for \$s"
+                                    echo "Extracting the information now:"
+                                    acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
+                                    echo "\$s" >>otu.list
+                                    echo "\$acc" >>access.list
+                                    line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                    echo "\$line" | awk '{print \$10}' >>evalue.list
+                                    echo "\$line" | awk '{print \$11}' >>bit.list
+                                    echo "\$line" | awk '{print \$12}' >>pid.list
+                                    echo "\$line" | awk '{print \$2}' >>length.list
+                                    echo "Extracting virus and gene ID for \$s now"
+                                    gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                                    echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
+                                    virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                                    echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
+                                    echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
+                                    j=\$((\$j+1))
+                                    echo "\$s done."
+                                else
+                                    echo "Ugh, there was no hit for \$s .."
+                                    echo "We still love \$s though and we will add it to the final fasta file"
+                                    echo "\$s" >>otu.list
+                                    echo "NO_HIT" >>access.list
+                                    echo "NO_HIT" >>"\$name"_genes.list
+                                    echo "NO_HIT" >>"\$name"_virus.list
+                                    echo "NO_HIT" >>evalue.list
+                                    echo "NO_HIT" >>bit.list
+                                    echo "NO_HIT" >>pid.list
+                                    echo "NO_HIT" >>length.list
+                                    virus="NO"
+                                    gene="HIT"
+                                    echo ">pOTUaa\${j}_\${virus}_\${gene}" >>new_"\$name"_headers.txt
+                                    j=\$((\$j+1))
+                                    echo "\$s done."
+                                fi
+                            fi
+                    echo "Done with \$s"
+                    done
+                    echo "Now editing "\$name" fasta headers"
+                    ###### rename_seq.py
+                    ./rename_seq.py ${reads} new_"\$name"_headers.txt "\$name"_wTax.fasta
+                    awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_wTax.fasta > "\$name"_tmpssasv.fasta
+                    echo "[Sequence header]" > newnames.list
+                    cat new_"\$name"_headers.txt >> newnames.list
+                    touch sequence.list
+                    awk 'BEGIN{RS=">";ORS=""}{print \$2"\\n"}' \${name}_tmpssasv.fasta >>sequence.list
+                    rm "\$name"_tmpssasv.fasta
+                    paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_summary_phyloseqObject.csv
+                    paste -d"\\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summary_table.tsv
+                    rm evalue.list sequence.list bit.list pid.list length.list
+                    rm "\$name"_virus.list
+                    rm "\$name"_genes.list
+                    rm newnames.list
+                    rm access.list
+                    echo "Done Assigning Taxonomy To : ${reads} "
+                    """
+                }
+            }
+
+        if (!params.skipPhylogeny) {
+
+            process pOTU_Protein_Phylogeny {
+
+                label 'norm_cpus'
+
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
+
+    	        input:
+                    file(prot) from pOTUaaformafft
+
+                output:
+                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into pOTU_protein_phylogeny_results
+
+                script:
+                    """
+                    pre=\$( echo ${prot}  | awk -F ".fasta" '{print \$1}' )
+                    mafft --maxiterate 5000 --auto ${prot} >\${pre}_ALN.fasta
+                    trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
+
+                    # pOTU_Protein_ModelTest
+                    modeltest-ng -i ${prot} -p ${task.cpus} -d aa -s 203 --disable-checkpoint
+                    echo "Modeltest analysis complete :)"
+                    echo "Modeltest-ng results summary:" > \${pre}_model.summary
+                    tail -7 \${pre}_aln.fasta.log >> \${pre}_model.summary
+
+                    # pOTU_Protein_Phylogeny
+                    if [ "${params.ptraxcust}" != "" ];then
+                        raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
+                    elif [ "${params.ptmodeltrax}" != "" ];then
+                        mod=\$(tail -14 \${pre}_aln.fasta.log| head -1 | awk -F "--model " '{print \$2}')
+                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                    else
+                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                    fi
+                    """
             }
         }
 
-    if (!params.skipPhylogeny) {
-
-        process pOTU_Protein_Alignment {
+        process Generate_pOTU_Protein_Counts {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/protein/alignment", mode: "copy", overwrite: true
-
-	        input:
-                file(prot) from pOTUaaformafft
-
-            output:
-                file("*_aln.fasta") into ( pOTUaamodeltest, pOTUaatrax_align )
-                file("*_aln.html") into pOTUaa_aln
-
-            script:
-                """
-                name=\$( echo ${prot}  | awk -F ".fasta" '{print \$1}' )
-                mafft --maxiterate 5000 --auto ${prot} >\${name}_ALN.fasta
-                trimal -in \${name}_ALN.fasta -out \${name}_aln.fasta -keepheader -fasta -automated1 -htmlout \${name}_aln.html
-                """
-        }
-
-        process pOTU_Protein_ModelTest {
-
-            label 'norm_cpus'
-
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/modeltest", mode: "copy", overwrite: true, pattern: '*.{tree,log}'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/modeltest/summaryfiles", mode: "copy", overwrite: true, pattern: '*model.summary'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/counts", mode: "copy", overwrite: true
 
             input:
-                file(prot) from pOTUaamodeltest
+                file(fasta) from pOTUaaforcounts
+                file(merged) from mergeforpOTUaacounts
+                file(samplist) from samplistpotu
 
             output:
-                file("*.tree") into pOTUaatree_rax
-                file("*.log") into pOTUaalog_rax
-                file("*model.summary") into pOTUaamodelsum
+                tuple file("*_counts.csv"), file("*dmd.out") into potuaacounts_summary
 
             script:
                 """
-                name=\$( echo ${prot} | awk -F "_aln" '{print \$1}')
-                modeltest-ng -i ${prot} -p ${task.cpus} -d aa -s 203 --disable-checkpoint
-                echo "Modeltest analysis complete :)"
-                echo "Modeltest-ng results summary:" > \${name}_model.summary
-                tail -7 \${name}_aln.fasta.log >> \${name}_model.summary
-                """
-        }
+                set +e
+                potu="\$( echo ${fasta} | awk -F "_" '{print \$3}')"
+                diamond makedb --in ${fasta} --db ${fasta}
+                diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                echo "[Sequence]" >tmp.col1.txt
+                echo "Generating sample id list"
+                grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
+                cat otuid.list >> tmp.col1.txt
+                echo "Beginning them counts tho my g"
+                for y in \$( cat ${samplist} );do
+                    echo "Starting with \$y now ..."
+                    grep "\$y" ${params.projtag}_\${potu}_Counts_dmd.out > tmp."\$y".out
+                    echo "Isolated hits"
+                    echo "Created uniq subject id list"
+                    echo "\$y" > "\$y"_col.txt
+                    echo "Starting my counts"
+                    for z in \$(cat otuid.list);do
+                        echo "Counting \$z hits"
+        	            echo "grep -wc "\$z" >> "\$y"_col.txt"
+        	            grep -wc "\$z" tmp."\$y".out >> "\$y"_col.txt
+    		            echo "\$z counted"
+    	            done
+               done
+               paste -d "," tmp.col1.txt *col.txt > ${params.projtag}_\${potu}_counts.csv
+               rm tmp*
+               rm *col.txt
+               """
+           }
+    }
 
-        process pOTU_Protein_Phylogeny {
-
-            label 'rax_cpus'
-
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/trees", mode: "copy", overwrite: true
-
-            input:
-                file(palign) from pOTUaatrax_align
-                file(ptree) from pOTUaatree_rax
-                file(plog) from pOTUaalog_rax
-
-            output:
-                file("*raxml*") into raxml_pOTUaa_summary
-
-            script:
-                if (params.ptraxcust) {
-                    """
-                    pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
-                    raxml-ng --all --msa ${palign} --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
-                    """
-                } else if (params.ptmodeltrax) {
-                    """
-                    pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
-                    mod=\$(tail -14 ${plog} | head -1 | awk -F "--model " '{print \$2}')
-                    raxml-ng --all --msa ${palign} --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
-                    """
-                } else {
-                    """
-                    pre=\$(echo ${palign} | awk -F "_aln.fasta" '{print \$1}' )
-                    raxml-ng --all --msa ${palign} --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree ${ptree} --bs-trees autoMRE --prefix \${pre} --redo
-                    """
-                }
-        }
-    
-    process Generate_pOTU_Protein_Counts {
-
-        label 'norm_cpus'
-
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/counts", mode: "copy", overwrite: true
-
-        input:
-            file(fasta) from pOTUaaforcounts
-            file(merged) from mergeforpOTUaacounts
-            file(samplist) from samplistpotu
-
-        output:
-            tuple file("*_counts.csv"), file("*dmd.out") into potuaacounts_summary
-
-        script:
-            """
-            set +e
-            potu="\$( echo ${fasta} | awk -F "_" '{print \$3}')"
-            diamond makedb --in ${fasta} --db ${fasta}
-            diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-            echo "[Sequence]" >tmp.col1.txt
-            echo "Generating sample id list"
-            grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
-            cat otuid.list >> tmp.col1.txt
-            echo "Beginning them counts tho my g"
-            for y in \$( cat ${samplist} );do
-                echo "Starting with \$y now ..."
-                grep "\$y" ${params.projtag}_\${potu}_Counts_dmd.out > tmp."\$y".out
-                echo "Isolated hits"
-                echo "Created uniq subject id list"
-                echo "\$y" > "\$y"_col.txt
-                echo "Starting my counts"
-                for z in \$(cat otuid.list);do
-                    echo "Counting \$z hits"
-    	            echo "grep -wc "\$z" >> "\$y"_col.txt"
-    	            grep -wc "\$z" tmp."\$y".out >> "\$y"_col.txt
-		            echo "\$z counted"
-	            done
-           done
-           paste -d "," tmp.col1.txt *col.txt > ${params.projtag}_\${potu}_counts.csv
-           rm tmp*
-           rm *col.txt
-           """
-       }
-    } 
 } else {
-    	println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
-    	exit 0
-} 
+	println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
+	exit 0
+}
 
 
 if (params.generateAAcounts) {
@@ -1951,10 +1876,6 @@ if (params.generateAAcounts) {
         println("\n\t\033[0;31mProvide PATH for `proteinFasta` and `mergedFast`\n\033[0m")
         exit 0
     }
-
-} else {
-    println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
-    exit 0
 }
 
 if (params.dataCheck) {
@@ -2010,6 +1931,7 @@ if (params.dataCheck) {
                 --report_title ${sample_id}
                 """
             }
+
     } else {
         reads_ch
             .set{ reads_fastp_ch }
@@ -2050,7 +1972,7 @@ if (params.dataCheck) {
                     """
                 } else {
                     """
-                    bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduck_R1.fastq.gz out2=${sample_id}_bbduck_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus}
+                    bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus}
                     """
                 }
     	  }
@@ -2236,7 +2158,7 @@ if (params.dataCheck) {
             file("*_otu*.fasta") into ( fileforMafft, fileforClustal )
 
         script:
-        if (params.idlist) {
+        if (params.datacheckntIDlist) {
             """
             for id in `echo ${params.datacheckntIDlist} | tr "," "\n"`;done
                 vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
@@ -2245,6 +2167,7 @@ if (params.dataCheck) {
             """
         }
     }
+
     process Translation_For_ProteinBased_Clustering_DC {
 
         label 'norm_cpus'
@@ -2284,7 +2207,6 @@ if (params.dataCheck) {
 
         script:
         // add awk script to count seqs
-        if (params.clusterAAIDlist) {
             """
             cp ${asvs} ${params.projtag}_ASVs_all.fasta
             cp ${params.mypwd}/bin/rename_seq.py .
@@ -2344,7 +2266,7 @@ if (params.dataCheck) {
             done
             """
 	}
-    process Report_DataCheck {
+    /*process Report_DataCheck {
 
         label 'norm_cpus'
 
@@ -2361,9 +2283,8 @@ if (params.dataCheck) {
             """
             echo "Report"
             """
-    }
-} 
-
+    }*/
+}
 
 workflow.onComplete {
     log.info ( workflow.success ? \
@@ -2371,8 +2292,5 @@ workflow.onComplete {
         + "\n\033[0;32mDone! Open the following report in your browser --> ${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
-}
-
-def vampirus_header() {
 }
 
