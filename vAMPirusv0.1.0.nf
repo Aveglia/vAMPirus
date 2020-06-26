@@ -29,7 +29,7 @@ def fullHelpMessage() {
 
             Usage:
 
-                nextflow run vAMPirusv0.1.0.sh --all (other_options_here)
+                nextflow run vAMPirusv0.1.0.sh
 
         Help options:
 
@@ -47,87 +47,96 @@ def fullHelpMessage() {
 
                 --generateReport               Provide vAMPirus with paths to necessary files to generate a vAMPirus report
 
+        Clustering arguments:
+
+                --nOTU                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (nOTUs) - See options below to define a single percent similarity or a list
+
+                --pOTU                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pOTUs) - See options below to define a single percent similarity or a list
+
         Analysis-specific options (will override information in the config file):
 
             General information
 
-                --projtag                       Project name - Name that will be used as a prefix for namng files by vAMPirus
+                --projtag                       Set project name to be used as a prefix for output files
 
-                --metadata                      Path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
+                --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
 
                 --mypwd                         Path to working directory that contains (i) the vAMPirus.nf script, (ii) the nextflow.config, and (iii) directory containing read libraries
 
                 --email                         Your email for notifications for when jobs are submitted and completed
 
-                --reads                         Path to directory containing read libraries, mus have *R{1,2}.fast{a,q} in the name
+                --reads                         Path to directory containing read libraries, must have *R{1,2}.fast{a,q} in the name
 
                 --outdir                        Name of directory to store output of vAMPirus run
 
-        Merged read length filtering parameters
+        Merged read length filtering options
 
-                --minLen// Minimum merged read length - reads below the specified maximum read length wil be used for counts only
+                --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
 
-                    // Maximum merged read length - reads with length equal to the specified max read length will be used to generate uniques and ASVs
-                        maxLen="422"
+                --maxLen                        Maximum merged read length - reads with length equal to the specified max read length will be used to identifying unique sequences and  subsequent Amplicon Sequence Variant (ASV) analysis
 
-        Primer Removal parameters
-                    // If not specifying primer sequences, forward and reverse reads will be trimmed by number of bases specified using --GlobTrim #,#
-                        GlobTrim=""
-                    // Specific primer sequence on forward reads to be removed
-                        fwd="YTKCCTCGASCTRYTGGWCC"
-                    // Reverse primer sequence
-                        rev="MGCCAARTCASWCATATTAAAWGGCA"
 
-                // ASV generation and clustering parameters
-                    // Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
-                        alpha="1"
-                    // Default percent similarity to cluster nucleotide ASV sequences
-                        clusterNuclID=".85"
-                    // List of percent similarities to cluster nucleotide ASV sequnces - must be seperated by ".95,.96"
-                        clusterNuclIDlist=""
-                    // Default percent similarity to cluster aminoacid sequences
-                        clusterAAID=".97"
-                    // List of percent similarities to cluster aminoacid sequences - must be seperated by ".95,.96"
-                        clusterAAIDlist=""
-                    // minimum length of AA in cluster_AA
-                        minAA="50"
+        Primer Removal options
 
-                // Counts table generation parameters
-                    // Similarity ID to use for ASV counts table
-                        asvcountID=".97"
-                    // Protein counts table parameters
-                        // Minimum Bitscore for counts
-                            ProtCountsBit="50"
-                        // Minimum aminoacid sequence similarity for hit to count
-                            ProtCountID="85"
-                        // Minimum alignment length for hit to count
-                            ProtCountsLength="50"
+                --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences  #,#
 
-                // Taxonomy assignment parameters
-                    // Specify name of database to use for analysis
-                        dbname="U-RVDBv18.0-protc.fasta"
-                    // Path to Directory where database is being stored
-                        dbdir="/data/alex/PVID_dinorna/alltigs/U-RVDBv18.0-protc.fasta"
-                    // Toggle use of RefSeq header format; default is Reverence Viral DataBase (RVDB)
-                        refseq="F"
+                --fwd                           Specify forward primer sequence pecific primer sequence on forward reads to be removed
 
-                // Phylogeny analysis parameters
-                    // Customs options for RAxML (Example: "-option1 A -option2 B -option3 C -option4 D")
-                        ntraxcust=""
-                        ptraxcust=""
-                    // Signal for RAxML to use model from ModelTest Results_C50
-                        ntmodeltrax=false
-                        ptmodeltrax=false
+                --rev                           Reverse primer sequence
 
-                // Paths to files needed for --generateAAcounts option
-                    // Path to protein sequence fasta file to be used for counts
-                        proteinFasta=""
-                    // Path to merged read fastq/fasta file to be used for counts
-                        mergedFast=""
-                    // Path to list of sample names which are mentioned in the sequence headers
-                        sampleList=""
+        Amplicon analysis options
+
+                --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
+
+                --minSize                       Minimum size or representation for sequence to be considered in ASV generation
+
+                --clusterNuclID                 With --nOTU set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
+
+                --clusterNuclIDlist             With --nOTU set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+
+                --clusterAAID                   With --pOTU set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
+
+                --clusterAAIDlist               With --pOTU set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
+
+                --minAA                         With --pOTU set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
+
+
+        Counts table options
+
+                --asvcountID                    Similarity ID to use for ASV counts
+
+                --ProtCountID                   Minimum amino acid sequence similarity for hit to count
+
+                --ProtCountsLength              Minimum alignment length for hit to count
+
+
+        Taxonomy assignment parameters
+
+                --dbname                       Specify name of database to use for analysis
+
+                --dbdir                        Path to Directory where database is being stored
+
+                --refseq                       Toggle use of RefSeq header format; default is Reverence Viral DataBase (RVDB)
+
+                --Bitscore                     Set minimum bitscore for Diamond command
+
+                --
+
+        Phylogeny analysis parameters
+
+                --ntmodeltrax                 Use this option to use the nucleotide model of substitution determined by ModelTest-NG
+
+                --ptmodeltrax                 Use this option to use the amino acid model of substitution determined by ModelTest-NG
+
+        Paths to files needed for --generateAAcounts option
+
+                --proteinFasta                 Path to protein sequence fasta file to be used for counts
+
+                --mergedFast                   Path to merged read fastq/fasta file to be used for counts
+
+                --sampleList                   Path to list of sample names which are mentioned in the sequence headers
+
         |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-
         #################################################################################################
 
                                   Various examples on how to deploy vAMPirus
@@ -324,14 +333,17 @@ if (params.Analyze) {
                 output:
                     tuple sample_id, file("*.fastp.{json,html}") into fastp_results
                     tuple sample_id, file("*.filter.fq") into reads_fastp_ch
+                    tuple sample_id, file("*.csv") into fastp_csv
 
                 script:
                     """
                     echo ${sample_id}
 
                     fastp -i ${reads[0]} -I ${reads[1]} -o left-${sample_id}.filter.fq -O right-${sample_id}.filter.fq --detect_adapter_for_pe \
-                    --average_qual 25 --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
+                    --average_qual 25 -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
                     --report_title ${sample_id}
+
+                    bash get_readstats.sh ${sample_id}.fastp.json
                     """
                 }
         } else {
@@ -374,7 +386,7 @@ if (params.Analyze) {
                         """
                     } else {
                         """
-                        bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus}
+                        bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus} restrictleft=25 k=12 ordered=t mink=2 ktrim=l ecco=t rcomp=t minlength=200 tbo tpe
                         """
                     }
         	  }
@@ -441,11 +453,11 @@ if (params.Analyze) {
                 .collect()
 
         output:
-            file("*_clean_merged_reads.fastq") into ( collect_samples_ch, mergeforprotcounts, mergeforpOTUaacounts )
+            file("*_all_merged_reads.fastq") into collect_samples_ch
 
         script:
             """
-            cat ${reads} >>${params.projtag}_clean_merged_reads.fastq
+            cat ${reads} >>${params.projtag}_all_merged_reads.fastq
 	        """
     }
 
@@ -469,7 +481,7 @@ if (params.Analyze) {
 
     }
 
-    process Length_Filtering {
+    process Length_Filtering { \\\changed
 
         label 'norm_cpus'
 
@@ -479,17 +491,17 @@ if (params.Analyze) {
             file(reads) from collect_samples_ch
 
         output:
-            file("all_merged_clean.fasta") into ( mergedforcounts, mergeforpOTUcounts )
-            file("all_merged_clean_filter.fasta") into reads_vsearch2_ch
+            file("*_merged_clean.fasta") into ( mergedforcounts, mergeforpOTUcounts )
+            file("*_merged_clean_Lengthfiltered.fastq") into reads_vsearch2_ch
+            file("*_merged_reads_clean.fastq") into (  mergeforprotcounts, mergeforpOTUaacounts )
 
         script:
             """
-            fastp -i ${reads} -o all_merged_cln.fq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
-
-            # reformat.sh from BBtools
-            reformat.sh in=all_merged_cln.fq out=all_merged_clean.fasta t=${task.cpus}
-
-            bbduk.sh in=all_merged_clean.fasta out=all_merged_clean_filter.fasta minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
+            fastp -i ${reads} -o ${params.projtag}_merged_reads_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
+            reformat.sh in=${params.projtag}_merged_reads_clean.fastq out=${params.projtag}_merged_clean.fasta t=${task.cpus}
+            bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_prelenFilt_bhist.txt qhist=${params.projtag}_all_merged_prelenFilt_qhist.txt gchist=${params.projtag}_all_merged_prelenFilt_gchist.txt aqhist=${params.projtag}_all_merged_prelenFilt_aqhist.txt lhist=${params.projtag}_all_merged_prelenFilt_lhist.txt gcbins=auto
+            bbduk.sh in=${params.projtag}_merged_clean.fastq  out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
+            bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postlenFile_bhist.txt qhist=${params.projtag}_all_merged_postlenFile_qhist.txt gchist=${params.projtag}_all_merged_postlenFile_gchist.txt aqhist=${params.projtag}_all_merged_postlenFile_aqhist.txt lhist=${params.projtag}_all_merged_postlenFile_lhist.txt gcbins=auto
 	        """
     }
 
@@ -497,17 +509,17 @@ if (params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/Read_Processing/Uniques", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/Uniques", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch2_ch
 
         output:
-            file("all_unique_seq.fasta") into reads_vsearch3_ch
+            file("*unique_sequences.fasta") into reads_vsearch3_ch
 
         script:
             """
-            vsearch --derep_fulllength ${reads} --sizeout --relabel_keep --output all_unique_seq.fasta
+            vsearch --derep_fulllength ${reads} --sizeout --relabel_keep --output ${params.projtag}_unique_sequences.fasta
             """
     }
 
@@ -525,7 +537,7 @@ if (params.Analyze) {
 
         script:
             """
-            vsearch --cluster_unoise ${reads} --unoise_alpha ${params.alpha} --relabel ASV --centroids asv_chim.fasta
+            vsearch --cluster_unoise ${reads} --unoise_alpha ${params.alpha} --relabel ASV --centroids asv_chim.fasta --minsize ${params.minSize}
             """
     }
 
@@ -555,7 +567,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/nOTU", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
+            publishDir "${params.mypwd}/${params.outdir}/Clustering/nOTU", mode: "copy", overwrite: true, pattern: '*otu*.fasta'
 
             input:
                 file(fasta) from reads_vsearch5_ch
@@ -591,7 +603,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucelotide/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta,csv,tsv}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta,csv,tsv}'
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.out'
 
             input:
@@ -997,7 +1009,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/matrix", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Matrix", mode: "copy", overwrite: true
 
             input:
                 file(prot) from aminotypesClustal
@@ -1548,7 +1560,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Counts/Nucleotide", mode: "copy", overwrite: true, pattern: '*.{biome,txt}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Counts", mode: "copy", overwrite: true, pattern: '*.{biome,txt}'
 
             input:
                 file(reads) from diamondAA_ch
@@ -1638,7 +1650,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/aminoacid/matrix", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Matrix", mode: "copy", overwrite: true
 
             input:
                 file(prot) from pOTUaaforanalysis
@@ -1660,7 +1672,7 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Taxonomy/pOTU/aminoacid", mode: "copy", overwrite: true
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Taxonomy", mode: "copy", overwrite: true
 
                 input:
                     file(reads) from pOTUaa_diamondbp
@@ -1792,26 +1804,18 @@ if (params.Analyze) {
                     """
                 }
             }
-<<<<<<< HEAD
 
         if (!params.skipPhylogeny) {
 
             process pOTU_Protein_Phylogeny {
 
-=======
-
-        if (!params.skipPhylogeny) {
-
-            process pOTU_Protein_Phylogeny {
-
->>>>>>> 40daf85dccaa549de6c41a4ea889f5ec46d5fe6f
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Protein/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
 
     	        input:
                     file(prot) from pOTUaaformafft
@@ -1848,7 +1852,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/counts", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Counts", mode: "copy", overwrite: true
 
             input:
                 file(fasta) from pOTUaaforcounts
@@ -1957,7 +1961,7 @@ if (params.dataCheck) {
 
             tag "${sample_id}"
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/fastqc", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/fastqc", mode: "copy", overwrite: true
 
             input:
                 tuple sample_id, file(reads) from reads_qc_ch
@@ -1980,7 +1984,7 @@ if (params.dataCheck) {
 
             tag "${sample_id}"
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/adapter_removal", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/adapter_removal", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
             input:
                 tuple sample_id, file(reads) from reads_ch
@@ -1988,14 +1992,17 @@ if (params.dataCheck) {
             output:
                 tuple sample_id, file("*.fastp.{json,html}") into fastp_results
                 tuple sample_id, file("*.filter.fq") into reads_fastp_ch
+                tuple sample_id, file("*.csv") into fastp_csv_DC
 
             script:
                 """
                 echo ${sample_id}
 
                 fastp -i ${reads[0]} -I ${reads[1]} -o left-${sample_id}.filter.fq -O right-${sample_id}.filter.fq --detect_adapter_for_pe \
-                --average_qual 25 --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
+                --average_qual 25 -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
                 --report_title ${sample_id}
+
+                bash get_readstats.sh ${sample_id}.fastp.json
                 """
             }
 
@@ -2013,7 +2020,7 @@ if (params.dataCheck) {
 
             tag "${sample_id}"
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/primer_removal", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/primer_removal", mode: "copy", overwrite: true
 
             input:
                 tuple sample_id, file(reads) from reads_fastp_ch
@@ -2039,7 +2046,7 @@ if (params.dataCheck) {
                     """
                 } else {
                     """
-                    bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus}
+                    bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus} restrictleft=25 k=12 ordered=t mink=2 ktrim=l ecco=t rcomp=t minlength=200 tbo tpe
                     """
                 }
     	  }
@@ -2056,7 +2063,7 @@ if (params.dataCheck) {
 
             tag "${sample_id}"
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/fastqc/fastqc2", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/fastqc/fastqc2", mode: "copy", overwrite: true
 
             input:
                 tuple sample_id, file(reads) from readsforqc2
@@ -2077,7 +2084,7 @@ if (params.dataCheck) {
 
         tag "${sample_id}"
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/read_merging", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/read_merging", mode: "copy", overwrite: true
 
         input:
             tuple sample_id, file(reads) from reads_bbduk_ch
@@ -2098,14 +2105,14 @@ if (params.dataCheck) {
 
         label 'low_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/readmerging", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/readmerging", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch1_ch
                 .collect()
 
         output:
-            file("*_clean_merged_reads.fastq") into ( collect_samples_ch, mergeforprotcounts, mergeforpOTUaacounts )
+            file("*_clean_merged_reads.fastq") into collect_samples_ch
 
         script:
             """
@@ -2117,7 +2124,7 @@ if (params.dataCheck) {
 
         label 'low_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/readmerging", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/readmerging", mode: "copy", overwrite: true
 
         input:
             file(names) from names
@@ -2137,31 +2144,34 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/read_merging/clean", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/read_merging/clean", mode: "copy", overwrite: true
 
         input:
             file(reads) from collect_samples_ch
 
         output:
-            file("all_merged_clean.fasta") into ( mergedforcounts, mergeforpOTUcounts )
-            file("all_merged_clean_filter.fasta") into reads_vsearch2_ch
+        file("*_merged_clean.fasta") into ( mergedforcounts, mergeforpOTUcounts )
+        file("*_merged_clean_Lengthfiltered.fastq") into reads_vsearch2_ch
+        file("*_merged_reads_clean.fastq") into (  mergeforprotcounts, mergeforpOTUaacounts )
 
         script:
             """
-            fastp -i ${reads} -o all_merged_cln.fq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
-
-            # reformat.sh from BBtools
-            reformat.sh in=all_merged_cln.fq out=all_merged_clean.fasta t=${task.cpus}
-
-            bbduk.sh in=all_merged_clean.fasta out=all_merged_clean_filter.fasta minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
-	        """
-    }
+            ##histogram generation
+            bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_prelenFilt_bhist.txt qhist=${params.projtag}_all_merged_prelenFilt_qhist.txt gchist=${params.projtag}_all_merged_prelenFilt_gchist.txt aqhist=${params.projtag}_all_merged_prelenFilt_aqhist.txt lhist=${params.projtag}_all_merged_prelenFilt_lhist.txt gcbins=auto
+            ##Trimming and lower length filtering
+            fastp -i ${reads} -o ${params.projtag}_merged_reads_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
+            ##Reformat to fasta for counts
+            reformat.sh in=${params.projtag}_merged_reads_clean.fastq out=${params.projtag}_merged_clean.fasta t=${task.cpus}
+            bbduk.sh in=${params.projtag}_merged_clean.fastq  out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
+            bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postlenFile_bhist.txt qhist=${params.projtag}_all_merged_postlenFile_qhist.txt gchist=${params.projtag}_all_merged_postlenFile_gchist.txt aqhist=${params.projtag}_all_merged_postlenFile_aqhist.txt lhist=${params.projtag}_all_merged_postlenFile_lhist.txt gcbins=auto
+            """
+        }
 
     process Extract_Uniques_DC {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/uniques", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/uniques", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch2_ch
@@ -2179,7 +2189,7 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Read_Processing/uniques/asvs/wchimeras", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/uniques/asvs/wchimeras", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch3_ch
@@ -2189,7 +2199,7 @@ if (params.dataCheck) {
 
         script:
             """
-            vsearch --cluster_unoise ${reads} --unoise_alpha ${params.alpha} --relabel ASV --centroids asv_chim.fasta
+            vsearch --cluster_unoise ${reads} --unoise_alpha ${params.alpha} --relabel ASV --centroids asv_chim.fasta --minsize ${params.minSize}
             """
     }
 
@@ -2360,4 +2370,3 @@ workflow.onComplete {
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }
-
