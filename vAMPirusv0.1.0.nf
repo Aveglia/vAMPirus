@@ -500,7 +500,7 @@ if (params.Analyze) {
             fastp -i ${reads} -o ${params.projtag}_merged_reads_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
             reformat.sh in=${params.projtag}_merged_reads_clean.fastq out=${params.projtag}_merged_clean.fasta t=${task.cpus}
             bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_prelenFilt_bhist.txt qhist=${params.projtag}_all_merged_prelenFilt_qhist.txt gchist=${params.projtag}_all_merged_prelenFilt_gchist.txt aqhist=${params.projtag}_all_merged_prelenFilt_aqhist.txt lhist=${params.projtag}_all_merged_prelenFilt_lhist.txt gcbins=auto
-            bbduk.sh in=${params.projtag}_merged_clean.fastq  out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
+            bbduk.sh in=${params.projtag}_merged_reads_clean.fastq  out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postlenFile_bhist.txt qhist=${params.projtag}_all_merged_postlenFile_qhist.txt gchist=${params.projtag}_all_merged_postlenFile_gchist.txt aqhist=${params.projtag}_all_merged_postlenFile_aqhist.txt lhist=${params.projtag}_all_merged_postlenFile_lhist.txt gcbins=auto
 	        """
     }
@@ -603,8 +603,10 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta,csv,tsv}'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.out'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy", mode: "copy", overwrite: true, pattern: '*otu*.{fasta,csv,tsv}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*otu*dmd.out'
 
             input:
                 file(reads) from reads_diamond_ch
@@ -1031,7 +1033,7 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/Aminotypes/Taxonomy/", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Taxonomy/", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.out'
 
                 input:
@@ -1370,6 +1372,7 @@ if (params.Analyze) {
                     sed -n "/\$name/,/Cluster_/p" ${params.projtag}_pOTU\${id}.clstr > "\$name"_tmp.list
                 done
                 j=1
+                u=1
                 for x in *_tmp.list;do
                     name=\$(echo \$x | awk -F "_tmp" '{print \$1}')
                     cluster="pOTU\${j}"
@@ -1377,7 +1380,6 @@ if (params.Analyze) {
                     seqtk subseq ${asvs} seqs_tmps.list > \${cluster}_nucleotide_sequences.fasta
                     vsearch --cluster_fast \${cluster}_nucleotide_sequences.fasta --id 0.2 --centroids \${name}_centroids.fasta
                     grep ">" \${name}_centroids.fasta >> tmp_centroids.list
-                    u="1"
                     for y in \$( cat tmp_centroids.list);do
                         echo ">\${cluster}_type"\$u"" >> tmp_centroid.newheaders
                         u=\$(( \$u+1 ))
@@ -1961,7 +1963,7 @@ if (params.dataCheck) {
 
             tag "${sample_id}"
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/fastqc", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/FastQC/PreClean", mode: "copy", overwrite: true
 
             input:
                 tuple sample_id, file(reads) from reads_qc_ch
@@ -1984,7 +1986,7 @@ if (params.dataCheck) {
 
             tag "${sample_id}"
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/adapter_removal", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
             input:
                 tuple sample_id, file(reads) from reads_ch
@@ -2020,7 +2022,7 @@ if (params.dataCheck) {
 
             tag "${sample_id}"
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/primer_removal", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
 
             input:
                 tuple sample_id, file(reads) from reads_fastp_ch
@@ -2063,7 +2065,7 @@ if (params.dataCheck) {
 
             tag "${sample_id}"
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/fastqc/fastqc2", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/FastQC/PostClean", mode: "copy", overwrite: true
 
             input:
                 tuple sample_id, file(reads) from readsforqc2
@@ -2084,7 +2086,7 @@ if (params.dataCheck) {
 
         tag "${sample_id}"
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/read_merging", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging_DC", mode: "copy", overwrite: true
 
         input:
             tuple sample_id, file(reads) from reads_bbduk_ch
@@ -2105,7 +2107,7 @@ if (params.dataCheck) {
 
         label 'low_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/readmerging", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging_DC", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch1_ch
@@ -2124,7 +2126,7 @@ if (params.dataCheck) {
 
         label 'low_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/readmerging", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging_DC", mode: "copy", overwrite: true
 
         input:
             file(names) from names
@@ -2144,7 +2146,7 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/read_merging/clean", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/LengthFiltering_DC", mode: "copy", overwrite: true
 
         input:
             file(reads) from collect_samples_ch
@@ -2162,7 +2164,7 @@ if (params.dataCheck) {
             fastp -i ${reads} -o ${params.projtag}_merged_reads_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
             ##Reformat to fasta for counts
             reformat.sh in=${params.projtag}_merged_reads_clean.fastq out=${params.projtag}_merged_clean.fasta t=${task.cpus}
-            bbduk.sh in=${params.projtag}_merged_clean.fastq  out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
+            bbduk.sh in=${params.projtag}_merged_reads_clean.fastq  out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postlenFile_bhist.txt qhist=${params.projtag}_all_merged_postlenFile_qhist.txt gchist=${params.projtag}_all_merged_postlenFile_gchist.txt aqhist=${params.projtag}_all_merged_postlenFile_aqhist.txt lhist=${params.projtag}_all_merged_postlenFile_lhist.txt gcbins=auto
             """
         }
@@ -2171,7 +2173,7 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/uniques", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/Uniques", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch2_ch
@@ -2189,7 +2191,7 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/uniques/asvs/wchimeras", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/Uniques/asvs/wchimeras", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch3_ch
@@ -2207,7 +2209,7 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/asvs", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/ASVs", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch4_ch
@@ -2225,7 +2227,7 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/nucleotide_OTU", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/nOTU", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
 
         input:
             file(fasta) from reads_vsearch5_ch
@@ -2251,7 +2253,7 @@ if (params.dataCheck) {
 
         conda 'python=2.7'
 
-        publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU/translation4clustering", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU/translation", mode: "copy", overwrite: true
 
         input:
             file(fasta) from nucl2aa
