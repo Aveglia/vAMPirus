@@ -463,7 +463,7 @@ if (params.Analyze) {
 
                 script:
                     """
-                    fastqc --quiet --threads $task.cpus $reads
+                    fastqc --quiet --threads ${task.cpus} ${reads}
                     """
             }
         }
@@ -565,7 +565,7 @@ if (params.Analyze) {
 
                 script:
                     """
-                    fastqc --quiet --threads $task.cpus $reads
+                    fastqc --quiet --threads ${task.cpus} ${reads}
                     """
             }
         }
@@ -653,19 +653,11 @@ if (params.Analyze) {
             file("**hist.txt")  into histos
         script:
             """
-<<<<<<< HEAD
             bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_preFilt_bhist.txt qhist=${params.projtag}_all_merged_preFilt_qhist.txt gchist=${params.projtag}_all_merged_preFilt_gchist.txt aqhist=${params.projtag}_all_merged_preFilt_aqhist.txt lhist=${params.projtag}_all_merged_preFilt_lhist.txt gcbins=auto
             fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
             reformat.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_preFilt_clean.fasta t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postFilt_bhist.txt qhist=${params.projtag}_all_merged_postFilt_qhist.txt gchist=${params.projtag}_all_merged_postFilt_gchist.txt aqhist=${params.projtag}_all_merged_postFilt_aqhist.txt lhist=${params.projtag}_all_merged_postFilt_lhist.txt gcbins=auto
-=======
-            fastp -i ${reads} -o ${params.projtag}_merged_reads_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
-            reformat.sh in=${params.projtag}_merged_reads_clean.fastq out=${params.projtag}_merged_clean.fasta t=${task.cpus}
-            bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_prelenFilt_bhist.txt qhist=${params.projtag}_all_merged_prelenFilt_qhist.txt gchist=${params.projtag}_all_merged_prelenFilt_gchist.txt aqhist=${params.projtag}_all_merged_prelenFilt_aqhist.txt lhist=${params.projtag}_all_merged_prelenFilt_lhist.txt gcbins=auto
-            bbduk.sh in=${params.projtag}_merged_reads_clean.fastq  out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
-            bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postlenFile_bhist.txt qhist=${params.projtag}_all_merged_postlenFile_qhist.txt gchist=${params.projtag}_all_merged_postlenFile_gchist.txt aqhist=${params.projtag}_all_merged_postlenFile_aqhist.txt lhist=${params.projtag}_all_merged_postlenFile_lhist.txt gcbins=auto
->>>>>>> 796a36662f63b861c30ff67dc3061fbd36fa5b77
 	        """
     }
 
@@ -738,7 +730,7 @@ if (params.Analyze) {
 
             output:
                 tuple file("*_otu*.fasta"), file("*ASV_all.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
-                file("*_otu*.fasta") into fileforMafft
+                file("*_otu*.fasta") into nuclFastas_forphylogeny
 
             script:
             if (params.clusterNuclIDlist) {
@@ -758,7 +750,7 @@ if (params.Analyze) {
         }
     } else {
         reads_vsearch5_ch
-	       .into{ nuclFastas_forDiamond_ch; nuclFastas_forCounts_ch; fileforMafft; nuclFastas_forMatrix_ch }
+	       .into{ nuclFastas_forDiamond_ch; nuclFastas_forCounts_ch; nuclFastas_forphylogeny; nuclFastas_forMatrix_ch }
     }
 
     if (!params.skipTaxonomy) {
@@ -767,10 +759,10 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/nOTU/Taxonomy", mode: "copy", overwrite: true, pattern: '*otu*.{fasta,csv,tsv}'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/nOTU/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*otu*dmd.out'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy", mode: "copy", overwrite: true, pattern: '*otu*.{fasta,csv,tsv}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*otu*dmd.out'
 
             input:
                 file(reads) from nuclFastas_forDiamond_ch
@@ -778,7 +770,8 @@ if (params.Analyze) {
             output:
                 file("*.fasta") into tax_labeled_fasta
                 tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond
-                file("*_summary_for_plot.csv") into taxplot1
+                file("*nOTU*summary_for_plot.csv") into taxplot1a
+                file("*ASV*_summary_for_plot.csv") into taxplot1
             script:
                 """
                 cp ${params.mypwd}/bin/rename_seq.py .
@@ -1005,8 +998,8 @@ if (params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/nOTU/Counts", mode: "copy", overwrite: true, pattern: '*otu*.{biome,csv}'
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Counts", mode: "copy", overwrite: true, pattern: '*otu*.{biome,csv}'
 
         input:
             file(reads) from nuclFastas_forCounts_ch
@@ -1014,7 +1007,8 @@ if (params.Analyze) {
 
         output:
             tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
-
+            file("*otu*counts.csv") into notu_counts_plots
+            file("*ASV*counts.csv") into asv_counts_plots
         script:
             """
             for filename in ${reads};do
@@ -1036,15 +1030,16 @@ if (params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*.matrix'
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*otu*.matrix'
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*.matrix'
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*otu*.matrix'
 
         input:
             file(reads) from nuclFastas_forMatrix_ch
 
         output:
             file("*.matrix") into clustmatrices
-
+            file("*otu*PercentID.matrix") into notu_heatmap
+            file("*ASV*PercentID.matrix") into asv_heatmap
         script:
             // remove if statement later (no fin)
             """
@@ -1077,7 +1072,7 @@ if (params.Analyze) {
             """
     }
 
-    if (!params.skipPhylogeny) {
+    if (!params.skipPhylogeny) { // need to edit paths
 
         process Nucleotide_Phylogeny {
 
@@ -1090,11 +1085,11 @@ if (params.Analyze) {
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
 
             input:
-                file(reads) from fileforMafft
+                file(reads) from nuclFastas_forphylogeny
 
             output:
                 tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into align_results
-
+                file("*raxml.support") into nucl_phyl_plot
             script:
                 """
                 # Nucleotide_Alignment
@@ -1158,7 +1153,7 @@ if (params.Analyze) {
 
             output:
                 tuple file("*.fasta"), file("${params.projtag}_AminoTypes.clstr"), file("${params.projtag}_AminoType_summary_map.csv"), file("${params.projtag}_clustered.gc") into ( supplementalfiles )
-                file("${params.projtag}_AminoTypes_noTaxonomy.fasta") into ( aminotypesCounts, aminotypesMafft, aminotypesClustal, aminotypesBlast )
+                file("${params.projtag}_AminoTypes_noTaxonomy.fasta") into ( aminotypesCounts, aminotypesMafft, aminotypesClustal, aminotypesBlast, aminotypesEmboss )
 
             script:
                 """
@@ -1207,7 +1202,7 @@ if (params.Analyze) {
 
             output:
                 file("*.matrix") into proclustmatrices
-
+                file("*PercentID.matrix") into aminotype_heatmap
             script:
                 """
                 name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
@@ -1221,6 +1216,53 @@ if (params.Analyze) {
                     rm \$x
                 done
                 """
+        }
+
+        if (!params.skipEMBOSS) {
+
+            process AminoType_EMBOSS_Analyses {
+
+                label 'low_cpus'
+
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
+                input:
+                    file(prot) from aminotypesEmboss
+
+                output:
+                    tuple file("*.garnier"), file("*HydrophobicMoments.svg"), file("*IsoelectricPoint*"), file("*.pepstats"), file("*PropertiesPlot*"), file("*Helical*")  into amino_emboss
+
+                script:
+                    """
+                    name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
+                    garnier -sequence ${prot} -outfile \${name}_2dStructures.garnier
+                    hmoment -seqall ${prot} -graph svg -plot
+                    mv hmoment.svg ./"\${name}"_HydrophobicMoments.svg
+                    iep -sequence ${prot} -graph svg -plot -outfile "\${name}"_IsoelectricPoint.iep
+                    mv iep.svg ./"\${name}"_IsoelectricPoint.svg
+                    pepstats -sequence ${prot} -outfile \${name}_ProteinProperties.pepstats
+                    grep ">" ${prot} | awk -F ">" '{print \$2}' > tmpsequence.list
+                    for x in \$(cat tmpsequence.list);do
+                        echo \$x > tmp1.list
+                        seqtk subseq ${prot} tmp1.list > tmp2.fasta
+                        len=\$(tail -1 tmp2.fasta | awk '{print length}')
+                        pepinfo -sequence tmp2.fasta -graph svg -outfile "\$x"_PropertiesPlot.pepinfo
+                        mv pepinfo.svg ./"\$x"_PropertiesPlot.svg
+                        cat "\$x"_PropertiesPlot.pepinfo >> "\${name}"_PropertiesPlot.pepinfo
+                        rm "\$x"_PropertiesPlot.pepinfo
+                        pepnet -sask -sequence tmp2.fasta -graph svg -sbegin1 1 -send1 \$len
+                        mv pepnet.svg ./"\$x"_HelicalNet.svg
+                        pepwheel -sequence tmp2.fasta -graph svg -sbegin1 1 -send1 \$len
+                        mv pepwheel.svg ./"\$x"_HelicalWheel.svg
+                        rm tmp1.list tmp2.fasta
+                    done
+                    rm tmpsequence.list
+                    """
+                }
         }
 
         if (!params.skipTaxonomy) {
@@ -1390,7 +1432,7 @@ if (params.Analyze) {
 
                 output:
                     tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into alignprot_results
-
+                    file("*raxml.support") into amino_rax_plot
                 script:
                     """
                     # Protein_Alignment
@@ -1430,7 +1472,7 @@ if (params.Analyze) {
 
             output:
                 tuple file("*_protcounts.csv"), file("*dmd.out") into counts_summary
-
+                file("_protcounts.csv") into aminocounts_plot
             script:
                 """
                 set +e
@@ -1500,7 +1542,7 @@ if (params.Analyze) {
 
             output:
                 file("${params.projtag}_nucleotide_pOTU*.fasta") into ( pOTU_ntDiamond_ch, pOTU_nt_counts_ch, pOTU_ntmatrix_ch, pOTU_ntmafft_ch )
-                file("*_aminoacid_pOTU*_noTaxonomy.fasta") into ( pOTU_aaMatrix_ch, pOTU_aaDiamond_ch, pOTU_aaMafft_ch, pOTU_aaCounts_ch )
+                file("*_aminoacid_pOTU*_noTaxonomy.fasta") into ( pOTU_aaMatrix_ch, pOTU_aaDiamond_ch, pOTU_aaMafft_ch, pOTU_aaCounts_ch, pOTUEMBOSS )
                 tuple file("*.fasta"), file("*.clstr"), file("*.csv"), file("*.gc") into ( pOTUsupplementalfiles )
             script:
             // add awk script to count seqs
@@ -1598,7 +1640,7 @@ if (params.Analyze) {
                     t=\$(( \${t}+1 ))
                     b=\$(( \${b}+1 ))
                 done
-                
+
 		ls *_tmp.list
                 u=1
                 for x in *_tmp.list;do
@@ -1809,7 +1851,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Counts", mode: "copy", overwrite: true, pattern: '*.{biome,txt}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Counts", mode: "copy", overwrite: true, pattern: '*.{biome,csv,txt}'
 
             input:
                 file(reads) from pOTU_nt_counts_ch
@@ -1817,7 +1859,7 @@ if (params.Analyze) {
 
             output:
                 tuple file("*_counts.txt"), file("*_counts.biome") into pOTUcounts_vsearch
-
+                file("*.csv") into potu_Ncounts_for_report
             script:
                 """
                 ident=\$( echo ${reads} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
@@ -1839,7 +1881,7 @@ if (params.Analyze) {
 
             output:
                 file("*.matrix") into pOTUclustmatrices
-
+                file("PercentID.matrix") into potu_nucl_heatmap
             script:
                 """
                 ident=\$( echo ${reads} | awk -F "OTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
@@ -1873,7 +1915,7 @@ if (params.Analyze) {
 
                 output:
                     tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into pOTU_nucleotide_phylogeny_results
-
+                    file ("*raxml.support") potu_Ntree_plot
                 script:
                     """
                     pre=\$( echo ${reads} | awk -F "wTax" '{print \$1}' )
@@ -1910,7 +1952,7 @@ if (params.Analyze) {
 
             output:
                 file("*.matrix") into pOTUaaMatrix
-
+                file("*PercentID.matrix") into potu_aa_heatmap
             script:
                 """
                 name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
@@ -1924,6 +1966,53 @@ if (params.Analyze) {
                     rm \$x
                 done
                 """
+        }
+
+        if (!params.skipEMBOSS) {
+
+            process pOTU_EMBOSS_Analyses {
+
+                label 'low_cpus'
+
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
+                input:
+                    file(prot) from pOTUEMBOSS
+
+                output:
+                    tuple file("*.garnier"), file("*HydrophobicMoments.svg"), file("*IsoelectricPoint*"), file("*.pepstats"), file("*PropertiesPlot*"), file("*Helical*")  into pOTU_emboss
+
+                script:
+                    """
+                    name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
+                    garnier -sequence ${prot} -outfile \${name}_2dStructures.garnier
+                    hmoment -seqall ${prot} -graph svg -plot
+                    mv hmoment.svg ./"\${name}"_HydrophobicMoments.svg
+                    iep -sequence ${prot} -graph svg -plot -outfile "\${name}"_IsoelectricPoint.iep
+                    mv iep.svg ./"\${name}"_IsoelectricPoint.svg
+                    pepstats -sequence ${prot} -outfile \${name}_ProteinProperties.pepstats
+                    grep ">" ${prot} | awk -F ">" '{print \$2}' > tmpsequence.list
+                    for x in \$(cat tmpsequence.list);do
+                        echo \$x > tmp1.list
+                        seqtk subseq ${prot} tmp1.list > tmp2.fasta
+                        len=\$(tail -1 tmp2.fasta | awk '{print length}')
+                        pepinfo -sequence tmp2.fasta -graph svg -outfile "\$x"_PropertiesPlot.pepinfo
+                        mv pepinfo.svg ./"\$x"_PropertiesPlot.svg
+                        cat "\$x"_PropertiesPlot.pepinfo >> "\${name}"_PropertiesPlot.pepinfo
+                        rm "\$x"_PropertiesPlot.pepinfo
+                        pepnet -sask -sequence tmp2.fasta -graph svg -sbegin1 1 -send1 \$len
+                        mv pepnet.svg ./"\$x"_HelicalNet.svg
+                        pepwheel -sequence tmp2.fasta -graph svg -sbegin1 1 -send1 \$len
+                        mv pepwheel.svg ./"\$x"_HelicalWheel.svg
+                        rm tmp1.list tmp2.fasta
+                    done
+                    rm tmpsequence.list
+                    """
+                }
         }
 
         if (!params.skipTaxonomy) {
@@ -2093,7 +2182,7 @@ if (params.Analyze) {
 
                 output:
                     tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into pOTU_protein_phylogeny_results
-
+                    file("*raxml.support") into potu_Atree_plot
                 script:
                     """
                     pre=\$( echo ${prot}  | awk -F ".fasta" '{print \$1}' )
@@ -2132,7 +2221,7 @@ if (params.Analyze) {
 
             output:
                 tuple file("*_counts.csv"), file("*dmd.out") into potuaacounts_summary
-
+                file("*counts.csv") into potu_Acounts
             script:
                 """
                 set +e
@@ -2170,6 +2259,191 @@ if (params.Analyze) {
 	exit 0
 }
 
+if (!params.skipFilter) {
+
+    process combine_csv {
+
+        input:
+            file(csv) from fastp_csv
+                .collect()
+
+        output:
+            file("final_reads_stats.csv") into ( fastp_csv1, fastp_csv2, fastp_csv3, fastp_csv4 fastp_csv5 )
+
+        script:
+            """
+            cat ${csv} >all_reads_stats.csv
+            head -n1 all_reads_stats.csv >tmp.names.csv
+            cat all_reads_stats.csv | grep -v "[a-z]" >tmp.reads.stats.csv
+            cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
+            rm tmp.names.csv tmp.reads.stats.csv
+            """
+
+    }
+}
+
+if (params.nOTU && params.pOTU) {
+
+    // Report ASV
+    // Report Nuc
+    // Report Prot
+    // Report Aminotypes
+
+    process Report_ASV {
+
+        label 'norm_cpus'
+
+        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+        input:
+            file(counts) from asv_counts_plots
+            file(taxonomy) from taxplot1
+            file(matrix) from asv_heatmap
+            file(readsstats) from fastp_csv1
+
+        output:
+            tuple file("*.html") into report_summaryA
+
+        script:
+            """
+            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            cp ${params.mypwd}/bin/vAMPirus_ASV_Report.Rmd .
+            Rscript -e "rmarkdown::render('vAMPirus_ASV_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
+            ${readsstats} \
+            ${counts} \
+            ${param.metadata} \
+            ${matrix} \
+            ${taxonomy}
+            """
+        }
+
+    process Report_nOTU {
+
+        label 'norm_cpus'
+
+        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+        input:
+            file(counts) from notu_counts_plots
+            file(taxonomy) from taxplot1a
+            file(matrix) from notu_heatmap
+            file(phylogeny) from nucl_phyl_plot
+            file(readsstats) from fastp_csv2
+
+        output:
+            tuple file("*.html") into report_summaryB
+
+        script:
+            """
+            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_nOTU_Report.html')" \${name} \
+            ${readsstats} \
+            ${counts} \
+            ${param.metadata} \
+            ${matrix} \
+            ${taxonomy} \
+            ${phylogeny}
+            """
+        }
+
+    process Report_pOTU_AminoAcid {
+
+        label 'norm_cpus'
+
+        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+        input:
+            file(counts) from potu_Acounts
+            file(taxonomy) from taxplot4
+            file(matrix) from potu_aa_heatmap
+            file(phylogeny) from potu_Atree_plot
+            file(readsstats) from fastp_csv3
+
+        output:
+            tuple file("*.html") into report_summaryC
+
+        script:
+            """
+            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa_Report.html')" \${name} \
+            ${readsstats} \
+            ${counts} \
+            ${param.metadata} \
+            ${matrix} \
+            ${taxonomy} \
+            ${phylogeny}
+            """
+        }
+
+    process Report_pOTU_Nucleotide {
+
+        label 'norm_cpus'
+
+        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+        input:
+            file(counts) from potu_Ncounts_for_report
+            file(taxonomy) from taxplot3
+            file(matrix) from potu_nucl_heatmap
+            file(phylogeny) from potu_Ntree_plot
+            file(readsstats) from fastp_csv4
+
+        output:
+            tuple file("*.html") into report_summaryD
+
+        script:
+            """
+            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt_Report.html')" \${name} \
+            ${readsstats} \
+            ${counts} \
+            ${param.metadata} \
+            ${matrix} \
+            ${taxonomy} \
+            ${phylogeny}
+            """
+        }
+
+    process Report_AmynoTypes {
+
+        label 'norm_cpus'
+
+        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+        input:
+            file(counts) from aminocounts_plot
+            file(taxonomy) from taxplot2
+            file(matrix) from aminotype_heatmap
+            file(phylogeny) from amino_rax_plot
+            file(readsstats) from fastp_csv5
+
+        output:
+            tuple file("*.html") into report_summaryE
+
+        script:
+            """
+            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
+            ${readsstats} \
+            ${counts} \
+            ${param.metadata} \
+            ${matrix} \
+            ${taxonomy} \
+            ${phylogeny}
+            """
+        }
+
+} else if (params.nOTU && !params.pOTU) {
+    println("nuc")
+} else if (!params.nOTU && params.pOTU) {
+    println("prot")
+} else if (!params.nOTU && !params.pOTU && params.skipAminoTyping) {
+    println("else")
+}
 
 if (params.generateAAcounts) {
 
