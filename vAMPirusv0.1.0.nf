@@ -485,7 +485,7 @@ if (params.Analyze) {
                 output:
                     tuple sample_id, file("*.fastp.{json,html}") into fastp_results
                     tuple sample_id, file("*.filter.fq") into reads_fastp_ch
-                    tuple sample_id, file("*.csv") into fastp_csv
+                    file("*.csv") into fastp_csv
 
                 script:
                     """
@@ -1060,7 +1060,7 @@ if (params.Analyze) {
                     name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
                     clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                     clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                    for x in *.matrix;do
+                    for x in *q.matrix;do
                         pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                         ya=\$(wc -l \$x | awk '{print \$1}')
                         echo "\$(( \$ya-1))"
@@ -1076,7 +1076,7 @@ if (params.Analyze) {
 
         process Nucleotide_Phylogeny {
 
-            label 'norm_cpus'
+            label 'rax_cpus'
 
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*aln.*'
             publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
@@ -1094,7 +1094,7 @@ if (params.Analyze) {
                 """
                 # Nucleotide_Alignment
                 pre=\$(echo ${reads} | awk -F ".fasta" '{print \$1}' )
-                mafft --thread ${task.cpu} --maxiterate 15000 --auto ${reads} >\${pre}_ALN.fasta
+                mafft --thread ${task.cpus} --maxiterate 15000 --auto ${reads} >\${pre}_ALN.fasta
                 trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
                 # Nucleotide_ModelTest
@@ -1105,12 +1105,12 @@ if (params.Analyze) {
 
                 # Nucleotide_Phylogeny
                 if [ "${params.ntraxcust}" != "" ];then
-                    raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ntraxcust}
-                elif [ "${params.ntmodelt}" != "" ];then
-                    mod=\$(tail -14 \${pre}_aln.fasta.log| head -1 | awk -F "--model " '{print \$2}')
-                    raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                    raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --redo --threads ${task.cpus} ${params.ntraxcust}
+                elif [ "${params.ntmodeltrax}" != "false" ];then
+                    mod=\$(tail -14 \${pre}_aln.fasta.log | head -1 | awk -F "--model " '{print \$2}')
+                    raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
                 else
-                    raxml-ng --all --msa \${pre}_aln.fasta --model GTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                    raxml-ng --all --msa \${pre}_aln.fasta --model GTR --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
                 fi
                 """
         }
@@ -1208,7 +1208,7 @@ if (params.Analyze) {
                 name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
                 clustalo -i ${prot} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                 clustalo -i ${prot} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                for x in *.matrix;do
+                for x in *q.matrix;do
                     pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                     ya=\$(wc -l \$x | awk '{print \$1}')
                     echo "\$(( \$ya-1))"
@@ -1419,7 +1419,7 @@ if (params.Analyze) {
 
             process AminoType_Phylogeny {
 
-                label 'norm_cpus'
+                label 'rax_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
@@ -1437,7 +1437,7 @@ if (params.Analyze) {
                     """
                     # Protein_Alignment
                     pre=\$(echo ${prot} | awk -F ".fasta" '{print \$1}' )
-                    mafft --thread ${task.cpu} --maxiterate 15000 --auto ${prot} >\${pre}_ALN.fasta
+                    mafft --thread ${task.cpus} --maxiterate 15000 --auto ${prot} >\${pre}_ALN.fasta
                     trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
                     # Protein_ModelTest
@@ -1449,11 +1449,11 @@ if (params.Analyze) {
                     # Protein_Phylogeny
                     if [ "${params.ptraxcust}" != "" ];then
                         raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
-                    elif [ "${params.ptmodeltrax}" != "" ];then
+                    elif [ "${params.ptmodeltrax}" != "false" ];then
                         mod=\$(tail -14 \${pre}_aln.fasta.log| head -1 | awk -F "--model " '{print \$2}')
-                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
                     else
-                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
                     fi
                     """
             }
@@ -1881,14 +1881,14 @@ if (params.Analyze) {
 
             output:
                 file("*.matrix") into pOTUclustmatrices
-                file("PercentID.matrix") into potu_nucl_heatmap
+                file("*PercentID.matrix") into potu_nucl_heatmap
             script:
                 """
                 ident=\$( echo ${reads} | awk -F "OTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                 name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}')
                 clustalo -i ${reads} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                 clustalo -i ${reads} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                for x in *.matrix;do
+                for x in *q.matrix;do
                     pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                     ya=\$(wc -l \$x | awk '{print \$1}')
                     echo "\$(( \$ya-1))"
@@ -1902,7 +1902,7 @@ if (params.Analyze) {
 
             process pOTU_Nucleotide_Phylogeny {
 
-                label 'norm_cpus'
+                label 'rax_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
@@ -1915,10 +1915,11 @@ if (params.Analyze) {
 
                 output:
                     tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into pOTU_nucleotide_phylogeny_results
-                    file ("*raxml.support") potu_Ntree_plot
+                    file ("*raxml.support") into potu_Ntree_plot
+
                 script:
                     """
-                    pre=\$( echo ${reads} | awk -F "wTax" '{print \$1}' )
+                    pre=\$( echo ${reads} | awk -F "noTax" '{print \$1}' )
                     mafft --maxiterate 5000 --auto ${reads} >\${pre}_ALN.fasta
                     trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
@@ -1930,12 +1931,12 @@ if (params.Analyze) {
 
                     # pOTU_Nucleotide_Phylogeny
                     if [ "${params.ntraxcust}" != "" ];then
-                        raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ntraxcust}
-                    elif [ "${params.ntmodelt}" != "" ];then
+                        raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --redo --threads ${task.cpus} ${params.ntraxcust}
+                    elif [ "${params.ntmodeltrax}" != "false" ];then
                         mod=\$(tail -14 \${pre}_aln.fasta.log | head -1 | awk -F "--model " '{print \$2}')
-                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
                     else
-                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
                     fi
                     """
             }
@@ -1958,7 +1959,7 @@ if (params.Analyze) {
                 name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
                 clustalo -i ${prot} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                 clustalo -i ${prot} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                for x in *.matrix;do
+                for x in *q.matrix;do
                     pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                     ya=\$(wc -l \$x | awk '{print \$1}')
                     echo "\$(( \$ya-1))"
@@ -2169,7 +2170,7 @@ if (params.Analyze) {
 
             process pOTU_Protein_Phylogeny {
 
-                label 'norm_cpus'
+                label 'rax_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
@@ -2190,19 +2191,19 @@ if (params.Analyze) {
                     trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
                     # pOTU_Protein_ModelTest
-                    modeltest-ng -i ${prot} -p ${task.cpus} -d aa -s 203 --disable-checkpoint
+                    modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -d aa -s 203 --disable-checkpoint
                     echo "Modeltest analysis complete :)"
                     echo "Modeltest-ng results summary:" > \${pre}_model.summary
                     tail -7 \${pre}_aln.fasta.log >> \${pre}_model.summary
 
                     # pOTU_Protein_Phylogeny
                     if [ "${params.ptraxcust}" != "" ];then
-                        raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
-                    elif [ "${params.ptmodeltrax}" != "" ];then
+                        raxml-ng --all --msa \${pre}_aln.fasta --redo --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
+                    elif [ "${params.ptmodeltrax}" != "false" ];then
                         mod=\$(tail -14 \${pre}_aln.fasta.log| head -1 | awk -F "--model " '{print \$2}')
-                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                        raxml-ng --all --msa \${pre}_aln.fasta --redo --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
                     else
-                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.raxml.startTree --bs-trees autoMRE --prefix \${pre} --redo
+                        raxml-ng --all --msa \${pre}_aln.fasta --redo --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
                     fi
                     """
             }
@@ -2268,13 +2269,13 @@ if (!params.skipFilter) {
                 .collect()
 
         output:
-            file("final_reads_stats.csv") into ( fastp_csv1, fastp_csv2, fastp_csv3, fastp_csv4 fastp_csv5 )
+            file("final_reads_stats.csv") into ( fastp_csv1, fastp_csv2, fastp_csv3, fastp_csv4, fastp_csv5 )
 
         script:
             """
             cat ${csv} >all_reads_stats.csv
             head -n1 all_reads_stats.csv >tmp.names.csv
-            cat all_reads_stats.csv | grep -v "[a-z]" >tmp.reads.stats.csv
+            cat all_reads_stats.csv | grep -v ""Sample,Total_"" >tmp.reads.stats.csv
             cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
             rm tmp.names.csv tmp.reads.stats.csv
             """
@@ -2302,7 +2303,7 @@ if (params.nOTU && params.pOTU) {
             file(readsstats) from fastp_csv1
 
         output:
-            tuple file("*.html") into report_summaryA
+            file("*.html") into report_summaryA
 
         script:
             """
@@ -2331,7 +2332,7 @@ if (params.nOTU && params.pOTU) {
             file(readsstats) from fastp_csv2
 
         output:
-            tuple file("*.html") into report_summaryB
+            file("*.html") into report_summaryB
 
         script:
             """
@@ -2361,7 +2362,7 @@ if (params.nOTU && params.pOTU) {
             file(readsstats) from fastp_csv3
 
         output:
-            tuple file("*.html") into report_summaryC
+            file("*.html") into report_summaryC
 
         script:
             """
@@ -2391,7 +2392,7 @@ if (params.nOTU && params.pOTU) {
             file(readsstats) from fastp_csv4
 
         output:
-            tuple file("*.html") into report_summaryD
+            file("*.html") into report_summaryD
 
         script:
             """
@@ -2421,7 +2422,7 @@ if (params.nOTU && params.pOTU) {
             file(readsstats) from fastp_csv5
 
         output:
-            tuple file("*.html") into report_summaryE
+            file("*.html") into report_summaryE
 
         script:
             """
