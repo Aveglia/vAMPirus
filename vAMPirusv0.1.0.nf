@@ -653,11 +653,19 @@ if (params.Analyze) {
             file("**hist.txt")  into histos
         script:
             """
+<<<<<<< HEAD
             bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_preFilt_bhist.txt qhist=${params.projtag}_all_merged_preFilt_qhist.txt gchist=${params.projtag}_all_merged_preFilt_gchist.txt aqhist=${params.projtag}_all_merged_preFilt_aqhist.txt lhist=${params.projtag}_all_merged_preFilt_lhist.txt gcbins=auto
             fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
             reformat.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_preFilt_clean.fasta t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postFilt_bhist.txt qhist=${params.projtag}_all_merged_postFilt_qhist.txt gchist=${params.projtag}_all_merged_postFilt_gchist.txt aqhist=${params.projtag}_all_merged_postFilt_aqhist.txt lhist=${params.projtag}_all_merged_postFilt_lhist.txt gcbins=auto
+=======
+            fastp -i ${reads} -o ${params.projtag}_merged_reads_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
+            reformat.sh in=${params.projtag}_merged_reads_clean.fastq out=${params.projtag}_merged_clean.fasta t=${task.cpus}
+            bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_prelenFilt_bhist.txt qhist=${params.projtag}_all_merged_prelenFilt_qhist.txt gchist=${params.projtag}_all_merged_prelenFilt_gchist.txt aqhist=${params.projtag}_all_merged_prelenFilt_aqhist.txt lhist=${params.projtag}_all_merged_prelenFilt_lhist.txt gcbins=auto
+            bbduk.sh in=${params.projtag}_merged_reads_clean.fastq  out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
+            bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postlenFile_bhist.txt qhist=${params.projtag}_all_merged_postlenFile_qhist.txt gchist=${params.projtag}_all_merged_postlenFile_gchist.txt aqhist=${params.projtag}_all_merged_postlenFile_aqhist.txt lhist=${params.projtag}_all_merged_postlenFile_lhist.txt gcbins=auto
+>>>>>>> 796a36662f63b861c30ff67dc3061fbd36fa5b77
 	        """
     }
 
@@ -1223,7 +1231,6 @@ if (params.Analyze) {
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*TaxonomyLabels.fasta'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.out'
 
                 input:
                     file(reads) from aminotypesBlast
@@ -1591,7 +1598,8 @@ if (params.Analyze) {
                     t=\$(( \${t}+1 ))
                     b=\$(( \${b}+1 ))
                 done
-                ls *_tmp.list
+                
+		ls *_tmp.list
                 u=1
                 for x in *_tmp.list;do
                     name="\$(echo \$x | awk -F "_p" '{print \$1}')"
