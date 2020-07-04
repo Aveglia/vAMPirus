@@ -1,5 +1,5 @@
 jfile=$1
-sampleid=$( $jfile | cut -f 1 -d "." )
+sampleid=$( echo $jfile | cut -f 1 -d "." )
 tb=$( jq '.summary.before_filtering.total_reads' $jfile )
 r1b=$( jq '.read1_before_filtering.total_reads' $jfile )
 r1bl=$( jq '.summary.before_filtering.read1_mean_length' $jfile )
