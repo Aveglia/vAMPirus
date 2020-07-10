@@ -1,5 +1,5 @@
 ---
-title: "vAMPirus Report `!r commandArgs(trailingOnly=T)[1]`"
+title: "vAMPirus Report: `!r commandArgs(trailingOnly=T)[1]`"
 date: "Generated on: `r Sys.time()`"
 output: html_document
 params:
@@ -7,9 +7,10 @@ params:
   reads: !r commandArgs(trailingOnly=T)[2]    # reads
   counts: !r commandArgs(trailingOnly=T)[3]   # csv
   metadata: !r commandArgs(trailingOnly=T)[4] # metadata
-  heatmap: !r commandArgs(trailingOnly=T)[5]  # heatmap
-  tax: !r commandArgs(trailingOnly=T)[6]      # tax
-  tree: !r commandArgs(trailingOnly=T)[7]     # tree
+  filter: !r commandArgs(trailingOnly=T)[5]   # filter treatment
+  heatmap: !r commandArgs(trailingOnly=T)[6]  # heatmap
+  tax: !r commandArgs(trailingOnly=T)[7]      # tax
+  tree: !r commandArgs(trailingOnly=T)[8]     # tree
 ---
 <style>
 .rectangle {
@@ -51,6 +52,7 @@ mycol=c('#088da5','#73cdc8','#ff6f61','#7cb8df','#88b04b','#00a199','#6B5B95','#
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Read Stats</h2></div>
 ```{r readstats, echo=FALSE}
 reads_stats=read.csv(params$reads)
+#reads_stats=read.csv("PVID_final_reads_stats.csv")
 paged_table(reads_stats,options = list(rows.print = 20))
 
 #test plotly table
@@ -102,6 +104,8 @@ pr
 ```{r load_datasets, include=FALSE}
 sample_name=params$counts
 sample_metadata=params$metadata
+#sample_name="PVID_vAMPtest1_otu.85_counts.csv"
+#sample_metadata="PVID_fiscesTestmeta.csv"
 #sample_name="vAMPrun_otu.55_counts.csv"
 #sample_metadata="pvid_samples.csv"
 data<- read.csv(sample_name)
@@ -113,14 +117,14 @@ data2 <- data2[-1,]
 
 #X.OTU.ID for X.Sequence.
 data2 <- data2 %>%
-  rename(Sample=X.OTU.ID)
+  rename(sample=X.OTU.ID)
 data2dim <- dim(data2)
 
 ##Loading metadata
 samples <- read.csv(sample_metadata)
 
 ##Combining data and metadata
-data3 <- merge(data2, samples, by="Sample")
+data3 <- merge(data2, samples, by="sample")
 
 dim_data3 <- dim(data3)
 dim_samples <- dim(samples)
@@ -157,8 +161,10 @@ data5 <- data4 %>%
 data5dim <-dim(data5)
 minreads<-min(data5$sum)
 # Filter by treatment
+tfil=params$filter
+#tfil="CHOR"
 h <- data5 %>%
-  filter(treatment == "H") ##variable needed to be defined by config
+  filter(treatment == tfil) ##variable needed to be defined by config
 writeLines(c("Mean"))
 mean(h$sum)
 writeLines(c("Min"))
@@ -173,7 +179,7 @@ max(h$sum)
 <br>
 
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Rarefaction</h2></div>
-```{r rarefaction, echo=FALSE, cache=TRUE}
+```{r rarefaction, echo=FALSE, cache=FALSE}
 ##Rarefaction curves
 rarefaction <- rarecurve(data5[,2:cols])
 
@@ -207,14 +213,14 @@ rarerichnessdata5 <- as.data.frame(index)
 
 metadata <- data5[,(cols+1):data5dim[2]]
 
-metadata$Sample <- data5$Sample
-shannondata5$Sample<- data5$Sample
-simpsondata5$Sample<- data5$Sample
-rarerichnessdata5$Sample <-data5$Sample
+metadata$sample <- data5$sample
+shannondata5$sample<- data5$sample
+simpsondata5$sample<- data5$sample
+rarerichnessdata5$sample <-data5$sample
 
-shannondata5_2 <- merge(shannondata5, metadata, by="Sample")
-simpsondata5_2 <- merge(simpsondata5, metadata, by="Sample")
-rarerichnessdata5_2 <- merge(rarerichnessdata5, metadata, by="Sample")
+shannondata5_2 <- merge(shannondata5, metadata, by="sample")
+simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
+rarerichnessdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
 
 #shannonplot <- ggplot(shannondata5_2, aes(x=treatment,color=treatment,y=index))+
 #  geom_boxplot()+
@@ -297,8 +303,8 @@ bray <- vegdist(sqrt(intermediate), method="bray")
 ##Dispersion
 disper <- betadisper(bray, group = metadata$treatment, type="centroid")
 df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
-df$Sample <- data5$Sample
-df2 <- merge(df, metadata, by="Sample")
+df$sample <- data5$sample
+df2 <- merge(df, metadata, by="sample")
 
 #p<- ggplot(data=df2,aes(x=treatment,y=Distance_to_centroid,colour=treatment))+
 #  geom_boxplot(outlier.alpha = 0)+
@@ -339,8 +345,8 @@ MDS <- metaMDS(sqrt(datax),
                wascores = TRUE)
 
 data.scores <- as.data.frame(scores(MDS))
-data.scores$Sample <- data5$Sample
-data.scores.2 <- merge(data.scores, metadata, by="Sample")
+data.scores$sample <- data5$sample
+data.scores.2 <- merge(data.scores, metadata, by="sample")
 
 p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
   geom_point(size=2)+
@@ -376,8 +382,8 @@ MDS3 <- metaMDS(sqrt(datax),
 
 
 data.scores3 <- as.data.frame(scores(MDS3))
-data.scores3$Sample <- data5$Sample
-data.scores.3 <- merge(data.scores3, metadata, by="Sample")
+data.scores3$sample <- data5$sample
+data.scores.3 <- merge(data.scores3, metadata, by="sample")
 p3d <- plot_ly(data.scores.3, x= ~ NMDS1, y = ~ NMDS2, z = ~ NMDS3, text = ~paste("Sample: ", sample),
         color = ~treatment, colors = mycol,
         mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
@@ -396,8 +402,8 @@ p3d
 
 ```{r long, echo=FALSE}
 dataz <- decostand(data5[,2:cols],method="total") #method 'total' normalizes data to sum up to 1
-dataz$Sample <- data5$Sample
-datay <- merge(dataz, metadata, by="Sample")
+dataz$sample <- data5$sample
+datay <- merge(dataz, metadata, by="sample")
 datalong <- datay %>%
   tidyr::gather(first:last, key=hit, value=reads)
 
@@ -462,14 +468,16 @@ asp2
 ```{r heatmap, echo=FALSE}
 heatdata=params$heatmap
 #heatdata="a.csv"
+#heatdata="PVID_vAMPtest1_otu.85_PercentID.matrix"
 simmatrix<- read.csv(heatdata, header=FALSE)
 rownames(simmatrix) <- simmatrix[,1]
 simmatrix <- simmatrix[,-1]
 colnames(simmatrix) <-rownames(simmatrix)
 cols <- dim(simmatrix)[2]
 simmatrix$AA <- rownames(simmatrix)
+rval=nrow(simmatrix)
 simmatrix2 <- simmatrix %>%
-  gather(1:159, key=sequence, value=similarity)
+  gather(1:rval, key=sequence, value=similarity)
 x=reorder(simmatrix2$AA,simmatrix2$similarity)
 y=reorder(simmatrix2$sequence,simmatrix2$similarity)
 similaritymatrix <- ggplot(simmatrix2, aes(x=x, y=y,fill=similarity))+
@@ -497,6 +505,7 @@ ggplotly(similaritymatrix)
 ```{r taxonomy, echo=FALSE}
 tax=read.csv(params$tax,header=F)
 #tax=read.csv("tax.csv",header=F)
+#tax=read.csv("PVID_vAMPtest1_otu.85_summary_for_plot.csv", header=F)
 tp <- plot_ly(tax, labels = ~V1, values = ~V2)
 tp <- tp %>% add_pie(marker=list(colors=mycol, line=list(color='#000000', width=.5)), hole = 0.6)
 tp <- tp %>% layout(title = "Taxonomy distribution",  showlegend = F,
@@ -544,3 +553,4 @@ ggtree(tree)+
 <br>
 <br>
 <br>
+

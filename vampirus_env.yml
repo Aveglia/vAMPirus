@@ -13,7 +13,7 @@ dependencies:
   - fastqc=0.11.9
   - fastp=0.20.1
   - clustalo=1.2.4
-  - raxml-ng=0.6.0
+  - iqtree=2.0.3
   - modeltest-ng=0.1.6
   - mafft=7.464
   - vsearch=2.14.2
@@ -24,3 +24,9 @@ dependencies:
   - emboss=6.5.7.0
   - seqtk=1.3
   - jq=1.6
+  - r-plotly=4.9.2.1
+  - r-knitr=1.29
+  - r-rmarkdown=2.3
+  - r-kableextra=1.1.0
+  - r-vegan=2.5_6
+  - r-tidyverse=1.3.0

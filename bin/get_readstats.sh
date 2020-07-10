@@ -1,4 +1,4 @@
-jfile=$1
+jfile="$1"
 sampleid=$( echo $jfile | cut -f 1 -d "." )
 tb=$( jq '.summary.before_filtering.total_reads' $jfile )
 r1b=$( jq '.read1_before_filtering.total_reads' $jfile )

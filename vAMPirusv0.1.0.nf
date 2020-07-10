@@ -723,27 +723,27 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/nOTU", mode: "copy", overwrite: true, pattern: '*otu*.fasta'
+            publishDir "${params.mypwd}/${params.outdir}/Clustering/nOTU", mode: "copy", overwrite: true, pattern: '*nOTU*.fasta'
 
             input:
                 file(fasta) from reads_vsearch5_ch
 
             output:
-                tuple file("*_otu*.fasta"), file("*ASV_all.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
-                file("*_otu*.fasta") into nuclFastas_forphylogeny
+                tuple file("*_nOTU*.fasta"), file("*ASV_all.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
+                file("*_nOTU*.fasta") into nuclFastas_forphylogeny
 
             script:
             if (params.clusterNuclIDlist) {
                 """
                 for id in `echo ${params.clusterNuclIDlist} | tr "," "\n"`;done
-                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel nOTU --id \${id}
+                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_nOTU\${id}.fasta --threads ${task.cpus} --relabel nOTU --id \${id}
                 done
                 cp ${fasta} ${params.projtag}_ASV_all.fasta
                 """
             } else if (params.clusterNuclID) {
                 """
                 id=${params.clusterNuclID}
-                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel nOTU --id \${id}
+                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_nOTU\${id}.fasta --threads ${task.cpus} --relabel nOTU --id \${id}
                 cp ${fasta} ${params.projtag}_ASV_all.fasta
                 """
             }
@@ -760,9 +760,9 @@ if (params.Analyze) {
             label 'norm_cpus'
 
             publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy", mode: "copy", overwrite: true, pattern: '*otu*.{fasta,csv,tsv}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy", mode: "copy", overwrite: true, pattern: '*nOTU*.{fasta,csv,tsv}'
             publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*otu*dmd.out'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*nOTU*dmd.out'
 
             input:
                 file(reads) from nuclFastas_forDiamond_ch
@@ -792,9 +792,9 @@ if (params.Analyze) {
                     echo "extracting genes and names"
                     touch new_"\$name"_asvnames.txt
                     j=1
-                    if [ `echo \${filename} | grep -c "otu"` -eq 1 ];then
-                        echo "[OTU#]" > otu.list
-                        echo "[OTU sequence length]" > length.list
+                    if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
+                        echo "[nOTU#]" > otu.list
+                        echo "[nOTU sequence length]" > length.list
                         for s in \$(cat seqids.lst);do
                             echo "Checking for \$s hit in diamond output"
                             if [[ ${params.refseq} == "T" ]];then
@@ -815,7 +815,7 @@ if (params.Analyze) {
                                     echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                     virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                     echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                    echo ">OTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                    echo ">nOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                     j=\$((\$j+1))
                                     echo "\$s done."
                                 else
@@ -831,7 +831,7 @@ if (params.Analyze) {
                                     echo "NO_HIT" >> length.list
                                     virus="NO"
                                     gene="HIT"
-                                    echo ">OTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                    echo ">nOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                     j=\$((\$j+1))
                                     echo "\$s done."
                                 fi
@@ -1007,13 +1007,13 @@ if (params.Analyze) {
 
         output:
             tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
-            file("*otu*counts.csv") into notu_counts_plots
+            file("*nOTU*counts.csv") into notu_counts_plots
             file("*ASV*counts.csv") into asv_counts_plots
         script:
             """
             for filename in ${reads};do
-                if [ `echo \${filename} | grep -c "otu"` -eq 1 ];then
-                    ident=\$( echo \${filename} | awk -F "otu" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
+                    ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                     name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
                     vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                     cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
@@ -1038,14 +1038,14 @@ if (params.Analyze) {
 
         output:
             file("*.matrix") into clustmatrices
-            file("*otu*PercentID.matrix") into notu_heatmap
+            file("*nOTU*PercentID.matrix") into notu_heatmap
             file("*ASV*PercentID.matrix") into asv_heatmap
         script:
             // remove if statement later (no fin)
             """
             for filename in ${reads};do
-                if [ `echo \${filename} | grep -c "otu"` -eq 1 ];then
-                    ident=\$( echo \${filename} | awk -F "otu" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
+                    ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                     name=\$( echo \${filename}| awk -F ".fasta" '{print \$1}')
                     clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                     clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
@@ -1056,6 +1056,7 @@ if (params.Analyze) {
                         tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
                         rm \$x
                     done
+		    sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix
                 else
                     name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
                     clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
@@ -1067,6 +1068,7 @@ if (params.Analyze) {
                         tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
                         rm \$x
                     done
+		    sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix
                 fi
             done
             """
@@ -1078,18 +1080,18 @@ if (params.Analyze) {
 
             label 'rax_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*aln.*'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/Nucleotide/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
-
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*nOTU*aln.*'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*nOTU*mt*'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*nOTU*iq*'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
             input:
                 file(reads) from nuclFastas_forphylogeny
 
             output:
-                tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into align_results
-                file("*raxml.support") into nucl_phyl_plot
+                tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results
+                file("*iq.treefile") into nucl_phyl_plot
             script:
                 """
                 # Nucleotide_Alignment
@@ -1098,19 +1100,28 @@ if (params.Analyze) {
                 trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
                 # Nucleotide_ModelTest
-                modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -d nt -s 203 --disable-checkpoint
-                echo "Modeltest analysis complete :)"
-                echo "Modeltest-ng results summary:" > \${pre}_model.summary
-                tail -7 \${pre}_aln.fasta.log >> \${pre}_model.summary
+                modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
 
                 # Nucleotide_Phylogeny
-                if [ "${params.ntraxcust}" != "" ];then
-                    raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --redo --threads ${task.cpus} ${params.ntraxcust}
-                elif [ "${params.ntmodeltrax}" != "false" ];then
-                    mod=\$(tail -14 \${pre}_aln.fasta.log | head -1 | awk -F "--model " '{print \$2}')
-                    raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
+                if [ "${params.iqCustomnt}" != "" ];then
+                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
+                    
+                elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
+                    mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
+
+                elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
+                    mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+
+                elif [ "${params.nonparametric}" != "false" ];then
+                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
+                    
+                elif [ "${params.parametric}" != "false" ];then
+                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+
                 else
-                    raxml-ng --all --msa \${pre}_aln.fasta --model GTR --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
+                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                 fi
                 """
         }
@@ -1215,6 +1226,7 @@ if (params.Analyze) {
                     tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
                     rm \$x
                 done
+		sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix
                 """
         }
 
@@ -1422,17 +1434,16 @@ if (params.Analyze) {
                 label 'rax_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
                 input:
                     file(prot) from aminotypesMafft
 
                 output:
-                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into alignprot_results
-                    file("*raxml.support") into amino_rax_plot
+                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.log"), file("*iq*"), file("*mt*") into alignprot_results
+                    file("*iq.treefile") into amino_rax_plot
+                    
                 script:
                     """
                     # Protein_Alignment
@@ -1441,19 +1452,28 @@ if (params.Analyze) {
                     trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
                     # Protein_ModelTest
-                    modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -d aa -s 203 --disable-checkpoint
-                    echo "Modeltest analysis complete :)"
-                    echo "Modeltest-ng results summary:" > \${pre}_model.summary
-                    tail -7 \${pre}_aln.fasta.log >> \${pre}_model.summary
+                    modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
 
                     # Protein_Phylogeny
-                    if [ "${params.ptraxcust}" != "" ];then
-                        raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
-                    elif [ "${params.ptmodeltrax}" != "false" ];then
-                        mod=\$(tail -14 \${pre}_aln.fasta.log| head -1 | awk -F "--model " '{print \$2}')
-                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
+                    if [ "${params.iqCustomaa}" != "" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomaa}
+                        
+                    elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
+                        mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
+    
+                    elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
+                        mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+    
+                    elif [ "${params.nonparametric}" != "false" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
+                        
+                    elif [ "${params.parametric}" != "false" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+    
                     else
-                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                     fi
                     """
             }
@@ -1506,7 +1526,7 @@ if (params.Analyze) {
 
     if (params.pOTU) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
 
-        process Translation_For_ProteinBased_Clustering {
+        process Translation_For_pOTU_Generation {
 
             label 'norm_cpus'
 
@@ -1697,7 +1717,7 @@ if (params.Analyze) {
 
         if (!params.skipTaxonomy) {
 
-            process pOTU_Taxonomy_Assignment_1 {
+            process pOTU_Nucleotide_Taxonomy_Assignment {
 
                 label 'norm_cpus'
 
@@ -1895,6 +1915,7 @@ if (params.Analyze) {
                     tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
                     rm \$x
                 done
+		sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix
                 """
         }
 
@@ -1905,44 +1926,51 @@ if (params.Analyze) {
                 label 'rax_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
                 input:
                     file(reads) from pOTU_ntmafft_ch
 
                 output:
-                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into pOTU_nucleotide_phylogeny_results
-                    file ("*raxml.support") into potu_Ntree_plot
-
+                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pOTU_nucleotide_phylogeny_results
+                    file("*iq.treefile") into potu_Ntree_plot
+                    
                 script:
                     """
-                    pre=\$( echo ${reads} | awk -F "noTax" '{print \$1}' )
+                    pre=\$( echo ${reads} | awk -F "_noTax" '{print \$1}' )
                     mafft --maxiterate 5000 --auto ${reads} >\${pre}_ALN.fasta
                     trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
                     # pOTU_Nucleotide_ModelTest
-                    modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -d nt -s 203 --disable-checkpoint
-                    echo "Modeltest analysis complete :)"
-                    echo "Modeltest-ng results summary:" > \${pre}_model.summary
-                    tail -7 \${pre}_aln.fasta.log >> \${pre}_model.summary
+                    modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
 
                     # pOTU_Nucleotide_Phylogeny
-                    if [ "${params.ntraxcust}" != "" ];then
-                        raxml-ng --all --msa \${pre}_aln.fasta --prefix \${pre} --redo --threads ${task.cpus} ${params.ntraxcust}
-                    elif [ "${params.ntmodeltrax}" != "false" ];then
-                        mod=\$(tail -14 \${pre}_aln.fasta.log | head -1 | awk -F "--model " '{print \$2}')
-                        raxml-ng --all --msa \${pre}_aln.fasta --model \${mod} --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
+                    if [ "${params.iqCustomnt}" != "" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
+                        
+                    elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
+                        mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
+    
+                    elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
+                        mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+    
+                    elif [ "${params.nonparametric}" != "false" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
+                        
+                    elif [ "${params.parametric}" != "false" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+    
                     else
-                        raxml-ng --all --msa \${pre}_aln.fasta --model protGTR --redo --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                     fi
                     """
             }
         }
 
-        process pOTU_Protein_Matrix {
+        process pOTU_AminoAcid_Matrix {
 
             label 'norm_cpus'
 
@@ -1966,6 +1994,7 @@ if (params.Analyze) {
                     tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
                     rm \$x
                 done
+	            sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix	
                 """
         }
 
@@ -1975,12 +2004,12 @@ if (params.Analyze) {
 
                 label 'low_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
                 input:
                     file(prot) from pOTUEMBOSS
 
@@ -2018,7 +2047,7 @@ if (params.Analyze) {
 
         if (!params.skipTaxonomy) {
 
-            process pOTUaa_Taxonomy_Assignment_2 {
+            process pOTU_AminoAcid_Taxonomy_Assignment {
 
                 label 'norm_cpus'
 
@@ -2173,17 +2202,16 @@ if (params.Analyze) {
                 label 'rax_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*.tree'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*aln*log'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*model.summary'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*raxml*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*iq*'
 
     	        input:
                     file(prot) from pOTU_aaMafft_ch
 
                 output:
-                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*raxml*"), file("*model.summary") into pOTU_protein_phylogeny_results
-                    file("*raxml.support") into potu_Atree_plot
+                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pOTU_protein_phylogeny_results
+                    file("*iq.treefile") into potu_Atree_plot
+                
                 script:
                     """
                     pre=\$( echo ${prot}  | awk -F ".fasta" '{print \$1}' )
@@ -2191,19 +2219,28 @@ if (params.Analyze) {
                     trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
                     # pOTU_Protein_ModelTest
-                    modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -d aa -s 203 --disable-checkpoint
-                    echo "Modeltest analysis complete :)"
-                    echo "Modeltest-ng results summary:" > \${pre}_model.summary
-                    tail -7 \${pre}_aln.fasta.log >> \${pre}_model.summary
+                    modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
 
                     # pOTU_Protein_Phylogeny
-                    if [ "${params.ptraxcust}" != "" ];then
-                        raxml-ng --all --msa \${pre}_aln.fasta --redo --prefix \${pre} --threads ${task.cpus} ${params.ptraxcust}
-                    elif [ "${params.ptmodeltrax}" != "false" ];then
-                        mod=\$(tail -14 \${pre}_aln.fasta.log| head -1 | awk -F "--model " '{print \$2}')
-                        raxml-ng --all --msa \${pre}_aln.fasta --redo --model \${mod} --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
+                    if [ "${params.iqCustomaa}" != "" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomaa}
+                        
+                    elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
+                        mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
+    
+                    elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
+                        mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+    
+                    elif [ "${params.nonparametric}" != "false" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
+                        
+                    elif [ "${params.parametric}" != "false" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+    
                     else
-                        raxml-ng --all --msa \${pre}_aln.fasta --redo --model protGTR --seed 2 --blopt nr_safe --threads ${task.cpus} --tree \${pre}_aln.fasta.tree --bs-trees autoMRE --prefix \${pre} --redo
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                     fi
                     """
             }
@@ -2260,7 +2297,7 @@ if (params.Analyze) {
 	exit 0
 }
 
-if (!params.skipFilter) {
+if (!params.skipAdapterRemoval) {
 
     process combine_csv {
 
@@ -2307,13 +2344,14 @@ if (params.nOTU && params.pOTU) {
 
         script:
             """
-            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
             cp ${params.mypwd}/bin/vAMPirus_ASV_Report.Rmd .
             Rscript -e "rmarkdown::render('vAMPirus_ASV_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
             ${readsstats} \
             ${counts} \
-            ${param.metadata} \
-            ${matrix} \
+            ${params.metadata} \
+            ${params.filt} \
+	    ${matrix} \
             ${taxonomy}
             """
         }
@@ -2336,13 +2374,14 @@ if (params.nOTU && params.pOTU) {
 
         script:
             """
-            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
             cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
             Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_nOTU_Report.html')" \${name} \
             ${readsstats} \
             ${counts} \
-            ${param.metadata} \
-            ${matrix} \
+            ${params.metadata} \
+            ${params.filt} \
+	    ${matrix} \
             ${taxonomy} \
             ${phylogeny}
             """
@@ -2366,13 +2405,14 @@ if (params.nOTU && params.pOTU) {
 
         script:
             """
-            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
             cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
             Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa_Report.html')" \${name} \
             ${readsstats} \
             ${counts} \
-            ${param.metadata} \
-            ${matrix} \
+            ${params.metadata} \
+            ${params.filt} \
+	    ${matrix} \
             ${taxonomy} \
             ${phylogeny}
             """
@@ -2396,13 +2436,14 @@ if (params.nOTU && params.pOTU) {
 
         script:
             """
-            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
             cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
             Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt_Report.html')" \${name} \
             ${readsstats} \
             ${counts} \
-            ${param.metadata} \
-            ${matrix} \
+            ${params.metadata} \
+            ${params.filt} \
+	    ${matrix} \
             ${taxonomy} \
             ${phylogeny}
             """
@@ -2426,13 +2467,13 @@ if (params.nOTU && params.pOTU) {
 
         script:
             """
-            name=\$( ls ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
             cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
             Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
             ${readsstats} \
             ${counts} \
-            ${param.metadata} \
-            ${matrix} \
+            ${params.metadata} \
+            ${params.filt} ${matrix} \
             ${taxonomy} \
             ${phylogeny}
             """
@@ -2912,3 +2953,4 @@ workflow.onComplete {
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }
+
