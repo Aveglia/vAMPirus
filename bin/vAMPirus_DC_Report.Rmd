@@ -1,0 +1,536 @@
+---
+title: "vAMPirus Data Check Report: `!r commandArgs(trailingOnly=T)[1]`"
+date: "Generated on: `r Sys.time()`"
+output: html_document
+params:
+  interactive: TRUE
+  fastpcsv: !r commandArgs(trailingOnly=T)[2]
+  reads_per_sample_preFilt: !r commandArgs(trailingOnly=T)[3]
+  read_per_sample_postFilt: !r commandArgs(trailingOnly=T)[4]
+  preFilt_baseFrequency: !r commandArgs(trailingOnly=T)[5]  
+  postFilt_baseFrequency: !r commandArgs(trailingOnly=T)[6]
+  preFilt_qualityScore: !r commandArgs(trailingOnly=T)[7]
+  postFilt_qualityScore: !r commandArgs(trailingOnly=T)[8]
+  preFilt_gcContent: !r commandArgs(trailingOnly=T)[9]
+  postFilt_gcContent: !r commandArgs(trailingOnly=T)[10]
+  preFilt_averageQuality: !r commandArgs(trailingOnly=T)[11]
+  postFilt_averageQuaulity: !r commandArgs(trailingOnly=T)[12]
+  preFilt_length: !r commandArgs(trailingOnly=T)[13]
+  postFilt_length: !r commandArgs(trailingOnly=T)[14]
+  number_per_percentage_nucl: !r commandArgs(trailingOnly=T)[15]
+  number_per_percentage_prot: !r commandArgs(trailingOnly=T)[16]
+
+---
+<style>
+.rectangle {
+  height: 37px;
+  width: 105%;
+  background-color: #576675;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+      message = FALSE,
+      warning = FALSE,
+      out.width="100%")
+```
+```{r load_libraries, include=FALSE}
+library(vegan)
+#library(rstatix)
+library(tidyverse)
+library(scales)
+library(cowplot)
+library(dplyr)
+library(ggtree)
+library(plotly)
+library(BiocParallel)
+library(knitr)
+library(kableExtra) #install.packages("kableExtra")
+library(rmarkdown)
+register(MulticoreParam(4))
+```
+
+```{r colors, include=FALSE}
+mycol=c('#088da5','#73cdc8','#ff6f61','#7cb8df','#88b04b','#00a199','#6B5B95','#92A8D1','#b0e0e6','#ff7f50','#088d9b','#E15D44','#e19336')
+```
+<br>
+<br>
+<br>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Read Stats</h2></div>
+```{r readstats, echo=FALSE}
+reads_stats=read.csv(params$reads)
+#reads_stats=read.csv("PVID_final_reads_stats.csv")
+paged_table(reads_stats,options = list(rows.print = 20))
+
+#test plotly table
+fig <- plot_ly(
+    type = 'table',
+    header = list(values=names(reads_stats),
+                  align = c('left'),
+                  line = list(width = 1, color = 'black'),
+                  fill = list(color = 'rgb(45, 100, 230)')),
+    cells = list(values=unname(reads_stats),
+                 line = list(width = 1, color = 'black'),
+                 fill = list(color = 'white'),
+                 align = c('center'),
+                 font = list(color = '#506784', size = 10))
+    )
+
+#fig
+```
+<br>
+<br>
+<br>
+```{r readstats_plot, echo=FALSE}
+# Plot of reads before and after
+ptotal <- plot_ly(typle="box",marker=list(colors=mycol))
+ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_before, name="Reads before filtering")
+ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_after, name="Reads after filtering")
+ptotal <- ptotal %>% layout(title=list(text="Number of reads before and after filtering"))
+ptotal <- ptotal %>% layout(legend = list(x=10,y=.5))
+ptotal
+```
+<br>
+<br>
+<br>
+```{r readstats_plot2, echo=FALSE}
+# Plot of R1 and R2 before and after
+pr <- plot_ly(y=reads_stats$R1_before_length, type="box", name="R1 length before")
+pr <- pr %>% add_boxplot(y=reads_stats$R1_after_length, name="R1 length after")
+pr <- pr %>% add_boxplot(y=reads_stats$R2_before_length, name="R2 length before")
+pr <- pr %>% add_boxplot(y=reads_stats$R2_after_length, name="R2 length after")
+pr <- pr %>% layout(title = "R1 and R2 Length")
+pr <- pr %>% layout(legend = list(x=10,y=.5))
+pr
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+```{r load_datasets, include=FALSE}
+sample_name=params$counts
+sample_metadata=params$metadata
+#sample_name="PVID_vAMPtest1_otu.85_counts.csv"
+#sample_metadata="PVID_fiscesTestmeta.csv"
+#sample_name="vAMPrun_otu.55_counts.csv"
+#sample_metadata="pvid_samples.csv"
+data<- read.csv(sample_name)
+data2 <-as.data.frame(t(data))
+data2$sample <- row.names(data2)
+colnames(data2)<- as.matrix(data2[1,])
+as.data.frame(data2)
+data2 <- data2[-1,]
+
+#X.OTU.ID for X.Sequence.
+data2 <- data2 %>%
+  rename(sample=X.OTU.ID)
+data2dim <- dim(data2)
+
+##Loading metadata
+samples <- read.csv(sample_metadata)
+
+##Combining data and metadata
+data3 <- merge(data2, samples, by="sample")
+
+dim_data3 <- dim(data3)
+dim_samples <- dim(samples)
+cols <- dim_data3[2]-dim_samples[2]+1
+first <-colnames(data3)[2]
+last <- colnames(data3)[cols]
+data3[,2:cols] <- lapply(data3[,2:cols], as.character)
+data3[,2:cols] <- lapply(data3[,2:cols], as.numeric)
+
+#Calculate total reads per sample
+data4 <- data3%>%
+  mutate(sum=select(.,2:cols)%>%
+           apply(1, sum, na.rm=TRUE))
+
+```
+
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Counts plot</h2></div>
+
+```{r plot, echo=FALSE}
+# sample and count
+con <- plot_ly(data4, x = ~sum, y = ~sample, name = "Sample", type = 'scatter',
+               mode = "markers", marker = list(color = "#088da5"))
+con <- con %>% layout(xaxis = list(title = "Total reads"),yaxis = list(title = "Sample"))
+con
+```
+<br>
+<br>
+<br>
+```{r filter_data, include=FALSE}
+##Filter samples with low reads
+data5 <- data4 %>%
+  filter(sum>10000)
+data5dim <-dim(data5)
+minreads<-min(data5$sum)
+# Filter by treatment
+tfil=params$filter
+#tfil="CHOR"
+h <- data5 %>%
+  filter(treatment == tfil) ##variable needed to be defined by config
+writeLines(c("Mean"))
+mean(h$sum)
+writeLines(c("Min"))
+min(h$sum)
+writeLines(c("Max"))
+max(h$sum)
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Rarefaction</h2></div>
+```{r rarefaction, echo=FALSE, cache=FALSE}
+##Rarefaction curves
+rarefaction <- rarecurve(data5[,2:cols])
+
+##rarefied dataset
+raredata <- as.data.frame(rrarefy(data5[,2:cols], sample=minreads))
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Diversity plots</h2></div>
+
+<br>
+<br>
+<br>
+
+```{r diversity_analysis, echo=FALSE}
+
+index <-diversity(raredata, index= "shannon")
+shannondata5 <- as.data.frame(index)
+
+index <- diversity(raredata, index= "simpson")
+simpsondata5 <- as.data.frame(index)
+
+mind5<-min(data5$sum)
+index <- rarefy(data5[,2:cols], sample=mind5)
+rarerichnessdata5 <- as.data.frame(index)
+
+metadata <- data5[,(cols+1):data5dim[2]]
+
+metadata$sample <- data5$sample
+shannondata5$sample<- data5$sample
+simpsondata5$sample<- data5$sample
+rarerichnessdata5$sample <-data5$sample
+
+shannondata5_2 <- merge(shannondata5, metadata, by="sample")
+simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
+rarerichnessdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
+
+#shannonplot <- ggplot(shannondata5_2, aes(x=treatment,color=treatment,y=index))+
+#  geom_boxplot()+
+#  geom_point()+
+#  theme_classic()+
+#  labs(y="Index",x="Treatment")+
+#  theme(axis.text=element_text(size=12))+
+#  theme(legend.position = "none")
+
+#sh<-ggplotly(shannonplot)
+#sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
+#sh
+
+sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
+sh <- sh %>% layout(legend = list(x=10,y=.5))
+sh <- sh %>% layout(yaxis=list(title = "Index"))
+sh <- sh %>% layout(xaxis=list(title = "Treatment"))
+sh
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+```{r diversity_analysis2, echo=FALSE}
+#simpsonplot <- ggplot(simpsondata5_2, aes(x=treatment,color=treatment,y=index))+
+#  geom_boxplot()+
+#  geom_point()+
+#  theme_classic()+
+#  labs(y="Index",x="Treatment")+
+#  theme(axis.text=element_text(size=12))+
+#  theme(legend.position = "none")
+
+#s<-ggplotly(simpsonplot)
+#s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
+#s
+
+s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
+s <- s %>% layout(legend = list(x=10,y=.5))
+s <- s %>% layout(yaxis=list(title = "Index"))
+s <- s %>% layout(xaxis=list(title = "Treatment"))
+s
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+```{r diversity_analysis3, echo=FALSE}
+#richnessplot <- ggplot(rarerichnessdata5_2, aes(x=treatment,color=treatment,y=index))+
+#  geom_boxplot()+
+#  geom_point()+
+#  theme_classic()+
+#  labs(y="Richness",x="Treatment")+
+#  theme(axis.text=element_text(size=12))+
+#  theme(legend.position = "none")
+
+ri <- plot_ly(rarerichnessdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
+ri <- ri %>% layout(legend = list(x=10,y=.5))
+ri <- ri %>% layout(yaxis=list(title = "Index"))
+ri <- ri %>% layout(xaxis=list(title = "Treatment"))
+ri
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Distance</h2></div>
+
+```{r distance, echo=FALSE}
+##Distance
+intermediate <- raredata
+bray <- vegdist(sqrt(intermediate), method="bray")
+
+##Dispersion
+disper <- betadisper(bray, group = metadata$treatment, type="centroid")
+df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
+df$sample <- data5$sample
+df2 <- merge(df, metadata, by="sample")
+
+#p<- ggplot(data=df2,aes(x=treatment,y=Distance_to_centroid,colour=treatment))+
+#  geom_boxplot(outlier.alpha = 0)+
+#  theme_classic()+
+#  geom_point(position=position_dodge(width=0.75))+
+#  labs(y="Distance",x="Treatment")+
+#  theme(axis.text=element_text(size=12))+
+#  theme(legend.position = "none")
+
+#cen <- ggplotly(p)
+#cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
+#cen
+
+cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
+cen <- cen %>% layout(legend = list(x=10,y=.5))
+cen <- cen %>% layout(yaxis=list(title = "Distance"))
+cen <- cen %>% layout(xaxis=list(title = "Treatment"))
+cen
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS2D</h2></div>
+
+```{r nmds2d, echo=FALSE}
+##NMDS
+datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
+
+MDS <- metaMDS(sqrt(datax),
+               distance = "bray",autotransform = FALSE,
+               k = 2,
+               maxit = 999,
+               trymax = 500,
+               wascores = TRUE)
+
+data.scores <- as.data.frame(scores(MDS))
+data.scores$sample <- data5$sample
+data.scores.2 <- merge(data.scores, metadata, by="sample")
+
+p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
+  geom_point(size=2)+
+  theme_classic()+
+  theme(legend.title = element_blank())
+
+#fff <- ggplotly(p)
+#fff <- fff %>% layout(legend=list(y=.5))
+#fff
+
+fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
+fff <- fff %>% layout(legend=list(y=.5))
+fff
+
+
+```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS3D</h2></div>
+
+```{r nmds3d, echo=FALSE}
+MDS3 <- metaMDS(sqrt(datax),
+               distance = "bray",autotransform = FALSE,
+               k = 3,
+               maxit = 999,
+               trymax = 500,
+               wascores = TRUE)
+
+
+data.scores3 <- as.data.frame(scores(MDS3))
+data.scores3$sample <- data5$sample
+data.scores.3 <- merge(data.scores3, metadata, by="sample")
+p3d <- plot_ly(data.scores.3, x= ~ NMDS1, y = ~ NMDS2, z = ~ NMDS3, text = ~paste("Sample: ", sample),
+        color = ~treatment, colors = mycol,
+        mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
+        marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
+        )
+p3d <- p3d %>% layout(legend=list(y=.5))
+p3d
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Sample OTU barplot</h2></div>
+
+```{r long, echo=FALSE}
+dataz <- decostand(data5[,2:cols],method="total") #method 'total' normalizes data to sum up to 1
+dataz$sample <- data5$sample
+datay <- merge(dataz, metadata, by="sample")
+datalong <- datay %>%
+  tidyr::gather(first:last, key=hit, value=reads)
+
+##Barplot
+## add better colors
+#spec_bar <- ggplot(datalong, aes(x=forcats::fct_reorder(timepoint, as.numeric(as.character(timepoint))),
+#    y=reads, fill=hit))+ #Consider sqrt-transforming data
+#    geom_bar(aes(), stat="identity", position="fill")+
+#    #coord_polar("y", start=0)+
+#    theme_classic()+
+#    facet_wrap(colony~treatment, nrow=2)+
+#    #coord_flip()+
+#    labs(x="Timepoint") #+ theme(legend.position = "none")
+#spec_bar <- ggplot(datalong, aes(x=sample,y=reads,fill=hit))+geom_bar(aes(), stat="identity", position="fill")+
+#  theme(axis.text.x=element_text(angle=90))
+#ggplotly(spec_bar)
+#,'#00b300','#00b3b3','#0059b3','#6600ff','#b800e6','#ff3333','#ff8000','#ffff00','#bf8040','#42bcf5','#b428f5','#2e8d7e','#664e7e','#a4c700','#1aa3ff'
+
+ddd <- plot_ly(datalong, x=~sample, y=~reads, color=~hit, colors=mycol)
+ddd <- ddd %>% layout(type='bar',barmode = 'stack')
+ddd <- ddd %>% layout(yaxis=list(title = "Reads"))
+ddd <- ddd %>% layout(xaxis=list(title = "Sample"))
+ddd <- ddd %>% layout(legend = list(x=10,y=.5))
+ddd
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;ASV barplot</h2></div>
+
+```{r asv_barplot, echo=FALSE}
+datalong <- datalong %>%
+  filter(reads>0)
+
+#asv_bar <- ggplot(datalong, aes(x=reorder(hit,reads), y=reads, fill=treatment))+
+#  geom_bar(stat="identity")+
+#  scale_fill_manual(values=c('#088da5','#e19336'))+ #colors not working
+#  coord_flip()+
+#  theme_classic()+
+#  theme(axis.title.y = element_blank())+
+#  theme(legend.title = element_blank())
+
+asp2 <- plot_ly(datalong, y=~hit, x=~reads, color=~treatment, colors=mycol,text = ~paste("Sample: ", sample), opacity=.9)
+asp2 <- asp2 %>% layout(type='bar', barmode = 'group')
+asp2 <- asp2 %>% layout(yaxis = list(title = '', categoryorder = "total ascending"))
+asp2 <- asp2 %>% layout(legend = list(x=10,y=.5))
+asp2
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Heatmap</h2></div>
+
+<br>
+<br>
+```{r heatmap, echo=FALSE}
+heatdata=params$heatmap
+#heatdata="a.csv"
+#heatdata="PVID_vAMPtest1_otu.85_PercentID.matrix"
+simmatrix<- read.csv(heatdata, header=FALSE)
+rownames(simmatrix) <- simmatrix[,1]
+simmatrix <- simmatrix[,-1]
+colnames(simmatrix) <-rownames(simmatrix)
+cols <- dim(simmatrix)[2]
+simmatrix$AA <- rownames(simmatrix)
+rval=nrow(simmatrix)
+simmatrix2 <- simmatrix %>%
+  gather(1:rval, key=sequence, value=similarity)
+x=reorder(simmatrix2$AA,simmatrix2$similarity)
+y=reorder(simmatrix2$sequence,simmatrix2$similarity)
+similaritymatrix <- ggplot(simmatrix2, aes(x=x, y=y,fill=similarity))+
+  geom_raster()+
+  scale_fill_distiller(palette="Spectral")+
+  theme(axis.text.x = element_text(angle = 90))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank())
+
+
+ggplotly(similaritymatrix)
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Taxonomy</h2></div>
+
+<br>
+<br>
+
+```{r taxonomy, echo=FALSE}
+tax=read.csv(params$tax,header=F)
+#tax=read.csv("tax.csv",header=F)
+#tax=read.csv("PVID_vAMPtest1_otu.85_summary_for_plot.csv", header=F)
+tp <- plot_ly(tax, labels = ~V1, values = ~V2)
+tp <- tp %>% add_pie(marker=list(colors=mycol, line=list(color='#000000', width=.5)), hole = 0.6)
+tp <- tp %>% layout(title = "Taxonomy distribution",  showlegend = F,
+                    xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                    yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
+                    )
+
+
+tp
+```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
