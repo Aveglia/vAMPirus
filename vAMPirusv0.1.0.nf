@@ -606,11 +606,11 @@ if (params.Analyze) {
                 .collect()
 
         output:
-            file("*_all_merged_nonFiltered.fastq") into collect_samples_ch
+            file("*_all_merged_preFilt_preClean.fastq") into collect_samples_ch
 
         script:
             """
-            cat ${reads} >>${params.projtag}_all_merged_nonFiltered.fastq
+            cat ${reads} >>${params.projtag}_all_merged_preFilt_preCLean.fastq
 	        """
     }
 
@@ -653,11 +653,11 @@ if (params.Analyze) {
             file("**hist.txt")  into histos
         script:
             """
-            bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_preFilt_bhist.txt qhist=${params.projtag}_all_merged_preFilt_qhist.txt gchist=${params.projtag}_all_merged_preFilt_gchist.txt aqhist=${params.projtag}_all_merged_preFilt_aqhist.txt lhist=${params.projtag}_all_merged_preFilt_lhist.txt gcbins=auto
+            bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_preFilt_preClean_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_preFilt_preClean_qualityScore_hist.txt gchist=${params.projtag}_all_merged_preFilt_preClean_gcContent_hist.txt aqhist=${params.projtag}_all_merged_preFilt_preClean_averageQuality_hist.txt lhist=${params.projtag}_all_merged_preFilt__preClean_length_hist.txt gcbins=auto
             fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
             reformat.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_preFilt_clean.fasta t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
-            bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postFilt_bhist.txt qhist=${params.projtag}_all_merged_postFilt_qhist.txt gchist=${params.projtag}_all_merged_postFilt_gchist.txt aqhist=${params.projtag}_all_merged_postFilt_aqhist.txt lhist=${params.projtag}_all_merged_postFilt_lhist.txt gcbins=auto
+            bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postFilt_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_postFilt_qualityScore_hist.txt gchist=${params.projtag}_all_merged_postFilt_gcContent_hist.txt aqhist=${params.projtag}_all_merged_postFilt_averageQuaulity_hist.txt lhist=${params.projtag}_all_merged_postFilt_length_hist.txt gcbins=auto
 	        """
     }
 
@@ -735,7 +735,7 @@ if (params.Analyze) {
             script:
             if (params.clusterNuclIDlist) {
                 """
-                for id in `echo ${params.clusterNuclIDlist} | tr "," "\n"`;done
+                for id in `echo ${params.clusterNuclIDlist} | tr "," "\\n"`;do
                     vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_nOTU\${id}.fasta --threads ${task.cpus} --relabel nOTU --id \${id}
                 done
                 cp ${fasta} ${params.projtag}_ASV_all.fasta
@@ -1026,12 +1026,12 @@ if (params.Analyze) {
             """
     }
 
-    process Generate_Matrix {
+    process Generate_Nucleotide_Matrix {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*.matrix'
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*otu*.matrix'
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
+        publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*nOTU*PercentID.matrix'
 
         input:
             file(reads) from nuclFastas_forMatrix_ch
@@ -1040,6 +1040,7 @@ if (params.Analyze) {
             file("*.matrix") into clustmatrices
             file("*nOTU*PercentID.matrix") into notu_heatmap
             file("*ASV*PercentID.matrix") into asv_heatmap
+
         script:
             // remove if statement later (no fin)
             """
@@ -1049,14 +1050,15 @@ if (params.Analyze) {
                     name=\$( echo \${filename}| awk -F ".fasta" '{print \$1}')
                     clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                     clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                    for x in *.matrix;do
+                    for x in *q.matrix;do
                         pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                         ya=\$(wc -l \$x | awk '{print \$1}')
-                        echo "\$(( \$ya-1))"
-                        tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
+                        echo "\$((\$ya-1))"
+                        tail -"\$((\$ya-1))" \$x > "\$pre"z.matrix
                         rm \$x
+                        cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
+                        rm \$pre"z.matrix
                     done
-		    sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix
                 else
                     name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
                     clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
@@ -1064,11 +1066,12 @@ if (params.Analyze) {
                     for x in *q.matrix;do
                         pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                         ya=\$(wc -l \$x | awk '{print \$1}')
-                        echo "\$(( \$ya-1))"
-                        tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
+                        echo "\$((\$ya-1))"
+                        tail -"\$((\$ya-1))" \$x > "\$pre"z.matrix
                         rm \$x
+                        cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
+                        rm \$pre"z.matrix
                     done
-		    sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix
                 fi
             done
             """
@@ -1105,18 +1108,18 @@ if (params.Analyze) {
                 # Nucleotide_Phylogeny
                 if [ "${params.iqCustomnt}" != "" ];then
                     iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
-                    
+
                 elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
                     mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
+                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
 
                 elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
                     mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
                     iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
 
                 elif [ "${params.nonparametric}" != "false" ];then
-                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
-                    
+                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+
                 elif [ "${params.parametric}" != "false" ];then
                     iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
 
@@ -1222,11 +1225,12 @@ if (params.Analyze) {
                 for x in *q.matrix;do
                     pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                     ya=\$(wc -l \$x | awk '{print \$1}')
-                    echo "\$(( \$ya-1))"
-                    tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
+                    echo "\$((\$ya-1))"
+                    tail -"\$(( \$ya-1))" \$x > "\$pre"z.matrix
                     rm \$x
+                    cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
+                    rm \$pre"z.matrix
                 done
-		sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix
                 """
         }
 
@@ -1443,7 +1447,7 @@ if (params.Analyze) {
                 output:
                     tuple file("*_aln.fasta"), file("*_aln.html"), file("*.log"), file("*iq*"), file("*mt*") into alignprot_results
                     file("*iq.treefile") into amino_rax_plot
-                    
+
                 script:
                     """
                     # Protein_Alignment
@@ -1457,21 +1461,21 @@ if (params.Analyze) {
                     # Protein_Phylogeny
                     if [ "${params.iqCustomaa}" != "" ];then
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomaa}
-                        
+
                     elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
                         mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
-    
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+
                     elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
                         mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
-    
+
                     elif [ "${params.nonparametric}" != "false" ];then
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
-                        
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+
                     elif [ "${params.parametric}" != "false" ];then
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
-    
+
                     else
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                     fi
@@ -1498,7 +1502,7 @@ if (params.Analyze) {
                 set +e
                 diamond makedb --in ${fasta} --db ${fasta}
                 diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_protCounts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-                echo "[Sequence]" >tmp.col1.txt
+                echo "# OTU ID" >tmp.col1.txt
                 echo "Generating sample id list"
                 grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
                 cat otuid.list >> tmp.col1.txt
@@ -1569,8 +1573,8 @@ if (params.Analyze) {
             if (params.clusterAAIDlist) {
                 """
                 cp ${params.mypwd}/bin/rename_seq.py .
-                for id in `echo ${params.clusterAAIDlist} | tr "," "\n"`;do
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${params.projtag}_ASV_translations.fasta > ${params.projtag}_filtered_proteins.fasta
+                for id in `echo ${params.clusterAAIDlist} | tr "," "\\n"`;do
+                        awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                         cd-hit -i ${params.projtag}_filtered_proteins.fasta -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
                         sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
                         grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >temporaryclusters.list
@@ -1595,7 +1599,7 @@ if (params.Analyze) {
                             cluster="\$(echo \$x | awk -F "_" '{print \$3}')"
                             echo "\${cluster}"
                             grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > \${name}_\${cluster}_seqs_tmps.list
-                            seqtk subseq \${params.projtag}_ASV_nucleotide.fasta \${name}_\${cluster}_seqs_tmps.list > \${name}_\${cluster}_nucleotide_sequences.fasta
+                            seqtk subseq ${asvs} \${name}_\${cluster}_seqs_tmps.list > \${name}_\${cluster}_nucleotide_sequences.fasta
                             vsearch --cluster_fast \${name}_\${cluster}_nucleotide_sequences.fasta --id 0.2 --centroids \${name}_\${cluster}_centroids.fasta
                             grep ">" \${name}_\${cluster}_centroids.fasta >> \${name}_\${cluster}_tmp_centroids.list
                             for y in \$( cat \${name}_\${cluster}_tmp_centroids.list );do
@@ -1623,12 +1627,12 @@ if (params.Analyze) {
                         done
                         paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pOTUCluster\${id}_summary.csv
                         ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta
-                        stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU_aminoacid_clustered.gc gcformat=4
-                        stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU_nucleotide_clustered.gc gcformat=4
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<50{print ">"\$0}' ${params.projtag}_ASV_translations.fasta >${params.projtag}_pOTU\${id}_problematic_translations.fasta
+                        stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_aminoacid_clustered.gc gcformat=4
+                        stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_nucleotide_clustered.gc gcformat=4
+                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<50{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
                         if [ `wc -l ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                             grep ">" ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
-                            seqtk subseq ${params.projtag}_ASV_nucleotide.fasta problem_tmp.list > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
+                            seqtk subseq ${asvs} > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
                         else
                            rm ${params.projtag}_pOTU\${id}_problematic_translations.fasta
                         fi
@@ -1643,7 +1647,7 @@ if (params.Analyze) {
                 """
                 cp /data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus/bin/rename_seq.py .
                 id=${params.clusterAAID}
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${params.projtag}_ASV_translations.fasta > ${params.projtag}_filtered_proteins.fasta
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                 cd-hit -i ${params.projtag}_filtered_proteins.fasta -c ${params.clusterAAID} -o ${params.projtag}_pOTU\${id}.fasta
                 sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
                 grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >temporaryclusters.list
@@ -1669,7 +1673,7 @@ if (params.Analyze) {
                     cluster="\$(echo \$x | awk -F "_" '{print \$3}')"
                     echo "\${cluster}"
                     grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > \${name}_\${cluster}_seqs_tmps.list
-                    seqtk subseq ${params.projtag}_ASV_nucleotide.fasta \${name}_\${cluster}_seqs_tmps.list > \${name}_\${cluster}_nucleotide_sequences.fasta
+                    seqtk subseq ${asvs} \${name}_\${cluster}_seqs_tmps.list > \${name}_\${cluster}_nucleotide_sequences.fasta
                     vsearch --cluster_fast \${name}_\${cluster}_nucleotide_sequences.fasta --id 0.2 --centroids \${name}_\${cluster}_centroids.fasta
                     grep ">" \${name}_\${cluster}_centroids.fasta >> \${name}_\${cluster}_tmp_centroids.list
                     for y in \$( cat \${name}_\${cluster}_tmp_centroids.list );do
@@ -1697,12 +1701,12 @@ if (params.Analyze) {
                 done
                 paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pOTUCluster\${id}_summary.csv
                 ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta
-                stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU_aminoacid_clustered.gc gcformat=4
-                stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU_nucleotide_clustered.gc gcformat=4
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${params.projtag}_ASV_translations.fasta >${params.projtag}_pOTU\${id}_problematic_translations.fasta
+                stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_aminoacid_clustered.gc gcformat=4
+                stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_nucleotide_clustered.gc gcformat=4
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
                 if [ `wc -l ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                     grep ">" ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
-                    seqtk subseq ${params.projtag}_ASV_nucleotide.fasta problem_tmp.list > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
+                    seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
                 else
                    rm ${params.projtag}_pOTU\${id}_problematic_translations.fasta
                 fi
@@ -1740,7 +1744,7 @@ if (params.Analyze) {
                     virdb=${params.mypwd}/DBs/diamonddb_custom/${params.dbname}
                     grep ">" \${virdb} >> headers.list
                     headers="headers.list"
-                    name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
+                    name=\$(ls ${reads} | awk -F "_noTax" '{print \$1}')
                     diamond blastx -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
                     echo "Preparing lists to generate summary .csv's"
                     echo "[Best hit accession number]" >access.list
@@ -1884,7 +1888,6 @@ if (params.Analyze) {
                 """
                 ident=\$( echo ${reads} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
                 name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}')
-                vsearch --usearch_global ${merged} --db ${reads} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                 cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
 
                 """
@@ -1911,11 +1914,12 @@ if (params.Analyze) {
                 for x in *q.matrix;do
                     pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                     ya=\$(wc -l \$x | awk '{print \$1}')
-                    echo "\$(( \$ya-1))"
-                    tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
+                    echo "\$((\$ya-1))"
+                    tail -"\$((\$ya-1))" \$x > "\$pre"z.matrix
                     rm \$x
+                    cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
+                    rm \$pre"z.matrix
                 done
-		sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix
                 """
         }
 
@@ -1935,7 +1939,7 @@ if (params.Analyze) {
                 output:
                     tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pOTU_nucleotide_phylogeny_results
                     file("*iq.treefile") into potu_Ntree_plot
-                    
+
                 script:
                     """
                     pre=\$( echo ${reads} | awk -F "_noTax" '{print \$1}' )
@@ -1948,21 +1952,21 @@ if (params.Analyze) {
                     # pOTU_Nucleotide_Phylogeny
                     if [ "${params.iqCustomnt}" != "" ];then
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
-                        
+
                     elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
                         mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
-    
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+
                     elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
                         mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
-    
+
                     elif [ "${params.nonparametric}" != "false" ];then
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
-                        
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+
                     elif [ "${params.parametric}" != "false" ];then
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
-    
+
                     else
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                     fi
@@ -1990,11 +1994,12 @@ if (params.Analyze) {
                 for x in *q.matrix;do
                     pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                     ya=\$(wc -l \$x | awk '{print \$1}')
-                    echo "\$(( \$ya-1))"
-                    tail -"\$(( \$ya-1))" \$x > "\$pre".matrix
+                    echo "\$((\$ya-1))"
+                    tail -"\$((\$ya-1))" \$x > "\$pre"z.matrix
                     rm \$x
+                    cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
+                    rm \$pre"z.matrix
                 done
-	            sed -i 's/ /,/g' *PercentID.matrix | sed -i 's/,,/,/g' *PercentID.matrix	
                 """
         }
 
@@ -2203,7 +2208,7 @@ if (params.Analyze) {
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/RAxML", mode: "copy", overwrite: true, pattern: '*iq*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
     	        input:
                     file(prot) from pOTU_aaMafft_ch
@@ -2211,7 +2216,7 @@ if (params.Analyze) {
                 output:
                     tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pOTU_protein_phylogeny_results
                     file("*iq.treefile") into potu_Atree_plot
-                
+
                 script:
                     """
                     pre=\$( echo ${prot}  | awk -F ".fasta" '{print \$1}' )
@@ -2224,21 +2229,21 @@ if (params.Analyze) {
                     # pOTU_Protein_Phylogeny
                     if [ "${params.iqCustomaa}" != "" ];then
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomaa}
-                        
+
                     elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
                         mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
-    
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+
                     elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
                         mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
-    
+
                     elif [ "${params.nonparametric}" != "false" ];then
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots} 
-                        
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+
                     elif [ "${params.parametric}" != "false" ];then
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
-    
+
                     else
                         iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                     fi
@@ -2266,7 +2271,7 @@ if (params.Analyze) {
                 potu="\$( echo ${fasta} | awk -F "_" '{print \$3}')"
                 diamond makedb --in ${fasta} --db ${fasta}
                 diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-                echo "[Sequence]" >tmp.col1.txt
+                echo "# OTU ID" >tmp.col1.txt
                 echo "Generating sample id list"
                 grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
                 cat otuid.list >> tmp.col1.txt
@@ -2292,200 +2297,202 @@ if (params.Analyze) {
            }
     }
 
+    if (!params.skipAdapterRemoval) {
+
+        process combine_csv {
+
+            input:
+                file(csv) from fastp_csv
+                    .collect()
+
+            output:
+                file("final_reads_stats.csv") into ( fastp_csv1, fastp_csv2, fastp_csv3, fastp_csv4, fastp_csv5 )
+
+            script:
+                """
+                cat ${csv} >all_reads_stats.csv
+                head -n1 all_reads_stats.csv >tmp.names.csv
+                cat all_reads_stats.csv | grep -v ""Sample,Total_"" >tmp.reads.stats.csv
+                cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
+                rm tmp.names.csv tmp.reads.stats.csv
+                """
+
+        }
+    }
+
+    if (params.nOTU && params.pOTU) {
+
+        // Report ASV
+        // Report Nuc
+        // Report Prot
+        // Report Aminotypes
+
+        process Report_ASV {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+            input:
+                file(counts) from asv_counts_plots
+                file(taxonomy) from taxplot1
+                file(matrix) from asv_heatmap
+                file(readsstats) from fastp_csv1
+
+            output:
+                file("*.html") into report_summaryA
+
+            script:
+                """
+                name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                cp ${params.mypwd}/bin/vAMPirus_ASV_Report.Rmd .
+                Rscript -e "rmarkdown::render('vAMPirus_ASV_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
+                ${readsstats} \
+                ${counts} \
+                ${params.metadata} \
+                ${params.filt} \
+    	    ${matrix} \
+                ${taxonomy}
+                """
+            }
+
+        process Report_nOTU {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+            input:
+                file(counts) from notu_counts_plots
+                file(taxonomy) from taxplot1a
+                file(matrix) from notu_heatmap
+                file(phylogeny) from nucl_phyl_plot
+                file(readsstats) from fastp_csv2
+
+            output:
+                file("*.html") into report_summaryB
+
+            script:
+                """
+                name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+                Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_nOTU_Report.html')" \${name} \
+                ${readsstats} \
+                ${counts} \
+                ${params.metadata} \
+                ${params.filt} \
+    	        ${matrix} \
+                ${taxonomy} \
+                ${phylogeny}
+                """
+            }
+
+        process Report_pOTU_AminoAcid {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+            input:
+                file(counts) from potu_Acounts
+                file(taxonomy) from taxplot4
+                file(matrix) from potu_aa_heatmap
+                file(phylogeny) from potu_Atree_plot
+                file(readsstats) from fastp_csv3
+
+            output:
+                file("*.html") into report_summaryC
+
+            script:
+                """
+                name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+                Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa_Report.html')" \${name} \
+                ${readsstats} \
+                ${counts} \
+                ${params.metadata} \
+                ${params.filt} \
+    	    ${matrix} \
+                ${taxonomy} \
+                ${phylogeny}
+                """
+            }
+
+        process Report_pOTU_Nucleotide {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+            input:
+                file(counts) from potu_Ncounts_for_report
+                file(taxonomy) from taxplot3
+                file(matrix) from potu_nucl_heatmap
+                file(phylogeny) from potu_Ntree_plot
+                file(readsstats) from fastp_csv4
+
+            output:
+                file("*.html") into report_summaryD
+
+            script:
+                """
+                name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+                Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt_Report.html')" \${name} \
+                ${readsstats} \
+                ${counts} \
+                ${params.metadata} \
+                ${params.filt} \
+    	        ${matrix} \
+                ${taxonomy} \
+                ${phylogeny}
+                """
+            }
+
+        process Report_AmynoTypes {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+            input:
+                file(counts) from aminocounts_plot
+                file(taxonomy) from taxplot2
+                file(matrix) from aminotype_heatmap
+                file(phylogeny) from amino_rax_plot
+                file(readsstats) from fastp_csv5
+
+            output:
+                file("*.html") into report_summaryE
+
+            script:
+                """
+                name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+                Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
+                ${readsstats} \
+                ${counts} \
+                ${params.metadata} \
+                ${params.filt} ${matrix} \
+                ${taxonomy} \
+                ${phylogeny}
+                """
+            }
+
+    } else if (params.nOTU && !params.pOTU) {
+        println("nuc")
+    } else if (!params.nOTU && params.pOTU) {
+        println("prot")
+    } else if (!params.nOTU && !params.pOTU && params.skipAminoTyping) {
+        println("else")
+    }
+
 } else {
 	println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
-	exit 0
+	//exit 0
 }
 
-if (!params.skipAdapterRemoval) {
 
-    process combine_csv {
-
-        input:
-            file(csv) from fastp_csv
-                .collect()
-
-        output:
-            file("final_reads_stats.csv") into ( fastp_csv1, fastp_csv2, fastp_csv3, fastp_csv4, fastp_csv5 )
-
-        script:
-            """
-            cat ${csv} >all_reads_stats.csv
-            head -n1 all_reads_stats.csv >tmp.names.csv
-            cat all_reads_stats.csv | grep -v ""Sample,Total_"" >tmp.reads.stats.csv
-            cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
-            rm tmp.names.csv tmp.reads.stats.csv
-            """
-
-    }
-}
-
-if (params.nOTU && params.pOTU) {
-
-    // Report ASV
-    // Report Nuc
-    // Report Prot
-    // Report Aminotypes
-
-    process Report_ASV {
-
-        label 'norm_cpus'
-
-        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
-
-        input:
-            file(counts) from asv_counts_plots
-            file(taxonomy) from taxplot1
-            file(matrix) from asv_heatmap
-            file(readsstats) from fastp_csv1
-
-        output:
-            file("*.html") into report_summaryA
-
-        script:
-            """
-            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-            cp ${params.mypwd}/bin/vAMPirus_ASV_Report.Rmd .
-            Rscript -e "rmarkdown::render('vAMPirus_ASV_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
-            ${readsstats} \
-            ${counts} \
-            ${params.metadata} \
-            ${params.filt} \
-	    ${matrix} \
-            ${taxonomy}
-            """
-        }
-
-    process Report_nOTU {
-
-        label 'norm_cpus'
-
-        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
-
-        input:
-            file(counts) from notu_counts_plots
-            file(taxonomy) from taxplot1a
-            file(matrix) from notu_heatmap
-            file(phylogeny) from nucl_phyl_plot
-            file(readsstats) from fastp_csv2
-
-        output:
-            file("*.html") into report_summaryB
-
-        script:
-            """
-            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
-            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_nOTU_Report.html')" \${name} \
-            ${readsstats} \
-            ${counts} \
-            ${params.metadata} \
-            ${params.filt} \
-	    ${matrix} \
-            ${taxonomy} \
-            ${phylogeny}
-            """
-        }
-
-    process Report_pOTU_AminoAcid {
-
-        label 'norm_cpus'
-
-        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
-
-        input:
-            file(counts) from potu_Acounts
-            file(taxonomy) from taxplot4
-            file(matrix) from potu_aa_heatmap
-            file(phylogeny) from potu_Atree_plot
-            file(readsstats) from fastp_csv3
-
-        output:
-            file("*.html") into report_summaryC
-
-        script:
-            """
-            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
-            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa_Report.html')" \${name} \
-            ${readsstats} \
-            ${counts} \
-            ${params.metadata} \
-            ${params.filt} \
-	    ${matrix} \
-            ${taxonomy} \
-            ${phylogeny}
-            """
-        }
-
-    process Report_pOTU_Nucleotide {
-
-        label 'norm_cpus'
-
-        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
-
-        input:
-            file(counts) from potu_Ncounts_for_report
-            file(taxonomy) from taxplot3
-            file(matrix) from potu_nucl_heatmap
-            file(phylogeny) from potu_Ntree_plot
-            file(readsstats) from fastp_csv4
-
-        output:
-            file("*.html") into report_summaryD
-
-        script:
-            """
-            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
-            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt_Report.html')" \${name} \
-            ${readsstats} \
-            ${counts} \
-            ${params.metadata} \
-            ${params.filt} \
-	    ${matrix} \
-            ${taxonomy} \
-            ${phylogeny}
-            """
-        }
-
-    process Report_AmynoTypes {
-
-        label 'norm_cpus'
-
-        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
-
-        input:
-            file(counts) from aminocounts_plot
-            file(taxonomy) from taxplot2
-            file(matrix) from aminotype_heatmap
-            file(phylogeny) from amino_rax_plot
-            file(readsstats) from fastp_csv5
-
-        output:
-            file("*.html") into report_summaryE
-
-        script:
-            """
-            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
-            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
-            ${readsstats} \
-            ${counts} \
-            ${params.metadata} \
-            ${params.filt} ${matrix} \
-            ${taxonomy} \
-            ${phylogeny}
-            """
-        }
-
-} else if (params.nOTU && !params.pOTU) {
-    println("nuc")
-} else if (!params.nOTU && params.pOTU) {
-    println("prot")
-} else if (!params.nOTU && !params.pOTU && params.skipAminoTyping) {
-    println("else")
-}
 
 if (params.generateAAcounts) {
 
@@ -2540,129 +2547,110 @@ if (params.dataCheck) {
 
     println("\n\tRunning vAMPirus \n")
 
-    if (!params.skipFastQC) {
+    process QualityCheck_1DC {
 
-        process QualityCheck_1DC {
+        label 'low_cpus'
 
-            label 'low_cpus'
+        tag "${sample_id}"
 
-            tag "${sample_id}"
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/FastQC/PreClean", mode: "copy", overwrite: true
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/FastQC/PreClean", mode: "copy", overwrite: true
+        input:
+            tuple sample_id, file(reads) from reads_qc_ch
 
-            input:
-                tuple sample_id, file(reads) from reads_qc_ch
+        output:
+            tuple sample_id, file("*_fastqc.{zip,html}") into fastqc_results_OAS
 
-            output:
-                tuple sample_id, file("*_fastqc.{zip,html}") into fastqc_results_OAS
-
-            script:
-                """
-                fastqc --quiet --threads $task.cpus $reads
-                """
-        }
+        script:
+            """
+            fastqc --quiet --threads ${task.cpus} ${reads}
+            """
     }
 
-    if (!params.skipFastP) {
+    process Adapter_Removal_DC {
 
-        process Adapter_Removal_DC {
+        label 'low_cpus'
 
-            label 'low_cpus'
+        tag "${sample_id}"
 
-            tag "${sample_id}"
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
+        input:
+            tuple sample_id, file(reads) from reads_ch
 
-            input:
-                tuple sample_id, file(reads) from reads_ch
+        output:
+            tuple sample_id, file("*.fastp.{json,html}") into fastp_results
+            tuple sample_id, file("*.filter.fq") into reads_fastp_ch
+            file("*.csv") into fastp_csv
 
-            output:
-                tuple sample_id, file("*.fastp.{json,html}") into fastp_results
-                tuple sample_id, file("*.filter.fq") into reads_fastp_ch
-                tuple sample_id, file("*.csv") into fastp_csv_DC
+        script:
+            """
+            echo ${sample_id}
 
-            script:
+            fastp -i ${reads[0]} -I ${reads[1]} -o left-${sample_id}.filter.fq -O right-${sample_id}.filter.fq --detect_adapter_for_pe \
+            --average_qual 25 -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
+            --report_title ${sample_id}
+
+            bash get_readstats.sh ${sample_id}.fastp.json
+            """
+    }
+
+    process Primer_Removal_DC {
+
+        label 'low_cpus'
+
+        tag "${sample_id}"
+
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
+
+        input:
+            tuple sample_id, file(reads) from reads_fastp_ch
+
+        output:
+            tuple sample_id, file("*bbduk*.fastq.gz") into ( reads_bbduk_ch, readsforqc2 )
+
+        script:
+            // check if we need to check this outside processes
+            if ( params.fwd == "" && params.rev == "" ) {
                 """
-                echo ${sample_id}
-
-                fastp -i ${reads[0]} -I ${reads[1]} -o left-${sample_id}.filter.fq -O right-${sample_id}.filter.fq --detect_adapter_for_pe \
-                --average_qual 25 -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
-                --report_title ${sample_id}
-
-                bash get_readstats.sh ${sample_id}.fastp.json
+                bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.defaultFwdTrim} t=${task.cpus}
+                bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.defaultRevTrim} t=${task.cpus}
+                repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+                """
+            } else if ( params.GlobTrim && !params.GlobTrim == "" ) {
+                """
+                FTRIM=\$( echo ${GlobTrim} | cut -f 1 -d "," )
+                RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
+                bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
+                bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
+                repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+                """
+            } else {
+                """
+                bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus} restrictleft=25 k=12 ordered=t mink=2 ktrim=l ecco=t rcomp=t minlength=200 tbo tpe
                 """
             }
+	  }
 
-    } else {
-        reads_ch
-            .set{ reads_fastp_ch }
-        fastp_results = Channel.empty()
-    }
+    process QualityCheck_2_DC {
 
-    if (!params.skipBBduk) {
+        label 'low_cpus'
 
-        process Primer_Removal_DC {
+        tag "${sample_id}"
 
-            label 'low_cpus'
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/FastQC/PostClean", mode: "copy", overwrite: true
 
-            tag "${sample_id}"
+        input:
+            tuple sample_id, file(reads) from readsforqc2
 
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
+        output:
+            tuple sample_id, file("*_fastqc.{zip,html}") into fastqc2_results_OAS
 
-            input:
-                tuple sample_id, file(reads) from reads_fastp_ch
-
-            output:
-                tuple sample_id, file("*bbduk*.fastq.gz") into ( reads_bbduk_ch, readsforqc2 )
-
-            script:
-                // check if we need to check this outside processes
-                if ( params.fwd == "" && params.rev == "" ) {
-                    """
-                    bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.FTRIM} t=${task.cpus}
-                    bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.RTRIM} t=${task.cpus}
-    		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
-                    """
-                } else if ( params.GlobTrim && !params.GlobTrim == "" ) {
-                    """
-                    FTRIM=\$( echo ${GlobTrim} | cut -f 1 -d "," )
-                    RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
-                    bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
-                    bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
-    		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
-                    """
-                } else {
-                    """
-                    bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus} restrictleft=25 k=12 ordered=t mink=2 ktrim=l ecco=t rcomp=t minlength=200 tbo tpe
-                    """
-                }
-    	  }
-    } else {
-        reads_fastp_ch
-            .set{ reads_bbduk_ch }
-    }
-
-    if (!params.skipFastQC) {
-
-        process QualityCheck_2_DC {
-
-            label 'low_cpus'
-
-            tag "${sample_id}"
-
-            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/FastQC/PostClean", mode: "copy", overwrite: true
-
-            input:
-                tuple sample_id, file(reads) from readsforqc2
-
-            output:
-                tuple sample_id, file("*_fastqc.{zip,html}") into fastqc2_results_OAS
-
-            script:
-                """
-                fastqc --quiet --threads $task.cpus $reads
-                """
-        }
+        script:
+            """
+            fastqc --quiet --threads ${task.cpus} ${reads}
+            """
     }
 
     process Read_Merging_DC {
@@ -2671,18 +2659,19 @@ if (params.dataCheck) {
 
         tag "${sample_id}"
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging_DC", mode: "copy", overwrite: true
-
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging/Individual", mode: "copy", overwrite: true, pattern: "*mergedclean.fastq"
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging/Individual/notmerged", mode: "copy", overwrite: true, pattern: "*notmerged*.fastq"
         input:
             tuple sample_id, file(reads) from reads_bbduk_ch
 
         output:
-            file("*_mergered.fq") into reads_vsearch1_ch
+            file("*_mergedclean.fastq") into reads_vsearch1_ch
             file("*.name") into names
+            file("*notmerged*.fastq") into notmerged
 
         script:
             """
-            vsearch --fastq_mergepairs ${reads[0]} --reverse ${reads[1]} --threads ${task.cpus} --fastqout ${sample_id}_mergered.fq --fastq_maxee 1 --relabel ${sample_id}.
+            vsearch --fastq_mergepairs ${reads[0]} --reverse ${reads[1]} --threads ${task.cpus} --fastqout ${sample_id}_mergedclean.fastq --fastqout_notmerged_fwd ${sample_id}_notmerged_fwd.fastq --fastqout_notmerged_rev ${sample_id}_notmerged_rev.fastq --fastq_maxee ${params.maxEE} --relabel ${sample_id}.
             echo ${sample_id} > ${sample_id}.name
             """
 
@@ -2692,18 +2681,18 @@ if (params.dataCheck) {
 
         label 'low_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging_DC", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch1_ch
                 .collect()
 
         output:
-            file("*_clean_merged_reads.fastq") into collect_samples_ch
+            file("*_all_merged_preFilt_preClean.fastq") into collect_samples_ch
 
         script:
             """
-            cat ${reads} >>${params.projtag}_clean_merged_reads.fastq
+            cat ${reads} >>${params.projtag}_all_merged_preFilt_preClean.fastq
 	        """
     }
 
@@ -2711,7 +2700,7 @@ if (params.dataCheck) {
 
         label 'low_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging_DC", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging", mode: "copy", overwrite: true
 
         input:
             file(names) from names
@@ -2729,44 +2718,71 @@ if (params.dataCheck) {
 
     process Length_Filtering_DC {
 
-        label 'norm_cpus'
+            label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/LengthFiltering_DC", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true, pattern: "*_merged_preFilt*.fasta"
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging", mode: "copy", overwrite: true, pattern: "*Lengthfiltered.fastq"
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging/Histograms/pre_length_filtering", mode: "copy", overwrite: true, pattern: "*preFilt_*st.txt"
+            publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging/Histograms/post_length_filtering", mode: "copy", overwrite: true, pattern: "*postFilt_*st.txt"
 
-        input:
-            file(reads) from collect_samples_ch
+            input:
+                file(reads) from collect_samples_ch
 
-        output:
-        file("*_merged_clean_Lengthfiltered.fastq") into reads_vsearch2_ch
+            output:
+                file("*_merged_preFilt_clean.fasta") into ( nuclCounts_mergedreads_ch, pOTU_mergedreads_ch )
+                file("*_merged_clean_Lengthfiltered.fastq") into reads_vsearch2_ch
 
-        script:
-            """
-            ##histogram generation
-            bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_prelenFilt_bhist.txt qhist=${params.projtag}_all_merged_prelenFilt_qhist.txt gchist=${params.projtag}_all_merged_prelenFilt_gchist.txt aqhist=${params.projtag}_all_merged_prelenFilt_aqhist.txt lhist=${params.projtag}_all_merged_prelenFilt_lhist.txt gcbins=auto
-            ##Trimming and lower length filtering
-            fastp -i ${reads} -o ${params.projtag}_merged_reads_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
-            ##Reformat to fasta for counts
-            reformat.sh in=${params.projtag}_merged_reads_clean.fastq out=${params.projtag}_merged_clean.fasta t=${task.cpus}
-            bbduk.sh in=${params.projtag}_merged_reads_clean.fastq  out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
-            bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postlenFile_bhist.txt qhist=${params.projtag}_all_merged_postlenFile_qhist.txt gchist=${params.projtag}_all_merged_postlenFile_gchist.txt aqhist=${params.projtag}_all_merged_postlenFile_aqhist.txt lhist=${params.projtag}_all_merged_postlenFile_lhist.txt gcbins=auto
-            """
-        }
+                file("*preFilt_preClean_baseFrequency_hist.csv") into prefilt_basefreq
+                file("*preFilt_preClean_qualityScore_hist.csv") into prefilt_qualityscore
+                file("*preFilt_preClean_gcContent_hist.csv") into prefilt_gccontent
+                file("*preFilt_preClean_averageQuality_hist.csv") into prefilt_averagequality
+                file("*preFilt_preClean_length_hist.csv") into prefilt_length
+
+                file("*postFilt_baseFrequency_hist.csv") into postFilt_basefreq
+                file("*postFilt_qualityScore_hist.csv") into postFilt_qualityscore
+                file("*postFilt_gcContent_hist.csv") into postFilt_gccontent
+                file("*postFilt_averageQuaulity_hist.csv") into postFilt_averagequality
+                file("*postFilt_length_hist.csv") into postFilt_length
+
+                file("reads_per_sample_preFilt_preClean.csv") into reads_per_sample_preFilt
+                file("read_per_sample_postFilt_postClean.csv") into reads_per_sample_postFilt
+            script:
+                """
+                bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_preFilt_preClean_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_preFilt_preClean_qualityScore_hist.txt gchist=${params.projtag}_all_merged_preFilt_preClean_gcContent_hist.txt aqhist=${params.projtag}_all_merged_preFilt_preClean_averageQuality_hist.txt lhist=${params.projtag}_all_merged_preFilt_preClean_length_hist.txt gcbins=auto
+                for x in *preFilt*hist.txt;do
+                    pre=\$(echo \$x | awk -F ".txt" '{print \$1}')
+                    cat \$x | tr "\t" "," > \${pre}.csv
+                    rm \$x
+                done
+                grep ">" ${reads} | awk -F ">" '{print \$2}' | awk -F "." '{print \$1}' | sort --parallel=${task.cpus} | uniq -c | sort -brg --parallel=${task.cpus} | awk '{print \$2","\$1}' > reads_per_sample_preFilt_preClean.csv
+                fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
+                reformat.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_preFilt_clean.fasta t=${task.cpus}
+                bbduk.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
+                bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postFilt_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_postFilt_qualityScore_hist.txt gchist=${params.projtag}_all_merged_postFilt_gcContent_hist.txt aqhist=${params.projtag}_all_merged_postFilt_averageQuaulity_hist.txt lhist=${params.projtag}_all_merged_postFilt_length_hist.txt gcbins=auto
+                for x in *postFilt*hist.txt;do
+                    pre=\$(echo \$x | awk -F ".txt" '{print \$1}')
+                    cat \$x | tr "\t" "," > \${pre}.csv
+                    rm \$x
+                done
+                grep ">" ${params.projtag}_merged_clean_Lengthfiltered.fastq | awk -F ">" '{print \$2}' | awk -F "." '{print \$1}' | sort --parallel=${task.cpus} | uniq -c | sort -brg --parallel=${task.cpus} | awk '{print \$2","\$1}' > read_per_sample_postFilt_postClean.csv
+                """
+    }
 
     process Extract_Uniques_DC {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/Uniques", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging/Uniques", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch2_ch
 
         output:
-            file("all_unique_seq.fasta") into reads_vsearch3_ch
+            file("*unique_sequences.fasta") into reads_vsearch3_ch
 
         script:
             """
-            vsearch --derep_fulllength ${reads} --sizeout --relabel_keep --output all_unique_seq.fasta
+            vsearch --derep_fulllength ${reads} --sizeout --relabel_keep --output ${params.projtag}_unique_sequences.fasta
             """
     }
 
@@ -2774,35 +2790,35 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/Uniques/asvs/wchimeras", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/ASVs/ChimeraCheck", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch3_ch
 
         output:
-            file("asv_chim.fasta") into reads_vsearch4_ch
+            file("*notChecked.fasta") into reads_vsearch4_ch
 
         script:
             """
-            vsearch --cluster_unoise ${reads} --unoise_alpha ${params.alpha} --relabel ASV --centroids asv_chim.fasta --minsize ${params.minSize}
+            vsearch --cluster_unoise ${reads} --unoise_alpha ${params.alpha} --relabel ASV --centroids ${params.projtag}_notChecked.fasta --minsize ${params.minSize}
             """
     }
 
-    process Chimera_Removal_DC {
+    process Chimera_Check_DC {
 
         label 'norm_cpus'
 
         publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/ASVs", mode: "copy", overwrite: true
 
         input:
-            file(reads) from reads_vsearch4_ch
+            file(fasta) from reads_vsearch4_ch
 
         output:
             file("*ASVs_all.fasta") into ( reads_vsearch5_ch, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck )
 
         script:
             """
-	        vsearch --uchime3_denovo asv_chim.fasta --relabel ASV --nonchimeras ${params.projtag}_ASVs_all.fasta
+	        vsearch --uchime3_denovo ${fasta} --relabel ASV --nonchimeras ${params.projtag}_ASVs_all.fasta
             """
     }
 
@@ -2810,22 +2826,26 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/nOTU", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/Nucleotide", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
         input:
             file(fasta) from reads_vsearch5_ch
 
         output:
-            tuple file("*_otu*.fasta"), file("*ASV_all.fasta") into nuclFastas_forDiamond_ch
-            file("*_otu*.fasta") into ( fileforMafft, nuclFastas_forMatrix_ch )
+            file("number_per_percentage_nucl.csv") into number_per_percent_nucl_plot
 
         script:
         if (params.datacheckntIDlist) {
             """
-            for id in `echo ${params.datacheckntIDlist} | tr "," "\n"`;done
-                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_otu\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
+            for id in `echo ${params.datacheckntIDlist} | tr "," "\\n"`;do
+                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_nOTU\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
             done
-            cp ${fasta} ${params.projtag}_ASV_all.fasta
+            for x in *nOTU*.fasta;do
+                id=\$( echo \$x | awk -F "_nOTU" '{print \$1}' | awk -F ".fasta" '{print \$2}')
+                numb=\$( grep -c ">" \$x )
+                echo "\${id},\${numb}" >> number_per_percentage_nucl.csv
+            done
+            echo "1.0,\$(grep -c ${fasta})" >> number_per_percentage_nucl.csv
             """
         }
     }
@@ -2836,7 +2856,7 @@ if (params.dataCheck) {
 
         conda 'python=2.7'
 
-        publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU/translation", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
 
         input:
             file(fasta) from nucl2aa
@@ -2849,6 +2869,7 @@ if (params.dataCheck) {
         script:
             """
             ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
+            cp ${fasta} ${params.projtag}_ASV_all.fasta
             """
     }
 
@@ -2856,48 +2877,63 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/Aminoacid", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
         input:
             file(fasta) from clustering_aa
             file(asvs) from asvfastaforaaclust
 
         output:
-            file("${params.projtag}_nucleotides_pOTU*.fasta") into pOTU_fastas
-            file("${params.projtag}_aminos_pOTU*_noTaxonomy.fasta") into ( pOTUaa_notlabeled_fasta )
+            file("number_per_percentage_prot.csv") into number_per_percent_prot_plot
 
         script:
         // add awk script to count seqs
             """
             cp ${params.mypwd}/bin/rename_seq.py .
-            for id in `echo ${params.datacheckaaIDlist} | tr "," "\n"`;do
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_filtered_proteins.fasta
-                cd-hit -i ${params.projtag}_filtered_proteins.fasta -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
+            for id in `echo ${params.datacheckaaIDlist} | tr "," "\\n"`;do
+                if [ \${id} == ".55" ];then
+                    word=3
+                elif [ \${id} == ".65" ];then
+                    word=4
+                else
+                    word=5
+                fi
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
+                cd-hit -i ${params.projtag}_filtered_proteins.fasta -n \${word} -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
                 sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
-                rm ${params.projtag}_pOTU\${id}.fasta.clstr
                 grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >temporaryclusters.list
+                y=\$(grep -c ">Cluster_" ${params.projtag}_pOTU\${id}.clstr)
+                echo ">Cluster_"\${y}"" >> ${params.projtag}_pOTU\${id}.clstr
+                t=1
+                b=1
                 for x in \$(cat temporaryclusters.list);do
                     echo "Extracting \$x"
-                    name=\$( echo \$x | awk -F ">" '{print \$2}')
-                    sed -n "/\$name/,/Cluster_/p" ${params.projtag}_pOTU\${id}.clstr > "\$name"_tmp.list
+                    name="\$( echo \$x | awk -F ">" '{print \$2}')"
+                    clust="pOTU"\${t}""
+                    echo "\${name}"
+                    awk '/^>'\${name}'\$/,/^>Cluster_'\${b}'\$/' ${params.projtag}_pOTU\${id}.clstr > "\${name}"_"\${clust}"_tmp.list
+                    t=\$(( \${t}+1 ))
+                    b=\$(( \${b}+1 ))
                 done
-                j=1
+                ls *_tmp.list
+                u=1
                 for x in *_tmp.list;do
-                    name=\$(echo \$x | awk -F "_tmp" '{print \$1}')
-                    cluster="pOTU\${j}"
-                    grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > seqs_tmps.list
-                    seqtk subseq ${asvs} seqs_tmps.list > \${cluster}_nucleotide_sequences.fasta
-                    vsearch --cluster_fast \${cluster}_nucleotide_sequences.fasta --id 0.2 --centroids \${name}_centroids.fasta
-                    grep ">" \${name}_centroids.fasta >> tmp_centroids.list
-                    u="1"
-                    for y in \$( cat tmp_centroids.list);do
-                        echo ">\${cluster}_type"\$u"" >> tmp_centroid.newheaders
-                        u=\$(( \$u+1 ))
+                    name="\$(echo \$x | awk -F "_p" '{print \$1}')"
+                    echo "\${name}"
+                    cluster="\$(echo \$x | awk -F "_" '{print \$3}')"
+                    echo "\${cluster}"
+                    grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > \${name}_\${cluster}_seqs_tmps.list
+                    seqtk subseq ${asvs} \${name}_\${cluster}_seqs_tmps.list > \${name}_\${cluster}_nucleotide_sequences.fasta
+                    vsearch --cluster_fast \${name}_\${cluster}_nucleotide_sequences.fasta --id 0.2 --centroids \${name}_\${cluster}_centroids.fasta
+                    grep ">" \${name}_\${cluster}_centroids.fasta >> \${name}_\${cluster}_tmp_centroids.list
+                    for y in \$( cat \${name}_\${cluster}_tmp_centroids.list );do
+                        echo ">\${cluster}_type"\$u"" >> \${name}_\${cluster}_tmp_centroid.newheaders
+                        u=\$(( \${u}+1 ))
                     done
-                    ./rename_seq.py \${name}_centroids.fasta tmp_centroid.newheaders \${cluster}_types_labeled.fasta
-                    j=\$(( \$j+1 ))
+                    u=1
+                    ./rename_seq.py \${name}_\${cluster}_centroids.fasta \${name}_\${cluster}_tmp_centroid.newheaders \${cluster}_types_labeled.fasta
                 done
-                cat *_types_labeled.fasta >> ${params.projtag}_nucleotides_pOTU\${id}.fasta
+                cat *_types_labeled.fasta >> ${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta
                 grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
                 grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
                 paste -d"," temporaryclusters.list tmphead.list >tmp.info.csv
@@ -2906,44 +2942,105 @@ if (params.dataCheck) {
                 for x in \$(cat lala.list);do
                     echo ">${params.projtag}_pOTU\${j}" >>${params.projtag}_aminoheaders.list
                     echo "\${x},>${params.projtag}_pOTU\${j}" >>tmpaminotype.info.csv
-                    j=\$(( \$j+1 ))
+                    j=\$(( \${j}+1 ))
                 done
                 rm lala.list
                 awk -F "," '{print \$2}' tmp.info.csv >>tmporder.list
                 for x in \$(cat tmporder.list);do
                     grep -w "\$x" tmpaminotype.info.csv | awk -F "," '{print \$2}' >>tmpder.list
                 done
-                paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pOTUCluster_summary.csv
-                rm tmp*
-                ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminos_pOTU\${id}_noTaxonomy.fasta
-                stats.sh in=${params.projtag}_aminos_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_clustered.gc gcformat=4
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_problematic_translations.fasta
-                if [ `wc -l ${params.projtag}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
-                    grep ">" ${params.projtag}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
-                    seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_problematic_nucleotides.fasta
+                paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pOTUCluster\${id}_summary.csv
+                ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta
+                stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_aminoacid_clustered.gc gcformat=4
+                stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_nucleotide_clustered.gc gcformat=4
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)<50{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
+                if [ `wc -l ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
+                    grep ">" ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
+                    seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
+                else
+                   rm ${params.projtag}_pOTU\${id}_problematic_translations.fasta
                 fi
-                done
+                rm *.list
+                rm Cluster*
+                rm *types*
+                rm *tmp*
+                rm ${params.projtag}_pOTU\${id}.fast*
             done
-            """
+            for x in *aminoacid*noTaxonomy.fasta;do
+                id=\$( echo \$x | awk -F "_noTax" '{print \$1}' | awk -F "pOTU" '{print \$2}')
+                numb=\$( grep -c ">" \$x)
+                echo "\${id},\${numb}" >> number_per_percentage_prot.csv
+            done
+        """
 	}
-    /*process Report_DataCheck {
+
+    process combine_csv_DC {
+
+        input:
+            file(csv) from fastp_csv
+                .collect()
+
+        output:
+            file("final_reads_stats.csv") into fastp_csv1
+
+        script:
+            """
+            cat ${csv} >all_reads_stats.csv
+            head -n1 all_reads_stats.csv >tmp.names.csv
+            cat all_reads_stats.csv | grep -v ""Sample,Total_"" >tmp.reads.stats.csv
+            cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
+            rm tmp.names.csv tmp.reads.stats.csv
+            """
+
+    }
+
+    process Report_DataCheck {
 
         label 'norm_cpus'
 
         publishDir "${params.mypwd}/${params.outdir}/DataCheck/Report", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
 
         input:
-            file(fasta) from reads_vsearch5_ch
+            file(fastpcsv) from fastp_csv1
+            file(reads_per_sample_preFilt) from reads_per_sample_preFilt
+            file(read_per_sample_postFilt) from reads_per_sample_postFilt
+            file(preFilt_baseFrequency) from prefilt_basefreq
+            file(postFilt_baseFrequency) from postFilt_basefreq
+            file(preFilt_qualityScore) from prefilt_qualityscore
+            file(postFilt_qualityScore) from postFilt_qualityscore
+            file(preFilt_gcContent) from prefilt_gccontent
+            file(postFilt_gcContent) from postFilt_gccontent
+            file(preFilt_averageQuality) from prefilt_averagequality
+            file(postFilt_averageQuaulity) from postFilt_averagequality
+            file(preFilt_length) from prefilt_length
+            file(postFilt_length) from postFilt_length
+            file(number_per_percentage_nucl) from number_per_percent_nucl_plot
+            file(number_per_percentage_prot) from number_per_percent_prot_plot
 
         output:
-            tuple file("*_otu*.fasta"), file("*ASV_all.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch )
-            file("*_otu*.fasta") into ( fileforMafft, nuclFastas_forMatrix_ch )
+
 
         script:
             """
-            echo "Report"
+            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+            Rscript -e "rmarkdown::render('TransPi_Report_Ind.Rmd',output_file='${params.projtag}_DataCheck_Report.html')" ${params.projtag} \
+            ${fastpcsv} \
+            ${reads_per_sample_preFilt} \
+            ${read_per_sample_postFilt} \
+            ${preFilt_baseFrequency} \
+            ${postFilt_baseFrequency} \
+            ${preFilt_qualityScore} \
+            ${postFilt_qualityScore} \
+            ${preFilt_gcContent} \
+            ${postFilt_gcContent} \
+            ${preFilt_averageQuality} \
+            ${postFilt_averageQuaulity} \
+            ${preFilt_length} \
+            ${postFilt_length} \
+            ${number_per_percentage_nucl} \
+            ${number_per_percentage_prot}
             """
-    }*/
+    }
 }
 
 workflow.onComplete {

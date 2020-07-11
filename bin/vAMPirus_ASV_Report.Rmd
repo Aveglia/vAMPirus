@@ -343,6 +343,8 @@ MDS <- metaMDS(sqrt(datax),
                trymax = 500,
                wascores = TRUE)
 
+if (MDS$converged == "TRUE") {
+
 data.scores <- as.data.frame(scores(MDS))
 data.scores$sample <- data5$sample
 data.scores.2 <- merge(data.scores, metadata, by="sample")
@@ -360,7 +362,9 @@ fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol,
 fff <- fff %>% layout(legend=list(y=.5))
 fff
 
-
+} else {
+  print("No Convergence")
+}
 ```
 
 <br>
@@ -379,6 +383,7 @@ MDS3 <- metaMDS(sqrt(datax),
                trymax = 500,
                wascores = TRUE)
 
+if (MDS3$converged == "TRUE") {
 
 data.scores3 <- as.data.frame(scores(MDS3))
 data.scores3$sample <- data5$sample
@@ -390,6 +395,10 @@ p3d <- plot_ly(data.scores.3, x= ~ NMDS1, y = ~ NMDS2, z = ~ NMDS3, text = ~past
         )
 p3d <- p3d %>% layout(legend=list(y=.5))
 p3d
+
+} else {
+  print("No Convergence")
+}
 ```
 <br>
 <br>
