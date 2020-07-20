@@ -1496,7 +1496,8 @@ if (params.Analyze) {
 
             output:
                 tuple file("*_protcounts.csv"), file("*dmd.out") into counts_summary
-                file("_protcounts.csv") into aminocounts_plot
+                file("*_protcounts.csv") into aminocounts_plot
+
             script:
                 """
                 set +e
