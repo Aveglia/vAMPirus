@@ -610,7 +610,7 @@ if (params.Analyze) {
 
         script:
             """
-            cat ${reads} >>${params.projtag}_all_merged_preFilt_preCLean.fastq
+            cat ${reads} >>${params.projtag}_all_merged_preFilt_preClean.fastq
 	        """
     }
 
@@ -1048,29 +1048,29 @@ if (params.Analyze) {
                 if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
                     ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                     name=\$( echo \${filename}| awk -F ".fasta" '{print \$1}')
-                    clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
+                    clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
                     clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
                     for x in *q.matrix;do
                         pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                         ya=\$(wc -l \$x | awk '{print \$1}')
                         echo "\$((\$ya-1))"
-                        tail -"\$((\$ya-1))" \$x > "\$pre"z.matrix
+                        tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
                         rm \$x
-                        cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
-                        rm \$pre"z.matrix
+                        cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
+                        rm \${pre}z.matrix
                     done
                 else
                     name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
-                    clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
+                    clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
                     clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
                     for x in *q.matrix;do
                         pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                         ya=\$(wc -l \$x | awk '{print \$1}')
                         echo "\$((\$ya-1))"
-                        tail -"\$((\$ya-1))" \$x > "\$pre"z.matrix
+                        tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
                         rm \$x
-                        cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
-                        rm \$pre"z.matrix
+                        cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
+                        rm \${pre}z.matrix
                     done
                 fi
             done
@@ -1226,10 +1226,10 @@ if (params.Analyze) {
                     pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                     ya=\$(wc -l \$x | awk '{print \$1}')
                     echo "\$((\$ya-1))"
-                    tail -"\$(( \$ya-1))" \$x > "\$pre"z.matrix
+                    tail -"\$(( \$ya-1))" \$x > \${pre}z.matrix
                     rm \$x
-                    cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
-                    rm \$pre"z.matrix
+                    cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
+                    rm \${pre}z.matrix
                 done
                 """
         }
@@ -1884,12 +1884,12 @@ if (params.Analyze) {
             output:
                 tuple file("*_counts.txt"), file("*_counts.biome") into pOTUcounts_vsearch
                 file("*.csv") into potu_Ncounts_for_report
+
             script:
                 """
                 ident=\$( echo ${reads} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
                 name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}')
                 cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
-
                 """
         }
 
@@ -1905,6 +1905,7 @@ if (params.Analyze) {
             output:
                 file("*.matrix") into pOTUclustmatrices
                 file("*PercentID.matrix") into potu_nucl_heatmap
+
             script:
                 """
                 ident=\$( echo ${reads} | awk -F "OTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
@@ -1915,10 +1916,10 @@ if (params.Analyze) {
                     pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                     ya=\$(wc -l \$x | awk '{print \$1}')
                     echo "\$((\$ya-1))"
-                    tail -"\$((\$ya-1))" \$x > "\$pre"z.matrix
+                    tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
                     rm \$x
-                    cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
-                    rm \$pre"z.matrix
+                    cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
+                    rm \${pre}z.matrix
                 done
                 """
         }
@@ -1995,10 +1996,10 @@ if (params.Analyze) {
                     pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
                     ya=\$(wc -l \$x | awk '{print \$1}')
                     echo "\$((\$ya-1))"
-                    tail -"\$((\$ya-1))" \$x > "\$pre"z.matrix
+                    tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
                     rm \$x
-                    cat "\$pre"z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >"\$pre".matrix
-                    rm \$pre"z.matrix
+                    cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
+                    rm \${pre}z.matrix
                 done
                 """
         }
@@ -2421,7 +2422,7 @@ if (params.Analyze) {
 
         } else {
 
-            process Report_ASV {
+            process Report_ASVs {
 
                 label 'norm_cpus'
 
@@ -2454,7 +2455,7 @@ if (params.Analyze) {
 
             if (!params.skipAminoTyping) {
 
-                process Report_AmynoTypes {
+                process Report_AmynoType {
 
                     label 'norm_cpus'
 
@@ -2551,12 +2552,11 @@ if (params.Analyze) {
             }
         }
 
-} else {
-	println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
-	//exit 0
+    } else {
+    	println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
+    	//exit 0
+    }
 }
-
-
 
 if (params.generateAAcounts) {
 
