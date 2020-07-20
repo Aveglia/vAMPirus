@@ -1,5 +1,5 @@
 ---
-title: "vAMPirus Report: `!r commandArgs(trailingOnly=T)[1]`"
+title: "vAMPirus ASV Report `!r commandArgs(trailingOnly=T)[1]`"
 date: "Generated on: `r Sys.time()`"
 output: html_document
 params:
@@ -26,6 +26,20 @@ knitr::opts_chunk$set(echo = TRUE,
       out.width="100%")
 ```
 
+```{bash name, echo=FALSE}
+cat << "EOF"
+
+      ,---.,-.-.,---.o                       
+.    ,|---|| | ||---'.,---..   .,---.              
+ \  / |   || | ||    ||    |   |`---.           
+  `'  `   `` ` ``    ``    `---``---`               
+"EOF"
+```
+
+```{r logo_plot, echo=FALSE}
+#knitr::include_graphics("vamp_logo.png")
+```
+
 ```{r load_libraries, include=FALSE}
 library(vegan)
 #library(rstatix)
@@ -39,6 +53,7 @@ library(BiocParallel)
 library(knitr)
 library(kableExtra) #install.packages("kableExtra")
 library(rmarkdown)
+library(processx) #install.packages("processx")
 register(MulticoreParam(4))
 ```
 
@@ -46,9 +61,12 @@ register(MulticoreParam(4))
 mycol=c('#088da5','#73cdc8','#ff6f61','#7cb8df','#88b04b','#00a199','#6B5B95','#92A8D1','#b0e0e6','#ff7f50','#088d9b','#E15D44','#e19336')
 ```
 <br>
+
+NOTE: Most plots are interactive and you can use the legend to specify samples/treament of interest
+
 <br>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pre- and Post-Adapter Removal Read Stats</h2></div>
 <br>
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Read Stats</h2></div>
 ```{r readstats, echo=FALSE}
 reads_stats=read.csv(params$reads)
 #reads_stats=read.csv("PVID_final_reads_stats.csv")
@@ -72,31 +90,33 @@ fig <- plot_ly(
 ```
 <br>
 <br>
-<br>
+
+
+### Total number of reads before and after adapter removal
+
 ```{r readstats_plot, echo=FALSE}
 # Plot of reads before and after
 ptotal <- plot_ly(typle="box",marker=list(colors=mycol))
 ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_before, name="Reads before filtering")
 ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_after, name="Reads after filtering")
-ptotal <- ptotal %>% layout(title=list(text="Number of reads before and after filtering"))
+#ptotal <- ptotal %>% layout(title=list(text="Number of reads before and after filtering"))
 ptotal <- ptotal %>% layout(legend = list(x=10,y=.5))
 ptotal
 ```
 <br>
-<br>
-<br>
+
+### Forward (R1) and reverse (R2) read length before and after adapter removal
+
 ```{r readstats_plot2, echo=FALSE}
 # Plot of R1 and R2 before and after
 pr <- plot_ly(y=reads_stats$R1_before_length, type="box", name="R1 length before")
 pr <- pr %>% add_boxplot(y=reads_stats$R1_after_length, name="R1 length after")
 pr <- pr %>% add_boxplot(y=reads_stats$R2_before_length, name="R2 length before")
 pr <- pr %>% add_boxplot(y=reads_stats$R2_after_length, name="R2 length after")
-pr <- pr %>% layout(title = "R1 and R2 Length")
+#pr <- pr %>% layout(title = "R1 and R2 Length")
 pr <- pr %>% layout(legend = list(x=10,y=.5))
 pr
 ```
-<br>
-<br>
 <br>
 <br>
 <br>
@@ -141,7 +161,7 @@ data4 <- data3%>%
 ```
 
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Counts plot</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Number of Reads Per Sample</h2></div>
 
 ```{r plot, echo=FALSE}
 # sample and count
@@ -192,12 +212,14 @@ raredata <- as.data.frame(rrarefy(data5[,2:cols], sample=minreads))
 <br>
 
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Diversity plots</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Diversity Analyses Plots</h2></div>
 
 <br>
 <br>
-<br>
 
+### Shannon diversty
+
+<br>
 ```{r diversity_analysis, echo=FALSE}
 
 index <-diversity(raredata, index= "shannon")
@@ -234,7 +256,7 @@ rarerichnessdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
 #sh
 
 sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
-sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
+#sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
 sh <- sh %>% layout(legend = list(x=10,y=.5))
 sh <- sh %>% layout(yaxis=list(title = "Index"))
 sh <- sh %>% layout(xaxis=list(title = "Treatment"))
@@ -244,6 +266,9 @@ sh
 <br>
 <br>
 <br>
+
+### Simpson diversty
+
 <br>
 ```{r diversity_analysis2, echo=FALSE}
 #simpsonplot <- ggplot(simpsondata5_2, aes(x=treatment,color=treatment,y=index))+
@@ -259,7 +284,7 @@ sh
 #s
 
 s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
-s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
+#s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
 s <- s %>% layout(legend = list(x=10,y=.5))
 s <- s %>% layout(yaxis=list(title = "Index"))
 s <- s %>% layout(xaxis=list(title = "Treatment"))
@@ -269,6 +294,9 @@ s
 <br>
 <br>
 <br>
+
+### Species Richness
+
 <br>
 ```{r diversity_analysis3, echo=FALSE}
 #richnessplot <- ggplot(rarerichnessdata5_2, aes(x=treatment,color=treatment,y=index))+
@@ -280,7 +308,7 @@ s
 #  theme(legend.position = "none")
 
 ri <- plot_ly(rarerichnessdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
-ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
+#ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
 ri <- ri %>% layout(legend = list(x=10,y=.5))
 ri <- ri %>% layout(yaxis=list(title = "Index"))
 ri <- ri %>% layout(xaxis=list(title = "Treatment"))
@@ -292,8 +320,8 @@ ri
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Distance</h2></div>
-
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Distance To Centroid</h2></div>
+<br>
 ```{r distance, echo=FALSE}
 ##Distance
 intermediate <- raredata
@@ -318,7 +346,7 @@ df2 <- merge(df, metadata, by="sample")
 #cen
 
 cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
-cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
+#cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
 cen <- cen %>% layout(legend = list(x=10,y=.5))
 cen <- cen %>% layout(yaxis=list(title = "Distance"))
 cen <- cen %>% layout(xaxis=list(title = "Treatment"))
@@ -330,8 +358,13 @@ cen
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS2D</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS Plots</h2></div>
 
+<br>
+
+### 2D NMDS
+
+<br>
 ```{r nmds2d, echo=FALSE}
 ##NMDS
 datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
@@ -371,9 +404,10 @@ fff
 <br>
 <br>
 <br>
-<br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS3D</h2></div>
+### 3D NMDS
+
+<br>
 
 ```{r nmds3d, echo=FALSE}
 MDS3 <- metaMDS(sqrt(datax),
@@ -406,7 +440,7 @@ p3d
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Sample OTU barplot</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;OTU Abundance Per Sample</h2></div>
 
 ```{r long, echo=FALSE}
 dataz <- decostand(data5[,2:cols],method="total") #method 'total' normalizes data to sum up to 1
@@ -443,7 +477,7 @@ ddd
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;ASV barplot</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;OTU Abundance Per Treatment</h2></div>
 
 ```{r asv_barplot, echo=FALSE}
 datalong <- datalong %>%
@@ -469,7 +503,7 @@ asp2
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Heatmap</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pairwise Percent-ID Heatmap</h2></div>
 
 <br>
 <br>
@@ -505,7 +539,7 @@ ggplotly(similaritymatrix)
 <br>
 
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Taxonomy</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Taxonomy Result Visualization</h2></div>
 
 <br>
 <br>
@@ -521,7 +555,6 @@ tp <- tp %>% layout(title = "Taxonomy distribution",  showlegend = F,
                     yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
                     )
 
-
 tp
 ```
 
@@ -534,4 +567,4 @@ tp
 <br>
 <br>
 <br>
-
+<br>
