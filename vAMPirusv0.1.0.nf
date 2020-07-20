@@ -1502,7 +1502,7 @@ if (params.Analyze) {
                 set +e
                 diamond makedb --in ${fasta} --db ${fasta}
                 diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_protCounts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-                echo "# OTU ID" >tmp.col1.txt
+                echo "#OTU ID" >tmp.col1.txt
                 echo "Generating sample id list"
                 grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
                 cat otuid.list >> tmp.col1.txt
@@ -1889,6 +1889,7 @@ if (params.Analyze) {
                 """
                 ident=\$( echo ${reads} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
                 name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}')
+                vsearch --usearch_global ${merged} --db ${reads} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                 cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
                 """
         }
@@ -2272,7 +2273,7 @@ if (params.Analyze) {
                 potu="\$( echo ${fasta} | awk -F "_" '{print \$3}')"
                 diamond makedb --in ${fasta} --db ${fasta}
                 diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-                echo "# OTU ID" >tmp.col1.txt
+                echo "#OTU ID" >tmp.col1.txt
                 echo "Generating sample id list"
                 grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
                 cat otuid.list >> tmp.col1.txt
