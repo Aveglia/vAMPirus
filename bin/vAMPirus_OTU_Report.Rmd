@@ -97,7 +97,7 @@ fig <- plot_ly(
 
 ```{r readstats_plot, echo=FALSE}
 # Plot of reads before and after
-ptotal <- plot_ly(typle="box",marker=list(colors=mycol))
+ptotal <- plot_ly(type="box",marker=list(colors=mycol))
 ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_before, name="Reads before filtering")
 ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_after, name="Reads after filtering")
 #ptotal <- ptotal %>% layout(title=list(text="Number of reads before and after filtering"))
@@ -177,7 +177,8 @@ con
 ```{r filter_data, include=FALSE}
 ##Filter samples with low reads
 data5 <- data4 %>%
-  filter(sum>10000)
+  filter(sum>1000)
+   #can cause errors
 data5dim <-dim(data5)
 minreads<-min(data5$sum)
 # Filter by treatment
