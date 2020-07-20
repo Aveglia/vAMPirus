@@ -2320,7 +2320,7 @@ if (params.Analyze) {
         }
     }
 
-    if (params.nOTU && params.pOTU) {
+    if (params.nOTU) {
 
         // Report ASV
         // Report Nuc
@@ -2351,7 +2351,7 @@ if (params.Analyze) {
                 ${counts} \
                 ${params.metadata} \
                 ${params.filt} \
-    	    ${matrix} \
+    	        ${matrix} \
                 ${taxonomy}
                 """
             }
@@ -2387,105 +2387,169 @@ if (params.Analyze) {
                 """
             }
 
-        process Report_pOTU_AminoAcid {
+        if (!params.skipAminoTyping) {
 
-            label 'norm_cpus'
+            process Report_AmynoTypes {
 
-            publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                label 'norm_cpus'
 
-            input:
-                file(counts) from potu_Acounts
-                file(taxonomy) from taxplot4
-                file(matrix) from potu_aa_heatmap
-                file(phylogeny) from potu_Atree_plot
-                file(readsstats) from fastp_csv3
+                publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
 
-            output:
-                file("*.html") into report_summaryC
+                input:
+                    file(counts) from aminocounts_plot
+                    file(taxonomy) from taxplot2
+                    file(matrix) from aminotype_heatmap
+                    file(phylogeny) from amino_rax_plot
+                    file(readsstats) from fastp_csv5
 
-            script:
-                """
-                name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
-                Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa_Report.html')" \${name} \
-                ${readsstats} \
-                ${counts} \
-                ${params.metadata} \
-                ${params.filt} \
-    	    ${matrix} \
-                ${taxonomy} \
-                ${phylogeny}
-                """
+                output:
+                    file("*.html") into report_summaryE
+
+                script:
+                    """
+                    name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                    cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+                    Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
+                    ${readsstats} \
+                    ${counts} \
+                    ${params.metadata} \
+                    ${params.filt} ${matrix} \
+                    ${taxonomy} \
+                    ${phylogeny}
+                    """
             }
 
-        process Report_pOTU_Nucleotide {
+        } else {
 
-            label 'norm_cpus'
+            process Report_ASV {
 
-            publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                label 'norm_cpus'
 
-            input:
-                file(counts) from potu_Ncounts_for_report
-                file(taxonomy) from taxplot3
-                file(matrix) from potu_nucl_heatmap
-                file(phylogeny) from potu_Ntree_plot
-                file(readsstats) from fastp_csv4
+                publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
 
-            output:
-                file("*.html") into report_summaryD
+                input:
+                    file(counts) from asv_counts_plots
+                    file(taxonomy) from taxplot1
+                    file(matrix) from asv_heatmap
+                    file(phylogeny) from nucl_phyl_plot
+                    file(readsstats) from fastp_csv1
 
-            script:
-                """
-                name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
-                Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt_Report.html')" \${name} \
-                ${readsstats} \
-                ${counts} \
-                ${params.metadata} \
-                ${params.filt} \
-    	        ${matrix} \
-                ${taxonomy} \
-                ${phylogeny}
-                """
+                output:
+                    file("*.html") into report_summaryA
+
+                script:
+                    """
+                    name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                    cp ${params.mypwd}/bin/vAMPirus_ASV_Report.Rmd .
+                    Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
+                    ${readsstats} \
+                    ${counts} \
+                    ${params.metadata} \
+                    ${params.filt} \
+                    ${matrix} \
+                    ${taxonomy} \
+                    ${phylogeny}
+                    """
             }
 
-        process Report_AmynoTypes {
+            if (!params.skipAminoTyping) {
 
-            label 'norm_cpus'
+                process Report_AmynoTypes {
 
-            publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                    label 'norm_cpus'
 
-            input:
-                file(counts) from aminocounts_plot
-                file(taxonomy) from taxplot2
-                file(matrix) from aminotype_heatmap
-                file(phylogeny) from amino_rax_plot
-                file(readsstats) from fastp_csv5
+                    publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
 
-            output:
-                file("*.html") into report_summaryE
+                    input:
+                        file(counts) from aminocounts_plot
+                        file(taxonomy) from taxplot2
+                        file(matrix) from aminotype_heatmap
+                        file(phylogeny) from amino_rax_plot
+                        file(readsstats) from fastp_csv5
 
-            script:
-                """
-                name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
-                Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
-                ${readsstats} \
-                ${counts} \
-                ${params.metadata} \
-                ${params.filt} ${matrix} \
-                ${taxonomy} \
-                ${phylogeny}
-                """
+                    output:
+                        file("*.html") into report_summaryE
+
+                    script:
+                        """
+                        name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                        cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+                        Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
+                        ${readsstats} \
+                        ${counts} \
+                        ${params.metadata} \
+                        ${params.filt} ${matrix} \
+                        ${taxonomy} \
+                        ${phylogeny}
+                        """
+                }
             }
+        }
 
-    } else if (params.nOTU && !params.pOTU) {
-        println("nuc")
-    } else if (!params.nOTU && params.pOTU) {
-        println("prot")
-    } else if (!params.nOTU && !params.pOTU && params.skipAminoTyping) {
-        println("else")
-    }
+        if (params.pOTU) {
+
+            process Report_pOTU_AminoAcid {
+
+                label 'norm_cpus'
+
+                publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+                input:
+                    file(counts) from potu_Acounts
+                    file(taxonomy) from taxplot4
+                    file(matrix) from potu_aa_heatmap
+                    file(phylogeny) from potu_Atree_plot
+                    file(readsstats) from fastp_csv3
+
+                output:
+                    file("*.html") into report_summaryC
+
+                script:
+                    """
+                    name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                    cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+                    Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa_Report.html')" \${name} \
+                    ${readsstats} \
+                    ${counts} \
+                    ${params.metadata} \
+                    ${params.filt} \
+        	        ${matrix} \
+                    ${taxonomy} \
+                    ${phylogeny}
+                    """
+                }
+
+            process Report_pOTU_Nucleotide {
+
+                label 'norm_cpus'
+
+                publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+
+                input:
+                    file(counts) from potu_Ncounts_for_report
+                    file(taxonomy) from taxplot3
+                    file(matrix) from potu_nucl_heatmap
+                    file(phylogeny) from potu_Ntree_plot
+                    file(readsstats) from fastp_csv4
+
+                output:
+                    file("*.html") into report_summaryD
+
+                script:
+                    """
+                    name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
+                    cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
+                    Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt_Report.html')" \${name} \
+                    ${readsstats} \
+                    ${counts} \
+                    ${params.metadata} \
+                    ${params.filt} \
+        	        ${matrix} \
+                    ${taxonomy} \
+                    ${phylogeny}
+                    """
+            }
+        }
 
 } else {
 	println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
@@ -3022,8 +3086,8 @@ if (params.dataCheck) {
 
         script:
             """
-            cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
-            Rscript -e "rmarkdown::render('TransPi_Report_Ind.Rmd',output_file='${params.projtag}_DataCheck_Report.html')" ${params.projtag} \
+            cp ${params.mypwd}/bin/vAMPirus_DC_Report.Rmd .
+            Rscript -e "rmarkdown::render('vAMPirus_DC_Report.Rmd',output_file='${params.projtag}_DataCheck_Report.html')" ${params.projtag} \
             ${fastpcsv} \
             ${reads_per_sample_preFilt} \
             ${read_per_sample_postFilt} \
@@ -3031,8 +3095,6 @@ if (params.dataCheck) {
             ${postFilt_baseFrequency} \
             ${preFilt_qualityScore} \
             ${postFilt_qualityScore} \
-            ${preFilt_gcContent} \
-            ${postFilt_gcContent} \
             ${preFilt_averageQuality} \
             ${postFilt_averageQuaulity} \
             ${preFilt_length} \
@@ -3050,4 +3112,3 @@ workflow.onComplete {
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }
-
