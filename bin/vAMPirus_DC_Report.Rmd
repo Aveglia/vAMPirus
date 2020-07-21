@@ -178,7 +178,7 @@ cat *all_merged_preFilt_preClean_gcContent_hist.csv | grep "#" | tr -d "#"
 ```{r gc_plot, echo=FALSE}
 pregc=read.csv("final_gc.csv", header=F)
 pregcp <- plot_ly(pregc, x=~V1, y=~V2, type="bar", marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)))
+               width = .1)), hovertemplate = paste('GC content: %{x}','<br>Count: %{y}','<extra></extra>'))
 pregcp <- pregcp %>% layout(yaxis = list(title = "Count"))
 pregcp <- pregcp %>% layout(xaxis = list(title = "GC content"))
 pregcp
@@ -197,7 +197,7 @@ cat *all_merged_postFilt_gcContent_hist.csv | grep "#" | tr -d "#"
 ```{r gc2_plot, echo=FALSE}
 postgc=read.csv("final_gc2.csv", header=F)
 postgcp <- plot_ly(postgc, x=~V1, y=~V2, type="bar", marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)))
+               width = .1)), hovertemplate = paste('GC content: %{x}','<br>Count: %{y}','<extra></extra>'))
 postgcp <- postgcp %>% layout(yaxis = list(title = "Count"))
 postgcp <- postgcp %>% layout(xaxis = list(title = "GC content"))
 postgcp
@@ -215,7 +215,7 @@ postgcp
 preaq=read.csv(params$preFilt_averageQuality, header=TRUE)
 #preaq=read.csv("PVID_vAMPtest1_all_merged_preFilt_preClean_averageQuality_hist.csv", header=T)
 preaqp <- plot_ly(preaq, x=preaq[,1], y=preaq[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)))
+               width = .1)), hovertemplate = paste('Average quality: %{x}','<br>Count: %{y}','<extra></extra>'))
 preaqp <- preaqp %>% layout(yaxis = list(title = "Count"))
 preaqp <- preaqp %>% layout(xaxis = list(title = "Average quality"))
 preaqp
@@ -234,7 +234,7 @@ preaqp
 postaq=read.csv(params$postFilt_averageQuaulity, header=TRUE)
 #postaq=read.csv("PVID_vAMPtest1_all_merged_postFilt_averageQuaulity_hist.csv", header=T)
 postaqp <- plot_ly(postaq, x=postaq[,1], y=postaq[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)))
+               width = .1)), hovertemplate = paste('Average quality: %{x}','<br>Count: %{y}','<extra></extra>'))
 postaqp <- postaqp %>% layout(yaxis = list(title = "Count"))
 postaqp <- postaqp %>% layout(xaxis = list(title = "Average quality"))
 postaqp
@@ -252,7 +252,7 @@ postaqp
 prelh=read.csv(params$preFilt_length, header=TRUE)
 #prelh=read.csv("PVID_vAMPtest1_all_merged_preFilt_preClean_length_hist.csv", header=T)
 prelhp <- plot_ly(prelh, x=prelh[,1], y=prelh[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)))
+               width = .1)), hovertemplate = paste('Read Length: %{x}','<br>Count: %{y}','<extra></extra>'))
 prelhp <- prelhp %>% layout(yaxis = list(title = "Count"))
 prelhp <- prelhp %>% layout(xaxis = list(title = "Read Length"))
 prelhp
@@ -268,7 +268,7 @@ prelhp
 postlh=read.csv(params$postFilt_length, header=TRUE)
 #postlh=read.csv("PVID_vAMPtest1_all_merged_postFilt_length_hist.csv", header=T)
 postlhp <- plot_ly(postlh, x=postlh[,1], y=postlh[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)))
+               width = .1)), hovertemplate = paste('Read Length: %{x}','<br>Count: %{y}','<extra></extra>'))
 postlhp <- postlhp %>% layout(yaxis = list(title = "Count"))
 postlhp <- postlhp %>% layout(xaxis = list(title = "Read Length"))
 postlhp
@@ -286,7 +286,7 @@ postlhp
 nn=read.csv(params$number_per_percentage_nucl, header=TRUE)
 #nn=read.csv("number_per_percentage_nucl.csv", header=T)
 nnp <- plot_ly(nn, x=nn[,1], y=nn[,2], type="scatter", mode = 'lines+markers', marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)))
+               width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of nOTU: %{y}','<extra></extra>'))
 nnp <- nnp %>% layout(yaxis = list(title = "Number of nOTU"))
 nnp <- nnp %>% layout(xaxis = list(title = "Clustering ID %"))
 nnp
@@ -302,7 +302,7 @@ nnp
 pn=read.csv(params$number_per_percentage_prot, header=TRUE)
 #pn=read.csv("number_per_percentage_prot.csv", header=T)
 pnp <- plot_ly(pn, x=pn[,1], y=pn[,2], type="scatter", mode = 'lines+markers', marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)))
+               width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of pOTU: %{y}','<extra></extra>'))
 pnp <- pnp %>% layout(yaxis = list(title = "Number of pOTU"))
 pnp <- pnp %>% layout(xaxis = list(title = "Clustering ID %"))
 pnp

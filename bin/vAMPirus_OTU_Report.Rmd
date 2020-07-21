@@ -7,7 +7,7 @@ params:
   reads: !r commandArgs(trailingOnly=T)[2]    # reads
   counts: !r commandArgs(trailingOnly=T)[3]   # csv
   metadata: !r commandArgs(trailingOnly=T)[4] # metadata
-  filter: !r commandArgs(trailingOnly=T)[5]   # filter treatment
+  filter: !r commandArgs(trailingOnly=T)[5]   # filter min counts
   heatmap: !r commandArgs(trailingOnly=T)[6]  # heatmap
   tax: !r commandArgs(trailingOnly=T)[7]      # tax
   tree: !r commandArgs(trailingOnly=T)[8]     # tree
@@ -167,7 +167,7 @@ data4 <- data3%>%
 ```{r plot, echo=FALSE}
 # sample and count
 con <- plot_ly(data4, x = ~sum, y = ~sample, name = "Sample", type = 'scatter',
-               mode = "markers", marker = list(color = "#088da5"))
+               mode = "markers", marker = list(color = "#088da5"), hovertemplate = paste('Sample: %{y}','<br>Total reads: %{x}','<extra></extra>'))
 con <- con %>% layout(xaxis = list(title = "Total reads"),yaxis = list(title = "Sample"))
 con
 ```
@@ -176,22 +176,12 @@ con
 <br>
 ```{r filter_data, include=FALSE}
 ##Filter samples with low reads
+nfil=params$filter
 data5 <- data4 %>%
-  filter(sum>1000)
+  filter(sum>nfil)
    #can cause errors
 data5dim <-dim(data5)
 minreads<-min(data5$sum)
-# Filter by treatment
-tfil=params$filter
-#tfil="CHOR"
-h <- data5 %>%
-  filter(treatment == tfil) ##variable needed to be defined by config
-writeLines(c("Mean"))
-mean(h$sum)
-writeLines(c("Min"))
-min(h$sum)
-writeLines(c("Max"))
-max(h$sum)
 ```
 <br>
 <br>
@@ -468,7 +458,7 @@ datalong <- datay %>%
 
 ddd <- plot_ly(datalong, x=~sample, y=~reads, color=~hit, colors=mycol)
 ddd <- ddd %>% layout(type='bar',barmode = 'stack')
-ddd <- ddd %>% layout(yaxis=list(title = "Reads"))
+ddd <- ddd %>% layout(yaxis=list(title = "Relative abundance"))
 ddd <- ddd %>% layout(xaxis=list(title = "Sample"))
 ddd <- ddd %>% layout(legend = list(x=10,y=.5))
 ddd
