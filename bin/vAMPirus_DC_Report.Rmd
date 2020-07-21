@@ -157,7 +157,7 @@ preqp
 
 ```{r postClean_qualityScore, echo=FALSE}
 postq=read.csv(params$postFilt_qualityScore, header=TRUE)
-postq=read.csv("PVID_vAMPtest1_all_merged_postFilt_qualityScore_hist.csv", header=TRUE)
+#postq=read.csv("PVID_vAMPtest1_all_merged_postFilt_qualityScore_hist.csv", header=TRUE)
 postqp <- plot_ly(x=c(1:nrow(postq)),y=as.numeric(postq[,2]),type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
 postqp <- postqp %>% layout(xaxis=list(title="Base position"))
 postqp <- postqp %>% layout(yaxis=list(title="Mean quality", range = c(0,41)))

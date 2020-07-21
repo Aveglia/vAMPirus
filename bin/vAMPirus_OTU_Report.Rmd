@@ -97,7 +97,7 @@ fig <- plot_ly(
 
 ```{r readstats_plot, echo=FALSE}
 # Plot of reads before and after
-ptotal <- plot_ly(typle="box",marker=list(colors=mycol))
+ptotal <- plot_ly(type="box",marker=list(colors=mycol))
 ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_before, name="Reads before filtering")
 ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_after, name="Reads after filtering")
 #ptotal <- ptotal %>% layout(title=list(text="Number of reads before and after filtering"))
@@ -177,7 +177,7 @@ con
 ```{r filter_data, include=FALSE}
 ##Filter samples with low reads
 data5 <- data4 %>%
-  filter(sum>10000)
+  filter(sum>1000)
 data5dim <-dim(data5)
 minreads<-min(data5$sum)
 # Filter by treatment
@@ -423,8 +423,8 @@ if (MDS3$converged == "TRUE") {
 data.scores3 <- as.data.frame(scores(MDS3))
 data.scores3$sample <- data5$sample
 data.scores.3 <- merge(data.scores3, metadata, by="sample")
-p3d <- plot_ly(data.scores.3, x= ~ NMDS1, y = ~ NMDS2, z = ~ NMDS3, text = ~paste("Sample: ", sample),
-        color = ~treatment, colors = mycol,
+p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
+        color=~treatment, colors=mycol,
         mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
         marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
         )
