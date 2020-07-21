@@ -386,11 +386,9 @@ log.info """\
         Working directory:           ${params.mypwd}
         Minimum read length:	     ${params.minLen}
         Maximum read length:         ${params.maxLen}
-        OTU cluster percentages:     ${params.clustid}
-        Alpha value:                 ${params.alpha}
         Database directory:          ${params.dbdir}
         Database name:               ${params.dbname}
-        Database header format:      ${params.dbhead}
+        
 
         """.stripIndent()
 
@@ -1496,13 +1494,14 @@ if (params.Analyze) {
 
             output:
                 tuple file("*_protcounts.csv"), file("*dmd.out") into counts_summary
-                file("_protcounts.csv") into aminocounts_plot
-            script:
+                file("*_protcounts.csv") into aminocounts_plot
+            
+	    script:
                 """
                 set +e
                 diamond makedb --in ${fasta} --db ${fasta}
                 diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_protCounts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-                echo "# OTU ID" >tmp.col1.txt
+                echo "#OTU ID" >tmp.col1.txt
                 echo "Generating sample id list"
                 grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
                 cat otuid.list >> tmp.col1.txt
@@ -1889,7 +1888,8 @@ if (params.Analyze) {
                 """
                 ident=\$( echo ${reads} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
                 name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}')
-                cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
+                vsearch --usearch_global ${merged} --db ${reads} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
+		cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
                 """
         }
 
@@ -2272,7 +2272,7 @@ if (params.Analyze) {
                 potu="\$( echo ${fasta} | awk -F "_" '{print \$3}')"
                 diamond makedb --in ${fasta} --db ${fasta}
                 diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-                echo "# OTU ID" >tmp.col1.txt
+                echo "#OTU ID" >tmp.col1.txt
                 echo "Generating sample id list"
                 grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
                 cat otuid.list >> tmp.col1.txt
@@ -2905,11 +2905,12 @@ if (params.dataCheck) {
                 vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_nOTU\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
             done
             for x in *nOTU*.fasta;do
-                id=\$( echo \$x | awk -F "_nOTU" '{print \$1}' | awk -F ".fasta" '{print \$2}')
+                id=\$( echo \$x | awk -F "_nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                 numb=\$( grep -c ">" \$x )
                 echo "\${id},\${numb}" >> number_per_percentage_nucl.csv
             done
-            echo "1.0,\$(grep -c ${fasta})" >> number_per_percentage_nucl.csv
+         yo=\$(grep -c ">" ${fasta})
+	 echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
             """
         }
     }
@@ -3033,8 +3034,12 @@ if (params.dataCheck) {
             for x in *aminoacid*noTaxonomy.fasta;do
                 id=\$( echo \$x | awk -F "_noTax" '{print \$1}' | awk -F "pOTU" '{print \$2}')
                 numb=\$( grep -c ">" \$x)
-                echo "\${id},\${numb}" >> number_per_percentage_prot.csv
+                echo "\${id},\${numb}" >> number_per_percentage_protz.csv
             done
+	yesirr=\$( wc -l number_per_percentage_protz.csv | awk '{print \$1}')
+	tail -\$(( \${yesirr}-1 )) number_per_percentage_protz.csv > number_per_percentage_prot.csv
+	head -1 number_per_percentage_protz.csv >> number_per_percentage_prot.csv
+	rm number_per_percentage_protz.csv
         """
 	}
 
@@ -3062,7 +3067,7 @@ if (params.dataCheck) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Report", mode: "copy", overwrite: true, pattern: '*ASVs_all.fasta'
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Report", mode: "copy", overwrite: true, pattern: '*.{html}'
 
         input:
             file(fastpcsv) from fastp_csv1
@@ -3082,7 +3087,8 @@ if (params.dataCheck) {
             file(number_per_percentage_prot) from number_per_percent_prot_plot
 
         output:
-
+	
+	file("*.html") into datacheckreport
 
         script:
             """
