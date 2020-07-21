@@ -127,7 +127,7 @@ def helpMessage() {
 
                 --dbdir                        Path to Directory where database is being stored
 
-                --refseq                       Toggle use of RefSeq header format; default is Reverence Viral DataBase (RVDB)
+                --refseq                       Toggle use of RefSeq header format for Taxonomy assignment; default is Reverence Viral DataBase (RVDB)
 
                 --Bitscore                     Set minimum bitscore for Diamond command
 
@@ -388,7 +388,7 @@ log.info """\
         Maximum read length:         ${params.maxLen}
         Database directory:          ${params.dbdir}
         Database name:               ${params.dbname}
-        
+
 
         """.stripIndent()
 
@@ -1495,7 +1495,7 @@ if (params.Analyze) {
             output:
                 tuple file("*_protcounts.csv"), file("*dmd.out") into counts_summary
                 file("*_protcounts.csv") into aminocounts_plot
-            
+
             script:
                 """
                 set +e
@@ -2351,7 +2351,7 @@ if (params.Analyze) {
                 ${readsstats} \
                 ${counts} \
                 ${params.metadata} \
-                ${params.filt} \
+                ${params.minimumCounts} \
     	        ${matrix} \
                 ${taxonomy}
                 """
@@ -2381,7 +2381,7 @@ if (params.Analyze) {
                 ${readsstats} \
                 ${counts} \
                 ${params.metadata} \
-                ${params.filt} \
+                ${params.minimumCounts} \
     	        ${matrix} \
                 ${taxonomy} \
                 ${phylogeny}
@@ -2414,7 +2414,7 @@ if (params.Analyze) {
                     ${readsstats} \
                     ${counts} \
                     ${params.metadata} \
-                    ${params.filt} ${matrix} \
+                    ${params.minimumCounts} ${matrix} \
                     ${taxonomy} \
                     ${phylogeny}
                     """
@@ -2446,7 +2446,7 @@ if (params.Analyze) {
                     ${readsstats} \
                     ${counts} \
                     ${params.metadata} \
-                    ${params.filt} \
+                    ${params.minimumCounts} \
                     ${matrix} \
                     ${taxonomy} \
                     ${phylogeny}
@@ -2479,7 +2479,7 @@ if (params.Analyze) {
                         ${readsstats} \
                         ${counts} \
                         ${params.metadata} \
-                        ${params.filt} ${matrix} \
+                        ${params.minimumCounts} ${matrix} \
                         ${taxonomy} \
                         ${phylogeny}
                         """
@@ -2513,7 +2513,7 @@ if (params.Analyze) {
                     ${readsstats} \
                     ${counts} \
                     ${params.metadata} \
-                    ${params.filt} \
+                    ${params.minimumCounts} \
         	        ${matrix} \
                     ${taxonomy} \
                     ${phylogeny}
@@ -2544,7 +2544,7 @@ if (params.Analyze) {
                     ${readsstats} \
                     ${counts} \
                     ${params.metadata} \
-                    ${params.filt} \
+                    ${params.minimumCounts} \
         	        ${matrix} \
                     ${taxonomy} \
                     ${phylogeny}
@@ -3087,7 +3087,7 @@ if (params.dataCheck) {
             file(number_per_percentage_prot) from number_per_percent_prot_plot
 
         output:
-	
+
 	file("*.html") into datacheckreport
 
         script:
