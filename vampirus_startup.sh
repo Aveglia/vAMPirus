@@ -21,17 +21,14 @@ while getopts "hrbp:laguf" OPTION; do
 done
 shift $((OPTIND-1))      # required, to "eat" the options that have been processed
 
-
-
-
-export mypwd="$1"
+export mypwd="$(pwd)"
 
 os_c() {
     if [ -f /etc/os-release ];then
-        echo -e "\n\t -- Downloading Linux Anaconda3 installation -- \n"
-        curl -o Anaconda3-2020.02-Linux-x86_64.sh https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.sh
+        echo -e "\n\t -- Downloading Linux Miniconda3 installation -- \n"
+        curl -o Miniconda3-latest-Linux-x86_64.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
     else
-        echo -e "\n\t\e[31m -- ERROR: Are you in a Linux system? Please check requirements and rerun the pre-check --\e[39m\n"
+        echo -e "\n\t\e[31m -- ERROR: Are you in a Unix system? Please check requirements for vAMPirus --\e[39m\n"
         exit 0
     fi
 }
@@ -74,9 +71,9 @@ conda_c() {
             [yY] | [yY][eE][sS])
                 os_c
                 echo -e "\n\t -- Starting Anaconda installation -- \n"
-                bash Anaconda3-20*.sh
+                bash Miniconda3*.sh
                 echo -e "\n\t -- Installation done -- \n"
-                rm Anaconda3-20*.sh
+                rm Miniconda3*.sh
                 source_c
                 if [ -f vAMPirus_env.yml ];then
                     echo -e "\n\t -- vAMPirus environment file found. Creating environment... --\n"
