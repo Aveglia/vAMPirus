@@ -96,6 +96,36 @@ pr
 <br>
 <br>
 
+### Pre-filtering reads per sample
+
+<br>
+
+```{r preFilt_preClean_reads, echo=FALSE}
+prer=read.csv(params$reads_per_sample_preFilt, header=TRUE)
+prerp <- plot_ly(prer, x = ~reads, y = ~sample, name = "Sample", type = 'scatter',
+               mode = "markers", marker = list(color = "#088da5"),
+               hovertemplate = paste('Sample: %{y}','<br>Total reads: %{x}','<extra></extra>'))
+prerp <- prerp %>% layout(xaxis = list(title = "Total reads"),yaxis = list(title = "Sample"))
+prerp
+```
+
+<br>
+
+### Post-filtering reads per sample
+
+<br>
+
+```{r postFilt_postClean_reads, echo=FALSE}
+postr=read.csv(params$read_per_sample_postFilt, header=TRUE)
+postrp <- plot_ly(postr, x = ~reads, y = ~sample, name = "Sample", type = 'scatter',
+               mode = "markers", marker = list(color = "#088da5"),
+               hovertemplate = paste('Sample: %{y}','<br>Total reads: %{x}','<extra></extra>'))
+postrp <- postrp %>% layout(xaxis = list(title = "Total reads"),yaxis = list(title = "Sample"))
+postrp
+```
+
+<br>
+
 ### Pre-filtering base frequency per position on reads
 
 <br>
