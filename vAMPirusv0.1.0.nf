@@ -2818,7 +2818,10 @@ if (params.dataCheck) {
                     cat \$x | tr "\t" "," > \${pre}.csv
                     rm \$x
                 done
-                grep ">" ${reads} | awk -F ">" '{print \$2}' | awk -F "." '{print \$1}' | sort --parallel=${task.cpus} | uniq -c | sort -brg --parallel=${task.cpus} | awk '{print \$2","\$1}' > reads_per_sample_preFilt_preClean.csv
+                reformat.sh in=${reads} out=${params.projtag}_preFilt_preclean.fasta t=${task.cpus}
+                echo "sample,reads" >> reads_per_sample_preFilt_preClean.csv
+                grep ">" ${params.projtag}_preFilt_preclean.fasta | awk -F ">" '{print \$2}' | awk -F "." '{print \$1}' | sort --parallel=${task.cpus} | uniq -c | sort -brg --parallel=${task.cpus} | awk '{print \$2","\$1}' >> reads_per_sample_preFilt_preClean.csv
+                rm ${params.projtag}_preFilt_preclean.fasta
                 fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
                 reformat.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_preFilt_clean.fasta t=${task.cpus}
                 bbduk.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
@@ -2828,7 +2831,9 @@ if (params.dataCheck) {
                     cat \$x | tr "\t" "," > \${pre}.csv
                     rm \$x
                 done
-                grep ">" ${params.projtag}_merged_clean_Lengthfiltered.fastq | awk -F ">" '{print \$2}' | awk -F "." '{print \$1}' | sort --parallel=${task.cpus} | uniq -c | sort -brg --parallel=${task.cpus} | awk '{print \$2","\$1}' > read_per_sample_postFilt_postClean.csv
+                reformat.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq out=${params.projtag}_merged_clean_Lengthfiltered.fasta t=${task.cpus}
+                echo "sample,reads" >> read_per_sample_postFilt_postClean.csv
+                grep ">" ${params.projtag}_merged_clean_Lengthfiltered.fasta | awk -F ">" '{print \$2}' | awk -F "." '{print \$1}' | sort --parallel=${task.cpus} | uniq -c | sort -brg --parallel=${task.cpus} | awk '{print \$2","\$1}' >> read_per_sample_postFilt_postClean.csv
                 """
     }
 
