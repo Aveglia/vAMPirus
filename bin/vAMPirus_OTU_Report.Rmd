@@ -178,6 +178,7 @@ con
 ##Filter samples with low reads
 data5 <- data4 %>%
   filter(sum>1000)
+   #can cause errors
 data5dim <-dim(data5)
 minreads<-min(data5$sum)
 # Filter by treatment

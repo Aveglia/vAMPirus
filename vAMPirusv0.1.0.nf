@@ -1496,7 +1496,7 @@ if (params.Analyze) {
                 tuple file("*_protcounts.csv"), file("*dmd.out") into counts_summary
                 file("*_protcounts.csv") into aminocounts_plot
             
-	    script:
+            script:
                 """
                 set +e
                 diamond makedb --in ${fasta} --db ${fasta}
@@ -1889,7 +1889,7 @@ if (params.Analyze) {
                 ident=\$( echo ${reads} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
                 name=\$( echo ${reads} | awk -F ".fasta" '{print \$1}')
                 vsearch --usearch_global ${merged} --db ${reads} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
-		cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
+                cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
                 """
         }
 
