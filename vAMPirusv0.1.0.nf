@@ -1230,88 +1230,174 @@ if (params.Analyze) {
             }
         }
 
-    process Generate_Counts_Tables_Nucleotide {
+        if (params.nOTU) {
 
-        label 'norm_cpus'
+            process Generate_Counts_Tables_Nucleotide {
 
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Counts", mode: "copy", overwrite: true, pattern: '*otu*.{biome,csv}'
+                label 'norm_cpus'
 
-        input:
-            file(reads) from nuclFastas_forCounts_ch
-            file(merged) from nuclCounts_mergedreads_ch
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Counts", mode: "copy", overwrite: true, pattern: '*otu*.{biome,csv}'
 
-        output:
-            tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
-            file("*nOTU*counts.csv") into notu_counts_plots
-            file("*ASV*counts.csv") into asv_counts_plots
-        script:
-            """
-            for filename in ${reads};do
-                if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
-                    ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
-                    name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
-                    vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
-                    cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
-                else
-                    name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
-                    vsearch --usearch_global ${merged} --db \${filename} --id ${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
-                    cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
-                fi
-            done
-            """
-    }
+                input:
+                    file(reads) from nuclFastas_forCounts_ch
+                    file(merged) from nuclCounts_mergedreads_ch
 
-    process Generate_Nucleotide_Matrix {
-
-        label 'norm_cpus'
-
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
-        publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*nOTU*PercentID.matrix'
-
-        input:
-            file(reads) from nuclFastas_forMatrix_ch
-
-        output:
-            file("*.matrix") into clustmatrices
-            file("*nOTU*PercentID.matrix") into notu_heatmap
-            file("*ASV*PercentID.matrix") into asv_heatmap
-
-        script:
-            // remove if statement later (no fin)
-            """
-            for filename in ${reads};do
-                if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
-                    ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
-                    name=\$( echo \${filename}| awk -F ".fasta" '{print \$1}')
-                    clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
-                    clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                    for x in *q.matrix;do
-                        pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
-                        ya=\$(wc -l \$x | awk '{print \$1}')
-                        echo "\$((\$ya-1))"
-                        tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
-                        rm \$x
-                        cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
-                        rm \${pre}z.matrix
+                output:
+                    tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
+                    file("*nOTU*counts.csv") into notu_counts_plots
+                    file("*ASV*counts.csv") into asv_counts_plots
+                script:
+                    """
+                    for filename in ${reads};do
+                        if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
+                            ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                            name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
+                            vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
+                            cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
+                        else
+                            name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
+                            vsearch --usearch_global ${merged} --db \${filename} --id ${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
+                            cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
+                        fi
                     done
-                else
-                    name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
-                    clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
-                    clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                    for x in *q.matrix;do
-                        pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
-                        ya=\$(wc -l \$x | awk '{print \$1}')
-                        echo "\$((\$ya-1))"
-                        tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
-                        rm \$x
-                        cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
-                        rm \${pre}z.matrix
+                    """
+            }
+        } else {
+            process Generate_ASV_Counts_Tables {
+
+                label 'norm_cpus'
+
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
+
+                input:
+                    file(reads) from nuclFastas_forCounts_ch
+                    file(merged) from nuclCounts_mergedreads_ch
+
+                output:
+                    tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
+                    file("*ASV*counts.csv") into asv_counts_plots
+                script:
+                    """
+                    for filename in ${reads};do
+                        if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
+                            ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                            name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
+                            vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
+                            cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
+                        else
+                            name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
+                            vsearch --usearch_global ${merged} --db \${filename} --id ${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
+                            cat \${name}_counts.txt | tr "\t" "," >\${name}_counts.csv
+                        fi
                     done
-                fi
-            done
-            """
-    }
+                    """
+                }
+            }
+
+    if (params.nOTU) {
+
+        process Generate_Nucleotide_Matrix {
+
+            label 'norm_cpus'
+
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
+            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*nOTU*PercentID.matrix'
+
+            input:
+                file(reads) from nuclFastas_forMatrix_ch
+
+            output:
+                file("*.matrix") into clustmatrices
+                file("*nOTU*PercentID.matrix") into notu_heatmap
+                file("*ASV*PercentID.matrix") into asv_heatmap
+
+            script:
+                // remove if statement later (no fin)
+                """
+                for filename in ${reads};do
+                    if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
+                        ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                        name=\$( echo \${filename}| awk -F ".fasta" '{print \$1}')
+                        clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
+                        clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
+                        for x in *q.matrix;do
+                            pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
+                            ya=\$(wc -l \$x | awk '{print \$1}')
+                            echo "\$((\$ya-1))"
+                            tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
+                            rm \$x
+                            cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
+                            rm \${pre}z.matrix
+                        done
+                    else
+                        name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
+                        clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
+                        clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
+                        for x in *q.matrix;do
+                            pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
+                            ya=\$(wc -l \$x | awk '{print \$1}')
+                            echo "\$((\$ya-1))"
+                            tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
+                            rm \$x
+                            cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
+                            rm \${pre}z.matrix
+                        done
+                    fi
+                done
+                """
+            }
+        } else {
+
+            process Generate_ASV_Matrix {
+
+                label 'norm_cpus'
+
+                publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
+
+                input:
+                    file(reads) from nuclFastas_forMatrix_ch
+
+                output:
+                    file("*.matrix") into clustmatrices
+                    file("*ASV*PercentID.matrix") into asv_heatmap
+
+                script:
+                    // remove if statement later (no fin)
+                    """
+                    for filename in ${reads};do
+                        if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
+                            ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                            name=\$( echo \${filename}| awk -F ".fasta" '{print \$1}')
+                            clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
+                            clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
+                            for x in *q.matrix;do
+                                pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
+                                ya=\$(wc -l \$x | awk '{print \$1}')
+                                echo "\$((\$ya-1))"
+                                tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
+                                rm \$x
+                                cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
+                                rm \${pre}z.matrix
+                            done
+                        else
+                            name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
+                            clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
+                            clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
+                            for x in *q.matrix;do
+                                pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
+                                ya=\$(wc -l \$x | awk '{print \$1}')
+                                echo "\$((\$ya-1))"
+                                tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
+                                rm \$x
+                                cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
+                                rm \${pre}z.matrix
+                            done
+                        fi
+                    done
+                    """
+                }
+            }
 
     if (!params.skipPhylogeny) { // need to edit paths
 

@@ -3,20 +3,36 @@
 usage () {
 echo "
 
-Run this script in the vAMPirus
+Run this script in the vAMPirus directory to set up Conda and the vAMPirus Conda environment
+
+You can also use this script to download reference databases for taxonomy assignment by useing the -d option described below.
 
 General exicution:
 
+vampirus_startup.sh -h -d [1|2|3|4]
 
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+    Command line options:
+
+        [ -h ]                       	Print help information
+
+        [ -d 1|2|3|4 ]                  Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
+
+                                                    1 - Download only NCBIs Viral RefSeq protein database
+                                                    2 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                    3 - Download only the complete NCBI NR protein database
+                                                    4 - Download all three databases
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 "
 
 }
 
-while getopts "hrbp:laguf" OPTION; do
+while getopts "hd:" OPTION; do
      case $OPTION in
          h) usage; exit;;
-         r)
+         d) DATABASE=${OPTARG};;
      esac
 done
 shift $((OPTIND-1))      # required, to "eat" the options that have been processed
@@ -98,3 +114,35 @@ conda_c() {
         esac
     fi
 }
+
+if [[ $DATABASE -eq 1 ]]
+then    mkdir "$myowd"/DATABASES
+        cd "$myowd"/DATABASES
+        echo "Database installation: RVDB version 19.0 (latest as of 2020-06)"
+        curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
+        echo "Database downloaded, make sure you update the config file before running!"
+elif [[ $DATABASE -eq 2 ]]
+then    mkdir "$myowd"/DATABASES
+        cd "$myowd"/DATABASES
+        echo "Database installation: Viral RefSeq database version 2.0 (latest as of 2020-07)"
+        curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
+        echo "Database downloaded, make sure you update the config file before running!"
+elif [[ $DATABASE -eq 3 ]]
+then    mkdir "$myowd"/DATABASES
+        cd "$myowd"/DATABASES
+        echo "Database installation: NCBI NR protein database (should be the most up to date at time of running this script)"
+        curl -o NCBI_nt_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
+        echo "Database downloaded, make sure you update the config file before running!"
+elif [[ $DATABASE -eq 4 ]]
+then    mkdir "$myowd"/DATABASES
+        cd "$myowd"/DATABASES
+        echo "Database installation: We want 'em all! Might take a little while....'"
+        curl -o NCBI_nt_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
+        curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
+        curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
+        echo "Databases downloaded, make sure you update the config file before running!"
+else
+        echo "Error: Database download signaled but not given a value between 1-4"
+fi
+
+echo "Setup script is complete!"
