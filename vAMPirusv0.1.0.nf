@@ -993,7 +993,7 @@ if (params.Analyze) {
                 """
             }
         } else {
-            process Nucleotide_Taxonomy_Assignment {
+            process ASV_Taxonomy_Assignment {
 
                 label 'norm_cpus'
 
