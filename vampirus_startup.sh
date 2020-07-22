@@ -80,8 +80,8 @@ conda_c() {
             fi
         fi
     else
-        echo -e "\n\t -- Conda is not intalled. Please install Anaconda (https://www.anaconda.com) and rerun this script --\n"
-        echo -e -n "\n\t    Do you want to install Anaconda? (y,n,exit): "
+        echo -e "\n\t -- Conda is not intalled."
+        echo -e -n "\n\t    Do you want to install Miniconda3? (y,n,exit): "
         read ans
         case $ans in
             [yY] | [yY][eE][sS])
@@ -100,7 +100,7 @@ conda_c() {
                 fi
             ;;
             [nN] | [nN][oO])
-                echo -e "\n\t\e[31m -- ERROR: Download and Install Anaconda. Then rerun the pre-check  --\e[39m\n"
+                echo -e "\n\t\e[31m -- ERROR: Download and Install Miniconda or Anaconda. Then rerun the pre-check  --\e[39m\n"
                 exit 0
             ;;
             exit)
@@ -114,6 +114,8 @@ conda_c() {
         esac
     fi
 }
+
+conda_c
 
 if [[ $DATABASE -eq 1 ]]
 then    mkdir "$myowd"/DATABASES
@@ -141,8 +143,9 @@ then    mkdir "$myowd"/DATABASES
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
         echo "Databases downloaded, make sure you update the config file before running!"
-else
+elif [[ $DATABASE != "" ]]
         echo "Error: Database download signaled but not given a value between 1-4"
+        exit 1
 fi
 
 echo "Setup script is complete!"
