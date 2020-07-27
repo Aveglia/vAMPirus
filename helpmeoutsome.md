@@ -71,7 +71,7 @@ NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003
 During Taxonomy Assignment, vAMPirus extacts results using the information stored in the headers of reference sequence that are matched. If the
 database headers do not match these patterns, you are bound to see errors in the naming of files created during the Taxonomy Assignment phase of vAMPirus.
 
-### Testing vAMpirus installation
+### Testing vAMPirus installation
 
 A test dataset is provided in the vAMPirus/example_data. To ensure that vAMPirus is set up properly before running with your own data, you can run:
 
