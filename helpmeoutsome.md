@@ -41,7 +41,6 @@ If we look at the script usage guidelines:
 
 vampirus_startup.sh -h -d [1|2|3|4]
 
-|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
     Command line options:
 
@@ -54,7 +53,7 @@ vampirus_startup.sh -h -d [1|2|3|4]
                                                     3 - Download only the complete NCBI NR protein database
                                                     4 - Download all three databases
 
-|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*
+**
 
 So, if we wanted to download NCBIs Viral protein RefSeq database, we would just need to run:
 
