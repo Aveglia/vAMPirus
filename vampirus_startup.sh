@@ -11,7 +11,7 @@ General exicution:
 
 vampirus_startup.sh -h -d [1|2|3|4]
 
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
     Command line options:
 
@@ -19,12 +19,12 @@ vampirus_startup.sh -h -d [1|2|3|4]
 
         [ -d 1|2|3|4 ]                  Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
-                                                    1 - Download only NCBIs Viral RefSeq protein database
+                                                    1 - Download only NCBIs Viral protein RefSeq database
                                                     2 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
                                                     3 - Download only the complete NCBI NR protein database
                                                     4 - Download all three databases
 
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 "
 
 }
@@ -72,7 +72,7 @@ conda_c() {
                     echo -e "\n\t -- vAMPirus environment file found. Creating environment... --\n"
                     conda env create -f vAMPirus_env.yml
                 else
-                    echo -e "\n\t\e[31m -- ERROR: vAMPirus environment file not found \(vAMPirus_env.yml\). Please check requirements and rerun the pre-check --\e[39m\n"
+                    echo -e "\n\t\e[31m -- ERROR: vAMPirus environment file not found \(vAMPirus_env.yml\). Make sure you are running this from the vAMPirus program directory. --\e[39m\n"
                     exit 0
                 fi
             elif [ "$check_env" -eq 1 ];then
@@ -128,17 +128,17 @@ nextflow_c() {
         echo -e "\n\t -- Nextflow seems to be installed in your system and in your current \$PATH, great! --\n"
     else
         echo -e "\n\t -- Nextflow does not to seem to be downloaded or it specified in your \$PATH --\n"
-        echo -e "\n\t -- If you know you have it downloaded, answer n/N to the following question, add nextflow to you \$PATH variable and re-run this script to test --\n"
-        echo -e -n "\n\t  If you don't have it installed, do you want me to install Nextflow for you? (y,n,exit): "
+        echo -e "\n\t -- If you know you have it downloaded, answer n/N to the following question, add nextflow to your \$PATH variable and re-run this script to test --\n"
+        echo -e -n "\n\t If not, would you like me to install Nextflow for you? (y,n,exit): "
         read ans
         case $ans in
             [yY] | [yY][eE][sS])
-            echo -e "\n\t -- Starting Nextflow installation -- \n"
+            echo -e "\n\t Starting Nextflow installation \n"
             curl -s https://get.nextflow.io | bash
-            echo -e "\n\t -- Nextflow installation finished, execultable in "$mypwd" -- \n"
+            echo -e "\n\t Nextflow installation finished, execultable in "$mypwd" \n"
         ;;
         [nN] | [nN][oO])
-            echo -e "\n\t\e[31m -- ERROR: Download and Install Nextflow. Then rerun the pre-check  --\e[39m\n"
+            echo -e "\n\t\e[31m -- ERROR: Download and Install Nextflow. Then re-run the script. --\e[39m\n"
             exit 0
         ;;
         exit)
@@ -147,44 +147,45 @@ nextflow_c() {
         ;;
         *)
             echo -e "\n\n\t\e[31m -- Yes or No answer not specified. Try again --\e[39m\n"
-            conda_c
+            nextflow_c
         ;;
         esac
-        echo -e -n "\n\t  Do you want to add Nextflow executable within your $PATH? (y,n,exit): "
     fi
 }
+
 echo "Alright, lets check your system for Conda..."
 conda_c
-echo "Now lets check to see if you have Nextflow downloaded and in your $PATH..."
+echo "Now lets check the status of Nextflow on your system..."
 nextflow_c
+
 if [[ $DATABASE -eq 1 ]]
-then    mkdir "$myowd"/DATABASES
-        cd "$myowd"/DATABASES
+then    mkdir "$mypwd"/DATABASES
+        cd "$mypwd"/DATABASES
         echo "Database installation: RVDB version 19.0 (latest as of 2020-06)"
         curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
         echo "Database downloaded, make sure you update the config file before running!"
 elif [[ $DATABASE -eq 2 ]]
-then    mkdir "$myowd"/DATABASES
-        cd "$myowd"/DATABASES
+then    mkdir "$mypwd"/DATABASES
+        cd "$mypwd"/DATABASES
         echo "Database installation: Viral RefSeq database version 2.0 (latest as of 2020-07)"
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         echo "Database downloaded, make sure you update the config file before running!"
 elif [[ $DATABASE -eq 3 ]]
-then    mkdir "$myowd"/DATABASES
-        cd "$myowd"/DATABASES
+then    mkdir "$mypwd"/DATABASES
+        cd "$mypwd"/DATABASES
         echo "Database installation: NCBI NR protein database (should be the most up to date at time of running this script)"
-        curl -o NCBI_nt_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
+        curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         echo "Database downloaded, make sure you update the config file before running!"
 elif [[ $DATABASE -eq 4 ]]
-then    mkdir "$myowd"/DATABASES
-        cd "$myowd"/DATABASES
+then    mkdir "$mypwd"/DATABASES
+        cd "$mypwd"/DATABASES
         echo "Database installation: We want 'em all! Might take a little while....'"
-        curl -o NCBI_nt_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
+        curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
-        curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
-        echo "Databases downloaded, make sure you update the config file before running!"
+        curl -o U-RVDBv19.0-prot.fasta.bz2 https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
+        echo "Databases downloaded, make sure you update the config file with the one you would like to use before running!"
 elif [[ $DATABASE != "" ]]
-        echo "Error: Database download signaled but not given a value between 1-4"
+then    echo "Error: Database download signaled but not given a value between 1-4"
         exit 1
 fi
 
