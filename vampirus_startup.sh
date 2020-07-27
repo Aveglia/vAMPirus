@@ -115,8 +115,48 @@ conda_c() {
     fi
 }
 
+nextflow_c() {
+    source ~/.bashrc
+    cd $mypwd
+    echo "Checking if Nextflow installed system-wide.."
+    check_nextflow=$( command -v nextflow )
+    if [ "$check_nextflow" = "" ];then #&& [ "$ver" -gt "45" ];then
+        echo -e "\n\t -- Nextflow is not system-wide, checking if its in the current working directory.. --\n"
+        check_nextflow=$( ls nextflow)
+    fi
+    if [ "$check_nextflow" != "" ];then #&& [ "$ver" -gt "45" ];then
+        echo -e "\n\t -- Nextflow seems to be installed in your system and in your current \$PATH, great! --\n"
+    else
+        echo -e "\n\t -- Nextflow does not to seem to be downloaded or it specified in your \$PATH --\n"
+        echo -e "\n\t -- If you know you have it downloaded, answer n/N to the following question, add nextflow to you \$PATH variable and re-run this script to test --\n"
+        echo -e -n "\n\t  If you don't have it installed, do you want me to install Nextflow for you? (y,n,exit): "
+        read ans
+        case $ans in
+            [yY] | [yY][eE][sS])
+            echo -e "\n\t -- Starting Nextflow installation -- \n"
+            curl -s https://get.nextflow.io | bash
+            echo -e "\n\t -- Nextflow installation finished, execultable in "$mypwd" -- \n"
+        ;;
+        [nN] | [nN][oO])
+            echo -e "\n\t\e[31m -- ERROR: Download and Install Nextflow. Then rerun the pre-check  --\e[39m\n"
+            exit 0
+        ;;
+        exit)
+           echo -e "\n\t -- Exiting -- \n"
+           exit 0
+        ;;
+        *)
+            echo -e "\n\n\t\e[31m -- Yes or No answer not specified. Try again --\e[39m\n"
+            conda_c
+        ;;
+        esac
+        echo -e -n "\n\t  Do you want to add Nextflow executable within your $PATH? (y,n,exit): "
+    fi
+}
+echo "Alright, lets check your system for Conda..."
 conda_c
-
+echo "Now lets check to see if you have Nextflow downloaded and in your $PATH..."
+nextflow_c
 if [[ $DATABASE -eq 1 ]]
 then    mkdir "$myowd"/DATABASES
         cd "$myowd"/DATABASES
