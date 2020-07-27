@@ -2998,7 +2998,7 @@ if (params.dataCheck) {
             tuple sample_id, file("*bbduk*.fastq.gz") into ( reads_bbduk_ch, readsforqc2 )
 
         script:
-            // check if we need to check this outside processes
+            // add cocktail primer removal, easy, set a list, line by line seperated by , in a for loop
             if ( params.fwd == "" && params.rev == "" ) {
                 """
                 bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.defaultFwdTrim} t=${task.cpus}

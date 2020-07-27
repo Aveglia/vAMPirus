@@ -7,7 +7,7 @@ Run this script in the vAMPirus directory to set up Conda and the vAMPirus Conda
 
 You can also use this script to download reference databases for taxonomy assignment by useing the -d option described below.
 
-General exicution:
+General execution:
 
 vampirus_startup.sh -h -d [1|2|3|4]
 
