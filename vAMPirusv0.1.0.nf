@@ -1427,35 +1427,29 @@ if (params.Analyze) {
                 file("*iq.treefile") into nucl_phyl_plot
             script:
                 """
-                # Nucleotide_Alignment
-                pre=\$(echo ${reads} | awk -F ".fasta" '{print \$1}' )
-                mafft --thread ${task.cpus} --maxiterate 15000 --auto ${reads} >\${pre}_ALN.fasta
-                trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
-
-                # Nucleotide_ModelTest
-                modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
-
-                # Nucleotide_Phylogeny
-                if [ "${params.iqCustomnt}" != "" ];then
-                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
-
-                elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                    mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
-
-                elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                    mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
-
-                elif [ "${params.nonparametric}" != "false" ];then
-                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
-
-                elif [ "${params.parametric}" != "false" ];then
-                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
-
-                else
-                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
-                fi
+                for filename in ${reads};do
+                    pre=\$(echo \${filename} | awk -F ".fasta" '{print \$1}' )
+                    mafft --thread ${task.cpus} --maxiterate 15000 --auto \${filename} >\${pre}_ALN.fasta
+                    trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
+                    # Nucleotide_ModelTest
+                    modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                    # Nucleotide_Phylogeny
+                    if [ "${params.iqCustomnt}" != "" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
+                    elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
+                        mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                    elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
+                        mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                    elif [ "${params.nonparametric}" != "false" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                    elif [ "${params.parametric}" != "false" ];then
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                    else
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                    fi
+                done
                 """
         }
     }
