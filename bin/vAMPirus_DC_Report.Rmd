@@ -1,5 +1,5 @@
 ---
-title: "vAMPirus Data Check Report: `!r commandArgs(trailingOnly=T)[1]`"
+title: "vAMPirus Data Check Report: `r commandArgs(trailingOnly=T)[1]`"
 date: "Generated on: `r Sys.time()`"
 output: html_document
 params:
