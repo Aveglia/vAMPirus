@@ -1331,12 +1331,12 @@ if (params.Analyze) {
                 script:
                     """
                     if [ `echo ${asvs} | grep -c "ASV"` -eq 1 ];then
-                        name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
-                        vsearch --usearch_global ${merged} --db \${filename} --id ${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
+                        name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                        vsearch --usearch_global ${merged} --db ${asvs} --id ${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
                         cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                         sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
                         rm \${name}_count.csv
-                    else
+                    fi 
                     """
                 }
             }
@@ -2322,12 +2322,12 @@ if (params.Analyze) {
             script:
                 """
                 for filename in ${potus};do
-                ident=\$( echo \${filename} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
-                name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
-                vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
-                cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
-                sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
-                rm \${name}_count.csv
+                	ident=\$( echo \${filename} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
+                	name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
+                	vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
+                	cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
+                	sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
+                	rm \${name}_count.csv
                 done
                 """
         }
@@ -2776,10 +2776,6 @@ if (params.Analyze) {
 
     if (params.nOTU) {
 
-        // Report ASV
-        // Report Nuc
-        // Report Prot
-        // Report Aminotypes
 
         process Report_ASV {
 
@@ -2831,7 +2827,7 @@ if (params.Analyze) {
                 cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                 for x in *_summary_for_plot.csv;do
                     name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                    id=\$( echo \${name} | cut -f 2 -d "." )
+                    id=\$( echo ${counts} | awk -F "_counts.csv" '{print \$1}' | cut -f 2 -d "." )
                     Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_nOTU\${id}_Report.html')" \${name} \
                     ${readsstats} \
                     \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
@@ -2898,7 +2894,7 @@ if (params.Analyze) {
                         """
                         name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
                         cp ${params.mypwd}/bin/vAMPirus_ASV_Report.Rmd .
-                        Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
+                        Rscript -e "rmarkdown::render('vAMPirus_ASV_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
                         ${readsstats} \
                         ${counts} \
                         ${params.metadata} \
@@ -2966,7 +2962,7 @@ if (params.Analyze) {
                     cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                     for x in *_summary_for_plot.csv;do
                         name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                        id=\$( echo \${name} | cut -f 2 -d "." )
+                        id=\$( echo ${counts} | awk -F "_counts.csv" '{print \$1}' | cut -f 2 -d "." )
                         Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa\${id}_Report.html')" \${name} \
                         ${readsstats} \
                         \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
@@ -3000,7 +2996,7 @@ if (params.Analyze) {
                     cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                     for x in *_summary_for_plot.csv;do
                         name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                        id=\$( echo \${name} | cut -f 2 -d "." )
+                        id=\$( echo ${counts} | awk -F "_noTaxonomy_counts.csv" '{print \$1}' | cut -f 2 -d "." )
                         Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt\${id}_Report.html')" \${name} \
                         ${readsstats} \
                         \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
