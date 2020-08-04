@@ -105,7 +105,7 @@ In the command above, there are five necessary pieces of information needed to s
 
     4. The next piece of information Nextflow needs is the environment to use for the vAMPirus workflow. The dependencies of vAMPirus are stored as a conda environment so we need
        to tell Nextflow that we would like to run vAMPirus with conda and specifically the vAMPirus environment that was built when running the vampirus_startup.sh script during
-       installation.
+       installation. To find the path to the vAMPirus conda environment, you can run "conda info --envs" and this will give you the path to your conda environments.
 
     5. And finally, there are a few different mandatory arguments that one can set when running vAMPirus to specify the type of analysis the user would like to run (we will go over these
        later in this documentation). In this example, we are using "--Analyze" which includes ASV and AminoType generation and all subsequent analyses (Taxonomy Assignment, Phylogeny, EMBOSS, etc.).
@@ -117,4 +117,4 @@ Now that we have an understanding on how to deploy vAMPirus with Nextflow, lets 
 ### The configuration file (vampirus.config)
 
 If you were to look through the configuration file you will find a bunch of different parameters you can edit to tailor your analysis to your data. There is usually a brief description within the
-file itself to help you decide what you need changed. Here is a snippet 
+file itself to help you decide what you need changed. Here is a snippet
