@@ -1526,7 +1526,7 @@ if (params.Analyze) {
                         publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
                         publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
                         input:
-                            tuple file(asvs) from nuclFastas_forphylogeny
+                            file(asvs) from nuclFastas_forphylogeny
 
                         output:
                             tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results
