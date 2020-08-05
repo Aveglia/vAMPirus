@@ -728,7 +728,7 @@ if (params.Analyze) {
 
             output:
                 tuple file("*_nOTU*.fasta"), file("*ASVs.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
-                file("*_nOTU*.fasta") into nuclFastas_forphylogeny
+                tuple file("*_nOTU*.fasta"), file("*ASVs.fasta") into nuclFastas_forphylogeny
 
             script:
             if (params.clusterNuclIDlist) {
@@ -1336,7 +1336,7 @@ if (params.Analyze) {
                         cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                         sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
                         rm \${name}_count.csv
-                    fi 
+                    fi
                     """
                 }
             }
@@ -1460,12 +1460,14 @@ if (params.Analyze) {
                     publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
                     publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
                     publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+
                     input:
                         tuple file(notus), file(asvs) from nuclFastas_forphylogeny
 
                     output:
                         tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results
                         file("*iq.treefile") into nucl_phyl_plot
+
                     script:
                         """
                         for filename in ${notus};do
@@ -1525,12 +1527,14 @@ if (params.Analyze) {
                         publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
                         publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
                         publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+
                         input:
                             file(asvs) from nuclFastas_forphylogeny
 
                         output:
                             tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results
                             file("*iq.treefile") into nucl_phyl_plot
+
                         script:
                             """
                             for filename in ${asvs};do
@@ -3580,3 +3584,4 @@ workflow.onComplete {
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }
+
