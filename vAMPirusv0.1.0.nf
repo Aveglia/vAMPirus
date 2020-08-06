@@ -577,6 +577,7 @@ if (params.Analyze) {
 
         publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging/Individual", mode: "copy", overwrite: true, pattern: "*mergedclean.fastq"
         publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging/Individual/notmerged", mode: "copy", overwrite: true, pattern: "*notmerged*.fastq"
+
         input:
             tuple sample_id, file(reads) from reads_bbduk_ch
 
@@ -649,6 +650,7 @@ if (params.Analyze) {
             file("*_merged_clean_Lengthfiltered.fastq") into reads_vsearch2_ch
             file("*_merged_preFilt_clean.fastq") into (  mergeforprotcounts, mergeforpOTUaacounts )
             file("**hist.txt")  into histos
+
         script:
             """
             bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_preFilt_preClean_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_preFilt_preClean_qualityScore_hist.txt gchist=${params.projtag}_all_merged_preFilt_preClean_gcContent_hist.txt aqhist=${params.projtag}_all_merged_preFilt_preClean_averageQuality_hist.txt lhist=${params.projtag}_all_merged_preFilt__preClean_length_hist.txt gcbins=auto
@@ -728,7 +730,7 @@ if (params.Analyze) {
 
             output:
                 tuple file("*_nOTU*.fasta"), file("*ASVs.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
-                file("*_nOTU*.fasta") into nuclFastas_forphylogeny
+                tuple file("*_nOTU*.fasta"), file("*ASVs.fasta") into nuclFastas_forphylogeny
 
             script:
             if (params.clusterNuclIDlist) {
@@ -1293,6 +1295,7 @@ if (params.Analyze) {
                     tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
                     file("*nOTU*counts.csv") into notu_counts_plots
                     file("*ASV*counts.csv") into asv_counts_plots
+
                 script:
                     """
                     for filename in ${notus};do
@@ -1328,6 +1331,7 @@ if (params.Analyze) {
                 output:
                     tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
                     file("*ASV*counts.csv") into asv_counts_plots
+
                 script:
                     """
                     if [ `echo ${asvs} | grep -c "ASV"` -eq 1 ];then
@@ -1460,12 +1464,14 @@ if (params.Analyze) {
                     publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
                     publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
                     publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+
                     input:
                         tuple file(notus), file(asvs) from nuclFastas_forphylogeny
 
                     output:
                         tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results
                         file("*iq.treefile") into nucl_phyl_plot
+
                     script:
                         """
                         for filename in ${notus};do
@@ -1525,12 +1531,14 @@ if (params.Analyze) {
                         publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
                         publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
                         publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+
                         input:
                             file(asvs) from nuclFastas_forphylogeny
 
                         output:
                             tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results
                             file("*iq.treefile") into nucl_phyl_plot
+
                         script:
                             """
                             for filename in ${asvs};do
@@ -1648,6 +1656,7 @@ if (params.Analyze) {
             output:
                 file("*.matrix") into proclustmatrices
                 file("*PercentID.matrix") into aminotype_heatmap
+
             script:
                 """
                 name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
@@ -1677,6 +1686,7 @@ if (params.Analyze) {
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
+
                 input:
                     file(prot) from aminotypesEmboss
 
@@ -1992,6 +2002,7 @@ if (params.Analyze) {
             publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU", mode: "copy", overwrite: true, pattern: '*pOTU*.{fasta}'
             publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
             publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU/Problematic", mode: "copy", overwrite: true, pattern: '*problem*.{fasta}'
+
             input:
                 file(fasta) from clustering_aa
                 file(asvs) from asvfastaforaaclust
@@ -2000,6 +2011,7 @@ if (params.Analyze) {
                 file("${params.projtag}_nucleotide_pOTU*.fasta") into ( pOTU_ntDiamond_ch, pOTU_nt_counts_ch, pOTU_ntmatrix_ch, pOTU_ntmafft_ch )
                 file("*_aminoacid_pOTU*_noTaxonomy.fasta") into ( pOTU_aaMatrix_ch, pOTU_aaDiamond_ch, pOTU_aaMafft_ch, pOTU_aaCounts_ch, pOTUEMBOSS )
                 tuple file("*.fasta"), file("*.clstr"), file("*.csv"), file("*.gc") into ( pOTUsupplementalfiles )
+
             script:
             // add awk script to count seqs
             if (params.clusterAAIDlist) {
@@ -2322,12 +2334,12 @@ if (params.Analyze) {
             script:
                 """
                 for filename in ${potus};do
-                ident=\$( echo \${filename} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
-                name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
-                vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
-                cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
-                sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
-                rm \${name}_count.csv
+                	ident=\$( echo \${filename} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
+                	name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
+                	vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
+                	cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
+                	sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
+                	rm \${name}_count.csv
                 done
                 """
         }
@@ -2430,6 +2442,7 @@ if (params.Analyze) {
             output:
                 file("*.matrix") into pOTUaaMatrix
                 file("*PercentID.matrix") into potu_aa_heatmap
+
             script:
                 """
                 for filename in ${prot};do
@@ -2461,6 +2474,7 @@ if (params.Analyze) {
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
+
                 input:
                     file(prot) from pOTUEMBOSS
 
@@ -2512,9 +2526,9 @@ if (params.Analyze) {
                     file(reads) from pOTU_aaDiamond_ch
 
                 output:
-                file("*.fasta") into ( pOTU_labeledAA )
-                tuple file("*phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
-                file("*_summary_for_plot.csv") into taxplot4
+                    file("*.fasta") into ( pOTU_labeledAA )
+                    tuple file("*phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
+                    file("*_summary_for_plot.csv") into taxplot4
 
                 script:
                     """
@@ -2717,6 +2731,7 @@ if (params.Analyze) {
             output:
                 tuple file("*_counts.csv"), file("*dmd.out") into potuaacounts_summary
                 file("*counts.csv") into potu_Acounts
+
             script:
                 """
                 set +e
@@ -2776,10 +2791,6 @@ if (params.Analyze) {
 
     if (params.nOTU) {
 
-        // Report ASV
-        // Report Nuc
-        // Report Prot
-        // Report Aminotypes
 
         process Report_ASV {
 
@@ -2831,7 +2842,7 @@ if (params.Analyze) {
                 cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                 for x in *_summary_for_plot.csv;do
                     name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                    id=\$( echo \${name} | cut -f 2 -d "." )
+                    id=\$( echo ${counts} | awk -F "_counts.csv" '{print \$1}' | cut -f 2 -d "." )
                     Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_nOTU\${id}_Report.html')" \${name} \
                     ${readsstats} \
                     \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
@@ -2898,7 +2909,7 @@ if (params.Analyze) {
                         """
                         name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
                         cp ${params.mypwd}/bin/vAMPirus_ASV_Report.Rmd .
-                        Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
+                        Rscript -e "rmarkdown::render('vAMPirus_ASV_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
                         ${readsstats} \
                         ${counts} \
                         ${params.metadata} \
@@ -2966,7 +2977,7 @@ if (params.Analyze) {
                     cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                     for x in *_summary_for_plot.csv;do
                         name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                        id=\$( echo \${name} | cut -f 2 -d "." )
+                        id=\$( echo ${counts} | awk -F "_counts.csv" '{print \$1}' | cut -f 2 -d "." )
                         Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa\${id}_Report.html')" \${name} \
                         ${readsstats} \
                         \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
@@ -3000,7 +3011,7 @@ if (params.Analyze) {
                     cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                     for x in *_summary_for_plot.csv;do
                         name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                        id=\$( echo \${name} | cut -f 2 -d "." )
+                        id=\$( echo ${counts} | awk -F "_noTaxonomy_counts.csv" '{print \$1}' | cut -f 2 -d "." )
                         Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt\${id}_Report.html')" \${name} \
                         ${readsstats} \
                         \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
@@ -3186,6 +3197,7 @@ if (params.dataCheck) {
 
         publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging/Individual", mode: "copy", overwrite: true, pattern: "*mergedclean.fastq"
         publishDir "${params.mypwd}/${params.outdir}/DataCheck/ReadProcessing/ReadMerging/Individual/notmerged", mode: "copy", overwrite: true, pattern: "*notmerged*.fastq"
+
         input:
             tuple sample_id, file(reads) from reads_bbduk_ch
 
@@ -3238,7 +3250,6 @@ if (params.dataCheck) {
             """
             cat ${names} >>${params.projtag}_sample_ids.list
             """
-
     }
 
     process Length_Filtering_DC {
@@ -3375,8 +3386,8 @@ if (params.dataCheck) {
                 numb=\$( grep -c ">" \$x )
                 echo "\${id},\${numb}" >> number_per_percentage_nucl.csv
             done
-         yo=\$(grep -c ">" ${fasta})
-	 echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
+            yo=\$(grep -c ">" ${fasta})
+	        echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
             """
         }
     }
@@ -3502,11 +3513,11 @@ if (params.dataCheck) {
                 numb=\$( grep -c ">" \$x)
                 echo "\${id},\${numb}" >> number_per_percentage_protz.csv
             done
-	yesirr=\$( wc -l number_per_percentage_protz.csv | awk '{print \$1}')
-	tail -\$(( \${yesirr}-1 )) number_per_percentage_protz.csv > number_per_percentage_prot.csv
-	head -1 number_per_percentage_protz.csv >> number_per_percentage_prot.csv
-	rm number_per_percentage_protz.csv
-        """
+        	yesirr=\$( wc -l number_per_percentage_protz.csv | awk '{print \$1}')
+        	tail -\$(( \${yesirr}-1 )) number_per_percentage_protz.csv > number_per_percentage_prot.csv
+        	head -1 number_per_percentage_protz.csv >> number_per_percentage_prot.csv
+        	rm number_per_percentage_protz.csv
+            """
 	}
 
     process combine_csv_DC {
@@ -3553,8 +3564,7 @@ if (params.dataCheck) {
             file(number_per_percentage_prot) from number_per_percent_prot_plot
 
         output:
-
-	file("*.html") into datacheckreport
+	       file("*.html") into datacheckreport
 
         script:
             """
