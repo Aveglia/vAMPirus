@@ -85,6 +85,10 @@ NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003
 During Taxonomy Assignment, vAMPirus infers results by extracting the information stored in the reference sequence headers. If the database sequence headers do not match these
 patterns, you are bound to see errors in the naming of files created during the Taxonomy Assignment phase of vAMPirus.
 
+The default is that vAMPirus assumes that the database headers are in RVDB format, to change this assumption, you would need to edit the configuration file at line 78 where "refseq=F". Change the "F" to "T" and
+you are good to go! You could also change this within the launch command with adding "--refseq T", but setting parameters will be discussed further in a section later.
+
+
 ## Testing vAMPirus installation
 
 A test dataset is provided in the vAMPirus/example_data. To ensure that vAMPirus is set up properly before running with your own data, you can run:
@@ -93,7 +97,7 @@ A test dataset is provided in the vAMPirus/example_data. To ensure that vAMPirus
 
 # Quick Notes Before Running vAMPirus
 
-## The Nextflow workflow manager
+## The Nextflow workflow manager and the "launch command"
 
 vAMPirus is deployed using the Nextflow workflow manager which "enables scalable and reproducible scientific workflows using software containers. It allows the
 adaptation of pipelines written in the most common scripting languages. Its fluent DSL simplifies the implementation and the deployment of complex parallel and reactive
@@ -103,7 +107,7 @@ The great thing about vAMPirus being integrated into Nextflow is that it is just
 where the configuration file comes into play and we will discuss this in more detail in the next section. First, lets understand the basics of how to launch vAMPirus using
 Nextflow.
 
-Here is a basic usage example for how to deploy vAMPirus (we will talk more about the mandatory/optional arguments of vAMPirus later):
+Here is a basic "launch command" to deploy the vAMPirus pipeline (we will talk more about the mandatory/optional arguments of vAMPirus later):
 
 `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze`
 
@@ -132,8 +136,12 @@ Now that we have an understanding on how to deploy vAMPirus with Nextflow, lets 
 ### The configuration file (vampirus.config)
 
 Nextflow deployment of vAMPirus relies on the use of the configuration file (vampirus.config) that is found in the vAMPirus program directory. The configuration file is a great way to store parameters/options
-used in your analyses. It also makes it pretty easy to set and keep track of multiple parameters as well where you can store custom default values that you feel work best for your data. You can have multiple
-copies of vampirus configuration files with different parameters, you would just have to specify the correct file with the "-c" argument shown in the section before.
+used in your analyses. It also makes it pretty easy to set and keep track of multiple parameters as well as storing custom default values that you feel work best for your data. You can also have multiple copies
+of vampirus configuration files with different parameters, you would just have to specify the correct file with the "-c" argument shown in the section before.
+
+Furthermore, the configuration file contains analysis-specific parameters AND resource-specific Nextflow launching parameters. A benefit of Nextflow integration, is that you can run the vAMPirus workflow on a large
+HPC just as easily as you could on your local machine. If you look at line 151 and greater in the vampirus.config file, you will see resource-specific parameters that you can alter before any run. Nexflow is capable
+of submitting jobs automatically using slurm and PBS, check out the Nextflow docs to learn more (https://www.nextflow.io/docs/latest/index.html)!
 
 ### Setting parameter values
 
@@ -166,7 +174,7 @@ There are two ways to set parameters with Nextflow and vAMPirus:
                  projtag="VirusRun1"*
 
 
-    2. Set the value within the command itself!
+    2. Set the value within the launch command itself!
 
         Instead of editing the configuration file directly, you could set parmeters within the launching command itself. So, for example, if we wanted to run the analysis with nucletide-based clustering of ASVs at 95%
         similarity, you would do so like this:
@@ -174,6 +182,93 @@ There are two ways to set parameters with Nextflow and vAMPirus:
                 `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --clusterNuclID .95`
 
         Here we use the "--Analyze" option that tells vAMPirus that we are ready to analyze soem data. Then the "--nOTU" argument with the "--clisterNuclID .95" tells vAMPirus we would like to cluster our ASVs based on
-        95% nucleotide similarity. The default ID value is stored at line 51 in the vampirus.config file (currentlt 85%), but as soon as you specify and provide a value in the command, the default value is overwritten.
+        95% nucleotide similarity. The default ID value is stored at line 51 in the vampirus.config file (currently 85%), but as soon as you specify and provide a value in the command, the default value is overwritten.
 
-## Skip options
+### vAMPirus skip options
+
+To specify certain parts of the vAMPirus workflow to perform in a given run, you can use skip options to have vAMPirus ignore certain processes. Here are the current skip options you can specify within the launch command:
+
+    *// Skip options
+        // Skip all Read Processing
+            skipReadProcessing=false
+        // Skip quality control processes only
+            skipFastQC = false
+        // Skip adapter removal process only
+            skipAdapterRemoval=false
+        // Skip primer removal process only
+            skipPrimerRemoval=false
+        // Skip AminoTyping
+            skipAminoTyping=false
+        // Skip Taxonomy
+            skipTaxonomy=false
+        // Skip phylogeny
+            skipPhylogeny = false
+        // Skip EMBOSS analyses
+            skipEMBOSS = false*
+
+To utilize these skip options is pretty simple where you would just add it to the launch command like so:
+
+    `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --clusterNuclID .95 --skipPhylogeny --skipTaxonomy`
+
+With this launch command, vAMPirus will perform ASV generation and nucleotide-based clustering to produce nOTUs, then will generate counts tables, matrices and the final report for you.
+
+
+# Running the vAMPirus workflow
+
+## For the impatient
+
+Once you have everything set up and you have edited the parameters of interest in your configuration file you can run the following launch command for a full analysis:
+
+    `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --pOTU`
+
+This launch command will run all aspects of the vAMPirus workflow on your data and spit out final reports for each clustering technique.
+
+## Necessary input
+
+### Sequencing reads
+
+Input can be raw or processed gzipped fastq files with names containing *"_R1"* or *"_R2"*. You can specify the directory containing your reads in line 25 of the vampirus.config file.
+
+NOTE: Sample names are extracted from read library names by using the string to the left of the *"_R"* in the filename automatically.
+
+### Metadata file
+
+For every analysis, vAMPirus generates a final report and uses a user supplied metadata file with sample names and treatment. Treatment is how vAMPirus groups samples in downstream statistical
+analyses performed to generate for the final report. For example, if comparing samples from different species of corals, you would set up a metadata file like so:
+
+        *sample,treatment
+        Coral1,Ofaveolata
+        Coral2,Ofaveolata
+        Coral3,Ofaveolata
+        Coral4,Mcavernosa
+        Coral5,Mcavernosa
+        Coral6,Mcavernosa*
+
+The metadata file needs to be comma separated with the first column being "sample" and the second column must be "treatment". These species names could easily be replaced with "Heat"/"Control".
+
+## The mandatory arguments
+
+To run the vAMPirus workflow, you must specify one or two mandatory arguments:
+
+    1. "--DataCheck"
+
+        Usage example:
+
+            `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --DataCheck`
+
+        The DataCheck feature of vAMPirus is meant to give the user some information about their data so they can tailor their final analysis appropriately. In DataCheck mode, vAMPirus
+        performs all read processing operations then generates ASVS and performs nucleotide- and protein-based clustering at 24 different clustering percentages ranging from 55-99% ID.
+        vAMPirus then generates an html report that displays and visualizes read processing and clustering stats. It is recommended that before running any dataset through vAMPirus, you
+        run the data through the DataCheck to allow informed decisions on clustering percentage, max read length, etc., etc.
+
+    2. "--Analyze" -- We've seen this one before *^__^*
+
+        Usage example:
+
+        *nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze*
+
+        The Analyze option allows vAMPirus to know that you plan to analyze your data with the given parameters either within the launch command or sourced from the configuration file. On
+        its own, "--Analyze" will run all read processing operations, generate ASVs, ASV counts files/matrices, ASV phylogeny, ASV taxonomy assignment, generate Aminotypes, Aminotype counts/matrices,
+        Aminotype phylogeny, Aminotype taxonomy assignment and EMBOSS analyses. vAMPirus will also produce final reports for ASV and Aminotype analyses.
+
+        To generate nOTUs (nucleotide-based OTUs) or pOTUs (protein-based OTUs) and run all subsequent analyses with them (phylogeny, taxonomy assignment), you would just need to add
