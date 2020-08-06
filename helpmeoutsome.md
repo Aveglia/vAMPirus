@@ -1,10 +1,25 @@
+****************************************************************************************************
                                                             ,---.,-.-.,---.o
                                                       .    ,|---|| | ||---'.,---..   .,---.
                                                        \  / |   || | ||    ||    |   |`---.
                                                         `'  `   `` ` ``    ``    `---``---`
-                                            An automated virus amplicon sequencing analysis pipeline
+                                             An automated virus amplicon sequencing analysis pipeline
+*****************************************************************************************************
+# Introduction to vAMPirus
 
-#
+The main motive behind vAMPirus is to provide a robust and easy-to-use bioinformatics workflow for virus amplicon sequencing analysis. The vAMPirus workflow
+allows easy reproducibility of project-specific analyses and is flexible enough to tailor your analysis to your own data.
+
+## Contact/support:
+
+Please contact Alex Veglia at ajv5@rice.edu with any feedback or questions. Any kind of input from the community is welcomed and encouraged!
+
+## How to cite:
+
+If you do use vAMPirus for your analyses, please cite using the following ->
+
+Veglia, A.J. *et.al.,* 2020
+
 
 
 # Getting started
@@ -116,5 +131,49 @@ Now that we have an understanding on how to deploy vAMPirus with Nextflow, lets 
 
 ### The configuration file (vampirus.config)
 
-If you were to look through the configuration file you will find a bunch of different parameters you can edit to tailor your analysis to your data. There is usually a brief description within the
-file itself to help you decide what you need changed. Here is a snippet
+Nextflow deployment of vAMPirus relies on the use of the configuration file (vampirus.config) that is found in the vAMPirus program directory. The configuration file is a great way to store parameters/options
+used in your analyses. It also makes it pretty easy to set and keep track of multiple parameters as well where you can store custom default values that you feel work best for your data. You can have multiple
+copies of vampirus configuration files with different parameters, you would just have to specify the correct file with the "-c" argument shown in the section before.
+
+### Setting parameter values
+
+There are two ways to set parameters with Nextflow and vAMPirus:
+
+    1. Just edit the config file!
+
+        Here we have a block from the vampirus.config file that stores information related to your run:
+
+            *// Project/analyses- specific information
+                // Project name - Name that will be used as a prefix for namng files by vAMPirus
+                     projtag="vAMPrun"
+                // Path to metadata spreadsheet file to be used for plot
+                     metadata="/data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus/fisces_metdata.csv"
+                // Minimum number of hit counts for a sample to have to be included in the downstream analyses and report generation
+        	         minimumCounts="1000"
+        	    // PATH to current working directory that contains (i) the vAMPirus.nf script, (ii)
+                     mypwd="/data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus"
+                     email="your_email@web.com"
+                // reads directory
+                     reads="/data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus/reads/R{1,2}_001.fastq.gz"
+                // Directory to store output of vAMPirus analyses
+                     outdir="results"*
+
+        The first one in the block is the project tag or "projtag" which by default, if unchanged, will use the prefix "vAMPrun". To change this value, and any other parameter value, just edit right in the configuration
+        file so if you wanted to call the run "VirusRun1" you would edit the line to:
+
+        *// Project/analyses- specific information
+            // Project name - Name that will be used as a prefix for naming files by vAMPirus
+                 projtag="VirusRun1"*
+
+
+    2. Set the value within the command itself!
+
+        Instead of editing the configuration file directly, you could set parmeters within the launching command itself. So, for example, if we wanted to run the analysis with nucletide-based clustering of ASVs at 95%
+        similarity, you would do so like this:
+
+                `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --clusterNuclID .95`
+
+        Here we use the "--Analyze" option that tells vAMPirus that we are ready to analyze soem data. Then the "--nOTU" argument with the "--clisterNuclID .95" tells vAMPirus we would like to cluster our ASVs based on
+        95% nucleotide similarity. The default ID value is stored at line 51 in the vampirus.config file (currentlt 85%), but as soon as you specify and provide a value in the command, the default value is overwritten.
+
+## Skip options

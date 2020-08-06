@@ -3030,56 +3030,7 @@ if (params.Analyze) {
     	//exit 0
     }
 
-if (params.generateAAcounts) {
-
-    if (params.proteinFasta && params.mergedFast && params.sampleList) {
-
-        process Generate_Protein_Counts {
-
-            label 'norm_cpus'
-
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/ProteinCounts", mode: "copy", overwrite: true
-
-            output:
-                tuple file("*_counts.csv"), file("*dmd.out") into potuaacounts_summary
-
-            script:
-                """
-                set +e
-                potu="\$( echo ${params.proteinFasta} | awk -F "_" '{print \$3}')"
-                diamond makedb --in ${params.proteinFasta} --db ${params.proteinFasta}
-                diamond blastx -q ${params.mergedFast} -d ${params.proteinFasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-                echo "[Sequence]" >tmp.col1.txt
-                echo "Generating sample id list"
-                grep ">" ${params.proteinFasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
-                cat otuid.list >> tmp.col1.txt
-                echo "Beginning them counts tho my g"
-                for y in \$( cat ${params.sampleList} );do
-                    echo "Starting with \$y now ..."
-                    grep "\$y" ${params.projtag}_\${potu}_Counts_dmd.out > tmp."\$y".out
-                    echo "Isolated hits"
-                    echo "Created uniq subject id list"
-                    echo "\$y" > "\$y"_col.txt
-                    echo "Starting my counts"
-                    for z in \$(cat otuid.list);do
-                        echo "Counting \$z hits"
-                        echo "grep -wc "\$z" >> "\$y"_col.txt"
-                        grep -wc "\$z" tmp."\$y".out >> "\$y"_col.txt
-                        echo "\$z counted"
-                    done
-               done
-               paste -d "," tmp.col1.txt *col.txt > ${params.projtag}_\${potu}_counts.csv
-               rm tmp*
-               rm *col.txt
-               """
-           }
-    } else {
-        println("\n\t\033[0;31mProvide PATH for `proteinFasta` and `mergedFast`\n\033[0m")
-        exit 0
-    }
-}
-
-if (params.dataCheck) {
+if (params.DataCheck) {
 
     println("\n\tRunning vAMPirus \n")
 
