@@ -8,7 +8,7 @@
 # Introduction to vAMPirus
 
 The main motive behind vAMPirus is to provide a robust and easy-to-use bioinformatics workflow for virus amplicon sequencing analysis. The vAMPirus workflow
-allows easy reproducibility of project-specific analyses and is flexible enough to tailor your analysis to your own data. 
+allows easy reproducibility of project-specific analyses and is flexible enough to tailor your analysis to your own data.
 
 ## Order of operations
 
@@ -253,7 +253,7 @@ To utilize these skip options is pretty simple where you would just add it to th
 With this launch command, vAMPirus will perform ASV generation and nucleotide-based clustering to produce nOTUs, then will generate counts tables, matrices and the final report for you.
 
 
-# Running the vAMPirus workflow
+# What we need to run the vAMPirus workflow
 
 ## Recommended order of operations
 
@@ -332,8 +332,6 @@ To run the vAMPirus workflow, you must specify one or two mandatory arguments:
                 [2e/e5fea3] process > Report_DataCheck                                [100%] 1 of 1 ✔
 
         Every time you launch vAMPirus with Nextflow, you will see this kind of output that refreshes with the status of the different processes during the run.
-
-
 
 
     2. "--Analyze" -- We've seen this one before
@@ -428,3 +426,93 @@ To run the vAMPirus workflow, you must specify one or two mandatory arguments:
                 [-        ] process > Report_pOTU_Nucleotide              -
 
         You can notice that there are a few more processes now compared to the output of the previous launch command which is what we expect since we are asking vAMPirus to do a little bit more work for us :).
+
+# Breaking it down: The vAMPirus workflow process by process
+
+## Read processing
+
+The read processing segment of vAMPirus includes FastQC report generation, adapter removal with fastp, primer removal with bbduk.sh, read merging with vsearch, and a final length filtering/global trimming with fastp and bbduk.sh.
+
+### Adapter removal with fastp
+
+Adapter contamination in reads are automatically detected with fastp. Overrepresentation analysis and quality filtering is also ran during this process prior to primer removal. Adapter contamination removal can be skipped using the
+"--skipAdapterRemoval" option, but is not recommended as even if you already performed adapter removal, it doesn't hurt to check again.
+
+### Primer removal with bbduk.sh
+
+There are two ways that vAMPirus is able to remove primer sequences from reads with bbduk.sh:
+
+    1. Primer removal by chopping off specified number of bases from each read -
+
+            This is the default action of vAMPirus if no primer sequences are specified. To use this method of primer removal, you must specify "--GlobTrim" and either specify the number of bases in the launch command like so:
+
+                `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --pOTU --GlobTrim 23,26`
+
+            In this situation, we tell vAMPirus we would like to remove primers by trimming 23 bases from the forward reads and 26 bases from the reverse reads. The other way to initiate this method of primer removal is to add
+             the same information at line 39 in the configuration file:
+
+             // Primer Removal parameters
+                 // If not specifying primer sequences, forward and reverse reads will be trimmed by number of bases specified using --GlobTrim #basesfromforward,#basesfromreverse
+                     GlobTrim="23,26"
+
+            By adding the information to line 39, vAMPirus will automatically use this method and these parameters for primer removal. If you want to change the number of bases without editing the configuration file, all you would
+            need to do is then specify in the launch command with "--GlobTrim 20,27" and vAMPirus will ignore the "23,26" in the configuration file.
+
+            NOTE: Specifying global trimming by editing line 39 in the config file or using "--GlobTrim" in the launch command will override the use of primer sequences for removal if both are specified  
+
+    2. Primer removal by specifying primer sequences
+
+            To signal to vAMPirus to utilize this method of primer removal, similar to the previous method, you could edit the configuration file or specify within the launch command. To specify in launch command, we would need to used the "--fwd" and "--rev" options:
+
+                `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --pOTU --fwd FWDPRIMER --rev REVPRIMER`
+
+            vAMPirus will then provide these sequences to bbduk.sh for them to be removed. The primer sequences could also be stored in the configuration file in lines 40-43:
+
+                // Specific primer sequence on forward reads to be removed
+                    fwd="FWDPRIMER"
+                // Reverse primer sequence
+                    rev="REVPRIMER"
+
+
+### Read merging and length filtering
+
+Read merging in the vAMPirus workflow is performed by vsearch and afterwards, reads are trimmed to the expected amplicon length (--maxLen) and any reads with lengths below the user specified minimum read length (--minLen). There are three parameters that you can edit to influence this segment of vAMPirus. If we look at lines 29-35:
+
+    // Merged read length filtering parameters
+        // Minimum merged read length - reads below the specified maximum read length will be used for counts only
+            minLen="400"
+        // Maximum merged read length - reads with length equal to the specified max read length will be used to generate uniques and ASVs
+            maxLen="422"
+        // Maximum expected error for vsearch merge command
+            maxEE="1"
+
+The user can edit the minimum length (--minLen) for reads to be used for counts table generation, maximum length (--maxLen) for reads used to generate uniques and subsequent ASVs, and the expected error rate (--maxEE) for overlapping region of reads during read merging with vsearch. The values above are default and should be edited before running your data with --Analyze.
+
+This is where the DataCheck report is very useful, you can review the report and see the number of reads that merge per library and you can edit the expected error value to be less stringent if needed. The DataCheck report also
+contains a read length distribution that you can use to select an ideal maximum/minimum read length.
+
+
+## Amplicon Sequence Variants and clustering
+
+ vAMPirus relies on vsearch using the UNOISE3 algorithm to generate Amplicon Sequencing Variants (ASVs) from dereplicated amplicon reads. ASVs are always generated by default and there are two parameters that the user can specify either in the launch command or by editing the configuration file at lines 45-49:
+
+     // ASV generation and clustering parameters
+         // Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
+             alpha="1"
+         // Minimum size or representation for sequence to be considered in ASV generation
+             minSize="8"
+
+The smaller the alpha value (--alpha) the more stringent vsearch is ASV generation while minimum size is the minimum representation of a unique sequence to have to be considered in the ASV generation.
+
+Now, onto clustering ASVs into Operation Taxonomic Units (OTUs). vAMPirus is able to use two different techniques for generating OTUs for the user:
+
+
+    1. Nucleotide-based clustering into OTUS (nOTUs) -
+
+        In this technique, as the name infers, is just the clustering of ASVs into OTUs based on nucleotide identity. To signal vAMPirus to generate nOTUs, we just add the "--nOTU" option to our launch command:
+
+                `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU`
+
+        With nOTU analysis specified, vAMPirus will still generate ASVs and produce ASV-related results with a report, so you are not losing any results when you the clustering and this way, you can compare the reports afterwards.
+
+        By default, vAMPirus will perform clustering with 95% 
