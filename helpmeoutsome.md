@@ -151,7 +151,7 @@ There are two ways to set parameters with Nextflow and vAMPirus:
 
         Here we have a block from the vampirus.config file that stores information related to your run:
 
-            *// Project/analyses- specific information
+            // Project/analyses- specific information
                 // Project name - Name that will be used as a prefix for namng files by vAMPirus
                      projtag="vAMPrun"
                 // Path to metadata spreadsheet file to be used for plot
@@ -164,14 +164,14 @@ There are two ways to set parameters with Nextflow and vAMPirus:
                 // reads directory
                      reads="/data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus/reads/R{1,2}_001.fastq.gz"
                 // Directory to store output of vAMPirus analyses
-                     outdir="results"*
+                     outdir="results"
 
         The first one in the block is the project tag or "projtag" which by default, if unchanged, will use the prefix "vAMPrun". To change this value, and any other parameter value, just edit right in the configuration
         file so if you wanted to call the run "VirusRun1" you would edit the line to:
 
-        *// Project/analyses- specific information
+        // Project/analyses- specific information
             // Project name - Name that will be used as a prefix for naming files by vAMPirus
-                 projtag="VirusRun1"*
+                 projtag="VirusRun1"
 
 
     2. Set the value within the launch command itself!
@@ -236,13 +236,13 @@ NOTE: Sample names are extracted from read library names by using the string to 
 For every analysis, vAMPirus generates a final report and uses a user supplied metadata file with sample names and treatment. Treatment is how vAMPirus groups samples in downstream statistical
 analyses performed to generate for the final report. For example, if comparing samples from different species of corals, you would set up a metadata file like so:
 
-        *sample,treatment
+        sample,treatment
         Coral1,Ofaveolata
         Coral2,Ofaveolata
         Coral3,Ofaveolata
         Coral4,Mcavernosa
         Coral5,Mcavernosa
-        Coral6,Mcavernosa*
+        Coral6,Mcavernosa
 
 The metadata file needs to be comma separated with the first column being "sample" and the second column must be "treatment". These species names could easily be replaced with "Heat"/"Control".
 
@@ -257,11 +257,37 @@ To run the vAMPirus workflow, you must specify one or two mandatory arguments:
             `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --DataCheck`
 
         The DataCheck feature of vAMPirus is meant to give the user some information about their data so they can tailor their final analysis appropriately. In DataCheck mode, vAMPirus
-        performs all read processing operations then generates ASVS and performs nucleotide- and protein-based clustering at 24 different clustering percentages ranging from 55-99% ID.
+        performs all read processing operations then generates ASVS and performs nucleotide- and p rotein-based clustering at 24 different clustering percentages ranging from 55-99% ID.
         vAMPirus then generates an html report that displays and visualizes read processing and clustering stats. It is recommended that before running any dataset through vAMPirus, you
         run the data through the DataCheck to allow informed decisions on clustering percentage, max read length, etc., etc.
 
-    2. "--Analyze" -- We've seen this one before *^__^*
+        Here is how Nextflow will display the list of processes vAMPirus will execute during DataCheck (executed with the launch command above):
+
+                executor >  local (57)
+                [8a/75e048] process > Build_database                                  [100%] 1 of 1 ✔
+                [b4/c08216] process > QualityCheck_1DC                                [100%] 9 of 9 ✔
+                [5c/ed7618] process > Adapter_Removal_DC                              [100%] 9 of 9 ✔
+                [25/56a27d] process > Primer_Removal_DC                               [100%] 9 of 9 ✔
+                [fa/736d66] process > QualityCheck_2_DC                               [100%] 9 of 9 ✔
+                [d8/4b0c4e] process > Read_Merging_DC                                 [100%] 9 of 9 ✔
+                [93/f5d315] process > Compile_Reads_DC                                [100%] 1 of 1 ✔
+                [4d/8d83dd] process > Compile_Names_DC                                [100%] 1 of 1 ✔
+                [0a/fdd8e8] process > Length_Filtering_DC                             [100%] 1 of 1 ✔
+                [b6/097dd8] process > Extract_Uniques_DC                              [100%] 1 of 1 ✔
+                [1b/1c4476] process > Identify_ASVs_DC                                [100%] 1 of 1 ✔
+                [2e/9101c3] process > Chimera_Check_DC                                [100%] 1 of 1 ✔
+                [14/365745] process > NucleotideBased_ASV_clustering_DC               [100%] 1 of 1 ✔
+                [99/938f26] process > Translation_For_ProteinBased_Clustering_DC      [100%] 1 of 1 ✔
+                [34/9eb77a] process > Protein_clustering_DC                           [100%] 1 of 1 ✔
+                [26/1143ba] process > combine_csv_DC                                  [100%] 1 of 1 ✔
+                [2e/e5fea3] process > Report_DataCheck                                [100%] 1 of 1 ✔
+
+        This screen is displayed uponEach column contains different information related to progress and execution of the analysis.
+
+
+
+
+    2. "--Analyze" -- We've seen this one before
 
         Usage example:
 
