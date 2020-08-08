@@ -658,3 +658,5 @@ NOTE: By default, vAMPirus assumes the headers are in RVDB format, to trigger th
 ## EMBOSS Analyses
 
 For pOTU protein files and AminoTypes, vAMPirus will run different protein property analyses using scripts within EMBOSS. To skip this process, just add "--skipEMBOSS" to the launch command.
+
+## vAMPirus final reports
