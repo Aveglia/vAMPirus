@@ -3030,7 +3030,7 @@ if (params.Analyze) {
 
 } else if (params.DataCheck) {
 
-    println("\n\tRunning vAMPirus \n")
+    println("\n\tRunning vAMPirus DataCheck \n")
 
     process QualityCheck_1DC {
 
