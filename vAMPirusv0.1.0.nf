@@ -294,75 +294,7 @@ def fullHelpMessage() {
 
         #################################################################################################
 
-        I. Steps for running on a local cluster and local installation of TransPi
 
-            1- Run the `precheck_TransPi.sh` to install tools, set up the databases and directories for TransPi
-            2- Run TransPi
-
-            Usage:
-
-                nextflow run TransPi.nf --all -with-conda ~/anaconda3/envs/TransPi
-
-        #################################################################################################
-
-        II. Steps for running on a local cluster and conda installation by nextflow
-
-            1- Run the `precheck_TransPi.sh` to install tools, set up the databases and directories for TransPi
-            2- Run TransPi
-
-            Usage:
-
-                nextflow run TransPi.nf --all -profile conda
-
-            NOTE:
-                Not recommended, not all programs are installed by conda. Use if other dependencies are manually installed
-
-        #################################################################################################
-
-        III. Steps for running on docker (in development)
-
-            1- Run the `container_precheck_TransPi.sh` to install tools, set up the databases and directories for TransPi
-            2- Run TransPi
-
-            Usage:
-
-                nextflow run TransPi.nf --all -profile docker
-
-            NOTE:
-                All necesary tools for running TransPi are pre-installed in the container
-                `container_precheck_TransPi.sh` will install only the database used by TransPi
-
-        #################################################################################################
-
-        IV. Steps for running on singualarity (in development)
-
-            1- Run the `container_precheck_TransPi.sh` to install tools, set up the databases and directories for TransPi
-            2- Run TransPi
-
-            Usage:
-
-                nextflow run TransPi.nf --all -profile singularity
-
-            NOTE:
-                All necesary tools for running TransPi are pre-installed in the container
-                `container_precheck_TransPi.sh` will install only the database used by TransPi
-
-        #################################################################################################
-
-        V. Steps for running with multiple profiles (in development - depending on profile selected)
-
-            1- Run the `precheck_TransPi.sh` to install tools, set up the databases and directories for TransPi
-            2- Run TransPi
-
-            Usage:
-
-                nextflow run TransPi.nf --all -profile conda,test
-
-            NOTE:
-                This will run TransPi using a test dataset and a conda environment created by Nextflow
-                To run with containers first run the `container_precheck_TransPi.sh` and use -profile docker,test
-
-        #################################################################################################
 
     """.stripIndent()
 }
@@ -393,15 +325,15 @@ log.info """\
         """.stripIndent()
 
 // read files from here. This will be changed!
-if (params.readsTest) {
+if (params.testing) {
     println("\n\tRunning vAMPirus with TEST dataset\n")
     Channel
         .from(params.readsTest)
         .map{ row -> [ row[0], [ file(row[1][0],checkIfExists: true),file(row[2][0],checkIfExists: true) ] ] }
-        .ifEmpty{ exit 1, "params.readsTest was empty - no input files supplied" }
+        .ifEmpty{ exit 1, "params.testing was empty - no input files supplied" }
         .into{ reads_ch; reads_qc_ch }
 } else {
-    println("\n\tRunning vAMPirus with your dataset\n")
+    println("\n\tEverything good to go, lets run vAMPirus!\n")
     Channel
         .fromFilePairs("${params.reads}", checkIfExists: true)
         .into{ reads_ch; reads_qc_ch }
@@ -451,7 +383,7 @@ if (params.Analyze) {
 
                 tag "${sample_id}"
 
-                publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/FastQC/PreClean", mode: "copy", overwrite: true
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/FastQC/PreClean", mode: "copy", overwrite: true
 
                 input:
                     tuple sample_id, file(reads) from reads_qc_ch
@@ -474,8 +406,8 @@ if (params.Analyze) {
 
                 tag "${sample_id}"
 
-                publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
-                publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
                 input:
                     tuple sample_id, file(reads) from reads_ch
@@ -510,7 +442,7 @@ if (params.Analyze) {
 
                 tag "${sample_id}"
 
-                publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
 
                 input:
                     tuple sample_id, file(reads) from reads_fastp_ch
@@ -553,7 +485,7 @@ if (params.Analyze) {
 
                 tag "${sample_id}"
 
-                publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/FastQC/PostClean", mode: "copy", overwrite: true
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/FastQC/PostClean", mode: "copy", overwrite: true
 
                 input:
                     tuple sample_id, file(reads) from readsforqc2
@@ -575,8 +507,8 @@ if (params.Analyze) {
 
         tag "${sample_id}"
 
-        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging/Individual", mode: "copy", overwrite: true, pattern: "*mergedclean.fastq"
-        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging/Individual/notmerged", mode: "copy", overwrite: true, pattern: "*notmerged*.fastq"
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Individual", mode: "copy", overwrite: true, pattern: "*mergedclean.fastq"
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Individual/notmerged", mode: "copy", overwrite: true, pattern: "*notmerged*.fastq"
 
         input:
             tuple sample_id, file(reads) from reads_bbduk_ch
@@ -598,7 +530,7 @@ if (params.Analyze) {
 
         label 'low_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch1_ch
@@ -617,7 +549,7 @@ if (params.Analyze) {
 
         label 'low_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging", mode: "copy", overwrite: true
 
         input:
             file(names) from names
@@ -637,10 +569,10 @@ if (params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true, pattern: "*_merged_preFilt*.fasta"
-        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging", mode: "copy", overwrite: true, pattern: "*Lengthfiltered.fastq"
-        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/pre_length_filtering", mode: "copy", overwrite: true, pattern: "*preFilt_*st.txt"
-        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/post_length_filtering", mode: "copy", overwrite: true, pattern: "*postFilt_*st.txt"
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true, pattern: "*_merged_preFilt*.fasta"
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging", mode: "copy", overwrite: true, pattern: "*Lengthfiltered.fastq"
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Histograms/pre_length_filtering", mode: "copy", overwrite: true, pattern: "*preFilt_*st.txt"
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Histograms/post_length_filtering", mode: "copy", overwrite: true, pattern: "*postFilt_*st.txt"
 
         input:
             file(reads) from collect_samples_ch
@@ -665,7 +597,7 @@ if (params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/ReadProcessing/ReadMerging/Uniques", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Uniques", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch2_ch
@@ -683,7 +615,7 @@ if (params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/Clustering/ASVs/ChimeraCheck", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/ASVs/ChimeraCheck", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch3_ch
@@ -701,7 +633,7 @@ if (params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.mypwd}/${params.outdir}/Clustering/ASVs", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/ASVs", mode: "copy", overwrite: true
 
         input:
             file(fasta) from reads_vsearch4_ch
@@ -723,7 +655,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/nOTU", mode: "copy", overwrite: true, pattern: '*nOTU*.fasta'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/nOTU", mode: "copy", overwrite: true, pattern: '*nOTU*.fasta'
 
             input:
                 file(fasta) from reads_vsearch5_ch
@@ -761,10 +693,10 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy", mode: "copy", overwrite: true, pattern: '*nOTU*.{fasta,csv,tsv}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*nOTU*dmd.out'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Taxonomy", mode: "copy", overwrite: true, pattern: '*nOTU*.{fasta,csv,tsv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*nOTU*dmd.out'
 
                 input:
                     tuple file(notus), file(asvs) from nuclFastas_forDiamond_ch
@@ -1045,8 +977,8 @@ if (params.Analyze) {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
-                    publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
 
                     input:
                         file(reads) from nuclFastas_forDiamond_ch
@@ -1284,8 +1216,8 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Counts", mode: "copy", overwrite: true, pattern: '*otu*.{biome,csv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Counts", mode: "copy", overwrite: true, pattern: '*otu*.{biome,csv}'
 
                 input:
                     tuple file(notus), file(asvs) from nuclFastas_forCounts_ch
@@ -1322,7 +1254,7 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
 
                 input:
                     file(asvs) from nuclFastas_forCounts_ch
@@ -1351,8 +1283,8 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*nOTU*PercentID.matrix'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*nOTU*PercentID.matrix'
 
             input:
                 tuple file(notus), file(asvs) from nuclFastas_forMatrix_ch
@@ -1404,7 +1336,7 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
 
                 input:
                     file(reads) from nuclFastas_forMatrix_ch
@@ -1458,12 +1390,12 @@ if (params.Analyze) {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*nOTU*aln.*'
-                    publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*nOTU*mt*'
-                    publishDir "${params.mypwd}/${params.outdir}/Analyses/nOTU/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*nOTU*iq*'
-                    publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
-                    publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
-                    publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*nOTU*aln.*'
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*nOTU*mt*'
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*nOTU*iq*'
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
 
                     input:
                         tuple file(notus), file(asvs) from nuclFastas_forphylogeny
@@ -1528,9 +1460,9 @@ if (params.Analyze) {
 
                         label 'norm_cpus'
 
-                        publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
-                        publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
-                        publishDir "${params.mypwd}/${params.outdir}/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+                        publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
+                        publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
+                        publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
 
                         input:
                             file(asvs) from nuclFastas_forphylogeny
@@ -1577,7 +1509,7 @@ if (params.Analyze) {
 
             conda 'python=2.7'
 
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
 
             input:
                 file(fasta) from asvsforAminotyping
@@ -1596,9 +1528,9 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/AminoTypes/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/AminoTypes/Problematic", mode: "copy", overwrite: true, pattern: '*problematic*.{fasta}'
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/AminoTypes", mode: "copy", overwrite: true, pattern: '*AminoTypes_noTaxonomy.{fasta}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/AminoTypes/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/AminoTypes/Problematic", mode: "copy", overwrite: true, pattern: '*problematic*.{fasta}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/AminoTypes", mode: "copy", overwrite: true, pattern: '*AminoTypes_noTaxonomy.{fasta}'
 
             input:
                 file(prot) from amintypegen
@@ -1648,7 +1580,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Matrix", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Matrix", mode: "copy", overwrite: true
 
             input:
                 file(prot) from aminotypesClustal
@@ -1680,12 +1612,12 @@ if (params.Analyze) {
 
                 label 'low_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
 
                 input:
                     file(prot) from aminotypesEmboss
@@ -1728,8 +1660,8 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*TaxonomyLabels.fasta'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*TaxonomyLabels.fasta'
 
                 input:
                     file(reads) from aminotypesBlast
@@ -1878,9 +1810,9 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
                 input:
                     file(prot) from aminotypesMafft
@@ -1928,7 +1860,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/AminoTypes/Counts", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Counts", mode: "copy", overwrite: true
 
             input:
                 file(fasta) from aminotypesCounts
@@ -1978,7 +1910,7 @@ if (params.Analyze) {
 
             conda 'python=2.7'
 
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/pOTU/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
 
             input:
                 file(fasta) from nucl2aa
@@ -1999,9 +1931,9 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU", mode: "copy", overwrite: true, pattern: '*pOTU*.{fasta}'
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
-            publishDir "${params.mypwd}/${params.outdir}/Clustering/pOTU/Problematic", mode: "copy", overwrite: true, pattern: '*problem*.{fasta}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/pOTU", mode: "copy", overwrite: true, pattern: '*pOTU*.{fasta}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/pOTU/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/pOTU/Problematic", mode: "copy", overwrite: true, pattern: '*problem*.{fasta}'
 
             input:
                 file(fasta) from clustering_aa
@@ -2169,9 +2101,9 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
 
                 input:
                     file(reads) from pOTU_ntDiamond_ch
@@ -2321,7 +2253,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Counts", mode: "copy", overwrite: true, pattern: '*.{biome,csv,txt}'
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Counts", mode: "copy", overwrite: true, pattern: '*.{biome,csv,txt}'
 
             input:
                 file(potus) from pOTU_nt_counts_ch
@@ -2348,7 +2280,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Matrix", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Matrix", mode: "copy", overwrite: true
 
             input:
                 file(potus) from pOTU_ntmatrix_ch
@@ -2383,9 +2315,9 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Nucleotide/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
                 input:
                     file(reads) from pOTU_ntmafft_ch
@@ -2434,7 +2366,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Matrix", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Matrix", mode: "copy", overwrite: true
 
             input:
                 file(prot) from pOTU_aaMatrix_ch
@@ -2468,12 +2400,12 @@ if (params.Analyze) {
 
                 label 'low_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
 
                 input:
                     file(prot) from pOTUEMBOSS
@@ -2518,9 +2450,9 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
 
                 input:
                     file(reads) from pOTU_aaDiamond_ch
@@ -2670,9 +2602,9 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
-                publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
     	        input:
                     file(prot) from pOTU_aaMafft_ch
@@ -2721,7 +2653,7 @@ if (params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.mypwd}/${params.outdir}/Analyses/pOTU/Aminoacid/Counts", mode: "copy", overwrite: true
+            publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Counts", mode: "copy", overwrite: true
 
             input:
                 file(fasta) from pOTU_aaCounts_ch
@@ -2798,7 +2730,7 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
 
                 input:
                     file(counts) from asv_counts_plots
@@ -2827,7 +2759,7 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
 
                 input:
                     file(counts) from notu_counts_plots
@@ -2863,7 +2795,7 @@ if (params.Analyze) {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
 
                     input:
                         file(counts) from aminocounts_plot
@@ -2895,7 +2827,7 @@ if (params.Analyze) {
 
                         label 'norm_cpus'
 
-                        publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                        publishDir "${params.mypwd}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
 
                         input:
                             file(counts) from asv_counts_plots
@@ -2928,7 +2860,7 @@ if (params.Analyze) {
 
                             label 'norm_cpus'
 
-                            publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                            publishDir "${params.mypwd}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
 
                             input:
                                 file(counts) from aminocounts_plot
@@ -2962,7 +2894,7 @@ if (params.Analyze) {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
 
                     input:
                         file(counts) from potu_Acounts
@@ -2996,7 +2928,7 @@ if (params.Analyze) {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.mypwd}/${params.outdir}/FinalReport", mode: "copy", overwrite: true
+                    publishDir "${params.mypwd}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
 
                     input:
                         file(counts) from potu_Ncounts_for_report

@@ -101,7 +101,7 @@ you are good to go! You could also change this within the launch command with ad
 
 A test dataset is provided in the vAMPirus/example_data. To ensure that vAMPirus is set up properly before running with your own data, you can run:
 
-`nextflow run vAMPirusv0.1.0.nf -c ./example_data/vampirus_test.config -with-conda /PATH/TO/miniconda3/env/vAMPirus`
+`nextflow run vAMPirusv0.1.0.nf -c ./example_data/vampirus_test.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --testing`
 
 # Quick Notes Before Running vAMPirus
 
@@ -661,4 +661,4 @@ For pOTU protein files and AminoTypes, vAMPirus will run different protein prope
 
 # vAMPirus output
 
-All files produced throughout the vAMPirus pipeline will be stored within the designated results directory. Within the results directory, output is organized into
+Output files produced throughout the vAMPirus pipeline is organized in directories within the specified results/output directory (e.g. )
