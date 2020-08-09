@@ -1611,8 +1611,8 @@ if (params.Analyze) {
             script:
                 """
                 cp ${params.mypwd}/bin/rename_seq.py .
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${prot} >${params.projtag}_filtered_translations.fasta
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${prot} >${params.projtag}_problematic_translations.fasta
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${prot} >${params.projtag}_filtered_translations.fasta
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${prot} >${params.projtag}_problematic_translations.fasta
                 if [ `wc -l ${params.projtag}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                     grep ">" ${params.projtag}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
                     seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_problematic_nucleotides.fasta
@@ -2018,7 +2018,7 @@ if (params.Analyze) {
                 """
                 cp ${params.mypwd}/bin/rename_seq.py .
                 for id in `echo ${params.clusterAAIDlist} | tr "," "\\n"`;do
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
+                        awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                         cd-hit -i ${params.projtag}_filtered_proteins.fasta -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
                         sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
                         grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >temporaryclusters.list
@@ -2073,7 +2073,7 @@ if (params.Analyze) {
                         ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta
                         stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_aminoacid_clustered.gc gcformat=4
                         stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_nucleotide_clustered.gc gcformat=4
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<50{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
+                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
                         if [ `wc -l ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                             grep ">" ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
                             seqtk subseq ${asvs} > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
@@ -2091,7 +2091,7 @@ if (params.Analyze) {
                 """
                 cp /data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus/bin/rename_seq.py .
                 id=${params.clusterAAID}
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                 cd-hit -i ${params.projtag}_filtered_proteins.fasta -c ${params.clusterAAID} -o ${params.projtag}_pOTU\${id}.fasta
                 sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
                 grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >temporaryclusters.list
@@ -2147,7 +2147,7 @@ if (params.Analyze) {
                 ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta
                 stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_aminoacid_clustered.gc gcformat=4
                 stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_nucleotide_clustered.gc gcformat=4
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
                 if [ `wc -l ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                     grep ">" ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
                     seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
@@ -3389,7 +3389,7 @@ if (params.Analyze) {
                 else
                     word=5
                 fi
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)>${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                 cd-hit -i ${params.projtag}_filtered_proteins.fasta -n \${word} -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
                 sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
                 grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >temporaryclusters.list
@@ -3444,7 +3444,7 @@ if (params.Analyze) {
                 ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta
                 stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_aminoacid_clustered.gc gcformat=4
                 stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_nucleotide_clustered.gc gcformat=4
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)<50{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
                 if [ `wc -l ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                     grep ">" ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
                     seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
