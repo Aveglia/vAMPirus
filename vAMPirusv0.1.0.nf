@@ -17,13 +17,17 @@ def helpMessage() {
     ==============================================================================================================================================================================================
 
         Steps:
-            1- Run the `precheck_TransPi.sh` to install tools, set up the databases and directories for
+            1- Run the `vampirus_startup.sh` to install dependencies, then test installation by running with test dataset provided.
 
-            2- Run vAMPirusv0.1.0.sh
+            2- Edit vampirus.config file for your analysis/data.
 
-            Usage:
+            3. Run vAMPirus --DataCheck and adjust parameters where you see fit.
 
-                nextflow run vAMPirusv0.1.0.sh
+            4. Run vAMPirus --Analyze
+
+            Example usage:
+
+                nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze
 
         Help options:
 
@@ -35,11 +39,7 @@ def helpMessage() {
 
                 --Analyze                       Run absolutely everything
 
-                --dataCheck                     Assess how data performs with during processing and clustering
-
-                --generateAAcounts              Provide vAMPirus with a translated fasta file and the merged reads you would like mapped and it will generate a protein counts file for you
-
-                --generateReport                Provide vAMPirus with paths to necessary files to generate a vAMPirus report
+                --DataCheck                     Assess how data performs with during processing and clustering
 
         Clustering arguments:
 
@@ -62,6 +62,8 @@ def helpMessage() {
                 --skipTaxonomy                  Set this option to skip taxonomy assignment processes
 
                 --skipPhylogeny                 Set this option to skip phylogeny processes
+
+                --skipReport                    Set this option to skip report generation
 
         Analysis-specific options (will override information in the config file):
 
@@ -131,21 +133,18 @@ def helpMessage() {
 
                 --Bitscore                     Set minimum bitscore for Diamond command
 
-                --
-
         Phylogeny analysis parameters
 
-                --ntmodeltrax                 Use this option to use the nucleotide model of substitution determined by ModelTest-NG
+                --ModelTnt                     Signals for vAMPirus to use nucleotide substitution model produced by ModelTest-NG
 
-                --ptmodeltrax                 Use this option to use the amino acid model of substitution determined by ModelTest-NG
+                --ModelTaa                     Signals for vAMPirus to use amino acid substitution model produced by ModelTest-NG
 
-        Paths to files needed for --generateAAcounts option
+                --parametric                   Set to have IQ-TREE to perform parametric bootstrapping during tree making
 
-                --proteinFasta                 Path to protein sequence fasta file to be used for counts
+                --nonparametric                Set to have IQ-TREE to perform non-parametric bootstrapping during tree making
 
-                --mergedFast                   Path to merged read fastq/fasta file to be used for counts
+                --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
 
-                --sampleList                   Path to list of sample names which are mentioned in the sequence headers
 
         |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     """.stripIndent()
@@ -271,21 +270,12 @@ def fullHelpMessage() {
 
                 --Bitscore                     Set minimum bitscore for Diamond command
 
-                --
-
         Phylogeny analysis parameters
 
                 --ntmodeltrax                 Use this option to use the nucleotide model of substitution determined by ModelTest-NG
 
                 --ptmodeltrax                 Use this option to use the amino acid model of substitution determined by ModelTest-NG
 
-        Paths to files needed for --generateAAcounts option
-
-                --proteinFasta                 Path to protein sequence fasta file to be used for counts
-
-                --mergedFast                   Path to merged read fastq/fasta file to be used for counts
-
-                --sampleList                   Path to list of sample names which are mentioned in the sequence headers
 
         |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
         #################################################################################################

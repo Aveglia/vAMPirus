@@ -59,23 +59,23 @@ To use the vampirus_startup.sh script to download any or all of these databases 
 If we look at the script usage:
 
 
-*General execution:
+    General execution:
 
-vampirus_startup.sh -h -d [1|2|3|4]
+    vampirus_startup.sh -h -d [1|2|3|4]
 
 
-    Command line options:
+        Command line options:
 
-        [ -h ]                       	Print help information
+            [ -h ]                       	Print help information
 
-        [ -d 1|2|3|4 ]                  Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
+            [ -d 1|2|3|4 ]                  Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
-                                                    1 - Download only NCBIs Viral protein RefSeq database
-                                                    2 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
-                                                    3 - Download only the complete NCBI NR protein database
-                                                    4 - Download all three databases
+                                                        1 - Download only NCBIs Viral protein RefSeq database
+                                                        2 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                        3 - Download only the complete NCBI NR protein database
+                                                        4 - Download all three databases
 
-**
+
 
 So, if we wanted to download NCBIs Viral protein RefSeq database, we would just need to run:
 
@@ -656,7 +656,7 @@ NOTE: By default, vAMPirus assumes the headers are in RVDB format, to trigger th
 
 ## EMBOSS Analyses
 
-For pOTU protein files and AminoTypes, vAMPirus will run different protein property analyses using scripts within EMBOSS. To skip this process, just add "--skipEMBOSS" to the launch command.
+For pOTU protein files and AminoTypes, vAMPirus will run different protein physiochemical property analyses using scripts within EMBOSS. To skip this process, just add "--skipEMBOSS" to the launch command.
 
 # vAMPirus output
 
@@ -777,6 +777,177 @@ The clustering directory will contain all files produced for whichever clusterin
 
 ### Analyses - ${working_directory}/results/Analyze/Analyses
 
+For each clustering technique (i.e. ASVs, AminoTypes, nOTUs and pOTUs) performed in a given run, resulting taxonomic unit fastas will go through the following analyses (unless skip options are used):
 
+        1. Counts - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Counts
+
+            The Counts directory is where you can find the OTU counts tables as .csv files (and .biome as well for nucleotide counts tables).
+
+        2. Phylogeny - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Phylogeny
+
+            Unless told otherwise, vAMPirus will produce phylogenetic trees for all taxonomic unit fastas using IQ-TREE. The options for this analysis was discussed in a previous section of the docs. In the phylogeny output directory, you will find three subdirectories: (i) ./Alignment - contains trimmed MAFFT alignment used for tree, (ii) ./ModelTest - contains output files from substitution model prediction with ModelTest-NG, and (iii) ./IQ-TREE - where you can find all output files from IQ-TREE with the file of (usual) interest is the ".treefile".
+
+        3.  Taxonomy - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Taxonomy
+
+            vAMPirus uses Diamond blastp/x and the supplied PROTEIN database for taxonomy assignment of sequences. In the Taxonomy directory, you will find (i) a subdirectory called "DiamondOutput" which contains the original output file produced by Diamond, (ii) a fasta file that has taxonomy assignments within the sequence headers, and (iii) three different summary files (one being a phyloseq object with taxonomic information, a tab-separated summary file for review by the user and a summary table looking at abundance of specific hits).
+
+        4. Matrix - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Matrix
+
+            The Matric directory is where you can find all Percent Identity matrices for produced taxonomic unit fastas.
+
+        5. EMBOSS - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/EMBOSS
+
+            Several different protein physiochemical properties for all amino acid sequences are assessed using EMBOSS scripts (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/groups.html). There are four different subdirectories within EMBOSS, these include (i) ./ProteinProperties - contains files and plots regarding multiple different physiochemical properties (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/pepstats.html), (ii) ./IsoelectricPoint - contains a text file and a .svg image with plots showing the isoelectric point of protein (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/iep.html), (iii) ./HydrophobicMoment - information related to hydrophobic moments of amino acid sequences (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/hmoment.html), and (iv) ./2dStructure - information about 2D structure of proteins (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/protein_2d_structure_group.html).
 
 ### FinalReport - ${working_directory}/results/Analyze/FinalReport
+
+vAMPirus produces final reports for all taxonomic unit fastas produced in the run. These reports contain the following information:
+
+        1. Pre- and post-adapter removal read statistics
+
+                This is the first section of the final report and similar to the DataCheck report,there is (i) a read stats table which includes read lengths/number of reads/gc content, (ii) a box plot comparing overall read length distribution before and after adapter removal, and (iii) another box plot showing the influence of adapter removal on read length.
+
+        2. Number of reads per sample
+
+                This is a plot that looks at number of reads per sample, similar to what is seen in the DataCheck report.
+
+        3. Rarefaction curves
+
+        4. Diversity analyses box Plots
+
+                The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Species Richness.
+
+        5. Distance to centroid box plot
+
+        6. NMDS plots (2D and 3D)
+
+        7. Relative OTU abundance per sample bar chart
+
+        8. Absolute OTU abundance per treatment bar chart
+
+        9. Pairwise percent ID heatmap
+
+        10. Taxonomy results visualized in a donut plot
+
+        11. Visualized phylogentic tree
+
+
+# All of the options
+
+Help options:
+
+        --help                          Print help information
+
+        --fullHelp                      Print even more help information
+
+Mandatory arguments (choose one):
+
+        --Analyze                       Run absolutely everything
+
+        --DataCheck                     Assess how data performs with during processing and clustering
+
+Clustering arguments:
+
+        --nOTU                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (nOTUs) - See options below to define a single percent similarity or a list
+
+        --pOTU                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pOTUs) - See options below to define a single percent similarity or a list
+
+Skip arguments:
+
+        --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
+
+        --skipFastQC                    Set this option to skiip FastQC steps in the pipeline
+
+        --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
+
+        --skipPrimerRemoval             Set this option to skup Skip primer removal process
+
+        --skipAminoTyping               Set this option to skip AminoTyping processes
+
+        --skipTaxonomy                  Set this option to skip taxonomy assignment processes
+
+        --skipPhylogeny                 Set this option to skip phylogeny processes
+
+        --skipReport                    Set this option to skip report generation
+
+Analysis-specific options (will override information in the config file):
+
+    General information
+
+        --projtag                       Set project name to be used as a prefix for output files
+
+        --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
+
+        --mypwd                         Path to working directory that contains (i) the vAMPirus.nf script, (ii) the nextflow.config, and (iii) directory containing read libraries
+
+        --email                         Your email for notifications for when jobs are submitted and completed
+
+        --reads                         Path to directory containing read libraries, must have \*R{1,2}.fast{a,q} in the name
+
+        --outdir                        Name of directory to store output of vAMPirus run
+
+Merged read length filtering options
+
+        --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
+
+        --maxLen                        Maximum merged read length - reads with length equal to the specified max read length will be used to identifying unique sequences and  subsequent Amplicon Sequence Variant (ASV) analysis
+
+        --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
+
+Primer Removal options
+
+        --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences  #,#
+
+        --fwd                           Specify forward primer sequence pecific primer sequence on forward reads to be removed
+
+        --rev                           Reverse primer sequence
+
+Amplicon analysis options
+
+        --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
+
+        --minSize                       Minimum size or representation for sequence to be considered in ASV generation
+
+        --clusterNuclID                 With --nOTU set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
+
+        --clusterNuclIDlist             With --nOTU set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+
+        --clusterAAID                   With --pOTU set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
+
+        --clusterAAIDlist               With --pOTU set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
+
+        --minAA                         With --pOTU set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
+
+
+Counts table options
+
+        --asvcountID                    Similarity ID to use for ASV counts
+
+        --ProtCountID                   Minimum amino acid sequence similarity for hit to count
+
+        --ProtCountsLength              Minimum alignment length for hit to count
+
+
+Taxonomy assignment parameters
+
+        --dbname                       Specify name of database to use for analysis
+
+        --dbdir                        Path to Directory where database is being stored
+
+        --refseq                       Toggle use of RefSeq header format for Taxonomy assignment; default is Reverence Viral DataBase (RVDB)
+
+        --Bitscore                     Set minimum bitscore for Diamond command
+
+Phylogeny analysis parameters
+
+        --ModelTnt                     Signals for vAMPirus to use nucleotide substitution model produced by ModelTest-NG
+
+        --ModelTaa                     Signals for vAMPirus to use amino acid substitution model produced by ModelTest-NG
+
+        --parametric                   Set to have IQ-TREE to perform parametric bootstrapping during tree making
+
+        --nonparametric                Set to have IQ-TREE to perform non-parametric bootstrapping during tree making   
+
+        --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
+
+# Usage examples
