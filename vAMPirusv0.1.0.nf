@@ -3475,7 +3475,8 @@ if (params.Analyze) {
 workflow.onComplete {
     log.info ( workflow.success ? \
         "---------------------------------------------------------------------------------" \
-        + "\n\033[0;32mDone! Open the following report in your browser --> ${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
+        + "\n\033[0;32mDone! Open the following pipeline performance report in your browser --> ${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
+        + "\n\033[0;32mDone! Look over results and reports in: ${params.outdir}\033[0m" : \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }

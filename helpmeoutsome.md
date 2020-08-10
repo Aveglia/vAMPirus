@@ -244,9 +244,9 @@ To specify certain parts of the vAMPirus workflow to perform in a given run, you
                 // Skip EMBOSS analyses
                     skipEMBOSS = false
                 // Skip Reports
-                    skipReports = false
+                    skipReport = false
 
-To utilize these skip options is pretty simple where you would just add it to the launch command like so:
+To utilize these skip options, just add it to the launch command like so:
 
     `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --clusterNuclID .95 --skipPhylogeny --skipTaxonomy`
 
@@ -473,7 +473,6 @@ There are two ways that vAMPirus is able to remove primer sequences from reads w
                 // Reverse primer sequence
                     rev="REVPRIMER"
 
-
 ### Read merging and length filtering
 
 Read merging in the vAMPirus workflow is performed by vsearch and afterwards, reads are trimmed to the expected amplicon length (--maxLen) and any reads with lengths below the user specified minimum read length (--minLen). There are three parameters that you can edit to influence this segment of vAMPirus. If we look at lines 29-35:
@@ -568,6 +567,7 @@ Now, onto clustering ASVs into Operation Taxonomic Units (OTUs). vAMPirus is abl
 
             `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --pOTU --clusterAAIDlist .85,.90,.96`
 
+
 ## Counts tables and percent ID matrices
 
 vAMPirus generate nucleotide-based counts tables using vsearch and protein-based counts tables using Diamond. Counts tables and percent ID matrices are always produced for each ASV, AminoType and all OTU fasta files produced. Here
@@ -648,7 +648,6 @@ This was mentioned in an earlier section of the docs, but before running vAMPiru
  respectively. The database, currently, needs to be protein sequences and be in fasta format. The database can be a custom database but for proper reporting of the results, the headers need to follow either RVDB or RefSeq
  header formats:
 
-
     1. RVDB format (default) -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein [Marine RNA virus BC-4]"
 
     2. NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003 [Zymoseptoria brevis]"
@@ -661,4 +660,123 @@ For pOTU protein files and AminoTypes, vAMPirus will run different protein prope
 
 # vAMPirus output
 
-Output files produced throughout the vAMPirus pipeline is organized in directories within the specified results/output directory (e.g. )
+There are several files created throughout the vAMPirus pipeline that are stored and organized in directories within the specified results/output directory (ex. ${working_directory}/results; line 27 in the configuration file). We will go through the structure of the output directory and where to find which files here:
+
+## Pipeline performance information - ${working_directory}/results/PipelinePerformance/
+
+Nextflow produces a couple files that breakdown how and what parts of the vAMPirus pipeline was ran. The first file is a report that contains information on how the pipeline performed along with other pipeline performance-related information like how much memory or CPUs were used during certain processes. You can use this information to alter how many resources you would request for a given task in the pipeline. For example, the counts table generation process may take a long time with the current amount of resources requested, you can see this in the report then edit the resources requested at lines 144-183 in the vAMPirus configuration file. The second file produced by Nextflow is just the visualization of the workflow and analyses ran as a flowchart.
+
+## Output of "--DataCheck" - ${working_directory}/results/DataCheck
+
+The DataCheck performed by vAMPirus includes "ReadProcessing", "Clustering", and "Report" generation. Here again is the launch command to run the DataCheck mode:
+
+        `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --DataCheck`
+
+### ReadProcessing - ${working_directory}/results/DataCheck/ReadProcessing
+
+Within the ReadProcessing directory you will find all files related to each step of read processing:
+
+        1. FastQC - ${working_directory}/results/DataCheck/ReadProcessing/FastQC
+
+                In this directory you will find FastQC html reports for pre-cleaned and post-cleaned individual read libraries.
+
+        2. AdapterRemoval - ${working_directory}/results/DataCheck/ReadProcessing/AdapterRemoval
+
+                Here we have resulting fastq files with adapter sequences removed. Fastp also generates its own reports which can also be found in "./fastpOut".
+
+        3. PrimerRemoval - ${working_directory}/results/DataCheck/ReadProcessing/PrimerRemoval
+
+                Similar to the adapter removal directory, here you have the clean read libraries that have had adapter and primer sequences removed.
+
+        4. ReadMerging - ${working_directory}/results/DataCheck/ReadProcessing/ReadMerging
+
+                There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report.
+
+### Clustering - ${working_directory}/results/DataCheck/Clustering
+
+As the name would suggest, the files within this directory are related to the clustering process of "--DataCheck". There isn't too much in here, but here is the breakdown anyway:
+
+        1. ASVs - ${working_directory}/results/DataCheck/Clustering/ASVs
+
+                In this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits.
+
+        2. Nucleotide - ${working_directory}/results/DataCheck/Clustering/Nucleotide
+
+                This directory stores a .csv file that shows the number of clusters or nOTUs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
+
+        3. Aminoacid - ${working_directory}/results/DataCheck/Clustering/Aminoacid
+
+                Similar to Nucleotide, the Aminoacid directory contained the .csv that shows the number of clusters or pOTUs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
+
+### Report - ${working_directory}/results/DataCheck/Report
+
+In this directory, you will find a .html DataCheck report that can be opened in any browser. The report contains the following information and it meant to allow the user to tailor their vAMPirus pipeline run to their data (i.e. maximum read length, clustering percentage, etc.):
+
+        1. Pre- and post-adapter removal read statistics
+
+                This is the first section of the DataCheck report which has (i) a read stats table which includes read lengths/number of reads/gc content, (ii) a box plot comparing overall read length distribution before and after adapter removal, and (iii) another box plot showing the influence of adapter removal on read length.
+
+        2. Post-merging statistics
+
+                The second section of the report displays several plots tracking the changes in certain data-related properties before and after the final read cleaning steps (e.g. length filtering and global trimming). These properties include (i) pre/post-filtering reads per sample, (ii) pre/post-filtering base frequency per position on reads, (iii) pre/post-filtering mean quality score per position, (iv) pre/post-filtering GC-content, (v) pre/post-filtering reads per quality score, (vi) pre/post-filtering merged read length distribution.
+
+        3. Clustering statistics
+
+                In this section of the report, vAMPirus is showing the number of nucleotide- and protein-based OTUs assigned per clustering percentage. vAMPirus clusters ASVs and ASV translations by 24 different clustering percentages between 55-100%. The "100% clustering" data point in the "Number of nOTUs per clustering percentage" plot is the number of ASVs, it is important to know that ASV generation and clustering based on 100% is not the same, but we felt the number of ASVs is an important stat to know when comparing to the clustered data.
+
+NOTE: Most, if not all, plots in vAMPirus reports are interactive meaning you can select and zoom on certain parts of the plot or you can use the legend to remove certain samples.
+
+
+## Output of "--Analyze" - ${working_directory}/results/Analyze
+
+Depending on which optional arguments you add to your analyses (e.g. --pOTU, --nOTU, skip options), you will have different files produced, here we will go through the output of the full analysis stemming from this launch command:
+
+        `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --pOTU`
+
+### ReadProcessing - ${working_directory}/results/Analyze/ReadProcessing
+
+Very similar to the "ReadProcessing" directory created in DataCheck, you will find the following:
+
+        1. FastQC - ${working_directory}/results/Analyze/ReadProcessing/FastQC
+
+                In this directory you will find FastQC html reports for pre-cleaned and post-cleaned individual read libraries.
+
+        2. AdapterRemoval - ${working_directory}/results/Analyze/ReadProcessing/AdapterRemoval
+
+                Here we have resulting fastq files with adapter sequences removed. Fastp also generates its own reports which can also be found in "./fastpOut".
+
+        3. PrimerRemoval - ${working_directory}/results/Analyze/ReadProcessing/PrimerRemoval
+
+                Similar to the adapter removal directory, here you have the clean read libraries that have had adapter and primer sequences removed.
+
+        4. ReadMerging - ${working_directory}/results/Analyze/ReadProcessing/ReadMerging
+
+                There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report if ran before Analyze.
+
+### Clustering - ${working_directory}/results/Analyze/Clustering
+
+The clustering directory will contain all files produced for whichever clustering technique you specified (with the launch command above, all are specified):
+
+        1. ASVs - ${working_directory}/results/Analyze/Clustering/ASVs
+
+            In this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits.
+
+        2. AminoTypes - ${working_directory}/results/Analyze/Clustering/AminoTypes
+
+            The AminoTypes directory has a few different subdirectories, in the main directory, however, is the fasta file with the AminoTypes used in all subsequent analyses. The first subdirectory is called "Translation" which includes the raw ASV translation file along with a report spit out by VirtualRibosome. The next subdirectory is "Problematic", where any translations that were below the given "--minAA" length will be reported, if none were deemed "problematic" then the directory will be empty. All problematic amino acid sequence AND their corresponding ASVs are stored in fasta files for you to review. The final subdirectory is "SummaryFiles" where you can find a "map" of sorts to track which ASVs contributed to which AminoTypes and a .gc file containing information on length of translated sequences.
+
+        3. nOTU - ${working_directory}/results/Analyze/Clustering/nOTU
+
+            In this directory, you will find the fasta files corresponding to the clustering percentage(s) you specified for the run.
+
+        4. pOTU - ${working_directory}/results/Analyze/Clustering/pOTU
+
+            Looking in this directory, you probably notice some similar subdirectories. The pOTU directory also contains the Summary, Problematic, and Translation subsirectories we saw in the AminoType directory. The other important files in this directory is the nucleotide and amino acid versions of the pOTUs generated for whichever clustering percentage(s) specified.
+
+            An important note for when creating pOTUs is that the subsequent analyses (phylogenies, taxonomy assignment, etc.) are run on both nucloetide and amino acid pOTU fastas. To create these files, vAMPirus translates the ASVs, checks for problematic sequences, then clusters the translated sequences by the given percentage(s). After clustering, vAMPirus will go pOTU by pOTU extracting the nucleotide sequences of the ASVs that clustered within a given pOTU. The extracted nucleotide sequences are then used to generate a consensus nucleotide sequence(s) per pOTU.        
+
+### Analyses - ${working_directory}/results/Analyze/Analyses
+
+
+
+### FinalReport - ${working_directory}/results/Analyze/FinalReport
