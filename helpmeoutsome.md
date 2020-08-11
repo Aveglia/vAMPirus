@@ -879,19 +879,21 @@ vAMPirus produces final reports for all taxonomic unit fastas produced in the ru
 
 ### Clustering arguments:
 
-        --nOTU                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (nOTUs) - See options below to define a single percent similarity or a list
+        --nOTU                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (nOTUs) - See options below to define a single percent
+                                        similarity or a list
 
-        --pOTU                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pOTUs) - See options below to define a single percent similarity or a list
+        --pOTU                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pOTUs) - See options below to define a single percent similarity or
+                                        a list
 
 ### Skip arguments:
 
         --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
 
-        --skipFastQC                    Set this option to skiip FastQC steps in the pipeline
+        --skipFastQC                    Set this option to skip FastQC steps in the pipeline
 
         --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
 
-        --skipPrimerRemoval             Set this option to skup Skip primer removal process
+        --skipPrimerRemoval             Set this option to skip primer removal process
 
         --skipAminoTyping               Set this option to skip AminoTyping processes
 
@@ -978,7 +980,6 @@ vAMPirus produces final reports for all taxonomic unit fastas produced in the ru
         --nonparametric                Set to have IQ-TREE to perform non-parametric bootstrapping during tree making   
 
         --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
-
 
 
 # Usage examples
