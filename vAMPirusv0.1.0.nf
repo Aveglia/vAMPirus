@@ -392,7 +392,7 @@ if (params.Analyze) {
 
             process Adapter_Removal {
 
-                label 'low_cpus'
+                label 'norm_cpus'
 
                 tag "${sample_id}"
 
@@ -428,7 +428,7 @@ if (params.Analyze) {
 
             process Primer_Removal {
 
-                label 'low_cpus'
+                label 'norm_cpus'
 
                 tag "${sample_id}"
 
@@ -585,7 +585,7 @@ if (params.Analyze) {
 
     process Extract_Uniques {
 
-        label 'norm_cpus'
+        label 'low_cpus'
 
         publishDir "${params.mypwd}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Uniques", mode: "copy", overwrite: true
 
@@ -621,7 +621,7 @@ if (params.Analyze) {
 
     process Chimera_Check {
 
-        label 'norm_cpus'
+        label 'low_cpus'
 
         publishDir "${params.mypwd}/${params.outdir}/Analyze/Clustering/ASVs", mode: "copy", overwrite: true
 
@@ -681,7 +681,7 @@ if (params.Analyze) {
 
             process Nucleotide_Taxonomy_Assignment {
 
-                label 'norm_cpus'
+                label 'high_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Taxonomy", mode: "copy", overwrite: true, pattern: '*nOTU*.{fasta,csv,tsv}'
@@ -965,7 +965,7 @@ if (params.Analyze) {
 
                 process ASV_Taxonomy_Assignment {
 
-                    label 'norm_cpus'
+                    label 'high_cpus'
 
                     publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
                     publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
@@ -1271,7 +1271,7 @@ if (params.Analyze) {
 
         process Generate_Nucleotide_Matrix {
 
-            label 'norm_cpus'
+            label 'low_cpus'
 
             publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
             publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*nOTU*PercentID.matrix'
@@ -1324,7 +1324,7 @@ if (params.Analyze) {
 
             process Generate_ASV_Matrix {
 
-                label 'norm_cpus'
+                label 'low_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
 
@@ -1495,7 +1495,7 @@ if (params.Analyze) {
 
         process Translate_For_AminoTyping {
 
-            label 'norm_cpus'
+            label 'low_cpus'
 
             conda 'python=2.7'
 
@@ -1568,7 +1568,7 @@ if (params.Analyze) {
 
         process Generate_AminoType_Matrix {
 
-            label 'norm_cpus'
+            label 'low_cpus'
 
             publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Matrix", mode: "copy", overwrite: true
 
@@ -1648,7 +1648,7 @@ if (params.Analyze) {
 
             process Taxonomy_Assignment_AminoTypes {
 
-                label 'norm_cpus'
+                label 'high_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*TaxonomyLabels.fasta'
@@ -1848,7 +1848,7 @@ if (params.Analyze) {
 
         process Generate_AminoTypes_Counts_Table {
 
-            label 'norm_cpus'
+            label 'high_cpus'
 
             publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/AminoTypes/Counts", mode: "copy", overwrite: true
 
@@ -1896,7 +1896,7 @@ if (params.Analyze) {
 
         process Translation_For_pOTU_Generation {
 
-            label 'norm_cpus'
+            label 'low_cpus'
 
             conda 'python=2.7'
 
@@ -2089,7 +2089,7 @@ if (params.Analyze) {
 
             process pOTU_Nucleotide_Taxonomy_Assignment {
 
-                label 'norm_cpus'
+                label 'high_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
@@ -2268,7 +2268,7 @@ if (params.Analyze) {
 
         process Generate_pOTU_Nucleotide_Matrix {
 
-            label 'norm_cpus'
+            label 'low_cpus'
 
             publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Matrix", mode: "copy", overwrite: true
 
@@ -2354,7 +2354,7 @@ if (params.Analyze) {
 
         process pOTU_AminoAcid_Matrix {
 
-            label 'norm_cpus'
+            label 'low_cpus'
 
             publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Matrix", mode: "copy", overwrite: true
 
@@ -2438,7 +2438,7 @@ if (params.Analyze) {
 
             process pOTU_AminoAcid_Taxonomy_Assignment {
 
-                label 'norm_cpus'
+                label 'high_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
@@ -2641,7 +2641,7 @@ if (params.Analyze) {
 
         process Generate_pOTU_Protein_Counts {
 
-            label 'norm_cpus'
+            label 'high_cpus'
 
             publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Counts", mode: "copy", overwrite: true
 
@@ -2976,7 +2976,7 @@ if (params.Analyze) {
 
     process Adapter_Removal_DC {
 
-        label 'low_cpus'
+        label 'norm_cpus'
 
         tag "${sample_id}"
 
@@ -3005,7 +3005,7 @@ if (params.Analyze) {
 
     process Primer_Removal_DC {
 
-        label 'low_cpus'
+        label 'norm_cpus'
 
         tag "${sample_id}"
 

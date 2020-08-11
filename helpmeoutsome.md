@@ -176,7 +176,7 @@ of vAMPirus configuration files with different parameters, you would just have t
 
 Furthermore, the configuration file contains analysis-specific parameters AND resource-specific Nextflow launching parameters. A benefit of Nextflow integration, is that you can run the vAMPirus workflow on a large
 HPC just as easily as you could on your local machine. If you look at line 151 and greater in the vampirus.config file, you will see resource-specific parameters that you can alter before any run. Nexflow is capable
-of submitting jobs automatically using slurm and PBS, check out the Nextflow docs to learn more (https://www.nextflow.io/docs/latest/index.html)!
+of submitting jobs automatically using slurm and PBS, check out the Nextflow docs to learn more (https://www.nextflow.io/docs/latest/executor.html)!
 
 ### Setting parameter values
 
@@ -221,6 +221,37 @@ There are two ways to set parameters with Nextflow and vAMPirus:
 
 NOTE: Nextflow also has options in the launch command. To tell them apart, Nextflow options uses a single dash (e.g. -with-conda) while vAMPirus options are always with a double dash (e.g. --Analyze)
 
+### Setting computing resource parameters - Edit in lines 151-171 in vampirus.config
+
+Each process within the vAMPirus workflow is tagged with either "low_cpus", "norm_cpus", or "high_cpus" (see below) which lets Nextflow know the amount of cpus and memory required for each process, which will then be used for when Nextflow submits a given job or task. Nexflow actively assesses the amount of available resources on your machine and will submit tasks only when the proper amount of resources can be requested.
+
+From line 151-171 in the vAMPirus.config file is where you can edit these values for whichever machine you plan to run the workflow on.
+
+        process {
+            withLabel: low_cpus {
+                cpus='2'
+                memory='15 GB'
+                //executor='slurm'
+                //clusterOptions='--cluster=cm2 --partition=cm2_tiny --qos=cm2_tiny --nodes=1'
+            }
+            withLabel: norm_cpus {
+                cpus='4'
+                memory='15 GB'
+                //executor='slurm'
+                //clusterOptions='--cluster=cm2 --partition=cm2_tiny --qos=cm2_tiny --nodes=1'
+            }
+            withLabel: high_cpus {
+                cpus='6'
+                memory='15 GB'
+                //executor='slurm'
+                //clusterOptions='--cluster=cm2 --partition=cm2_tiny --qos=cm2_tiny --nodes=1'
+            }
+            errorStrategy='finish'
+        }
+
+Proceed to modify processes if needed and note that "//" is the Nextflow equivalent to "#" meaning that the executor and clusterOptions lines above are currently commented out.
+
+As stated before, you can launch vAMPirus on either your personal laptop OR a larger HPC, you would just have to remove the "//" from the executor and clusterOptions lines to set the scheduler and options for submitting jobs. Review the Nextflow documentation about executors and running on HPCs here https://www.nextflow.io/docs/latest/executor.html.
 
 ### vAMPirus skip options
 
@@ -834,25 +865,25 @@ vAMPirus produces final reports for all taxonomic unit fastas produced in the ru
 
 # All of the options
 
-Help options:
+### Help options:
 
         --help                          Print help information
 
         --fullHelp                      Print even more help information
 
-Mandatory arguments (choose one):
+### Mandatory arguments (choose one):
 
         --Analyze                       Run absolutely everything
 
         --DataCheck                     Assess how data performs with during processing and clustering
 
-Clustering arguments:
+### Clustering arguments:
 
         --nOTU                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (nOTUs) - See options below to define a single percent similarity or a list
 
         --pOTU                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pOTUs) - See options below to define a single percent similarity or a list
 
-Skip arguments:
+### Skip arguments:
 
         --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
 
@@ -870,7 +901,7 @@ Skip arguments:
 
         --skipReport                    Set this option to skip report generation
 
-Analysis-specific options (will override information in the config file):
+### Analysis-specific options (will override information in the config file):
 
     General information
 
@@ -886,7 +917,7 @@ Analysis-specific options (will override information in the config file):
 
         --outdir                        Name of directory to store output of vAMPirus run
 
-Merged read length filtering options
+### Merged read length filtering options
 
         --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
 
@@ -894,7 +925,7 @@ Merged read length filtering options
 
         --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
 
-Primer Removal options
+### Primer Removal options
 
         --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences  #,#
 
@@ -902,7 +933,7 @@ Primer Removal options
 
         --rev                           Reverse primer sequence
 
-Amplicon analysis options
+### Amplicon analysis options
 
         --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
@@ -918,8 +949,7 @@ Amplicon analysis options
 
         --minAA                         With --pOTU set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
-
-Counts table options
+### Counts table options
 
         --asvcountID                    Similarity ID to use for ASV counts
 
@@ -927,8 +957,7 @@ Counts table options
 
         --ProtCountsLength              Minimum alignment length for hit to count
 
-
-Taxonomy assignment parameters
+### Taxonomy assignment parameters
 
         --dbname                       Specify name of database to use for analysis
 
@@ -938,7 +967,7 @@ Taxonomy assignment parameters
 
         --Bitscore                     Set minimum bitscore for Diamond command
 
-Phylogeny analysis parameters
+### Phylogeny analysis parameters
 
         --ModelTnt                     Signals for vAMPirus to use nucleotide substitution model produced by ModelTest-NG
 
@@ -950,4 +979,40 @@ Phylogeny analysis parameters
 
         --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
 
+
+
 # Usage examples
+
+Here are some example launch commands:
+
+## Running the --DataCheck
+
+There is really only one launch command to run for --DataCheck:
+
+`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --DataCheck`
+
+Just submit this launch command with the correct paths and vAMPirus will run the DataCheck and produce a report for you to review. Parameters like --minAA or --maxLen apply to the --DataCheck.
+
+## Running the --Analyze
+
+### Run it all with a list of cluster IDs!
+
+`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --pOTU --minLen 400 --maxLen 420 --clusterNuclIDlist .91,.92,.93 --clusterAAIDlist .91,.93,.95,.98`
+
+With this launch command, you are specifying that you would like to generate nOTUs and pOTUs by clustering at multiple percentages for each. You are also setting the minimum read length at 400 and maximum read length at 420. All analyses will be ran as well.
+
+### Run --Analyze with no clustering, no taxonomy assignment, and parametric bootstrapping with 1500 bootstraps
+
+`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --skipTaxonomy --skipAminoTyping --parametric --boots 1500`
+
+For this command, you will run ASV generation alone generating counts tables, matrices and a phylogenetic tree.
+
+### Run --Analyze to create pOTUs at a single clustering percentage
+
+`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --pOTU --clusterAAID .97 --skipAminoTyping --minLen 400 --maxLen 430`
+
+This command will produce results for ASVs and pOTUs.
+
+### Run --Analyze to create nOTUs at a single clustering percentage
+
+`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --clusterNuclID .97 --skipAminoTyping --minLen 400 --maxLen 430 --asvcountID .95`
