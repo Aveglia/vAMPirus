@@ -70,11 +70,10 @@ If we look at the script usage:
 
             [ -d 1|2|3|4 ]                  Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
-                                                        1 - Download only NCBIs Viral protein RefSeq database
-                                                        2 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                        1 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                        2 - Download only NCBIs Viral protein RefSeq database
                                                         3 - Download only the complete NCBI NR protein database
                                                         4 - Download all three databases
-
 
 
 So, if we wanted to download NCBIs Viral protein RefSeq database, we would just need to run:
@@ -187,17 +186,17 @@ There are two ways to set parameters with Nextflow and vAMPirus:
         Here we have a block from the vampirus.config file that stores information related to your run:
 
             // Project/analyses- specific information
-                // Project name - Name that will be used as a prefix for namng files by vAMPirus
+                // Project name - Name that will be used as a prefix for naming files by vAMPirus
                      projtag="vAMPrun"
                 // Path to metadata spreadsheet file to be used for plot
-                     metadata="/data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus/fisces_metdata.csv"
+                     metadata="/PATH/TO/metadata.csv"
                 // Minimum number of hit counts for a sample to have to be included in the downstream analyses and report generation
         	         minimumCounts="1000"
-        	    // PATH to current working directory that contains (i) the vAMPirus.nf script, (ii)
-                     mypwd="/data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus"
+        	    // PATH to current working directory 
+                     mypwd="/PATH/TO/working_directory"
                      email="your_email@web.com"
                 // reads directory
-                     reads="/data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus/reads/R{1,2}_001.fastq.gz"
+                     reads="/PATH/TO/reads/R{1,2}_001.fastq.gz"
                 // Directory to store output of vAMPirus analyses
                      outdir="results"
 

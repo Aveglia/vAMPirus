@@ -1,6 +1,6 @@
 ![vAMPirus logo](https://sync.palmuc.org/index.php/s/2DNSYTQ99FCdMm6/preview)
 
-                          An automated virus amplicon sequencing analysis pipeline
+                            An automated virus amplicon sequencing analysis pipeline
 
 # Introduction to vAMPirus
 

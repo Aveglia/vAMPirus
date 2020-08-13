@@ -11,20 +11,17 @@ General execution:
 
 vampirus_startup.sh -h -d [1|2|3|4]
 
-|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-
     Command line options:
 
         [ -h ]                       	Print help information
 
         [ -d 1|2|3|4 ]                  Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
-                                                    1 - Download only NCBIs Viral protein RefSeq database
-                                                    2 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                    1 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                    2 - Download only NCBIs Viral protein RefSeq database
                                                     3 - Download only the complete NCBI NR protein database
                                                     4 - Download all three databases
 
-|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 "
 
 }
