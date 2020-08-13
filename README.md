@@ -1,6 +1,6 @@
 ![vAMPirus logo](https://sync.palmuc.org/index.php/s/2DNSYTQ99FCdMm6/preview)
 
-                          A light-weight, automated virus amplicon sequencing analysis pipeline
+                          An automated virus amplicon sequencing analysis pipeline
 
 # Introduction to vAMPirus
 
@@ -127,3 +127,4 @@ you are good to go! You could also change this within the launch command with ad
         12. CD-HIT - Fu, L., Niu, B., Zhu, Z., Wu, S., & Li, W. (2012). CD-HIT: accelerated for clustering the next-generation sequencing data. Bioinformatics, 28(23), 3150-3152.
         13. EMBOSS - Rice, P., Longden, I., & Bleasby, A. (2000). EMBOSS: the European molecular biology open software suite.
         14. seqtk - Li, H. (2012). seqtk Toolkit for processing sequences in FASTA/Q formats. GitHub, 767, 69.
+        15. UNOISE algorithm - R.C. Edgar (2016). UNOISE2: improved error-correction for Illumina 16S and ITS amplicon sequencing, https://doi.org/10.1101/081257
