@@ -1,10 +1,6 @@
+![vAMPirus logo](https://sync.palmuc.org/index.php/s/2DNSYTQ99FCdMm6/preview)
 
-
-                                    ,---.,-.-.,---.o
-                              .    ,|---|| | ||---'.,---..   .,---.
-                               \  / |   || | ||    ||    |   |`---.
-                                `'  `   `` ` ``    ``    `---``---`
-        A light-weight, automated virus amplicon sequencing analysis pipeline
+                             A light-weight, automated virus amplicon sequencing analysis pipeline
 
 # Introduction to vAMPirus
 
