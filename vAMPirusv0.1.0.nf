@@ -3269,7 +3269,7 @@ if (params.Analyze) {
 
         conda 'python=2.7'
 
-        publishDir "${params.mypwd}/${params.outdir}/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
+        publishDir "${params.mypwd}/${params.outdir}/DataCheck/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
 
         input:
             file(fasta) from nucl2aa
