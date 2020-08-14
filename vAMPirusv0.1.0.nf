@@ -1823,24 +1823,24 @@ if (params.Analyze) {
 
                     # Protein_Phylogeny
                     if [ "${params.iqCustomaa}" != "" ];then
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomaa}
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomaa}
 
                     elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
                         mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
 
                     elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
                         mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                     elif [ "${params.nonparametric}" != "false" ];then
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
 
                     elif [ "${params.parametric}" != "false" ];then
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
                     else
-                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                        iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                     fi
                     """
             }
@@ -2615,24 +2615,24 @@ if (params.Analyze) {
 
                         # pOTU_Protein_Phylogeny
                         if [ "${params.iqCustomaa}" != "" ];then
-                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomaa}
+                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomaa}
 
                         elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
                             mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo  -nt auto -b ${params.boots}
 
                         elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
                             mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                         elif [ "${params.nonparametric}" != "false" ];then
-                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
 
                         elif [ "${params.parametric}" != "false" ];then
-                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
                         else
-                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                            iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                         fi
                     done
                     """
@@ -3466,7 +3466,7 @@ workflow.onComplete {
     log.info ( workflow.success ? \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;32mDone! Open the following pipeline performance report in your browser --> ${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
-        + "\n\033[0;32mDone! Look over results and reports in: ${params.outdir}\033[0m" : \
+        + "\n\033[0;32mDone! Look over results and reports in: ${params.outdir}/${params.results}/\033[0m" : \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }
