@@ -158,7 +158,7 @@ nextflow_c
 if [[ $DATABASE -eq 1 ]]
 then    mkdir "$mypwd"/DATABASES
         cd "$mypwd"/DATABASES
-        echo "Database installation: RVDB version 19.0 (latest as of 2020-06)"
+        echo "Database installation: RVDB version 19.0 (latest as of 2020-06)" 
         curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
         echo "Database downloaded, make sure you update the config file before running!"
 elif [[ $DATABASE -eq 2 ]]

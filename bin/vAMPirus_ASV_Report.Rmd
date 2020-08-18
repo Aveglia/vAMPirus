@@ -26,16 +26,6 @@ knitr::opts_chunk$set(echo = TRUE,
       out.width="100%")
 ```
 
-```{bash name, echo=FALSE}
-cat << "EOF"
-
-      ,---.,-.-.,---.o                       
-.    ,|---|| | ||---'.,---..   .,---.              
- \  / |   || | ||    ||    |   |`---.           
-  `'  `   `` ` ``    ``    `---``---`               
-"EOF"
-```
-
 ```{r logo_plot, echo=FALSE}
 #knitr::include_graphics("vamp_logo.png")
 ```
@@ -62,7 +52,7 @@ mycol=c('#088da5','#73cdc8','#ff6f61','#7cb8df','#88b04b','#00a199','#6B5B95','#
 ```
 <br>
 
-NOTE: Most plots are interactive and you can use the legend to specify samples/treament of interest
+NOTE: Most plots are interactive and you can use the legend to specify samples/treatment of interest
 
 <br>
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pre- and Post-Adapter Removal Read Stats</h2></div>

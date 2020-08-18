@@ -315,7 +315,7 @@ log.info """\
         """.stripIndent()
 
 // read files from here. This will be changed!
-if (params.testing) {
+if (params.readsTest) {
     println("\n\tRunning vAMPirus with TEST dataset\n")
     Channel
         .from(params.readsTest)
@@ -1207,7 +1207,7 @@ if (params.Analyze) {
                 label 'norm_cpus'
 
                 publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
-                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Counts", mode: "copy", overwrite: true, pattern: '*otu*.{biome,csv}'
+                publishDir "${params.mypwd}/${params.outdir}/Analyze/Analyses/nOTU/Counts", mode: "copy", overwrite: true, pattern: '*OTU*.{biome,csv}'
 
                 input:
                     tuple file(notus), file(asvs) from nuclFastas_forCounts_ch
@@ -3466,7 +3466,7 @@ workflow.onComplete {
     log.info ( workflow.success ? \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;32mDone! Open the following pipeline performance report in your browser --> ${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
-        + "\n\033[0;32mDone! Look over results and reports in: ${params.outdir}/${params.results}/\033[0m" : \
+        + "\n\033[0;32mDone! Open the vAMPirus final report(s) in your browser --> ${params.outdir}/${params.outdir}/Analyze/FinalReport \033[0m" : \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }

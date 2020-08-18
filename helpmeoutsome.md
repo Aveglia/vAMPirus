@@ -192,7 +192,7 @@ There are two ways to set parameters with Nextflow and vAMPirus:
                      metadata="/PATH/TO/metadata.csv"
                 // Minimum number of hit counts for a sample to have to be included in the downstream analyses and report generation
         	         minimumCounts="1000"
-        	    // PATH to current working directory 
+        	    // PATH to current working directory
                      mypwd="/PATH/TO/working_directory"
                      email="your_email@web.com"
                 // reads directory
@@ -336,7 +336,7 @@ To run the vAMPirus workflow, you must specify one or two mandatory arguments:
             `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --DataCheck`
 
         The DataCheck feature of vAMPirus is meant to give the user some information about their data so they can tailor their final analysis appropriately. In DataCheck mode, vAMPirus
-        performs all read processing operations then generates ASVS and performs nucleotide- and p rotein-based clustering at 24 different clustering percentages ranging from 55-99% ID.
+        performs all read processing operations then generates ASVS and performs nucleotide- and protein-based clustering at 24 different clustering percentages ranging from 55-99% ID.
         vAMPirus then generates an html report that displays and visualizes read processing and clustering stats. It is recommended that before running any dataset through vAMPirus, you
         run the data through the DataCheck to allow informed decisions on clustering percentage, max read length, etc., etc.
 
@@ -402,8 +402,8 @@ To run the vAMPirus workflow, you must specify one or two mandatory arguments:
 
 
         The Analyze option allows vAMPirus to know that you plan to analyze your data with the given parameters either within the launch command or sourced from the configuration file. On
-        its own, "--Analyze" will run all read processing operations, generate ASVs, ASV counts files/matrices, ASV phylogeny, ASV taxonomy assignment, generate Aminotypes, Aminotype counts/matrices,
-        Aminotype phylogeny, Aminotype taxonomy assignment and EMBOSS analyses. vAMPirus will also produce final reports for ASV and Aminotype analyses.
+        its own, "--Analyze" will run all read processing operations, generate ASVs, ASV counts files/matrices, ASV phylogeny, ASV taxonomy assignment, generate AminoTypes, AminoType counts/matrices,
+        AminoType phylogeny, AminoType taxonomy assignment and EMBOSS analyses. vAMPirus will also produce final reports for ASV and AminoType analyses.
 
         To generate nOTUs (nucleotide-based OTUs) or pOTUs (protein-based OTUs) and run all subsequent analyses with them (phylogeny, taxonomy assignment), you would just need to add the "--nOTU" and "--pOTU"
         options like so:
@@ -455,7 +455,7 @@ To run the vAMPirus workflow, you must specify one or two mandatory arguments:
                 [-        ] process > Report_pOTU_AminoAcid               -
                 [-        ] process > Report_pOTU_Nucleotide              -
 
-        You can notice that there are a few more processes now compared to the output of the previous launch command which is what we expect since we are asking vAMPirus to do a little bit more work for us :).
+        You can see that there are a few more processes now compared to the output of the previous launch command which is what we expect since we are asking vAMPirus to do a little bit more work for us :).
 
 # Breaking it down: The vAMPirus workflow
 
