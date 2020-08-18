@@ -10,6 +10,7 @@ params:
   filter: !r commandArgs(trailingOnly=T)[5]   # filter min counts
   heatmap: !r commandArgs(trailingOnly=T)[6]  # heatmap
   tax: !r commandArgs(trailingOnly=T)[7]      # tax
+  try: !r commandArgs(trailingOnly=T)[8]      # trymax
 ---
 <style>
 .rectangle {
@@ -25,10 +26,7 @@ knitr::opts_chunk$set(echo = TRUE,
       warning = FALSE,
       out.width="100%")
 ```
-
-```{r logo_plot, echo=FALSE}
-#knitr::include_graphics("vamp_logo.png")
-```
+![](https://sync.palmuc.org/index.php/s/gscg4m4PtdN5ZwY/preview)
 
 ```{r load_libraries, include=FALSE}
 library(vegan)
@@ -354,7 +352,7 @@ MDS <- metaMDS(sqrt(datax),
                distance = "bray",autotransform = FALSE,
                k = 2,
                maxit = 999,
-               trymax = 500,
+               trymax = params$try,
                wascores = TRUE)
 
 if (MDS$converged == "TRUE") {
@@ -395,7 +393,7 @@ MDS3 <- metaMDS(sqrt(datax),
                distance = "bray",autotransform = FALSE,
                k = 3,
                maxit = 999,
-               trymax = 500,
+               trymax = params$try,
                wascores = TRUE)
 
 if (MDS3$converged == "TRUE") {

@@ -2741,7 +2741,8 @@ if (params.Analyze) {
                     ${params.metadata} \
                     ${params.minimumCounts} \
         	        ${matrix} \
-                    ${taxonomy}
+                    ${taxonomy} \
+                    ${params.trymax}
                     """
                 }
 
@@ -2774,7 +2775,8 @@ if (params.Analyze) {
                         ${params.minimumCounts} \
             	        \$( echo ${matrix} | tr " " "\\n" | grep "\${id}" ) \
                         \$( echo ${taxonomy} | tr " " "\\n" | grep "\${id}" ) \
-                        \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" )
+                        \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" ) \
+                        ${params.trymax}
                     done
                     """
                 }
@@ -2807,7 +2809,8 @@ if (params.Analyze) {
                         ${params.metadata} \
                         ${params.minimumCounts} ${matrix} \
                         ${taxonomy} \
-                        ${phylogeny}
+                        ${phylogeny} \
+                        ${params.trymax}
                         """
                     }
                 }
@@ -2840,7 +2843,8 @@ if (params.Analyze) {
                             ${params.minimumCounts} \
                             ${matrix} \
                             ${taxonomy} \
-                            ${phylogeny}
+                            ${phylogeny} \
+                            ${params.trymax}
                             """
                     }
 
@@ -2872,7 +2876,8 @@ if (params.Analyze) {
                                 ${params.metadata} \
                                 ${params.minimumCounts} ${matrix} \
                                 ${taxonomy} \
-                                ${phylogeny}
+                                ${phylogeny} \
+                                ${params.trymax}
                                 """
                         }
                     }
@@ -2909,7 +2914,8 @@ if (params.Analyze) {
                             ${params.minimumCounts} \
                 	        \$( echo ${matrix} | tr " " "\\n" | grep "\${id}" ) \
                             \$( echo ${taxonomy} | tr " " "\\n" | grep "\${id}" ) \
-                            \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" )
+                            \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" ) \
+                            ${params.trymax}
                         done
                         """
                     }
@@ -2943,7 +2949,8 @@ if (params.Analyze) {
                             ${params.minimumCounts} \
                 	        \$( echo ${matrix} | tr " " "\\n" | grep "\${id}" ) \
                             \$( echo ${taxonomy} | tr " " "\\n" | grep "\${id}" ) \
-                            \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" )
+                            \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" ) \
+                            ${params.trymax}
                         done
                         """
                 }
@@ -3466,7 +3473,8 @@ workflow.onComplete {
     log.info ( workflow.success ? \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;32mDone! Open the following pipeline performance report in your browser --> ${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" : \
-        + "\n\033[0;32mDone! Open the vAMPirus final report(s) in your browser --> ${params.outdir}/${params.outdir}/Analyze/FinalReport \033[0m" : \
+        + "\n\033[0;32mDone! Open the vAMPirus final report(s) in your browser --> ${params.outdir}/${params.outdir}/Analyze/FinalReport \033[0m"  \
+        + "\n\033[0;32mDone! Open the vAMPirus DataCheck report(s) in your browser --> ${params.outdir}/${params.outdir}/DataCheck/FinalReport \033[0m" : \
         "---------------------------------------------------------------------------------" \
         + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
 }
