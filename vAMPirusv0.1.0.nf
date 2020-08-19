@@ -1646,7 +1646,7 @@ if (params.Analyze) {
 
         if (!params.skipTaxonomy) {
 
-            process Taxonomy_Assignment_AminoTypes {
+            process AminoType_Taxonomy_Assignment {
 
                 label 'high_cpus'
 
@@ -2905,8 +2905,8 @@ if (params.Analyze) {
                         """
                         cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                         for x in *_summary_for_plot.csv;do
-                            name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                            id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
+                            name=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}')
+                            id=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
                             Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa\${id}_Report.html')" \${name} \
                             ${readsstats} \
                             \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
