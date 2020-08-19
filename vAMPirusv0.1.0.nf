@@ -2767,7 +2767,7 @@ if (params.Analyze) {
                     cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                     for x in *_summary_for_plot.csv;do
                         name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                        id=\$( echo ${counts} | awk -F "_counts.csv" '{print \$1}' | cut -f 2 -d "." )
+                        id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
                         Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_nOTU\${id}_Report.html')" \${name} \
                         ${readsstats} \
                         \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
@@ -2906,7 +2906,7 @@ if (params.Analyze) {
                         cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                         for x in *_summary_for_plot.csv;do
                             name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                            id=\$( echo ${counts} | awk -F "_counts.csv" '{print \$1}' | cut -f 2 -d "." )
+                            id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
                             Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa\${id}_Report.html')" \${name} \
                             ${readsstats} \
                             \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
@@ -2941,7 +2941,7 @@ if (params.Analyze) {
                         cp ${params.mypwd}/bin/vAMPirus_OTU_Report.Rmd .
                         for x in *_summary_for_plot.csv;do
                             name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                            id=\$( echo ${counts} | awk -F "_noTaxonomy_counts.csv" '{print \$1}' | cut -f 2 -d "." )
+                            id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
                             Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt\${id}_Report.html')" \${name} \
                             ${readsstats} \
                             \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
