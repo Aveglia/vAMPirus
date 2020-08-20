@@ -36,6 +36,10 @@ shift $((OPTIND-1))      # required, to "eat" the options that have been process
 
 export mypwd="$(pwd)"
 
+sed "s|VAMPDIR|${mypwd}|g" ${mypwd}/vampirus.config > tmp.config
+cat tmp.config > vampirus.config
+rm tmp.config
+
 os_c() {
     if [ -f /etc/os-release ];then
         echo -e "\n\t -- Downloading Linux Miniconda3 installation -- \n"
@@ -156,31 +160,49 @@ echo "Now lets check the status of Nextflow on your system..."
 nextflow_c
 
 if [[ $DATABASE -eq 1 ]]
-then    mkdir "$mypwd"/DATABASES
-        cd "$mypwd"/DATABASES
-        echo "Database installation: RVDB version 19.0 (latest as of 2020-06)" 
+then    mkdir "$mypwd"/Databases
+        cd "$mypwd"/Databases
+        dir="$(pwd)"
+        echo "Database installation: RVDB version 19.0 (latest as of 2020-06)"
         curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
-        echo "Database downloaded, make sure you update the config file before running!"
+        echo "Editing confiration file for you now..."
+        sed 's/DATABASENAME/U-RVDBv19.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
+        sed "s|DATABASE|${dir}|g" tmp1.config > tmp2.config
+        rm tmp1
+        cat tmp2.config > "$mypwd"/vampirus.config
+        echo "Database downloaded, and configuration file edited, you still need to bunzip2 this database then just confirm the path was set correctly in the config file."
 elif [[ $DATABASE -eq 2 ]]
-then    mkdir "$mypwd"/DATABASES
-        cd "$mypwd"/DATABASES
+then    mkdir "$mypwd"/Databases
+        cd "$mypwd"/Databases
+        dir="$(pwd)"
         echo "Database installation: Viral RefSeq database version 2.0 (latest as of 2020-07)"
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
-        echo "Database downloaded, make sure you update the config file before running!"
+        echo "Editing confiration file for you now..."
+        sed 's/DATABASENAME/viral.2.protein.faa/g' "$mypwd"/vampirus.config > tmp1.config
+        sed "s|DATABASE|${dir}|g" tmp1.config > tmp2.config
+        rm tmp1
+        cat tmp2.config > "$mypwd"/vampirus.config
+        echo "Database downloaded, and configuration file edited, you still need to gunzip this database then just confirm the path was set correctly in the config file."
 elif [[ $DATABASE -eq 3 ]]
-then    mkdir "$mypwd"/DATABASES
-        cd "$mypwd"/DATABASES
+then    mkdir "$mypwd"/Databases
+        cd "$mypwd"/Databases
+        dir="$(pwd)"
         echo "Database installation: NCBI NR protein database (should be the most up to date at time of running this script)"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
+        echo "Editing confiration file for you now..."
+        sed 's/DATABASENAME/NCBI_nr_proteindb.faa/g' "$mypwd"/vampirus.config > tmp1.config
+        sed "s|DATABASE|${dir}|g" tmp1.config > tmp2.config
+        rm tmp1
+        cat tmp2.config > "$mypwd"/vampirus.config
         echo "Database downloaded, make sure you update the config file before running!"
 elif [[ $DATABASE -eq 4 ]]
-then    mkdir "$mypwd"/DATABASES
-        cd "$mypwd"/DATABASES
+then    mkdir "$mypwd"/Databases
+        cd "$mypwd"/Databases
         echo "Database installation: We want 'em all! Might take a little while....'"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         curl -o U-RVDBv19.0-prot.fasta.bz2 https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
-        echo "Databases downloaded, make sure you update the config file with the one you would like to use before running!"
+        echo "Databases downloaded, make sure you update the config file with the one you would like to use before running."
 elif [[ $DATABASE != "" ]]
 then    echo "Error: Database download signaled but not given a value between 1-4"
         exit 1
