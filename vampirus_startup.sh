@@ -122,32 +122,33 @@ nextflow_c() {
     echo "Checking if Nextflow installed system-wide.."
     check_nextflow=$( command -v nextflow )
     if [ "$check_nextflow" = "" ];then #&& [ "$ver" -gt "45" ];then
-        echo -e "\n\t -- Nextflow is not system-wide, checking if its in the current working directory.. --\n"
+        echo "Nextflow is not system-wide, checking if its in the current working directory.."
         check_nextflow=$( ls nextflow)
     fi
     if [ "$check_nextflow" != "" ];then #&& [ "$ver" -gt "45" ];then
-        echo -e "\n\t -- Nextflow seems to be installed in your system and in your current \$PATH, great! --\n"
+        echo "Nextflow seems to be installed in your system and in your current \$PATH, great!"
     else
-        echo -e "\n\t -- Nextflow does not to seem to be downloaded or it specified in your \$PATH --\n"
-        echo -e "\n\t -- If you know you have it downloaded, answer n/N to the following question, add nextflow to your \$PATH variable and re-run this script to test --\n"
-        echo -e -n "\n\t If not, would you like me to install Nextflow for you? (y,n,exit): "
+        echo "Nextflow does not to seem to be downloaded or specified in your \$PATH.."
+        echo "If you know you have it downloaded, answer n/N to the following question, add nextflow to your \$PATH variable and re-run this script to test. "
+        echo "Otherwise, would you like me to install Nextflow for you now? (y,n,exit): "
         read ans
         case $ans in
             [yY] | [yY][eE][sS])
-            echo -e "\n\t Starting Nextflow installation \n"
+            echo "Awesome,starting Nextflow installation now ..."
             curl -s https://get.nextflow.io | bash
-            echo -e "\n\t Nextflow installation finished, execultable in "$mypwd" \n"
+            echo "Nextflow installation finished, execultable in "$mypwd""
         ;;
         [nN] | [nN][oO])
-            echo -e "\n\t\e[31m -- ERROR: Download and Install Nextflow. Then re-run the script. --\e[39m\n"
+            echo "ERROR: It seems like you answered with something other than y... Download and install Nextflow on your own and rerun re-run the script to make sure path is sepcified correctly."
+            echo "If it was a mistake you regret your original answer, just re-run the script and all will be forgiven ^__^."
             exit 0
         ;;
         exit)
-           echo -e "\n\t -- Exiting -- \n"
+           echo "Alright, if you say so, exiting now."
            exit 0
         ;;
         *)
-            echo -e "\n\n\t\e[31m -- Yes or No answer not specified. Try again --\e[39m\n"
+            echo "Yes or No answer not specified. Lets try this again..."
             nextflow_c
         ;;
         esac

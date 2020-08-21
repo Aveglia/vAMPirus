@@ -2037,7 +2037,7 @@ if (params.Analyze) {
                 """
             } else if (params.clusterAAID) {
                 """
-                cp /data/alex/PVID_dinorna/AMPS/testvamp/vAMPirus/bin/rename_seq.py .
+                cp ${params.vampdir}/bin/rename_seq.py .
                 id=${params.clusterAAID}
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                 cd-hit -i ${params.projtag}_filtered_proteins.fasta -c ${params.clusterAAID} -o ${params.projtag}_pOTU\${id}.fasta
