@@ -169,9 +169,10 @@ then    mkdir "$mypwd"/Databases
         curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/U-RVDBv19.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
-        sed "s|DATABASE|${dir}|g" tmp1.config > tmp2.config
-        rm tmp1
+        sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
+        rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
+        rm tmp2.config
         echo "Database downloaded, and configuration file edited, you still need to bunzip2 this database then just confirm the path was set correctly in the config file."
 elif [[ $DATABASE -eq 2 ]]
 then    mkdir "$mypwd"/Databases
@@ -181,9 +182,10 @@ then    mkdir "$mypwd"/Databases
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/viral.2.protein.faa/g' "$mypwd"/vampirus.config > tmp1.config
-        sed "s|DATABASE|${dir}|g" tmp1.config > tmp2.config
-        rm tmp1
+        sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
+        rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
+        rm tmp2.config
         echo "Database downloaded, and configuration file edited, you still need to gunzip this database then just confirm the path was set correctly in the config file."
 elif [[ $DATABASE -eq 3 ]]
 then    mkdir "$mypwd"/Databases
@@ -193,23 +195,28 @@ then    mkdir "$mypwd"/Databases
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/NCBI_nr_proteindb.faa/g' "$mypwd"/vampirus.config > tmp1.config
-        sed "s|DATABASE|${dir}|g" tmp1.config > tmp2.config
-        rm tmp1
+        sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
+        rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
+        rm tmp2.config
         echo "Database downloaded, make sure you update the config file before running!"
 elif [[ $DATABASE -eq 4 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
+        dir="$(pwd)"
         echo "Database installation: We want 'em all! Might take a little while....'"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         curl -o U-RVDBv19.0-prot.fasta.bz2 https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
+        sed "s|DATABASEDIR|${dir}|g" "$mypwd"/vampirus.config > tmp1.config
+        cat tmp1.config > "$mypwd"/vampirus.config
+        rm tmp1.config
         echo "Databases downloaded, make sure you update the config file with the one you would like to use before running."
 elif [[ $DATABASE != "" ]]
 then    echo "Error: Database download signaled but not given a value between 1-4"
         exit 1
 fi
-
+cd "$mypwd"
 echo "Ok, everything downloaded. Here is an example lanch command to submit after editing the paths to your data and other parameters for the run."
 echo "   "
 echo "First, run the DataCheck:"
