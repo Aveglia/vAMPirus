@@ -95,12 +95,15 @@ patterns, you are bound to see errors in the naming of files created during the 
 The default is that vAMPirus assumes that the database headers are in RVDB format, to change this assumption, you would need to edit the configuration file at line 78 where "refseq=F". Change the "F" to "T" and
 you are good to go! You could also change this within the launch command with adding "--refseq T", but setting parameters will be discussed further in a section later.
 
+## For MacOS users
+
+
 
 ## Testing vAMPirus installation
 
 A test dataset is provided in the vAMPirus/example_data. To ensure that vAMPirus is set up properly before running with your own data, you can run:
 
-`nextflow run vAMPirusv0.1.0.nf -c ./example_data/vampirus_test.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --testing`
+`nextflow run vAMPirusv0.1.0.nf -c ./example_data/vampirus_test.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze -profile test`
 
 # Quick Notes Before Running vAMPirus
 
@@ -116,12 +119,11 @@ Nextflow.
 
 Here is a basic "launch command" to deploy the vAMPirus pipeline (we will talk more about the mandatory/optional arguments of vAMPirus later):
 
-`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze`
+`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -profile [conda,docker,singularity] --Analyze`
 
 In the command above, there are five necessary pieces of information needed to successfully launch the vAMPirus workflow:
 
-    1. The first is the "nextflow" executable in the beginning. Nextflow is responsible for launching the vAMPirus processes and this is why nextflow must be either added
-       to your $PATH variable, specify the path to your nextflow executable in the command itself, or copy the executable to your working directory.
+    1. The first is the location of the "nextflow" executable (could be in your $PATH, if so, just call like above).
 
     2. Second, you must tell Nextflow to "run" the vAMPirus program which is described in the "vAMPirusv0.1.0.nf" file. Depending on where you plan to submit this command,
        you may have to specify the path to the vAMPirusv0.1.0.nf file or you can copy the file to your working directory.
@@ -129,7 +131,7 @@ In the command above, there are five necessary pieces of information needed to s
     3. Next, we need to tell Nextflow what configuration file we would like to use for the vAMPirus run which is illustrated by the "-c vampirus.config" segment of the command.
        We will talk more about the configuration file in the next section.
 
-    4. The next piece of information Nextflow needs is the environment to use for the vAMPirus workflow. The dependencies of vAMPirus are stored as a conda environment so we need
+    4. The next piece of information Nextflow needs is the environment to use for the vAMPirus workflow. The dependencies of vAMPirus are stored as a Docker image, Singulairy and Conda environment so we need
        to tell Nextflow that we would like to run vAMPirus with conda and specifically the vAMPirus environment that was built when running the vampirus_startup.sh script during
        installation. To find the path to the vAMPirus conda environment, you can run "conda info --envs" and this will give you the path to your conda environments.
 

@@ -157,6 +157,7 @@ nextflow_c() {
 
 echo "Alright, lets check your system for Conda..."
 conda_c
+
 echo "Now lets check the status of Nextflow on your system..."
 nextflow_c
 
@@ -208,5 +209,34 @@ elif [[ $DATABASE != "" ]]
 then    echo "Error: Database download signaled but not given a value between 1-4"
         exit 1
 fi
+
+echo "Ok, everything downloaded. Here is an example lanch command to submit after editing the paths to your data and other parameters for the run."
+echo "   "
+echo "First, run the DataCheck:"
+environment="$(conda env list  | grep "vAMPirus" | head -1 | awk '{print $2}')"
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck"
+echo "   "
+echo "OR..."
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --DataCheck"
+echo "   "
+echo "Then you can run the analysis:"
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze ..."
+echo "   "
+echo "OR..."
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --Analyze ..."
+touch EXAMPLE_COMMANDS.txt
+echo "Here is an example lanch command to submit after editing the paths to your data and other parameters for the run." >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo "First, run the DataCheck:" >> EXAMPLE_COMMANDS.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck" >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo "OR..." >> EXAMPLE_COMMANDS.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --DataCheck" >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo "Then you can run the analysis:" >> EXAMPLE_COMMANDS.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze ..." >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo "OR..." >> EXAMPLE_COMMANDS.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --Analyze ..." >> EXAMPLE_COMMANDS.txt
 
 echo "Setup script is complete!"
