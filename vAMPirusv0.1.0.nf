@@ -2760,7 +2760,7 @@ if (params.Analyze) {
                 script:
                     """
                     name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                    cp ${params.workingdir}/bin/vAMPirus_ASV_Report.Rmd .
+                    cp ${params.vampdir}/bin/vAMPirus_ASV_Report.Rmd .
                     Rscript -e "rmarkdown::render('vAMPirus_ASV_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
                     ${readsstats} \
                     ${counts} \
@@ -2790,7 +2790,7 @@ if (params.Analyze) {
 
                 script:
                     """
-                    cp ${params.workingdir}/bin/vAMPirus_OTU_Report.Rmd .
+                    cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
                     for x in *_summary_for_plot.csv;do
                         name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
                         id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
@@ -2828,7 +2828,7 @@ if (params.Analyze) {
                     script:
                         """
                         name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                        cp ${params.workingdir}/bin/vAMPirus_OTU_Report.Rmd .
+                        cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
                         Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
                         ${readsstats} \
                         ${counts} \
@@ -2861,7 +2861,7 @@ if (params.Analyze) {
                         script:
                             """
                             name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                            cp ${params.workingdir}/bin/vAMPirus_ASV_Report.Rmd .
+                            cp ${params.vampdir}/bin/vAMPirus_ASV_Report.Rmd .
                             Rscript -e "rmarkdown::render('vAMPirus_ASV_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
                             ${readsstats} \
                             ${counts} \
@@ -2895,7 +2895,7 @@ if (params.Analyze) {
                             script:
                                 """
                                 name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                                cp ${params.workingdir}/bin/vAMPirus_OTU_Report.Rmd .
+                                cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
                                 Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
                                 ${readsstats} \
                                 ${counts} \
@@ -2929,7 +2929,7 @@ if (params.Analyze) {
 
                     script:
                         """
-                        cp ${params.workingdir}/bin/vAMPirus_OTU_Report.Rmd .
+                        cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
                         for x in *_summary_for_plot.csv;do
                             name=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}')
                             id=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
@@ -2964,7 +2964,7 @@ if (params.Analyze) {
 
                     script:
                         """
-                        cp ${params.workingdir}/bin/vAMPirus_OTU_Report.Rmd .
+                        cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
                         for x in *_summary_for_plot.csv;do
                             name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
                             id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
@@ -3472,7 +3472,7 @@ if (params.Analyze) {
 
         script:
             """
-            cp ${params.workingdir}/bin/vAMPirus_DC_Report.Rmd .
+            cp ${params.vampdir}/bin/vAMPirus_DC_Report.Rmd .
             Rscript -e "rmarkdown::render('vAMPirus_DC_Report.Rmd',output_file='${params.projtag}_DataCheck_Report.html')" ${params.projtag} \
             ${fastpcsv} \
             ${reads_per_sample_preFilt} \
