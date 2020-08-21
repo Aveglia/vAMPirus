@@ -69,9 +69,9 @@ conda_c() {
             check_env=$( conda info -e | grep -c "vAMPirus" )
 	        if [ "$check_env" -eq 0 ];then
                 echo -e "\n\t -- vAMPirus environment has not been created. Checking environment file... --\n"
-                if [ -f vAMPirus_env.yml ];then
+                if [ -f vampirus_env.yml ];then
                     echo -e "\n\t -- vAMPirus environment file found. Creating environment... --\n"
-                    conda env create -f vAMPirus_env.yml
+                    conda env create -f vampirus_env.yml
                 else
                     echo -e "\n\t\e[31m -- ERROR: vAMPirus environment file not found \(vAMPirus_env.yml\). Make sure you are running this from the vAMPirus program directory. --\e[39m\n"
                     exit 0
@@ -92,9 +92,9 @@ conda_c() {
                 echo -e "\n\t -- Installation done -- \n"
                 rm Miniconda3*.sh
                 source_c
-                if [ -f vAMPirus_env.yml ];then
+                if [ -f vampirus_env.yml ];then
                     echo -e "\n\t -- vAMPirus environment file found. Creating environment... --\n"
-                    conda env create -f vAMPirus_env.yml
+                    conda env create -f vampirus_env.yml
                 else
                     echo -e "\n\t\e[31m -- ERROR: vAMPirus environment file not found (vAMPirus_env.yml). Please check requirements and rerun the pre-check --\e[39m\n"
                     exit 0
