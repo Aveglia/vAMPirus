@@ -354,16 +354,19 @@ if (params.Analyze) {
                             echo "Nope, no database by that name here. Check the configuration file and help documentation to set path to the database."
                             exit 1
                         else
-                            echo "Ok, found the database specified here. Lets see if its built."
-                            if [ ! -e ${params.vampdir}/Databases/${params.dbname}.dmnd ];then
+                            echo "Ok, found the database specified here. Lets move it to the directory you wanted."
+                            mkdir ${params.dbdir}
+                            cp ${params.vampdir}/Databases/${params.dbname}* ${params.dbdir}/
+                            if [ ! -e ${params.dbdir}/${params.dbname}.dmnd ];then
                                 echo "It needs to be built upp, doing it now"
-                                diamond makedb --in ${params.vampdir}/Databases/${params.dbname} -d ${params.vampdir}/Databases/${params.dbname}
-                                export virdb=${params.vampdir}/Databases/${params.dbname}
+                                diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname}
+                                export virdb=${params.dbdir}/${params.dbname}
                             else
                                 echo "Database looks to be present and built."
                             fi
                         fi
                     fi
+                    cd  ${params.workingdir}
                 elif [ -d ${params.dbdir} ];then
                     echo -e "-- Directory exists. Checking if specified database is present now.. --\\n"
                     if [ ! -e ${params.dbdir}/${params.dbname} ];then
@@ -722,8 +725,8 @@ if (params.Analyze) {
 
                 script:
                     """
-                    cp ${params.workingdir}/bin/rename_seq.py .
-                    virdb=${params.workingdir}/DBs/diamonddb_custom/${params.dbname}
+                    cp ${params.vampdir}/bin/rename_seq.py .
+                    virdb=${params.dbdir}/${params.dbname}
                     grep ">" \${virdb} > headers.list
                     headers="headers.list"
                     for filename in ${notus};do
@@ -1002,8 +1005,8 @@ if (params.Analyze) {
                         file("*ASV*_summary_for_plot.csv") into taxplot1
                     script:
                         """
-                        cp ${params.workingdir}/bin/rename_seq.py .
-                        virdb=${params.workingdir}/DBs/diamonddb_custom/${params.dbname}
+                        cp ${params.vampdir}/bin/rename_seq.py .
+                        virdb=${params.dbdir}/${params.dbname}
                         grep ">" \${virdb} > headers.list
                         headers="headers.list"
                         for filename in ${reads};do
@@ -1555,7 +1558,7 @@ if (params.Analyze) {
 
             script:
                 """
-                cp ${params.workingdir}/bin/rename_seq.py .
+                cp ${params.vampdir}/bin/rename_seq.py .
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${prot} >${params.projtag}_filtered_translations.fasta
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${prot} >${params.projtag}_problematic_translations.fasta
                 if [ `wc -l ${params.projtag}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
@@ -1686,8 +1689,8 @@ if (params.Analyze) {
 
                 script:
                     """
-                    cp ${params.workingdir}/bin/rename_seq.py .
-                    virdb=${params.workingdir}/DBs/diamonddb_custom/${params.dbname}
+                    cp ${params.vampdir}/bin/rename_seq.py .
+                    virdb=${params.dbdir}/${params.dbname}
                     grep ">" \${virdb} >> headers.list
                     headers="headers.list"
                     name=\$(ls ${reads} | awk -F "_noTaxonomy" '{print \$1}')
@@ -1961,7 +1964,7 @@ if (params.Analyze) {
             // add awk script to count seqs
             if (params.clusterAAIDlist) {
                 """
-                cp ${params.workingdir}/bin/rename_seq.py .
+                cp ${params.vampdir}/bin/rename_seq.py .
                 for id in `echo ${params.clusterAAIDlist} | tr "," "\\n"`;do
                         awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                         cd-hit -i ${params.projtag}_filtered_proteins.fasta -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
@@ -2129,8 +2132,8 @@ if (params.Analyze) {
                 script:
                     """
                     set +e
-                    cp ${params.workingdir}/bin/rename_seq.py .
-                    virdb=${params.workingdir}/DBs/diamonddb_custom/${params.dbname}
+                    cp ${params.vampdir}/bin/rename_seq.py .
+                    virdb=${params.dbdir}/${params.dbname}
                     grep ">" \${virdb} >> headers.list
                     headers="headers.list"
                     for filename in ${reads};do
@@ -2477,8 +2480,8 @@ if (params.Analyze) {
 
                 script:
                     """
-                    cp ${params.workingdir}/bin/rename_seq.py .
-                    virdb=${params.workingdir}/DBs/diamonddb_custom/${params.dbname}
+                    cp ${params.vampdir}/bin/rename_seq.py .
+                    virdb=${params.dbdir}/${params.dbname}
                     grep ">" \${virdb} >> headers.list
                     headers="headers.list"
                     for filename in ${reads};do
@@ -3332,7 +3335,7 @@ if (params.Analyze) {
         script:
         // add awk script to count seqs
             """
-            cp ${params.workingdir}/bin/rename_seq.py .
+            cp ${params.vampdir}/bin/rename_seq.py .
             for id in `echo ${params.datacheckaaIDlist} | tr "," "\\n"`;do
                 if [ \${id} == ".55" ];then
                     word=3
