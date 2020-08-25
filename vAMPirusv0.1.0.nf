@@ -320,7 +320,7 @@ if (params.readsTest) {
     Channel
         .from(params.readsTest)
         .map{ row -> [ row[0], [ file(row[1][0],checkIfExists: true),file(row[2][0],checkIfExists: true) ] ] }
-        .ifEmpty{ exit 1, "params.testing was empty - no input files supplied" }
+        .ifEmpty{ exit 1, "params.readTest was empty - no input files supplied" }
         .into{ reads_ch; reads_qc_ch }
 } else {
     println("\n\tEverything good to go, lets run vAMPirus!\n")
