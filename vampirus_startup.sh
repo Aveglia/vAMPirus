@@ -217,8 +217,15 @@ then    echo "Error: Database download signaled but not given a value between 1-
         exit 1
 fi
 cd "$mypwd"
-echo "Ok, everything downloaded. Here is an example lanch command to submit after editing the paths to your data and other parameters for the run."
+echo "Ok, everything downloaded. To test installation, run the following commands and check for errors:"
 echo "   "
+echo "Checking DataCheck mode:"
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck"
+echo "    "
+echo "Next, test the analysis pipeline:"
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze"
+echo "   "
+echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file."
 echo "First, run the DataCheck:"
 environment="$(conda env list  | grep "vAMPirus" | head -1 | awk '{print $2}')"
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck"
@@ -231,9 +238,17 @@ echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.co
 echo "   "
 echo "OR..."
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --Analyze ..."
+
 touch EXAMPLE_COMMANDS.txt
-echo "Here is an example lanch command to submit after editing the paths to your data and other parameters for the run." >> EXAMPLE_COMMANDS.txt
+echo "Ok, everything downloaded. To test installation, run the following commands and check for errors:" >> EXAMPLE_COMMANDS.txt
 echo "   " >> EXAMPLE_COMMANDS.txt
+echo "Checking DataCheck mode:" >> EXAMPLE_COMMANDS.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck" >> EXAMPLE_COMMANDS.txt
+echo "    " >> EXAMPLE_COMMANDS.txt
+echo "Next, test the analysis pipeline:" >> EXAMPLE_COMMANDS.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze" >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file."
 echo "First, run the DataCheck:" >> EXAMPLE_COMMANDS.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck" >> EXAMPLE_COMMANDS.txt
 echo "   " >> EXAMPLE_COMMANDS.txt
