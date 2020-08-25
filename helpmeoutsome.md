@@ -101,9 +101,20 @@ you are good to go! You could also change this within the launch command with ad
 
 ## Testing vAMPirus installation
 
-A test dataset is provided in the vAMPirus/example_data. To ensure that vAMPirus is set up properly before running with your own data, you can run:
+A test dataset is provided and you can test your vAMPirus installation by running the following:
 
-`nextflow run vAMPirusv0.1.0.nf -c ./example_data/vampirus_test.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze -profile test`
+    1. First we want to make sure the DataCheck mode runs properly:
+
+        `/PATH/TO/nextflow run /PATH/TO/vAMPirusv0.1.0.nf -c /PATH/TO/vampirus.config -profile conda,test --DataCheck `
+
+        If not errors occur, you can then move on to the next command testing the Analyze mode.
+
+    2. To test all aspect of the vAMPirus analysis pipeline you can run the following:
+
+        `/PATH/TO/nextflow run /PATH/TO/vAMPirusv0.1.0.nf -c /PATH/TO/vampirus.config -profile conda,test --Analyze --nOTU --pOTU `
+
+        If no errors occur, you are good to run with your data! Just edit the specific parameters of interest (working directory, project prefix,
+            clustering/phylogeny parameter, etc.) in the vampirus.config file!
 
 # Quick Notes Before Running vAMPirus
 
