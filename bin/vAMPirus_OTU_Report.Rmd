@@ -12,6 +12,7 @@ params:
   tax: !r commandArgs(trailingOnly=T)[7]      # tax
   tree: !r commandArgs(trailingOnly=T)[8]     # tree
   try: !r commandArgs(trailingOnly=T)[9]      # trymax
+
 ---
 <style>
 .rectangle {
@@ -28,7 +29,9 @@ knitr::opts_chunk$set(echo = TRUE,
       out.width="100%")
 ```
 
-[](https://sync.palmuc.org/index.php/s/gscg4m4PtdN5ZwY/preview)
+```{r pathways, echo=FALSE}
+knitr::include_graphics("vamplogo.png")
+```
 
 ```{r load_libraries, include=FALSE}
 library(vegan)

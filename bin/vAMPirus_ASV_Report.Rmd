@@ -26,7 +26,10 @@ knitr::opts_chunk$set(echo = TRUE,
       warning = FALSE,
       out.width="100%")
 ```
-[](https://sync.palmuc.org/index.php/s/gscg4m4PtdN5ZwY/preview)
+
+```{r pathways, echo=FALSE}
+knitr::include_graphics("vamplogo.png")
+```
 
 ```{r load_libraries, include=FALSE}
 library(vegan)
