@@ -42,20 +42,25 @@ rm tmp.config
 
 os_c() {
     if [ -f /etc/os-release ];then
-        echo -e "\n\t -- Downloading Linux Miniconda3 installation -- \n"
+        echo -e "\n\t -- Downloading Linux Miniconda3 installation for Linux OS-- \n"
         curl -o Miniconda3-latest-Linux-x86_64.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    elif [ `which sw_vers | wc -l` -eq 1 ];then
+        echo -e "\n\t -- Downloading Linux Miniconda3 installation for MacOS -- \n"
+        curl -o Miniconda3-latest-MacOSX-x86_64.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
     else
-        echo -e "\n\t\e[31m -- ERROR: Are you in a Unix system? Please check requirements for vAMPirus --\e[39m\n"
+        echo "Error in Miniconda installation"
         exit 0
     fi
 }
 source_c() {
     if [ -f ~/.bashrc ];then
         source ~/.bashrc
+    else
+        source ~/.bash_profile
     fi
 }
 conda_c() {
-    source ~/.bashrc
+    source_c
     cd $mypwd
     #Check conda and environment
     check_conda=$( command -v conda )
@@ -117,13 +122,13 @@ conda_c() {
 }
 
 nextflow_c() {
-    source ~/.bashrc
+    source_c
     cd $mypwd
     echo "Checking if Nextflow installed system-wide.."
     check_nextflow=$( command -v nextflow )
     if [ "$check_nextflow" = "" ];then #&& [ "$ver" -gt "45" ];then
         echo "Nextflow is not system-wide, checking if its in the current working directory.."
-        check_nextflow=$( ls nextflow)
+        check_nextflow=$( ls nextflow )
     fi
     if [ "$check_nextflow" != "" ];then #&& [ "$ver" -gt "45" ];then
         echo "Nextflow seems to be installed in your system and in your current \$PATH, great!"
@@ -157,9 +162,18 @@ nextflow_c() {
 
 echo "Alright, lets check your system for Conda..."
 conda_c
+echo "Editing path to conda directory in vampirus.config"
+environment="$(conda env list  | sed 's/*//g' | grep "vAMPirus" | head -1 | awk '{print $2}')"
+sed "s|CONDADIR|${environment}|g" "$mypwd"/vampirus.config > tmp1.config
+cat tmp1.config > "$mypwd"/vampirus.config
+rm tmp1.config
+
+echo "-------------------------------------------------------------------------------- Conda loop done"
 
 echo "Now lets check the status of Nextflow on your system..."
 nextflow_c
+
+echo "-------------------------------------------------------------------------------- nextflow loop done"
 
 if [[ $DATABASE -eq 1 ]]
 then    mkdir "$mypwd"/Databases
@@ -216,6 +230,8 @@ elif [[ $DATABASE != "" ]]
 then    echo "Error: Database download signaled but not given a value between 1-4"
         exit 1
 fi
+echo "-------------------------------------------------------------------------------- Database loop done"
+
 cd "$mypwd"
 echo "Ok, everything downloaded. To test installation, run the following commands and check for errors:"
 echo "   "
@@ -227,7 +243,6 @@ echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.co
 echo "   "
 echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file."
 echo "First, run the DataCheck:"
-environment="$(conda env list  | sed 's/*//g' | grep "vAMPirus" | head -1 | awk '{print $2}')"
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck"
 echo "   "
 echo "OR..."
