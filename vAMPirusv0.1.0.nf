@@ -1083,7 +1083,7 @@ if (params.Analyze) {
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                            echo ">OTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                            echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             j=\$((\$j+1))
                                             echo "\$s done."
                                         else
@@ -1099,7 +1099,7 @@ if (params.Analyze) {
                                             echo "NO_HIT" >> length.list
                                             virus="NO"
                                             gene="HIT"
-                                            echo ">OTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                            echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             j=\$((\$j+1))
                                             echo "\$s done."
                                         fi
@@ -1232,7 +1232,7 @@ if (params.Analyze) {
                 label 'norm_cpus'
 
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Counts", mode: "copy", overwrite: true, pattern: '*OTU*.{biome,csv}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Counts", mode: "copy", overwrite: true, pattern: '*ncASV*.{biome,csv}'
 
                 input:
                     tuple file(notus), file(asvs) from nuclFastas_forCounts_ch
@@ -2281,7 +2281,7 @@ if (params.Analyze) {
             script:
                 """
                 for filename in ${potus};do
-                	ident=\$( echo \${filename} | awk -F "OTU" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
+                	ident=\$( echo \${filename} | awk -F "pcASV" '{print \$2}' | awk -F "_noTaxonomy.fasta" '{print \$1}')
                 	name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
                 	vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                 	cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
@@ -2307,7 +2307,7 @@ if (params.Analyze) {
             script:
                 """
                 for filename in ${potus};do
-                    ident=\$( echo \${filename} | awk -F "OTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                    ident=\$( echo \${filename} | awk -F "pcASV" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                     name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
                     clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                     clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
