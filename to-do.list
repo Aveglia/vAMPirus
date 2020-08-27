@@ -1,0 +1,7 @@
+Things to work on for the future:
+
+1. Change from OTU to cASV --ncASV --pcASV
+
+2. Change workingdir to projectDir
+
+3. Change vampdir to launchDir

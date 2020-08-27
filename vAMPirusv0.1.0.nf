@@ -43,9 +43,9 @@ def helpMessage() {
 
         Clustering arguments:
 
-                --nOTU                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (nOTUs) - See options below to define a single percent similarity or a list
+                --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
-                --pOTU                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pOTUs) - See options below to define a single percent similarity or a list
+                --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
         Skip arguments:
 
@@ -103,15 +103,15 @@ def helpMessage() {
 
                 --minSize                       Minimum size or representation for sequence to be considered in ASV generation
 
-                --clusterNuclID                 With --nOTU set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
+                --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
 
-                --clusterNuclIDlist             With --nOTU set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+                --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
 
-                --clusterAAID                   With --pOTU set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
+                --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
 
-                --clusterAAIDlist               With --pOTU set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
+                --clusterAAIDlist               With --pcASV set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
-                --minAA                         With --pOTU set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
+                --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
 
         Counts table options
@@ -182,9 +182,9 @@ def fullHelpMessage() {
 
         Clustering arguments:
 
-                --nOTU                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (nOTUs) - See options below to define a single percent similarity or a list
+                --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
-                --pOTU                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pOTUs) - See options below to define a single percent similarity or a list
+                --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
         Skip arguments:
 
@@ -240,15 +240,15 @@ def fullHelpMessage() {
 
                 --minSize                       Minimum size or representation for sequence to be considered in ASV generation
 
-                --clusterNuclID                 With --nOTU set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
+                --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
 
-                --clusterNuclIDlist             With --nOTU set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+                --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
 
-                --clusterAAID                   With --pOTU set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
+                --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
 
-                --clusterAAIDlist               With --pOTU set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
+                --clusterAAIDlist               With --pcASV set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
-                --minAA                         With --pOTU set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
+                --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
 
         Counts table options
@@ -318,8 +318,7 @@ log.info """\
 if (params.readsTest) {
     println("\n\tRunning vAMPirus with TEST dataset\n")
     Channel
-        .from(params.readsTest)
-        .map{ row -> [ row[0], [ file(row[1][0],checkIfExists: true),file(row[2][0],checkIfExists: true) ] ] }
+        .fromFilePairs(params.readsTest)
         .ifEmpty{ exit 1, "params.readTest was empty - no input files supplied" }
         .into{ reads_ch; reads_qc_ch }
 } else {
@@ -594,9 +593,9 @@ if (params.Analyze) {
             file(reads) from collect_samples_ch
 
         output:
-            file("*_merged_preFilt_clean.fasta") into ( nuclCounts_mergedreads_ch, pOTU_mergedreads_ch )
+            file("*_merged_preFilt_clean.fasta") into ( nuclCounts_mergedreads_ch, pcASV_mergedreads_ch )
             file("*_merged_clean_Lengthfiltered.fastq") into reads_vsearch2_ch
-            file("*_merged_preFilt_clean.fastq") into (  mergeforprotcounts, mergeforpOTUaacounts )
+            file("*_merged_preFilt_clean.fastq") into (  mergeforprotcounts, mergeforpcASVaacounts )
             file("**hist.txt")  into histos
 
         script:
@@ -665,33 +664,33 @@ if (params.Analyze) {
 
     // UNTIL HERE DEFAULT
 
-    if (params.nOTU) {
+    if (params.ncASV) {
 
         process NucleotideBased_ASV_clustering {
 
             label 'norm_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/nOTU", mode: "copy", overwrite: true, pattern: '*nOTU*.fasta'
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ncASV", mode: "copy", overwrite: true, pattern: '*ncASV*.fasta'
 
             input:
                 file(fasta) from reads_vsearch5_ch
 
             output:
-                tuple file("*_nOTU*.fasta"), file("*ASVs.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
-                tuple file("*_nOTU*.fasta"), file("*ASVs.fasta") into nuclFastas_forphylogeny
+                tuple file("*_ncASV*.fasta"), file("*ASVs.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
+                tuple file("*_ncASV*.fasta"), file("*ASVs.fasta") into nuclFastas_forphylogeny
 
             script:
             if (params.clusterNuclIDlist) {
                 """
                 for id in `echo ${params.clusterNuclIDlist} | tr "," "\\n"`;do
-                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_nOTU\${id}.fasta --threads ${task.cpus} --relabel nOTU --id \${id}
+                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
                 done
                 cp ${fasta} ${params.projtag}_ASVs.fasta
                 """
             } else if (params.clusterNuclID) {
                 """
                 id=${params.clusterNuclID}
-                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_nOTU\${id}.fasta --threads ${task.cpus} --relabel nOTU --id \${id}
+                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
                 cp ${fasta} ./${params.projtag}_ASVs.fasta
                 """
             }
@@ -703,16 +702,16 @@ if (params.Analyze) {
 
     if (!params.skipTaxonomy) {
 
-        if (params.nOTU) {
+        if (params.ncASV) {
 
             process Nucleotide_Taxonomy_Assignment {
 
                 label 'high_cpus'
 
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/nOTU/Taxonomy", mode: "copy", overwrite: true, pattern: '*nOTU*.{fasta,csv,tsv}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Taxonomy", mode: "copy", overwrite: true, pattern: '*ncASV*.{fasta,csv,tsv}'
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/nOTU/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*nOTU*dmd.out'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ncASV*dmd.out'
 
                 input:
                     tuple file(notus), file(asvs) from nuclFastas_forDiamond_ch
@@ -720,7 +719,7 @@ if (params.Analyze) {
                 output:
                     file("*.fasta") into tax_labeled_fasta
                     tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond
-                    file("*nOTU*summary_for_plot.csv") into taxplot1a
+                    file("*ncASV*summary_for_plot.csv") into taxplot1a
                     file("*ASV*_summary_for_plot.csv") into taxplot1
 
                 script:
@@ -743,9 +742,9 @@ if (params.Analyze) {
                         echo "extracting genes and names"
                         touch new_"\$name"_asvnames.txt
                         j=1
-                        if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
-                            echo "[nOTU#]" > otu.list
-                            echo "[nOTU sequence length]" > length.list
+                        if [ `echo \${filename} | grep -c "ncASV"` -eq 1 ];then
+                            echo "[ncASV#]" > otu.list
+                            echo "[ncASV sequence length]" > length.list
                             for s in \$(cat seqids.lst);do
                                 echo "Checking for \$s hit in diamond output"
                                 if [[ ${params.refseq} == "T" ]];then
@@ -766,7 +765,7 @@ if (params.Analyze) {
                                         echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                         echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                        echo ">nOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                        echo ">ncASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     else
@@ -782,7 +781,7 @@ if (params.Analyze) {
                                         echo "NO_HIT" >> length.list
                                         virus="NO"
                                         gene="HIT"
-                                        echo ">nOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                        echo ">ncASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     fi
@@ -1023,9 +1022,9 @@ if (params.Analyze) {
                             echo "extracting genes and names"
                             touch new_"\$name"_asvnames.txt
                             j=1
-                            if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
-                                echo "[nOTU#]" > otu.list
-                                echo "[nOTU sequence length]" > length.list
+                            if [ `echo \${filename} | grep -c "ncASV"` -eq 1 ];then
+                                echo "[ncASV#]" > otu.list
+                                echo "[ncASV sequence length]" > length.list
                                 for s in \$(cat seqids.lst);do
                                     echo "Checking for \$s hit in diamond output"
                                     if [[ ${params.refseq} == "T" ]];then
@@ -1046,7 +1045,7 @@ if (params.Analyze) {
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                            echo ">nOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                            echo ">ncASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             j=\$((\$j+1))
                                             echo "\$s done."
                                         else
@@ -1062,7 +1061,7 @@ if (params.Analyze) {
                                             echo "NO_HIT" >> length.list
                                             virus="NO"
                                             gene="HIT"
-                                            echo ">nOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                            echo ">ncASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             j=\$((\$j+1))
                                             echo "\$s done."
                                         fi
@@ -1226,14 +1225,14 @@ if (params.Analyze) {
             }
         }
 
-        if (params.nOTU) {
+        if (params.ncASV) {
 
             process Generate_Counts_Tables_Nucleotide {
 
                 label 'norm_cpus'
 
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/nOTU/Counts", mode: "copy", overwrite: true, pattern: '*OTU*.{biome,csv}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Counts", mode: "copy", overwrite: true, pattern: '*OTU*.{biome,csv}'
 
                 input:
                     tuple file(notus), file(asvs) from nuclFastas_forCounts_ch
@@ -1241,14 +1240,14 @@ if (params.Analyze) {
 
                 output:
                     tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
-                    file("*nOTU*counts.csv") into notu_counts_plots
+                    file("*ncASV*counts.csv") into notu_counts_plots
                     file("*ASV*counts.csv") into asv_counts_plots
 
                 script:
                     """
                     for filename in ${notus};do
-                        if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
-                            ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                        if [ `echo \${filename} | grep -c "ncASV"` -eq 1 ];then
+                            ident=\$( echo \${filename} | awk -F "ncASV" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                             name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
                             vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                             cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
@@ -1293,29 +1292,29 @@ if (params.Analyze) {
                 }
             }
 
-    if (params.nOTU) {
+    if (params.ncASV) {
 
         process Generate_Nucleotide_Matrix {
 
             label 'low_cpus'
 
             publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/nOTU/Matrix", mode: "copy", overwrite: true, pattern: '*nOTU*PercentID.matrix'
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Matrix", mode: "copy", overwrite: true, pattern: '*ncASV*PercentID.matrix'
 
             input:
                 tuple file(notus), file(asvs) from nuclFastas_forMatrix_ch
 
             output:
                 file("*.matrix") into clustmatrices
-                file("*nOTU*PercentID.matrix") into notu_heatmap
+                file("*ncASV*PercentID.matrix") into notu_heatmap
                 file("*ASV*PercentID.matrix") into asv_heatmap
 
             script:
                 // remove if statement later (no fin)
                 """
                 for filename in ${notus};do
-                    if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
-                        ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                    if [ `echo \${filename} | grep -c "ncASV"` -eq 1 ];then
+                        ident=\$( echo \${filename} | awk -F "ncASV" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                         name=\$( echo \${filename}| awk -F ".fasta" '{print \$1}')
                         clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
                         clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
@@ -1365,8 +1364,8 @@ if (params.Analyze) {
                     // remove if statement later (no fin)
                     """
                     for filename in ${reads};do
-                        if [ `echo \${filename} | grep -c "nOTU"` -eq 1 ];then
-                            ident=\$( echo \${filename} | awk -F "nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                        if [ `echo \${filename} | grep -c "ncASV"` -eq 1 ];then
+                            ident=\$( echo \${filename} | awk -F "ncASV" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                             name=\$( echo \${filename}| awk -F ".fasta" '{print \$1}')
                             clustalo -i \${filename} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
                             clustalo -i \${filename} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
@@ -1400,15 +1399,15 @@ if (params.Analyze) {
 
     if (!params.skipPhylogeny) { // need to edit paths
 
-        if (params.nOTU) {
+        if (params.ncASV) {
 
             process Nucleotide_Phylogeny {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/nOTU/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*nOTU*aln.*'
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/nOTU/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*nOTU*mt*'
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/nOTU/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*nOTU*iq*'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ncASV*aln.*'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ncASV*mt*'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ncASV*iq*'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
@@ -1697,7 +1696,7 @@ if (params.Analyze) {
                     diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
                     echo "Preparing lists to generate summary .csv's"
                     echo "[Best hit accession number]" >access.list
-                    echo "[pOTU sequence length]" >length.list
+                    echo "[pcASV sequence length]" >length.list
                     echo "[e-value]" >evalue.list
                     echo "[Bitscore]" >bit.list
                     echo "[Percent ID (aa)]" >pid.list
@@ -1918,15 +1917,15 @@ if (params.Analyze) {
         }
     }
 
-    if (params.pOTU) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
+    if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
 
-        process Translation_For_pOTU_Generation {
+        process Translation_For_pcASV_Generation {
 
             label 'low_cpus'
 
             conda 'python=2.7'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pOTU/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
 
             input:
                 file(fasta) from nucl2aa
@@ -1943,22 +1942,22 @@ if (params.Analyze) {
                 """
         }
 
-        process Generate_pOTUs {
+        process Generate_pcASVs {
 
             label 'norm_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pOTU", mode: "copy", overwrite: true, pattern: '*pOTU*.{fasta}'
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pOTU/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pOTU/Problematic", mode: "copy", overwrite: true, pattern: '*problem*.{fasta}'
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV", mode: "copy", overwrite: true, pattern: '*pcASV*.{fasta}'
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Problematic", mode: "copy", overwrite: true, pattern: '*problem*.{fasta}'
 
             input:
                 file(fasta) from clustering_aa
                 file(asvs) from asvfastaforaaclust
 
             output:
-                file("${params.projtag}_nucleotide_pOTU*.fasta") into ( pOTU_ntDiamond_ch, pOTU_nt_counts_ch, pOTU_ntmatrix_ch, pOTU_ntmafft_ch )
-                file("*_aminoacid_pOTU*_noTaxonomy.fasta") into ( pOTU_aaMatrix_ch, pOTU_aaDiamond_ch, pOTU_aaMafft_ch, pOTU_aaCounts_ch, pOTUEMBOSS )
-                tuple file("*.fasta"), file("*.clstr"), file("*.csv"), file("*.gc") into ( pOTUsupplementalfiles )
+                file("${params.projtag}_nucleotide_pcASV*.fasta") into ( pcASV_ntDiamond_ch, pcASV_nt_counts_ch, pcASV_ntmatrix_ch, pcASV_ntmafft_ch )
+                file("*_aminoacid_pcASV*_noTaxonomy.fasta") into ( pcASV_aaMatrix_ch, pcASV_aaDiamond_ch, pcASV_aaMafft_ch, pcASV_aaCounts_ch, pcASVEMBOSS )
+                tuple file("*.fasta"), file("*.clstr"), file("*.csv"), file("*.gc") into ( pcASVsupplementalfiles )
 
             script:
             // add awk script to count seqs
@@ -1967,19 +1966,19 @@ if (params.Analyze) {
                 cp ${params.vampdir}/bin/rename_seq.py .
                 for id in `echo ${params.clusterAAIDlist} | tr "," "\\n"`;do
                         awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
-                        cd-hit -i ${params.projtag}_filtered_proteins.fasta -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
-                        sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
-                        grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >temporaryclusters.list
-                        y=\$(grep -c ">Cluster_" ${params.projtag}_pOTU\${id}.clstr)
-                        echo ">Cluster_"\${y}"" >> ${params.projtag}_pOTU\${id}.clstr
+                        cd-hit -i ${params.projtag}_filtered_proteins.fasta -c \${id} -o ${params.projtag}_pcASV\${id}.fasta
+                        sed 's/>Cluster />Cluster_/g' ${params.projtag}_pcASV\${id}.fasta.clstr >${params.projtag}_pcASV\${id}.clstr
+                        grep ">Cluster_" ${params.projtag}_pcASV\${id}.clstr >temporaryclusters.list
+                        y=\$(grep -c ">Cluster_" ${params.projtag}_pcASV\${id}.clstr)
+                        echo ">Cluster_"\${y}"" >> ${params.projtag}_pcASV\${id}.clstr
                         t=1
                         b=1
                         for x in \$(cat temporaryclusters.list);do
                             echo "Extracting \$x"
                             name="\$( echo \$x | awk -F ">" '{print \$2}')"
-                            clust="pOTU"\${t}""
+                            clust="pcASV"\${t}""
                             echo "\${name}"
-                            awk '/^>'\${name}'\$/,/^>Cluster_'\${b}'\$/' ${params.projtag}_pOTU\${id}.clstr > "\${name}"_"\${clust}"_tmp.list
+                            awk '/^>'\${name}'\$/,/^>Cluster_'\${b}'\$/' ${params.projtag}_pcASV\${id}.clstr > "\${name}"_"\${clust}"_tmp.list
                             t=\$(( \${t}+1 ))
                             b=\$(( \${b}+1 ))
                         done
@@ -2001,15 +2000,15 @@ if (params.Analyze) {
                             u=1
                             ./rename_seq.py \${name}_\${cluster}_centroids.fasta \${name}_\${cluster}_tmp_centroid.newheaders \${cluster}_types_labeled.fasta
                         done
-                        cat *_types_labeled.fasta >> ${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta
-                        grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
-                        grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
+                        cat *_types_labeled.fasta >> ${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta
+                        grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
+                        grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
                         paste -d"," temporaryclusters.list tmphead.list >tmp.info.csv
-                        grep ">" ${params.projtag}_pOTU\${id}.fasta >lala.list
+                        grep ">" ${params.projtag}_pcASV\${id}.fasta >lala.list
                         j=1
                         for x in \$(cat lala.list);do
-                            echo ">${params.projtag}_pOTU\${j}" >>${params.projtag}_aminoheaders.list
-                            echo "\${x},>${params.projtag}_pOTU\${j}" >>tmpaminotype.info.csv
+                            echo ">${params.projtag}_pcASV\${j}" >>${params.projtag}_aminoheaders.list
+                            echo "\${x},>${params.projtag}_pcASV\${j}" >>tmpaminotype.info.csv
                             j=\$(( \${j}+1 ))
                         done
                         rm lala.list
@@ -2017,22 +2016,22 @@ if (params.Analyze) {
                         for x in \$(cat tmporder.list);do
                             grep -w "\$x" tmpaminotype.info.csv | awk -F "," '{print \$2}' >>tmpder.list
                         done
-                        paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pOTUCluster\${id}_summary.csv
-                        ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta
-                        stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_aminoacid_clustered.gc gcformat=4
-                        stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_nucleotide_clustered.gc gcformat=4
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
-                        if [ `wc -l ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
-                            grep ">" ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
-                            seqtk subseq ${asvs} > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
+                        paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pcASVCluster\${id}_summary.csv
+                        ./rename_seq.py ${params.projtag}_pcASV\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta
+                        stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4
+                        stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4
+                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pcASV\${id}_problematic_translations.fasta
+                        if [ `wc -l ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
+                            grep ">" ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
+                            seqtk subseq ${asvs} > ${params.projtag}_pcASV\${id}_problematic_nucleotides.fasta
                         else
-                           rm ${params.projtag}_pOTU\${id}_problematic_translations.fasta
+                           rm ${params.projtag}_pcASV\${id}_problematic_translations.fasta
                         fi
                         rm *.list
                         rm Cluster*
                         rm *types*
                         rm *tmp*
-                        rm ${params.projtag}_pOTU\${id}.fast*
+                        rm ${params.projtag}_pcASV\${id}.fast*
                 done
                 """
             } else if (params.clusterAAID) {
@@ -2040,19 +2039,19 @@ if (params.Analyze) {
                 cp ${params.vampdir}/bin/rename_seq.py .
                 id=${params.clusterAAID}
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
-                cd-hit -i ${params.projtag}_filtered_proteins.fasta -c ${params.clusterAAID} -o ${params.projtag}_pOTU\${id}.fasta
-                sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
-                grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >temporaryclusters.list
-                y=\$(grep -c ">Cluster_" ${params.projtag}_pOTU\${id}.clstr)
-                echo ">Cluster_"\${y}"" >> ${params.projtag}_pOTU\${id}.clstr
+                cd-hit -i ${params.projtag}_filtered_proteins.fasta -c ${params.clusterAAID} -o ${params.projtag}_pcASV\${id}.fasta
+                sed 's/>Cluster />Cluster_/g' ${params.projtag}_pcASV\${id}.fasta.clstr >${params.projtag}_pcASV\${id}.clstr
+                grep ">Cluster_" ${params.projtag}_pcASV\${id}.clstr >temporaryclusters.list
+                y=\$(grep -c ">Cluster_" ${params.projtag}_pcASV\${id}.clstr)
+                echo ">Cluster_"\${y}"" >> ${params.projtag}_pcASV\${id}.clstr
                 t=1
                 b=1
                 for x in \$(cat temporaryclusters.list);do
                     echo "Extracting \$x"
                     name="\$( echo \$x | awk -F ">" '{print \$2}')"
-                    clust="pOTU"\${t}""
+                    clust="pcASV"\${t}""
                     echo "\${name}"
-                    awk '/^>'\${name}'\$/,/^>Cluster_'\${b}'\$/' ${params.projtag}_pOTU\${id}.clstr > "\${name}"_"\${clust}"_tmp.list
+                    awk '/^>'\${name}'\$/,/^>Cluster_'\${b}'\$/' ${params.projtag}_pcASV\${id}.clstr > "\${name}"_"\${clust}"_tmp.list
                     t=\$(( \${t}+1 ))
                     b=\$(( \${b}+1 ))
                 done
@@ -2075,15 +2074,15 @@ if (params.Analyze) {
                     u=1
                     ./rename_seq.py \${name}_\${cluster}_centroids.fasta \${name}_\${cluster}_tmp_centroid.newheaders \${cluster}_types_labeled.fasta
                 done
-                cat *_types_labeled.fasta >> ${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta
-                grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
-                grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
+                cat *_types_labeled.fasta >> ${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta
+                grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
+                grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
                 paste -d"," temporaryclusters.list tmphead.list >tmp.info.csv
-                grep ">" ${params.projtag}_pOTU\${id}.fasta >lala.list
+                grep ">" ${params.projtag}_pcASV\${id}.fasta >lala.list
                 j=1
                 for x in \$(cat lala.list);do
-                    echo ">${params.projtag}_pOTU\${j}" >>${params.projtag}_aminoheaders.list
-                    echo "\${x},>${params.projtag}_pOTU\${j}" >>tmpaminotype.info.csv
+                    echo ">${params.projtag}_pcASV\${j}" >>${params.projtag}_aminoheaders.list
+                    echo "\${x},>${params.projtag}_pcASV\${j}" >>tmpaminotype.info.csv
                     j=\$(( \${j}+1 ))
                 done
                 rm lala.list
@@ -2091,41 +2090,41 @@ if (params.Analyze) {
                 for x in \$(cat tmporder.list);do
                     grep -w "\$x" tmpaminotype.info.csv | awk -F "," '{print \$2}' >>tmpder.list
                 done
-                paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pOTUCluster\${id}_summary.csv
-                ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta
-                stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_aminoacid_clustered.gc gcformat=4
-                stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_nucleotide_clustered.gc gcformat=4
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
-                if [ `wc -l ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
-                    grep ">" ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
-                    seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
+                paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pcASVCluster\${id}_summary.csv
+                ./rename_seq.py ${params.projtag}_pcASV\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta
+                stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4
+                stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pcASV\${id}_problematic_translations.fasta
+                if [ `wc -l ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
+                    grep ">" ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
+                    seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pcASV\${id}_problematic_nucleotides.fasta
                 else
-                   rm ${params.projtag}_pOTU\${id}_problematic_translations.fasta
+                   rm ${params.projtag}_pcASV\${id}_problematic_translations.fasta
                 fi
                 rm *.list
                 rm Cluster*
                 rm *types*
                 rm *tmp*
-                rm ${params.projtag}_pOTU\${id}.fast*
+                rm ${params.projtag}_pcASV\${id}.fast*
                 """
             }
         }
 
         if (!params.skipTaxonomy) {
 
-            process pOTU_Nucleotide_Taxonomy_Assignment {
+            process pcASV_Nucleotide_Taxonomy_Assignment {
 
                 label 'high_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
 
                 input:
-                    file(reads) from pOTU_ntDiamond_ch
+                    file(reads) from pcASV_ntDiamond_ch
 
                 output:
-                    file("*.fasta") into ( pOTU_labeled )
+                    file("*.fasta") into ( pcASV_labeled )
                     tuple file("*_phyloseqObject.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
                     file("*_summary_for_plot.csv") into taxplot3
 
@@ -2141,11 +2140,11 @@ if (params.Analyze) {
                         diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" >access.list
-                        echo "[pOTU sequence length]" >length.list
+                        echo "[pcASV sequence length]" >length.list
                         echo "[e-value]" >evalue.list
                         echo "[Bitscore]" >bit.list
                         echo "[Percent ID (aa)]" >pid.list
-                        echo "[pOTU#]" >otu.list
+                        echo "[pcASV#]" >otu.list
                         echo "[Virus ID]" >"\$name"_virus.list
                         echo "[Gene]" >"\$name"_genes.list
                         grep ">" \${filename} | awk -F ">" '{print \$2}' > seqids.lst
@@ -2172,7 +2171,7 @@ if (params.Analyze) {
                                         echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                         echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                        echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
+                                        echo ">pcASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     else
@@ -2188,7 +2187,7 @@ if (params.Analyze) {
                                         echo "NO_HIT" >>length.list
                                         virus="NO"
                                         gene="HIT"
-                                        echo ">pOTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
+                                        echo ">pcASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                 fi
@@ -2210,7 +2209,7 @@ if (params.Analyze) {
                                         echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
                                         echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
-                                        echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
+                                        echo ">pcASV\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     else
@@ -2226,7 +2225,7 @@ if (params.Analyze) {
                                         echo "NO_HIT" >>length.list
                                         virus="NO"
                                         gene="HIT"
-                                        echo ">pOTU\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
+                                        echo ">pcASV\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     fi
@@ -2265,18 +2264,18 @@ if (params.Analyze) {
             }
         }
 
-        process Generate_Nucleotide_pOTU_Counts {
+        process Generate_Nucleotide_pcASV_Counts {
 
             label 'norm_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Counts", mode: "copy", overwrite: true, pattern: '*.{biome,csv,txt}'
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Counts", mode: "copy", overwrite: true, pattern: '*.{biome,csv,txt}'
 
             input:
-                file(potus) from pOTU_nt_counts_ch
-                file(merged) from pOTU_mergedreads_ch
+                file(potus) from pcASV_nt_counts_ch
+                file(merged) from pcASV_mergedreads_ch
 
             output:
-                tuple file("*_counts.txt"), file("*_counts.biome") into pOTUcounts_vsearch
+                tuple file("*_counts.txt"), file("*_counts.biome") into pcASVcounts_vsearch
                 file("*.csv") into potu_Ncounts_for_report
 
             script:
@@ -2292,17 +2291,17 @@ if (params.Analyze) {
                 """
         }
 
-        process Generate_pOTU_Nucleotide_Matrix {
+        process Generate_pcASV_Nucleotide_Matrix {
 
             label 'low_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Matrix", mode: "copy", overwrite: true
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Matrix", mode: "copy", overwrite: true
 
             input:
-                file(potus) from pOTU_ntmatrix_ch
+                file(potus) from pcASV_ntmatrix_ch
 
             output:
-                file("*.matrix") into pOTUclustmatrices
+                file("*.matrix") into pcASVclustmatrices
                 file("*PercentID.matrix") into potu_nucl_heatmap
 
             script:
@@ -2327,19 +2326,19 @@ if (params.Analyze) {
 
         if (!params.skipPhylogeny) {
 
-            process pOTU_Nucleotide_Phylogeny {
+            process pcASV_Nucleotide_Phylogeny {
 
                 label 'norm_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Nucleotide/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
                 input:
-                    file(reads) from pOTU_ntmafft_ch
+                    file(reads) from pcASV_ntmafft_ch
 
                 output:
-                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pOTU_nucleotide_phylogeny_results
+                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pcASV_nucleotide_phylogeny_results
                     file("*iq.treefile") into potu_Ntree_plot
 
                 script:
@@ -2349,10 +2348,10 @@ if (params.Analyze) {
                         mafft --maxiterate 5000 --auto \${filename} >\${pre}_ALN.fasta
                         trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
-                        # pOTU_Nucleotide_ModelTest
+                        # pcASV_Nucleotide_ModelTest
                         modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
 
-                        # pOTU_Nucleotide_Phylogeny
+                        # pcASV_Nucleotide_Phylogeny
                         if [ "${params.iqCustomnt}" != "" ];then
                             iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
 
@@ -2378,17 +2377,17 @@ if (params.Analyze) {
             }
         }
 
-        process pOTU_AminoAcid_Matrix {
+        process pcASV_AminoAcid_Matrix {
 
             label 'low_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Matrix", mode: "copy", overwrite: true
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Matrix", mode: "copy", overwrite: true
 
             input:
-                file(prot) from pOTU_aaMatrix_ch
+                file(prot) from pcASV_aaMatrix_ch
 
             output:
-                file("*.matrix") into pOTUaaMatrix
+                file("*.matrix") into pcASVaaMatrix
                 file("*PercentID.matrix") into potu_aa_heatmap
 
             script:
@@ -2412,22 +2411,22 @@ if (params.Analyze) {
 
         if (!params.skipEMBOSS) {
 
-            process pOTU_EMBOSS_Analyses {
+            process pcASV_EMBOSS_Analyses {
 
                 label 'low_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
 
                 input:
-                    file(prot) from pOTUEMBOSS
+                    file(prot) from pcASVEMBOSS
 
                 output:
-                    tuple file("*.garnier"), file("*HydrophobicMoments.svg"), file("*IsoelectricPoint*"), file("*.pepstats"), file("*PropertiesPlot*"), file("*Helical*")  into pOTU_emboss
+                    tuple file("*.garnier"), file("*HydrophobicMoments.svg"), file("*IsoelectricPoint*"), file("*.pepstats"), file("*PropertiesPlot*"), file("*Helical*")  into pcASV_emboss
 
                 script:
                     """
@@ -2462,19 +2461,19 @@ if (params.Analyze) {
 
         if (!params.skipTaxonomy) {
 
-            process pOTU_AminoAcid_Taxonomy_Assignment {
+            process pcASV_AminoAcid_Taxonomy_Assignment {
 
                 label 'high_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
 
                 input:
-                    file(reads) from pOTU_aaDiamond_ch
+                    file(reads) from pcASV_aaDiamond_ch
 
                 output:
-                    file("*.fasta") into ( pOTU_labeledAA )
+                    file("*.fasta") into ( pcASV_labeledAA )
                     tuple file("*phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
                     file("*_summary_for_plot.csv") into taxplot4
 
@@ -2489,11 +2488,11 @@ if (params.Analyze) {
                         diamond blastp -q \${filename} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" >access.list
-                        echo "[pOTU sequence length]" >length.list
+                        echo "[pcASV sequence length]" >length.list
                         echo "[e-value]" >evalue.list
                         echo "[Bitscore]" >bit.list
                         echo "[Percent ID (aa)]" >pid.list
-                        echo "[pOTUaa#]" >otu.list
+                        echo "[pcASVaa#]" >otu.list
                         echo "[Virus ID]" >"\$name"_virus.list
                         echo "[Gene]" >"\$name"_genes.list
                         grep ">" \${filename} | awk -F ">" '{print \$2}' > seqids.lst
@@ -2520,7 +2519,7 @@ if (params.Analyze) {
                                         echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                         echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                        echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
+                                        echo ">pcASVaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     else
@@ -2536,7 +2535,7 @@ if (params.Analyze) {
                                         echo "NO_HIT" >>length.list
                                         virus="NO"
                                         gene="HIT"
-                                        echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
+                                        echo ">pcASVaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                 fi
@@ -2558,7 +2557,7 @@ if (params.Analyze) {
                                         echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
                                         echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
-                                        echo ">pOTUaa\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
+                                        echo ">pcASVaa\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     else
@@ -2574,7 +2573,7 @@ if (params.Analyze) {
                                         echo "NO_HIT" >>length.list
                                         virus="NO"
                                         gene="HIT"
-                                        echo ">pOTUaa\${j}_\${virus}_\${gene}" >>new_"\$name"_headers.txt
+                                        echo ">pcASVaa\${j}_\${virus}_\${gene}" >>new_"\$name"_headers.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     fi
@@ -2614,19 +2613,19 @@ if (params.Analyze) {
 
         if (!params.skipPhylogeny) {
 
-            process pOTU_Protein_Phylogeny {
+            process pcASV_Protein_Phylogeny {
 
                 label 'norm_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
     	        input:
-                    file(prot) from pOTU_aaMafft_ch
+                    file(prot) from pcASV_aaMafft_ch
 
                 output:
-                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pOTU_protein_phylogeny_results
+                    tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pcASV_protein_phylogeny_results
                     file("*iq.treefile") into potu_Atree_plot
 
                 script:
@@ -2636,10 +2635,10 @@ if (params.Analyze) {
                         mafft --maxiterate 5000 --auto \${filename} >\${pre}_ALN.fasta
                         trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
-                        # pOTU_Protein_ModelTest
+                        # pcASV_Protein_ModelTest
                         modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
 
-                        # pOTU_Protein_Phylogeny
+                        # pcASV_Protein_Phylogeny
                         if [ "${params.iqCustomaa}" != "" ];then
                             iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomaa}
 
@@ -2665,15 +2664,15 @@ if (params.Analyze) {
             }
         }
 
-        process Generate_pOTU_Protein_Counts {
+        process Generate_pcASV_Protein_Counts {
 
             label 'high_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pOTU/Aminoacid/Counts", mode: "copy", overwrite: true
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Counts", mode: "copy", overwrite: true
 
             input:
-                file(fasta) from pOTU_aaCounts_ch
-                file(merged) from mergeforpOTUaacounts
+                file(fasta) from pcASV_aaCounts_ch
+                file(merged) from mergeforpcASVaacounts
                 file(samplist) from samplistpotu
 
             output:
@@ -2739,7 +2738,7 @@ if (params.Analyze) {
             }
         }
 
-        if (params.nOTU) {
+        if (params.ncASV) {
 
 
             process Report_ASV {
@@ -2773,11 +2772,11 @@ if (params.Analyze) {
                     """
                 }
 
-            process Report_nOTU {
+            process Report_ncASV {
 
                 label 'norm_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport/nOTU", mode: "copy", overwrite: true
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport/ncASV", mode: "copy", overwrite: true
 
                 input:
                     file(counts) from notu_counts_plots
@@ -2796,7 +2795,7 @@ if (params.Analyze) {
                     for x in *_summary_for_plot.csv;do
                         name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
                         id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
-                        Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_nOTU\${id}_Report.html')" \${name} \
+                        Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_ncASV\${id}_Report.html')" \${name} \
                         ${readsstats} \
                         \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
                         ${params.metadata} \
@@ -2914,13 +2913,13 @@ if (params.Analyze) {
                     }
                 }
 
-            if (params.pOTU) {
+            if (params.pcASV) {
 
-                process Report_pOTU_AminoAcid {
+                process Report_pcASV_AminoAcid {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport/pOTU/Aminoacid", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport/pcASV/Aminoacid", mode: "copy", overwrite: true
 
                     input:
                         file(counts) from potu_Acounts
@@ -2939,7 +2938,7 @@ if (params.Analyze) {
                         for x in *_summary_for_plot.csv;do
                             name=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}')
                             id=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
-                            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUaa\${id}_Report.html')" \${name} \
+                            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pcASVaa\${id}_Report.html')" \${name} \
                             ${readsstats} \
                             \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
                             ${params.metadata} \
@@ -2952,11 +2951,11 @@ if (params.Analyze) {
                         """
                     }
 
-                process Report_pOTU_Nucleotide {
+                process Report_pcASV_Nucleotide {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport/pOTU/Nucleotide", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport/pcASV/Nucleotide", mode: "copy", overwrite: true
 
                     input:
                         file(counts) from potu_Ncounts_for_report
@@ -2975,7 +2974,7 @@ if (params.Analyze) {
                         for x in *_summary_for_plot.csv;do
                             name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
                             id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
-                            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pOTUnt\${id}_Report.html')" \${name} \
+                            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pcASVnt\${id}_Report.html')" \${name} \
                             ${readsstats} \
                             \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
                             ${params.metadata} \
@@ -3176,7 +3175,7 @@ if (params.Analyze) {
                 file(reads) from collect_samples_ch
 
             output:
-                file("*_merged_preFilt_clean.fasta") into ( nuclCounts_mergedreads_ch, pOTU_mergedreads_ch )
+                file("*_merged_preFilt_clean.fasta") into ( nuclCounts_mergedreads_ch, pcASV_mergedreads_ch )
                 file("*_merged_clean_Lengthfiltered.fastq") into reads_vsearch2_ch
 
                 file("*preFilt_preClean_baseFrequency_hist.csv") into prefilt_basefreq
@@ -3290,10 +3289,10 @@ if (params.Analyze) {
         if (params.datacheckntIDlist) {
             """
             for id in `echo ${params.datacheckntIDlist} | tr "," "\\n"`;do
-                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_nOTU\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
+                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
             done
-            for x in *nOTU*.fasta;do
-                id=\$( echo \$x | awk -F "_nOTU" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+            for x in *ncASV*.fasta;do
+                id=\$( echo \$x | awk -F "_ncASV" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                 numb=\$( grep -c ">" \$x )
                 echo "\${id},\${numb}" >> number_per_percentage_nucl.csv
             done
@@ -3352,19 +3351,19 @@ if (params.Analyze) {
                     word=5
                 fi
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
-                cd-hit -i ${params.projtag}_filtered_proteins.fasta -n \${word} -c \${id} -o ${params.projtag}_pOTU\${id}.fasta
-                sed 's/>Cluster />Cluster_/g' ${params.projtag}_pOTU\${id}.fasta.clstr >${params.projtag}_pOTU\${id}.clstr
-                grep ">Cluster_" ${params.projtag}_pOTU\${id}.clstr >temporaryclusters.list
-                y=\$(grep -c ">Cluster_" ${params.projtag}_pOTU\${id}.clstr)
-                echo ">Cluster_"\${y}"" >> ${params.projtag}_pOTU\${id}.clstr
+                cd-hit -i ${params.projtag}_filtered_proteins.fasta -n \${word} -c \${id} -o ${params.projtag}_pcASV\${id}.fasta
+                sed 's/>Cluster />Cluster_/g' ${params.projtag}_pcASV\${id}.fasta.clstr >${params.projtag}_pcASV\${id}.clstr
+                grep ">Cluster_" ${params.projtag}_pcASV\${id}.clstr >temporaryclusters.list
+                y=\$(grep -c ">Cluster_" ${params.projtag}_pcASV\${id}.clstr)
+                echo ">Cluster_"\${y}"" >> ${params.projtag}_pcASV\${id}.clstr
                 t=1
                 b=1
                 for x in \$(cat temporaryclusters.list);do
                     echo "Extracting \$x"
                     name="\$( echo \$x | awk -F ">" '{print \$2}')"
-                    clust="pOTU"\${t}""
+                    clust="pcASV"\${t}""
                     echo "\${name}"
-                    awk '/^>'\${name}'\$/,/^>Cluster_'\${b}'\$/' ${params.projtag}_pOTU\${id}.clstr > "\${name}"_"\${clust}"_tmp.list
+                    awk '/^>'\${name}'\$/,/^>Cluster_'\${b}'\$/' ${params.projtag}_pcASV\${id}.clstr > "\${name}"_"\${clust}"_tmp.list
                     t=\$(( \${t}+1 ))
                     b=\$(( \${b}+1 ))
                 done
@@ -3386,15 +3385,15 @@ if (params.Analyze) {
                     u=1
                     ./rename_seq.py \${name}_\${cluster}_centroids.fasta \${name}_\${cluster}_tmp_centroid.newheaders \${cluster}_types_labeled.fasta
                 done
-                cat *_types_labeled.fasta >> ${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta
-                grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
-                grep -w "*" ${params.projtag}_pOTU\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
+                cat *_types_labeled.fasta >> ${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta
+                grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
+                grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
                 paste -d"," temporaryclusters.list tmphead.list >tmp.info.csv
-                grep ">" ${params.projtag}_pOTU\${id}.fasta >lala.list
+                grep ">" ${params.projtag}_pcASV\${id}.fasta >lala.list
                 j=1
                 for x in \$(cat lala.list);do
-                    echo ">${params.projtag}_pOTU\${j}" >>${params.projtag}_aminoheaders.list
-                    echo "\${x},>${params.projtag}_pOTU\${j}" >>tmpaminotype.info.csv
+                    echo ">${params.projtag}_pcASV\${j}" >>${params.projtag}_aminoheaders.list
+                    echo "\${x},>${params.projtag}_pcASV\${j}" >>tmpaminotype.info.csv
                     j=\$(( \${j}+1 ))
                 done
                 rm lala.list
@@ -3402,25 +3401,25 @@ if (params.Analyze) {
                 for x in \$(cat tmporder.list);do
                     grep -w "\$x" tmpaminotype.info.csv | awk -F "," '{print \$2}' >>tmpder.list
                 done
-                paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pOTUCluster\${id}_summary.csv
-                ./rename_seq.py ${params.projtag}_pOTU\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta
-                stats.sh in=${params.projtag}_aminoacid_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_aminoacid_clustered.gc gcformat=4
-                stats.sh in=${params.projtag}_nucleotide_pOTU\${id}_noTaxonomy.fasta gc=${params.projtag}_pOTU\${id}_nucleotide_clustered.gc gcformat=4
-                awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pOTU\${id}_problematic_translations.fasta
-                if [ `wc -l ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
-                    grep ">" ${params.projtag}_pOTU\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
-                    seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pOTU\${id}_problematic_nucleotides.fasta
+                paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pcASVCluster\${id}_summary.csv
+                ./rename_seq.py ${params.projtag}_pcASV\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta
+                stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4
+                stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4
+                awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pcASV\${id}_problematic_translations.fasta
+                if [ `wc -l ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
+                    grep ">" ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
+                    seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pcASV\${id}_problematic_nucleotides.fasta
                 else
-                   rm ${params.projtag}_pOTU\${id}_problematic_translations.fasta
+                   rm ${params.projtag}_pcASV\${id}_problematic_translations.fasta
                 fi
                 rm *.list
                 rm Cluster*
                 rm *types*
                 rm *tmp*
-                rm ${params.projtag}_pOTU\${id}.fast*
+                rm ${params.projtag}_pcASV\${id}.fast*
             done
             for x in *aminoacid*noTaxonomy.fasta;do
-                id=\$( echo \$x | awk -F "_noTax" '{print \$1}' | awk -F "pOTU" '{print \$2}')
+                id=\$( echo \$x | awk -F "_noTax" '{print \$1}' | awk -F "pcASV" '{print \$2}')
                 numb=\$( grep -c ">" \$x)
                 echo "\${id},\${numb}" >> number_per_percentage_protz.csv
             done
