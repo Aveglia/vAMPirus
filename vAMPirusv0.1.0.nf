@@ -676,8 +676,8 @@ if (params.Analyze) {
                 file(fasta) from reads_vsearch5_ch
 
             output:
-                tuple file("*_ncASV*.fasta"), file("*ASVs.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
-                tuple file("*_ncASV*.fasta"), file("*ASVs.fasta") into nuclFastas_forphylogeny
+                tuple file("*_ncASV*.fasta"), file("*_ASVs.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
+                tuple file("*_ncASV*.fasta"), file("*_ASVs.fasta") into nuclFastas_forphylogeny
 
             script:
             if (params.clusterNuclIDlist) {
@@ -708,9 +708,9 @@ if (params.Analyze) {
 
                 label 'high_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*_ASV*.{fasta,csv,tsv}'
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Taxonomy", mode: "copy", overwrite: true, pattern: '*ncASV*.{fasta,csv,tsv}'
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*_ASV*dmd.out'
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ncASV*dmd.out'
 
                 input:
@@ -720,7 +720,7 @@ if (params.Analyze) {
                     file("*.fasta") into tax_labeled_fasta
                     tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond
                     file("*ncASV*summary_for_plot.csv") into taxplot1a
-                    file("*ASV*_summary_for_plot.csv") into taxplot1
+                    file("*_ASV*_summary_for_plot.csv") into taxplot1
 
                 script:
                     """
@@ -992,8 +992,8 @@ if (params.Analyze) {
 
                     label 'high_cpus'
 
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*ASV*.{fasta,csv,tsv}'
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ASV*dmd.out'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*_ASV*.{fasta,csv,tsv}'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*_ASV*dmd.out'
 
                     input:
                         file(reads) from nuclFastas_forDiamond_ch
@@ -1001,7 +1001,7 @@ if (params.Analyze) {
                     output:
                         file("*.fasta") into tax_labeled_fasta
                         tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond
-                        file("*ASV*_summary_for_plot.csv") into taxplot1
+                        file("*_ASV*_summary_for_plot.csv") into taxplot1
                     script:
                         """
                         cp ${params.vampdir}/bin/rename_seq.py .
@@ -1231,7 +1231,7 @@ if (params.Analyze) {
 
                 label 'norm_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*_ASV*.{biome,csv}'
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Counts", mode: "copy", overwrite: true, pattern: '*ncASV*.{biome,csv}'
 
                 input:
@@ -1241,7 +1241,7 @@ if (params.Analyze) {
                 output:
                     tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
                     file("*ncASV*counts.csv") into notu_counts_plots
-                    file("*ASV*counts.csv") into asv_counts_plots
+                    file("*_ASV*counts.csv") into asv_counts_plots
 
                 script:
                     """
@@ -1277,7 +1277,7 @@ if (params.Analyze) {
 
                 output:
                     tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
-                    file("*ASV*counts.csv") into asv_counts_plots
+                    file("*_ASV*counts.csv") into asv_counts_plots
 
                 script:
                     """
@@ -1298,7 +1298,7 @@ if (params.Analyze) {
 
             label 'low_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*_ASV*PercentID.matrix'
             publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Matrix", mode: "copy", overwrite: true, pattern: '*ncASV*PercentID.matrix'
 
             input:
@@ -1307,7 +1307,7 @@ if (params.Analyze) {
             output:
                 file("*.matrix") into clustmatrices
                 file("*ncASV*PercentID.matrix") into notu_heatmap
-                file("*ASV*PercentID.matrix") into asv_heatmap
+                file("*_ASV*PercentID.matrix") into asv_heatmap
 
             script:
                 // remove if statement later (no fin)
@@ -1329,7 +1329,7 @@ if (params.Analyze) {
                         done
                     fi
                 done
-                if [ `echo ${asvs} | grep -c "ASV"` -eq 1 ];then
+                if [ `echo ${asvs} | grep -c "_ASV"` -eq 1 ];then
                     name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                     clustalo -i ${asvs} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
                     clustalo -i ${asvs} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
@@ -1358,7 +1358,7 @@ if (params.Analyze) {
 
                 output:
                     file("*.matrix") into clustmatrices
-                    file("*ASV*PercentID.matrix") into asv_heatmap
+                    file("*_ASV*PercentID.matrix") into asv_heatmap
 
                 script:
                     // remove if statement later (no fin)
@@ -1408,9 +1408,9 @@ if (params.Analyze) {
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ncASV*aln.*'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ncASV*mt*'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ncASV*iq*'
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*_ASV*aln.*'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*_ASV*mt*'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*_ASV*iq*'
 
                     input:
                         tuple file(notus), file(asvs) from nuclFastas_forphylogeny

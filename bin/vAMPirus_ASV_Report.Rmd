@@ -114,10 +114,6 @@ pr
 ```{r load_datasets, include=FALSE}
 sample_name=params$counts
 sample_metadata=params$metadata
-#sample_name="PVID_vAMPtest1_otu.85_counts.csv"
-#sample_metadata="PVID_fiscesTestmeta.csv"
-#sample_name="vAMPrun_otu.55_counts.csv"
-#sample_metadata="pvid_samples.csv"
 data<- read.csv(sample_name, check.names=FALSE)
 data2 <-as.data.frame(t(data))
 data2$sample <- row.names(data2)

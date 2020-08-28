@@ -555,7 +555,7 @@ tp
 
 ```{r tree, echo=FALSE}
 #tree=read.newick("vAMPrun_otu.55.raxml.support")
-tree=read.newick(params$tree)
+tree=read.tree(params$tree)
 ggtree(tree)+
   geom_nodepoint(color="black", size=1.4, alpha=.7)+
   geom_treescale()+
