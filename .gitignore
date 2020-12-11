@@ -8,3 +8,4 @@ nextflow
 scripts/virtualribosomev2/mod_translate.pyc
 scripts/virtualribosomev2/ncbi_genetic_codes.pyc
 .Rproj.user
+.DS_Store
