@@ -114,6 +114,8 @@ pr
 ```{r load_datasets, include=FALSE}
 sample_name=params$counts
 sample_metadata=params$metadata
+#sample_name="vAMPset_nOTU.90_counts.csv"
+#sample_metadata="meta.csv"
 data<- read.csv(sample_name, check.names=FALSE)
 data2 <-as.data.frame(t(data))
 data2$sample <- row.names(data2)
@@ -154,7 +156,7 @@ data4 <- data3%>%
 # sample and count
 con <- plot_ly(data4, x = ~sum, y = ~sample, name = "Sample", type = 'scatter',
                mode = "markers", marker = list(color = "#088da5"), hovertemplate = paste('Sample: %{y}','<br>Total reads: %{x}','<extra></extra>'))
-con <- con %>% layout(xaxis = list(title = "Total reads"),yaxis = list(title = "Sample"))
+con <- con %>% layout(xaxis = list(title = "Total reads"), yaxis = list(title = "Sample"))
 con
 ```
 <br>
@@ -163,6 +165,7 @@ con
 ```{r filter_data, include=FALSE}
 ##Filter samples with low reads
 nfil=params$filter
+#nfil=1000
 data5 <- data4 %>%
   filter(sum>nfil)
    #can cause errors
@@ -199,27 +202,12 @@ raredata <- as.data.frame(rrarefy(data5[,2:cols], sample=minreads))
 
 <br>
 ```{r diversity_analysis, echo=FALSE}
-
+metadata <- data5[,(cols+1):data5dim[2]]
+metadata$sample <- data5$sample
 index <-diversity(raredata, index= "shannon")
 shannondata5 <- as.data.frame(index)
-
-index <- diversity(raredata, index= "simpson")
-simpsondata5 <- as.data.frame(index)
-
-mind5<-min(data5$sum)
-index <- rarefy(data5[,2:cols], sample=mind5)
-rarerichnessdata5 <- as.data.frame(index)
-
-metadata <- data5[,(cols+1):data5dim[2]]
-
-metadata$sample <- data5$sample
 shannondata5$sample<- data5$sample
-simpsondata5$sample<- data5$sample
-rarerichnessdata5$sample <-data5$sample
-
 shannondata5_2 <- merge(shannondata5, metadata, by="sample")
-simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
-rarerichnessdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
 
 #shannonplot <- ggplot(shannondata5_2, aes(x=treatment,color=treatment,y=index))+
 #  geom_boxplot()+
@@ -235,10 +223,17 @@ rarerichnessdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
 
 sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
-sh <- sh %>% layout(legend = list(x=10,y=.5))
-sh <- sh %>% layout(yaxis=list(title = "Index"))
-sh <- sh %>% layout(xaxis=list(title = "Treatment"))
+sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 sh
+
+shannonaov <- aov(index ~ treatment, data= shannondata5_2)
+summary(shannonaov)
+#Check later
+#TukeyHSD(simpsonaov)
+plot(shannonaov)
+hist(resid(shannonaov))
+shapiro.test(resid(shannonaov))
+bartlett.test(index ~ treatment, data= shannondata5_2)
 ```
 <br>
 <br>
@@ -249,6 +244,11 @@ sh
 
 <br>
 ```{r diversity_analysis2, echo=FALSE}
+index <- diversity(raredata, index= "simpson")
+simpsondata5 <- as.data.frame(index)
+simpsondata5$sample<- data5$sample
+simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
+
 #simpsonplot <- ggplot(simpsondata5_2, aes(x=treatment,color=treatment,y=index))+
 #  geom_boxplot()+
 #  geom_point()+
@@ -263,10 +263,15 @@ sh
 
 s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
-s <- s %>% layout(legend = list(x=10,y=.5))
-s <- s %>% layout(yaxis=list(title = "Index"))
-s <- s %>% layout(xaxis=list(title = "Treatment"))
+s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 s
+
+simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
+summary(simpsonaov)
+plot(simpsonaov)
+hist(resid(simpsonaov))
+shapiro.test(resid(simpsonaov))
+bartlett.test(index ~ treatment, data= simpsondata5_2)
 ```
 <br>
 <br>
@@ -277,6 +282,12 @@ s
 
 <br>
 ```{r diversity_analysis3, echo=FALSE}
+mind5<-min(data5$sum)
+index <- rarefy(data5[,2:cols], sample=mind5)
+rarerichnessdata5 <- as.data.frame(index)
+rarerichnessdata5$sample <-data5$sample
+rarerichnessdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
+
 #richnessplot <- ggplot(rarerichnessdata5_2, aes(x=treatment,color=treatment,y=index))+
 #  geom_boxplot()+
 #  geom_point()+
@@ -287,10 +298,15 @@ s
 
 ri <- plot_ly(rarerichnessdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
-ri <- ri %>% layout(legend = list(x=10,y=.5))
-ri <- ri %>% layout(yaxis=list(title = "Index"))
-ri <- ri %>% layout(xaxis=list(title = "Treatment"))
+ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 ri
+
+richaov <- aov(index ~ treatment, data= rarerichnessdata5_2)
+summary(richaov)
+plot(richaov)
+hist(resid(richaov))
+shapiro.test(resid(richaov))
+bartlett.test(index ~ treatment, data= rarerichnessdata5_2)
 ```
 <br>
 <br>
@@ -303,10 +319,14 @@ ri
 ```{r distance, echo=FALSE}
 ##Distance
 intermediate <- raredata
-bray <- vegdist(sqrt(intermediate), method="bray")
+bray <- vegdist(intermediate, method="bray",autotransform=TRUE)
+
+adn <- adonis(dist.mat~data5$treatment)
+adn
 
 ##Dispersion
 disper <- betadisper(bray, group = metadata$treatment, type="centroid")
+#anova(disper)
 df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
 df$sample <- data5$sample
 df2 <- merge(df, metadata, by="sample")
@@ -325,9 +345,7 @@ df2 <- merge(df, metadata, by="sample")
 
 cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
-cen <- cen %>% layout(legend = list(x=10,y=.5))
-cen <- cen %>% layout(yaxis=list(title = "Distance"))
-cen <- cen %>% layout(xaxis=list(title = "Treatment"))
+cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
 cen
 ```
 <br>
@@ -364,6 +382,7 @@ p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
   geom_point(size=2)+
   theme_classic()+
   theme(legend.title = element_blank())
+
 
 #fff <- ggplotly(p)
 #fff <- fff %>% layout(legend=list(y=.5))
@@ -443,10 +462,8 @@ datalong <- datay %>%
 #,'#00b300','#00b3b3','#0059b3','#6600ff','#b800e6','#ff3333','#ff8000','#ffff00','#bf8040','#42bcf5','#b428f5','#2e8d7e','#664e7e','#a4c700','#1aa3ff'
 
 ddd <- plot_ly(datalong, x=~sample, y=~reads, color=~hit, colors=mycol)
-ddd <- ddd %>% layout(type='bar',barmode = 'stack')
-ddd <- ddd %>% layout(yaxis=list(title = "Relative abundance"))
-ddd <- ddd %>% layout(xaxis=list(title = "Sample"))
-ddd <- ddd %>% layout(legend = list(x=10,y=.5))
+ddd <- ddd %>% layout(type='bar', barmode = 'stack')
+ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
 ddd
 ```
 <br>
@@ -471,8 +488,7 @@ datalong <- datalong %>%
 
 asp2 <- plot_ly(datalong, y=~hit, x=~reads, color=~treatment, colors=mycol,text = ~paste("Sample: ", sample), opacity=.9)
 asp2 <- asp2 %>% layout(type='bar', barmode = 'group')
-asp2 <- asp2 %>% layout(yaxis = list(title = '', categoryorder = "total ascending"))
-asp2 <- asp2 %>% layout(legend = list(x=10,y=.5))
+asp2 <- asp2 %>% layout(yaxis = list(title = '', categoryorder = "total ascending"), legend = list(x=10,y=.5))
 asp2
 ```
 <br>
