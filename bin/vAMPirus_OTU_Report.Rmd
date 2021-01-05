@@ -676,14 +676,12 @@ tp
 ```{r tree, echo=FALSE}
 #tree=read.newick("vAMPrun_otu.55.raxml.support")
 tree=read.tree(params$tree)
-ggtree(tree)+
-  geom_nodepoint(color="black", size=1.4, alpha=.7)+
-  geom_treescale()+
-  geom_rootedge(rootedge = .1)+
-  geom_nodelab(hjust=.005)+
-  geom_tiplab(align=TRUE, geom="label", offset=.3, hjust=.5, color="black")
-
-#ggplotly(asd)
+p1 <- ggtree(tree)
+id <- tree$tip.label
+dat <- tibble::tibble(id = id)
+metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
+p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id))
+ggplotly(p2, tooltip = "label")
 ```
 
 <br>
