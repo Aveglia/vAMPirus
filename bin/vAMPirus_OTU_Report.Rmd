@@ -236,27 +236,30 @@ bt <- bartlett.test(index ~ treatment, data= shannondata5_2)
 if (st$p.value > .05 && bt$p.value > .05) {
   print("Shapiro Test of normality - data is normal p-value > 0.05")
   print(shapiro.test(resid(shannonaov)))
+  writeLines("\n--------------------------------------------------------------\n")
   print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
   print(bartlett.test(index ~ treatment, data= shannondata5_2))
+  writeLines("\n--------------------------------------------------------------\n")
   print("ANOVA Results")
   print(summary(shannonaov))
+  writeLines("\n--------------------------------------------------------------\n")
   #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
   print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
   print(TukeyHSD(shannonaov))
-  print("Plots from the ANOVA for your review")
-  plot(shannonaov)
-  print("Histogram of residuals")
-  hist(resid(shannonaov))
+  writeLines("\n--------------------------------------------------------------\n")
 } else {
   print("Shapiro Test of normality - data is normal if p-value > 0.05")
   print(shapiro.test(resid(shannonaov)))
+  writeLines("\n--------------------------------------------------------------\n")
   print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
   print(bartlett.test(index ~ treatment, data= shannondata5_2))
+  writeLines("\n--------------------------------------------------------------\n")
   print("Data either not normal or variance not homogenous")
   print("Kruskal-Wallis Test - test significant if p <.05")
   #Kruskal-Wallis test - significant p <.05
   mykt <- kruskal.test(index ~ treatment, data= shannondata5_2)
   print(mykt)
+  writeLines("\n--------------------------------------------------------------\n")
   if (mykt$p.value < .05) {
     #Pairwise comparison
     print("Wilcox.test - pairwise comparison")
@@ -264,12 +267,10 @@ if (st$p.value > .05 && bt$p.value > .05) {
   } else {
     print("Data not significant. Skipping pairwise comparison")
   }
+  writeLines("\n--------------------------------------------------------------\n")
   print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
   print(summary(shannonaov))
-  print("Plots from the ANOVA")
-  plot(shannonaov)
-  print("Histogram of residuals")
-  hist(resid(shannonaov))
+  writeLines("\n--------------------------------------------------------------\n")
 }
 ```
 <br>
@@ -310,27 +311,30 @@ bt <- bartlett.test(index ~ treatment, data= simpsondata5_2)
 if (st$p.value > .05 && bt$p.value > .05) {
   print("Shapiro Test of normality - data is normal p-value > 0.05")
   print(shapiro.test(resid(simpsonaov)))
+  writeLines("\n--------------------------------------------------------------\n")
   print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
   print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+  writeLines("\n--------------------------------------------------------------\n")
   print("ANOVA Results")
   print(summary(simpsonaov))
+  writeLines("\n--------------------------------------------------------------\n")
   #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
   print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
   print(TukeyHSD(simpsonaov))
-  print("Plots from the ANOVA for your review")
-  plot(simpsonaov)
-  print("Histogram of residuals")
-  hist(resid(simpsonaov))
+  writeLines("\n--------------------------------------------------------------\n")
 } else {
   print("Shapiro Test of normality - data is normal if p-value > 0.05")
   print(shapiro.test(resid(simpsonaov)))
+  writeLines("\n--------------------------------------------------------------\n")
   print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
   print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+  writeLines("\n--------------------------------------------------------------\n")
   print("Data either not normal or variance not homogenous")
   print("Kruskal-Wallis Test - test significant if p <.05")
   #Kruskal-Wallis test - significant p <.05
   mykt <- kruskal.test(index ~ treatment, data= simpsondata5_2)
   print(mykt)
+  writeLines("\n--------------------------------------------------------------\n")
   if (mykt$p.value < .05) {
     #Pairwise comparison
     print("Wilcox.test - pairwise comparison")
@@ -338,12 +342,10 @@ if (st$p.value > .05 && bt$p.value > .05) {
   } else {
     print("Data not significant. Skipping pairwise comparison")
   }
+  writeLines("\n--------------------------------------------------------------\n")
   print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
   print(summary(simpsonaov))
-  print("Plots from the ANOVA")
-  plot(simpsonaov)
-  print("Histogram of residuals")
-  hist(resid(simpsonaov))
+  writeLines("\n--------------------------------------------------------------\n")
 }
 ```
 <br>
@@ -381,27 +383,30 @@ bt <- bartlett.test(index ~ treatment, data= richdata5_2)
 if (st$p.value > .05 && bt$p.value > .05) {
   print("Shapiro Test of normality - data is normal p-value > 0.05")
   print(shapiro.test(resid(richaov)))
+  writeLines("\n--------------------------------------------------------------\n")
   print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
   print(bartlett.test(index ~ treatment, data= richdata5_2))
+  writeLines("\n--------------------------------------------------------------\n")
   print("ANOVA Results")
   print(summary(richaov))
   #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+  writeLines("\n--------------------------------------------------------------\n")
   print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
   print(TukeyHSD(richaov))
-  print("Plots from the ANOVA for your review")
-  plot(richaov)
-  print("Histogram of residuals")
-  hist(resid(richaov))
+  writeLines("\n--------------------------------------------------------------\n")
 } else {
   print("Shapiro Test of normality - data is normal if p-value > 0.05")
   print(shapiro.test(resid(richaov)))
+  writeLines("\n--------------------------------------------------------------\n")
   print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
   print(bartlett.test(index ~ treatment, data= richdata5_2))
+  writeLines("\n--------------------------------------------------------------\n")
   print("Data either not normal or variance not homogenous")
   print("Kruskal-Wallis Test - test significant if p <.05")
   #Kruskal-Wallis test - significant p <.05
   mykt <- kruskal.test(index ~ treatment, data= richdata5_2)
   print(mykt)
+  writeLines("\n--------------------------------------------------------------\n")
   if (mykt$p.value < .05) {
     #Pairwise comparison
     print("Wilcox.test - pairwise comparison")
@@ -409,12 +414,10 @@ if (st$p.value > .05 && bt$p.value > .05) {
   } else {
     print("Data not significant. Skipping pairwise comparison")
   }
+  writeLines("\n--------------------------------------------------------------\n")
   print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
   print(summary(richaov))
-  print("Plots from the ANOVA")
-  plot(richaov)
-  print("Histogram of residuals")
-  hist(resid(richaov))
+  writeLines("\n--------------------------------------------------------------\n")
 }
 ```
 <br>
