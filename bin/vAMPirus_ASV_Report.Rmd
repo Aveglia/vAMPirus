@@ -114,8 +114,8 @@ pr
 ```{r load_datasets, include=FALSE}
 sample_name=params$counts
 sample_metadata=params$metadata
-sample_name="vAMPset_nOTU.90_counts.csv"
-sample_metadata="meta.csv"
+#sample_name="vAMPset_nOTU.90_counts.csv"
+#sample_metadata="meta.csv"
 data<- read.csv(sample_name, check.names=FALSE)
 data2 <-as.data.frame(t(data))
 data2$sample <- row.names(data2)
@@ -165,7 +165,7 @@ con
 ```{r filter_data, include=FALSE}
 ##Filter samples with low reads
 nfil=params$filter
-nfil=1000
+#nfil=1000
 data5 <- data4 %>%
   filter(sum>nfil)
    #can cause errors
@@ -413,7 +413,6 @@ if (st$p.value > .05 && bt$p.value > .05) {
   print("Histogram of residuals")
   hist(resid(richaov))
 }
-
 ```
 <br>
 <br>
@@ -426,13 +425,10 @@ if (st$p.value > .05 && bt$p.value > .05) {
 ```{r distance, echo=FALSE}
 ##Distance
 intermediate <- raredata
-bray <- vegdist(intermediate, method="bray",autotransform=TRUE)
-
-adn <- adonis(dist.mat~data5$treatment)
-adn
+bray.distance <- vegdist(intermediate, method="bray",autotransform=TRUE)
 
 ##Dispersion
-disper <- betadisper(bray, group = metadata$treatment, type="centroid")
+disper <- betadisper(bray.distance, group = metadata$treatment, type="centroid")
 #anova(disper)
 df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
 df$sample <- data5$sample
@@ -454,6 +450,9 @@ cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, col
 #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
 cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
 cen
+
+adn <- adonis(bray.distance~data5$treatment)
+adn
 ```
 <br>
 <br>

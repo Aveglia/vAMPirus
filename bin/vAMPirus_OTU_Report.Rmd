@@ -205,27 +205,12 @@ raredata <- as.data.frame(rrarefy(data5[,2:cols], sample=minreads))
 
 <br>
 ```{r diversity_analysis, echo=FALSE}
-
+metadata <- data5[,(cols+1):data5dim[2]]
+metadata$sample <- data5$sample
 index <-diversity(raredata, index= "shannon")
 shannondata5 <- as.data.frame(index)
-
-index <- diversity(raredata, index= "simpson")
-simpsondata5 <- as.data.frame(index)
-
-mind5<-min(data5$sum)
-index <- rarefy(data5[,2:cols], sample=mind5)
-rarerichnessdata5 <- as.data.frame(index)
-
-metadata <- data5[,(cols+1):data5dim[2]]
-
-metadata$sample <- data5$sample
 shannondata5$sample<- data5$sample
-simpsondata5$sample<- data5$sample
-rarerichnessdata5$sample <-data5$sample
-
 shannondata5_2 <- merge(shannondata5, metadata, by="sample")
-simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
-rarerichnessdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
 
 #shannonplot <- ggplot(shannondata5_2, aes(x=treatment,color=treatment,y=index))+
 #  geom_boxplot()+
@@ -241,10 +226,51 @@ rarerichnessdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
 
 sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
-sh <- sh %>% layout(legend = list(x=10,y=.5))
-sh <- sh %>% layout(yaxis=list(title = "Index"))
-sh <- sh %>% layout(xaxis=list(title = "Treatment"))
+sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 sh
+
+shannonaov <- aov(index ~ treatment, data= shannondata5_2)
+st <- shapiro.test(resid(shannonaov))
+bt <- bartlett.test(index ~ treatment, data= shannondata5_2)
+
+if (st$p.value > .05 && bt$p.value > .05) {
+  print("Shapiro Test of normality - data is normal p-value > 0.05")
+  print(shapiro.test(resid(shannonaov)))
+  print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+  print(bartlett.test(index ~ treatment, data= shannondata5_2))
+  print("ANOVA Results")
+  print(summary(shannonaov))
+  #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+  print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+  print(TukeyHSD(shannonaov))
+  print("Plots from the ANOVA for your review")
+  plot(shannonaov)
+  print("Histogram of residuals")
+  hist(resid(shannonaov))
+} else {
+  print("Shapiro Test of normality - data is normal if p-value > 0.05")
+  print(shapiro.test(resid(shannonaov)))
+  print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+  print(bartlett.test(index ~ treatment, data= shannondata5_2))
+  print("Data either not normal or variance not homogenous")
+  print("Kruskal-Wallis Test - test significant if p <.05")
+  #Kruskal-Wallis test - significant p <.05
+  mykt <- kruskal.test(index ~ treatment, data= shannondata5_2)
+  print(mykt)
+  if (mykt$p.value < .05) {
+    #Pairwise comparison
+    print("Wilcox.test - pairwise comparison")
+    print(pairwise.wilcox.test(shannondata5_2$index, shannondata5_2$treatment, p.adjust.method = "BH"))   
+  } else {
+    print("Data not significant. Skipping pairwise comparison")
+  }
+  print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+  print(summary(shannonaov))
+  print("Plots from the ANOVA")
+  plot(shannonaov)
+  print("Histogram of residuals")
+  hist(resid(shannonaov))
+}
 ```
 <br>
 <br>
@@ -255,6 +281,11 @@ sh
 
 <br>
 ```{r diversity_analysis2, echo=FALSE}
+index <- diversity(raredata, index= "simpson")
+simpsondata5 <- as.data.frame(index)
+simpsondata5$sample<- data5$sample
+simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
+
 #simpsonplot <- ggplot(simpsondata5_2, aes(x=treatment,color=treatment,y=index))+
 #  geom_boxplot()+
 #  geom_point()+
@@ -269,10 +300,51 @@ sh
 
 s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
-s <- s %>% layout(legend = list(x=10,y=.5))
-s <- s %>% layout(yaxis=list(title = "Index"))
-s <- s %>% layout(xaxis=list(title = "Treatment"))
+s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 s
+
+simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
+st <- shapiro.test(resid(simpsonaov))
+bt <- bartlett.test(index ~ treatment, data= simpsondata5_2)
+
+if (st$p.value > .05 && bt$p.value > .05) {
+  print("Shapiro Test of normality - data is normal p-value > 0.05")
+  print(shapiro.test(resid(simpsonaov)))
+  print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+  print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+  print("ANOVA Results")
+  print(summary(simpsonaov))
+  #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+  print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+  print(TukeyHSD(simpsonaov))
+  print("Plots from the ANOVA for your review")
+  plot(simpsonaov)
+  print("Histogram of residuals")
+  hist(resid(simpsonaov))
+} else {
+  print("Shapiro Test of normality - data is normal if p-value > 0.05")
+  print(shapiro.test(resid(simpsonaov)))
+  print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+  print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+  print("Data either not normal or variance not homogenous")
+  print("Kruskal-Wallis Test - test significant if p <.05")
+  #Kruskal-Wallis test - significant p <.05
+  mykt <- kruskal.test(index ~ treatment, data= simpsondata5_2)
+  print(mykt)
+  if (mykt$p.value < .05) {
+    #Pairwise comparison
+    print("Wilcox.test - pairwise comparison")
+    print(pairwise.wilcox.test(simpsondata5_2$index, simpsondata5_2$treatment, p.adjust.method = "BH"))   
+  } else {
+    print("Data not significant. Skipping pairwise comparison")
+  }
+  print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+  print(summary(simpsonaov))
+  print("Plots from the ANOVA")
+  plot(simpsonaov)
+  print("Histogram of residuals")
+  hist(resid(simpsonaov))
+}
 ```
 <br>
 <br>
@@ -283,7 +355,13 @@ s
 
 <br>
 ```{r diversity_analysis3, echo=FALSE}
-#richnessplot <- ggplot(rarerichnessdata5_2, aes(x=treatment,color=treatment,y=index))+
+mind5<-min(data5$sum)
+index <- rarefy(data5[,2:cols], sample=mind5)
+rarerichnessdata5 <- as.data.frame(index)
+rarerichnessdata5$sample <-data5$sample
+richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
+
+#richnessplot <- ggplot(richdata5_2, aes(x=treatment,color=treatment,y=index))+
 #  geom_boxplot()+
 #  geom_point()+
 #  theme_classic()+
@@ -291,12 +369,53 @@ s
 #  theme(axis.text=element_text(size=12))+
 #  theme(legend.position = "none")
 
-ri <- plot_ly(rarerichnessdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
-ri <- ri %>% layout(legend = list(x=10,y=.5))
-ri <- ri %>% layout(yaxis=list(title = "Index"))
-ri <- ri %>% layout(xaxis=list(title = "Treatment"))
+ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 ri
+
+richaov <- aov(index ~ treatment, data= richdata5_2)
+st <- shapiro.test(resid(richaov))
+bt <- bartlett.test(index ~ treatment, data= richdata5_2)
+
+if (st$p.value > .05 && bt$p.value > .05) {
+  print("Shapiro Test of normality - data is normal p-value > 0.05")
+  print(shapiro.test(resid(richaov)))
+  print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+  print(bartlett.test(index ~ treatment, data= richdata5_2))
+  print("ANOVA Results")
+  print(summary(richaov))
+  #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+  print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+  print(TukeyHSD(richaov))
+  print("Plots from the ANOVA for your review")
+  plot(richaov)
+  print("Histogram of residuals")
+  hist(resid(richaov))
+} else {
+  print("Shapiro Test of normality - data is normal if p-value > 0.05")
+  print(shapiro.test(resid(richaov)))
+  print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+  print(bartlett.test(index ~ treatment, data= richdata5_2))
+  print("Data either not normal or variance not homogenous")
+  print("Kruskal-Wallis Test - test significant if p <.05")
+  #Kruskal-Wallis test - significant p <.05
+  mykt <- kruskal.test(index ~ treatment, data= richdata5_2)
+  print(mykt)
+  if (mykt$p.value < .05) {
+    #Pairwise comparison
+    print("Wilcox.test - pairwise comparison")
+    print(pairwise.wilcox.test(richdata5_2$index, richdata5_2$treatment, p.adjust.method = "BH"))   
+  } else {
+    print("Data not significant. Skipping pairwise comparison")
+  }
+  print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+  print(summary(richaov))
+  print("Plots from the ANOVA")
+  plot(richaov)
+  print("Histogram of residuals")
+  hist(resid(richaov))
+}
 ```
 <br>
 <br>
@@ -309,10 +428,10 @@ ri
 ```{r distance, echo=FALSE}
 ##Distance
 intermediate <- raredata
-bray <- vegdist(sqrt(intermediate), method="bray")
+bray.distance <- vegdist(sqrt(intermediate), method="bray")
 
 ##Dispersion
-disper <- betadisper(bray, group = metadata$treatment, type="centroid")
+disper <- betadisper(bray.distance, group = metadata$treatment, type="centroid")
 df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
 df$sample <- data5$sample
 df2 <- merge(df, metadata, by="sample")
@@ -331,10 +450,11 @@ df2 <- merge(df, metadata, by="sample")
 
 cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
-cen <- cen %>% layout(legend = list(x=10,y=.5))
-cen <- cen %>% layout(yaxis=list(title = "Distance"))
-cen <- cen %>% layout(xaxis=list(title = "Treatment"))
+cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
 cen
+
+adn <- adonis(bray.distance~data5$treatment)
+adn
 ```
 <br>
 <br>
@@ -450,9 +570,7 @@ datalong <- datay %>%
 
 ddd <- plot_ly(datalong, x=~sample, y=~reads, color=~hit, colors=mycol)
 ddd <- ddd %>% layout(type='bar',barmode = 'stack')
-ddd <- ddd %>% layout(yaxis=list(title = "Relative abundance"))
-ddd <- ddd %>% layout(xaxis=list(title = "Sample"))
-ddd <- ddd %>% layout(legend = list(x=10,y=.5))
+ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
 ddd
 ```
 <br>
@@ -477,8 +595,7 @@ datalong <- datalong %>%
 
 asp2 <- plot_ly(datalong, y=~hit, x=~reads, color=~treatment, colors=mycol,text = ~paste("Sample: ", sample), opacity=.9)
 asp2 <- asp2 %>% layout(type='bar', barmode = 'group')
-asp2 <- asp2 %>% layout(yaxis = list(title = '', categoryorder = "total ascending"))
-asp2 <- asp2 %>% layout(legend = list(x=10,y=.5))
+asp2 <- asp2 %>% layout(yaxis = list(title = '', categoryorder = "total ascending"), legend = list(x=10,y=.5))
 asp2
 ```
 <br>
