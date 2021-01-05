@@ -181,6 +181,7 @@ then    mkdir "$mypwd"/Databases
         dir="$(pwd)"
         echo "Database installation: RVDB version 19.0 (latest as of 2020-06)"
         curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
+        bunzip2 U-RVDBv19.0-prot.fasta.bz2
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/U-RVDBv19.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
@@ -194,6 +195,7 @@ then    mkdir "$mypwd"/Databases
         dir="$(pwd)"
         echo "Database installation: Viral RefSeq database version 2.0 (latest as of 2020-07)"
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
+        gunzip viral.2.protein.faa.gz
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/viral.2.protein.faa/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
@@ -207,6 +209,7 @@ then    mkdir "$mypwd"/Databases
         dir="$(pwd)"
         echo "Database installation: NCBI NR protein database (should be the most up to date at time of running this script)"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
+        gunzip NCBI_nr_proteindb.faa.gz
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/NCBI_nr_proteindb.faa/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
@@ -225,7 +228,7 @@ then    mkdir "$mypwd"/Databases
         sed "s|DATABASEDIR|${dir}|g" "$mypwd"/vampirus.config > tmp1.config
         cat tmp1.config > "$mypwd"/vampirus.config
         rm tmp1.config
-        echo "Databases downloaded, make sure you update the config file with the one you would like to use before running."
+        echo "Databases downloaded, make sure you update the config file with the one you would like to use and decompress the database before running."
 elif [[ $DATABASE != "" ]]
 then    echo "Error: Database download signaled but not given a value between 1-4"
         exit 1

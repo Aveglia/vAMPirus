@@ -369,7 +369,7 @@ if (params.Analyze) {
                 elif [ -d ${params.dbdir} ];then
                     echo -e "-- Directory exists. Checking if specified database is present now.. --\\n"
                     if [ ! -e ${params.dbdir}/${params.dbname} ];then
-                        echo "Specified database not present, edit the configuraton fiole with the database name plz."
+                        echo "Specified database not present, edit the configuraton file with the database name plz."
                         exit 1
                     else
                         echo "Database present, checking if built now.."
