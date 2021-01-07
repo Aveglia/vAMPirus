@@ -660,7 +660,7 @@ tp <- tp %>% layout(title = "Taxonomy distribution",  showlegend = F,
 
 tp
 ```
-
+This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL.
 <br>
 <br>
 <br>

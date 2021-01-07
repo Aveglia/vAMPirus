@@ -683,7 +683,7 @@ metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
 p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id))
 ggplotly(p2, tooltip = "label")
 ```
-
+This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL.
 <br>
 <br>
 <br>
