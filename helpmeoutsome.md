@@ -310,7 +310,7 @@ With this launch command, vAMPirus will perform ASV generation and nucleotide-ba
 
 Once you have everything set up and you have edited the parameters of interest in your configuration file you can run the following launch command for a full analysis:
 
-    `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --nOTU --pOTU`
+    `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --pcASV`
 
 This launch command will run all aspects of the vAMPirus workflow on your data and spit out final reports for each clustering %ID and technique.
 
