@@ -325,7 +325,7 @@ nnp <- nnp %>% layout(yaxis = list(title = "Number of nOTU"))
 nnp <- nnp %>% layout(xaxis = list(title = "Clustering ID %"))
 nnp
 ```
-
+NOTE: The "1" on the x-axis represents number of ASVs identified by vsearch
 <br>
 
 ### Number of pOTUs per clustering percentage
@@ -341,7 +341,7 @@ pnp <- pnp %>% layout(yaxis = list(title = "Number of pOTU"))
 pnp <- pnp %>% layout(xaxis = list(title = "Clustering ID %"))
 pnp
 ```
-
+NOTE: The "1" represents the number of AminoTypes which are unique amino acid sequences in your dataset
 <br>
 <br>
 <br>
