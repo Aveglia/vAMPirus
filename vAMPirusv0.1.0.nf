@@ -304,9 +304,8 @@ log.info """\
         vAMPirus - Virus Amplicon Sequencing Analysis Pipeline
         ======================================================
         Project name:                ${params.projtag}
-        Email:                       ${params.email}
         Working directory:           ${params.workingdir}
-        Minimum read length:	     ${params.minLen}
+        Minimum read length:	       ${params.minLen}
         Maximum read length:         ${params.maxLen}
         Database directory:          ${params.dbdir}
         Database name:               ${params.dbname}
