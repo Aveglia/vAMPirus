@@ -269,6 +269,8 @@ echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.co
 echo "   " >> EXAMPLE_COMMANDS.txt
 echo "--------------------------------------------------------------------------------------------------------------------------------" >> EXAMPLE_COMMANDS.txt
 echo "   " >> EXAMPLE_COMMANDS.txt
+echo "Ok, if everything went well (green text was spit out by Nextflow), now you can move on to the fun. First, you should review the help docs and the vampirus.config in the vAMPirus directory." >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
 echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING DataCheck PIPELINE WITH YOUR DATA" >> EXAMPLE_COMMANDS.txt
 echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file:"
 echo "   " >> EXAMPLE_COMMANDS.txt
@@ -291,4 +293,6 @@ echo "   " >> EXAMPLE_COMMANDS.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --Analyze --ncASV --pcASV" >> EXAMPLE_COMMANDS.txt
 echo "   " >> EXAMPLE_COMMANDS.txt
 echo "--------------------------------------------------------------------------------------------------------------------------------" >> EXAMPLE_COMMANDS.txt
+echo "    "
 echo "Setup script is complete!"
+echo "Check out the EXAMPLE_COMMANDS.txt file for more information on how to move forward with the analysis."
