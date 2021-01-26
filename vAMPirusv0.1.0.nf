@@ -310,6 +310,7 @@ log.info """\
         Database directory:          ${params.dbdir}
         Database name:               ${params.dbname}
 
+        Alright, lets get to it...
 
         """.stripIndent()
 
