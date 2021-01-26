@@ -1,14 +1,14 @@
-****************************************************************************************************
+************************************************************************************************************************************************
                                                             ,---.,-.-.,---.o
                                                       .    ,|---|| | ||---'.,---..   .,---.
                                                        \  / |   || | ||    ||    |   |`---.
                                                         `'  `   `` ` ``    ``    `---``---`
                                              An automated virus amplicon sequencing analysis pipeline
-*****************************************************************************************************
+************************************************************************************************************************************************
 # Introduction to vAMPirus
 
 The main motive behind vAMPirus is to provide a robust and easy-to-use bioinformatics workflow for virus amplicon sequencing analysis. The vAMPirus workflow
-allows easy reproducibility of project-specific analyses and is flexible enough to tailor your analysis to your own data.
+allows easy reproducibility of project-specific analyses and is flexible enough to tailor each analysis to your own data.
 
 ## Order of operations
 
@@ -43,7 +43,7 @@ Clone the most recent version of vAMPirus from github using:
 To deploy vAMPirus, you need to have Nextflow and Anaconda/Miniconda installed on your system. To set up and install vAMPirus
 dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
 
-`cd ./vAMPirus`; `./vampirus_startup.sh`
+`./vAMPirus`; `./vampirus_startup.sh`
 
 The start up script will check your system for Nextflow and Anaconda/Miniconda and if they are not present, the script will ask
 if you would like to install these programs. If you answer with 'y', the script will install the missing programs and will build
