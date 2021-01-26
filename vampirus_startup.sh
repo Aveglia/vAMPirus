@@ -258,6 +258,7 @@ echo "OR..."
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --Analyze ..."
 
 touch EXAMPLE_COMMANDS.txt
+echo "-------------------------------------------------------------------------------------------------------------------------------- TESTING YOUR INSTALLATION" >> EXAMPLE_COMMANDS.txt
 echo "Ok, everything downloaded. To test installation, run the following commands and check for errors:" >> EXAMPLE_COMMANDS.txt
 echo "   " >> EXAMPLE_COMMANDS.txt
 echo "Checking DataCheck mode:" >> EXAMPLE_COMMANDS.txt
@@ -266,17 +267,28 @@ echo "    " >> EXAMPLE_COMMANDS.txt
 echo "Next, test the analysis pipeline:" >> EXAMPLE_COMMANDS.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze" >> EXAMPLE_COMMANDS.txt
 echo "   " >> EXAMPLE_COMMANDS.txt
-echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file."
-echo "First, run the DataCheck:" >> EXAMPLE_COMMANDS.txt
+echo "--------------------------------------------------------------------------------------------------------------------------------" >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING DataCheck PIPELINE WITH YOUR DATA" >> EXAMPLE_COMMANDS.txt
+echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file:"
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo "First, run the DataCheck part of the pipeline using the -with-conda Nextflow option:" >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck" >> EXAMPLE_COMMANDS.txt
 echo "   " >> EXAMPLE_COMMANDS.txt
-echo "OR..." >> EXAMPLE_COMMANDS.txt
+echo "OR using -profile option of Nextflow ..." >> EXAMPLE_COMMANDS.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --DataCheck" >> EXAMPLE_COMMANDS.txt
 echo "   " >> EXAMPLE_COMMANDS.txt
-echo "Then you can run the analysis:" >> EXAMPLE_COMMANDS.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze ..." >> EXAMPLE_COMMANDS.txt
+echo "--------------------------------------------------------------------------------------------------------------------------------" >> EXAMPLE_COMMANDS.txt
 echo "   " >> EXAMPLE_COMMANDS.txt
-echo "OR..." >> EXAMPLE_COMMANDS.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --Analyze ..." >> EXAMPLE_COMMANDS.txt
-
+echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING Analyze PIPELINE WITH YOUR DATA" >> EXAMPLE_COMMANDS.txt
+echo "Then you can run the analysis using the -with-conda Nextflow option, here is a launch command to run the complete analysis:" >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze --ncASV --pcASV" >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo "OR same command using -profile option of Nextflow ..." >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --Analyze --ncASV --pcASV" >> EXAMPLE_COMMANDS.txt
+echo "   " >> EXAMPLE_COMMANDS.txt
+echo "--------------------------------------------------------------------------------------------------------------------------------" >> EXAMPLE_COMMANDS.txt
 echo "Setup script is complete!"
