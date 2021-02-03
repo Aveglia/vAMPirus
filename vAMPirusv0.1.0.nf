@@ -2759,9 +2759,9 @@ if (params.Analyze) {
                 script:
                     """
                     name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                    cp ${params.vampdir}/bin/vAMPirus_ASV_Report.Rmd .
+                    cp ${params.vampdir}/bin/vAMPirus_ReportA.Rmd .
                     cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                    Rscript -e "rmarkdown::render('vAMPirus_ASV_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
+                    Rscript -e "rmarkdown::render('vAMPirus_ReportA.Rmd',output_file='\${name}_ASV_Report.html')" \${name} \
                     ${readsstats} \
                     ${counts} \
                     ${params.metadata} \
@@ -2791,12 +2791,12 @@ if (params.Analyze) {
 
                 script:
                     """
-                    cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
+                    cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
                     cp ${params.vampdir}/example_data/conf/vamplogo.png .
                     for x in *_summary_for_plot.csv;do
                         name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
                         id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
-                        Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_ncASV\${id}_Report.html')" \${name} \
+                        Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_ncASV\${id}_Report.html')" \${name} \
                         ${readsstats} \
                         \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
                         ${params.metadata} \
@@ -2831,9 +2831,9 @@ if (params.Analyze) {
                     script:
                         """
                         name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                        cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
+                        cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
                         cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                        Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
+                        Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_AminoType_Report.html')" \${name} \
                         ${readsstats} \
                         ${counts} \
                         ${params.metadata} \
@@ -2866,9 +2866,9 @@ if (params.Analyze) {
                         script:
                             """
                             name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                            cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
+                            cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
                             cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_ASV_Report.html')" \${name} \
+                            Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_ASV_Report.html')" \${name} \
                             ${readsstats} \
                             ${counts} \
                             ${params.metadata} \
@@ -2902,9 +2902,9 @@ if (params.Analyze) {
                             script:
                                 """
                                 name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                                cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
+                                cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
                                 cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                                Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_AminoType_Report.html')" \${name} \
+                                Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_AminoType_Report.html')" \${name} \
                                 ${readsstats} \
                                 ${counts} \
                                 ${params.metadata} \
@@ -2938,12 +2938,12 @@ if (params.Analyze) {
 
                     script:
                         """
-                        cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
+                        cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
                         cp ${params.vampdir}/example_data/conf/vamplogo.png .
                         for x in *_summary_for_plot.csv;do
                             name=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}')
                             id=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
-                            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pcASVaa\${id}_Report.html')" \${name} \
+                            Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_pcASVaa\${id}_Report.html')" \${name} \
                             ${readsstats} \
                             \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
                             ${params.metadata} \
@@ -2975,12 +2975,12 @@ if (params.Analyze) {
 
                     script:
                         """
-                        cp ${params.vampdir}/bin/vAMPirus_OTU_Report.Rmd .
+                        cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
                         cp ${params.vampdir}/example_data/conf/vamplogo.png .
                         for x in *_summary_for_plot.csv;do
                             name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
                             id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
-                            Rscript -e "rmarkdown::render('vAMPirus_OTU_Report.Rmd',output_file='vAMPirus_pcASVnt\${id}_Report.html')" \${name} \
+                            Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_pcASVnt\${id}_Report.html')" \${name} \
                             ${readsstats} \
                             \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
                             ${params.metadata} \
