@@ -242,7 +242,7 @@ echo "Checking DataCheck mode:"
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck"
 echo "    "
 echo "Next, test the analysis pipeline:"
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze"
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV"
 echo "   "
 echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file."
 echo "First, run the DataCheck:"
@@ -265,7 +265,7 @@ echo "Checking DataCheck mode:" >> STARTUP_HELP.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck" >> STARTUP_HELP.txt
 echo "    " >> STARTUP_HELP.txt
 echo "Next, test the analysis pipeline:" >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze" >> STARTUP_HELP.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
 echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
