@@ -2768,7 +2768,8 @@ if (params.Analyze) {
                     ${params.minimumCounts} \
         	        ${matrix} \
                     ${taxonomy} \
-                    ${params.trymax}
+                    ${params.trymax} \
+                    ${params.stats}
                     """
                 }
 
@@ -2803,14 +2804,15 @@ if (params.Analyze) {
             	        \$( echo ${matrix} | tr " " "\\n" | grep "\${id}" ) \
                         \$( echo ${taxonomy} | tr " " "\\n" | grep "\${id}" ) \
                         \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" ) \
-                        ${params.trymax}
+                        ${params.trymax} \
+                        ${params.stats}
                     done
                     """
                 }
 
             if (!params.skipAminoTyping) {
 
-                process Report_AmynoTypes {
+                process Report_AminoTypes {
 
                     label 'norm_cpus'
 
@@ -2838,7 +2840,8 @@ if (params.Analyze) {
                         ${params.minimumCounts} ${matrix} \
                         ${taxonomy} \
                         ${phylogeny} \
-                        ${params.trymax}
+                        ${params.trymax} \
+                        ${params.stats}
                         """
                     }
                 }
@@ -2873,13 +2876,14 @@ if (params.Analyze) {
                             ${matrix} \
                             ${taxonomy} \
                             ${phylogeny} \
-                            ${params.trymax}
+                            ${params.trymax} \
+                            ${params.stats}
                             """
                     }
 
                     if (!params.skipAminoTyping) {
 
-                        process Report_AmynoType {
+                        process Report_AminoType {
 
                             label 'norm_cpus'
 
@@ -2907,7 +2911,8 @@ if (params.Analyze) {
                                 ${params.minimumCounts} ${matrix} \
                                 ${taxonomy} \
                                 ${phylogeny} \
-                                ${params.trymax}
+                                ${params.trymax} \
+                                ${params.stats}
                                 """
                         }
                     }
@@ -2946,7 +2951,8 @@ if (params.Analyze) {
                 	        \$( echo ${matrix} | tr " " "\\n" | grep "\${id}" ) \
                             \$( echo ${taxonomy} | tr " " "\\n" | grep "\${id}" ) \
                             \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" ) \
-                            ${params.trymax}
+                            ${params.trymax} \
+                            ${params.stats}
                         done
                         """
                     }
@@ -2982,7 +2988,8 @@ if (params.Analyze) {
                 	        \$( echo ${matrix} | tr " " "\\n" | grep "\${id}" ) \
                             \$( echo ${taxonomy} | tr " " "\\n" | grep "\${id}" ) \
                             \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" ) \
-                            ${params.trymax}
+                            ${params.trymax} \
+                            ${params.stats}
                         done
                         """
                 }
