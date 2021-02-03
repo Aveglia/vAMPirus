@@ -92,8 +92,7 @@ NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003
 During Taxonomy Assignment, vAMPirus infers results by extracting the information stored in the reference sequence headers. If the database sequence headers do not match these
 patterns, you are bound to see errors in the naming of files created during the Taxonomy Assignment phase of vAMPirus.
 
-The default is that vAMPirus assumes that the database headers are in RVDB format, to change this assumption, you would need to edit the configuration file at line 78 where "refseq=F". Change the "F" to "T" and
-you are good to go! You could also change this within the launch command with adding "--refseq T", but setting parameters will be discussed further in a section later.
+The default is that vAMPirus assumes that the database headers are in RVDB format, to change this assumption, you would need to edit the configuration file at line 78 where "refseq=F". Change the "F" to "T" and you are good to go! You could also change this within the launch command with adding "--refseq T", but setting parameters will be discussed further in a section later.
 
 ## For MacOS users
 
@@ -103,18 +102,17 @@ you are good to go! You could also change this within the launch command with ad
 
 A test dataset is provided and you can test your vAMPirus installation by running the following:
 
-    1. First we want to make sure the DataCheck mode runs properly:
+    1. First we want to make sure the DataCheck pipeline runs properly:
 
         `/PATH/TO/nextflow run /PATH/TO/vAMPirusv0.1.0.nf -c /PATH/TO/vampirus.config -profile conda,test --DataCheck `
 
-        If not errors occur, you can then move on to the next command testing the Analyze mode.
+        If not errors occur, you can then move on to the next command testing the Analyze pipeline.
 
     2. To test all aspect of the vAMPirus analysis pipeline you can run the following:
 
-        `/PATH/TO/nextflow run /PATH/TO/vAMPirusv0.1.0.nf -c /PATH/TO/vampirus.config -profile conda,test --Analyze --nOTU --pOTU `
+        `/PATH/TO/nextflow run /PATH/TO/vAMPirusv0.1.0.nf -c /PATH/TO/vampirus.config -profile conda,test --Analyze --ncASV --pcASV `
 
-        If no errors occur, you are good to run with your data! Just edit the specific parameters of interest (working directory, project prefix,
-            clustering/phylogeny parameter, etc.) in the vampirus.config file!
+        If no errors occur, you are good to run with your data. Just edit the specific parameters of interest (working directory, project prefix, clustering/phylogeny parameters, etc.) in the vampirus.config file!
 
 # Quick Notes Before Running vAMPirus
 
@@ -124,9 +122,7 @@ vAMPirus is deployed using the Nextflow workflow manager which "enables scalable
 adaptation of pipelines written in the most common scripting languages. Its fluent DSL simplifies the implementation and the deployment of complex parallel and reactive
 workflows on clouds and clusters." To learn more about Nextflow and to learn more how to monitor your submitted jobs from a web portal with Nextflow Tower, visit nextflow.io.
 
-The great thing about vAMPirus being integrated into Nextflow is that it is just as easy to run vAMPirus on a HPC ad it is to run locally on your personal machine. This is
-where the configuration file comes into play and we will discuss this in more detail in the next section. First, lets understand the basics of how to launch vAMPirus using
-Nextflow.
+With vAMPirus being integrated into Nextflow it is just as easy to run vAMPirus on a HPC as it is to run locally on your personal machine. This is where the configuration file comes into play and we will discuss this in more detail in the next section. First, lets understand the basics of how to launch vAMPirus using Nextflow.
 
 Here is a basic "launch command" to deploy the vAMPirus pipeline (we will talk more about the mandatory/optional arguments of vAMPirus later):
 
