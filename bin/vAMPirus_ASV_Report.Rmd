@@ -11,6 +11,7 @@ params:
   heatmap: !r commandArgs(trailingOnly=T)[6]  # heatmap
   tax: !r commandArgs(trailingOnly=T)[7]      # tax
   try: !r commandArgs(trailingOnly=T)[8]      # trymax
+  stats: !r commandArgs(trailingOnly=T)[9]    # stats
 ---
 <style>
 .rectangle {
@@ -198,7 +199,7 @@ raredata <- as.data.frame(rrarefy(data5[,2:cols], sample=minreads))
 <br>
 <br>
 
-### Shannon diversty
+### Shannon diversity
 
 <br>
 ```{r diversity_analysis, echo=FALSE}
@@ -226,48 +227,52 @@ sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=m
 sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 sh
 
-shannonaov <- aov(index ~ treatment, data= shannondata5_2)
-st <- shapiro.test(resid(shannonaov))
-bt <- bartlett.test(index ~ treatment, data= shannondata5_2)
+if (params$stats == "run" ) {
+    shannonaov <- aov(index ~ treatment, data= shannondata5_2)
+    st <- shapiro.test(resid(shannonaov))
+    bt <- bartlett.test(index ~ treatment, data= shannondata5_2)
 
-if (st$p.value > .05 && bt$p.value > .05) {
-  print("Shapiro Test of normality - data is normal p-value > 0.05")
-  print(shapiro.test(resid(shannonaov)))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
-  print(bartlett.test(index ~ treatment, data= shannondata5_2))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("ANOVA Results")
-  print(summary(shannonaov))
-  writeLines("\n--------------------------------------------------------------\n")
-  #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
-  print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
-  print(TukeyHSD(shannonaov))
-  writeLines("\n--------------------------------------------------------------\n")
+    if (st$p.value > .05 && bt$p.value > .05) {
+      print("Shapiro Test of normality - data is normal p-value > 0.05")
+      print(shapiro.test(resid(shannonaov)))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+      print(bartlett.test(index ~ treatment, data= shannondata5_2))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("ANOVA Results")
+      print(summary(shannonaov))
+      writeLines("\n--------------------------------------------------------------\n")
+      #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+      print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+      print(TukeyHSD(shannonaov))
+      writeLines("\n--------------------------------------------------------------\n")
+    } else {
+      print("Shapiro Test of normality - data is normal if p-value > 0.05")
+      print(shapiro.test(resid(shannonaov)))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+      print(bartlett.test(index ~ treatment, data= shannondata5_2))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("Data either not normal or variance not homogenous")
+      print("Kruskal-Wallis Test - test significant if p <.05")
+      #Kruskal-Wallis test - significant p <.05
+      mykt <- kruskal.test(index ~ treatment, data= shannondata5_2)
+      print(mykt)
+      writeLines("\n--------------------------------------------------------------\n")
+      if (mykt$p.value < .05) {
+        #Pairwise comparison
+        print("Wilcox.test - pairwise comparison")
+        print(pairwise.wilcox.test(shannondata5_2$index, shannondata5_2$treatment, p.adjust.method = "BH"))   
+      } else {
+        print("Data not significant. Skipping pairwise comparison")
+      }
+      writeLines("\n--------------------------------------------------------------\n")
+      print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+      print(summary(shannonaov))
+      writeLines("\n--------------------------------------------------------------\n")
+    }
 } else {
-  print("Shapiro Test of normality - data is normal if p-value > 0.05")
-  print(shapiro.test(resid(shannonaov)))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
-  print(bartlett.test(index ~ treatment, data= shannondata5_2))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("Data either not normal or variance not homogenous")
-  print("Kruskal-Wallis Test - test significant if p <.05")
-  #Kruskal-Wallis test - significant p <.05
-  mykt <- kruskal.test(index ~ treatment, data= shannondata5_2)
-  print(mykt)
-  writeLines("\n--------------------------------------------------------------\n")
-  if (mykt$p.value < .05) {
-    #Pairwise comparison
-    print("Wilcox.test - pairwise comparison")
-    print(pairwise.wilcox.test(shannondata5_2$index, shannondata5_2$treatment, p.adjust.method = "BH"))   
-  } else {
-    print("Data not significant. Skipping pairwise comparison")
-  }
-  writeLines("\n--------------------------------------------------------------\n")
-  print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
-  print(summary(shannonaov))
-  writeLines("\n--------------------------------------------------------------\n")
+    print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
 }
 ```
 <br>
@@ -301,48 +306,52 @@ s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=my
 s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 s
 
-simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
-st <- shapiro.test(resid(simpsonaov))
-bt <- bartlett.test(index ~ treatment, data= simpsondata5_2)
+if (params$stats == "run" ) {
+    simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
+    st <- shapiro.test(resid(simpsonaov))
+    bt <- bartlett.test(index ~ treatment, data= simpsondata5_2)
 
-if (st$p.value > .05 && bt$p.value > .05) {
-  print("Shapiro Test of normality - data is normal p-value > 0.05")
-  print(shapiro.test(resid(simpsonaov)))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
-  print(bartlett.test(index ~ treatment, data= simpsondata5_2))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("ANOVA Results")
-  print(summary(simpsonaov))
-  writeLines("\n--------------------------------------------------------------\n")
-  #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
-  print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
-  print(TukeyHSD(simpsonaov))
-  writeLines("\n--------------------------------------------------------------\n")
+    if (st$p.value > .05 && bt$p.value > .05) {
+      print("Shapiro Test of normality - data is normal p-value > 0.05")
+      print(shapiro.test(resid(simpsonaov)))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+      print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("ANOVA Results")
+      print(summary(simpsonaov))
+      writeLines("\n--------------------------------------------------------------\n")
+      #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+      print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+      print(TukeyHSD(simpsonaov))
+      writeLines("\n--------------------------------------------------------------\n")
+    } else {
+      print("Shapiro Test of normality - data is normal if p-value > 0.05")
+      print(shapiro.test(resid(simpsonaov)))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+      print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("Data either not normal or variance not homogenous")
+      print("Kruskal-Wallis Test - test significant if p <.05")
+      #Kruskal-Wallis test - significant p <.05
+      mykt <- kruskal.test(index ~ treatment, data= simpsondata5_2)
+      print(mykt)
+      writeLines("\n--------------------------------------------------------------\n")
+      if (mykt$p.value < .05) {
+        #Pairwise comparison
+        print("Wilcox.test - pairwise comparison")
+        print(pairwise.wilcox.test(simpsondata5_2$index, simpsondata5_2$treatment, p.adjust.method = "BH"))   
+      } else {
+        print("Data not significant. Skipping pairwise comparison")
+      }
+      writeLines("\n--------------------------------------------------------------\n")
+      print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+      print(summary(simpsonaov))
+      writeLines("\n--------------------------------------------------------------\n")
+    }
 } else {
-  print("Shapiro Test of normality - data is normal if p-value > 0.05")
-  print(shapiro.test(resid(simpsonaov)))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
-  print(bartlett.test(index ~ treatment, data= simpsondata5_2))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("Data either not normal or variance not homogenous")
-  print("Kruskal-Wallis Test - test significant if p <.05")
-  #Kruskal-Wallis test - significant p <.05
-  mykt <- kruskal.test(index ~ treatment, data= simpsondata5_2)
-  print(mykt)
-  writeLines("\n--------------------------------------------------------------\n")
-  if (mykt$p.value < .05) {
-    #Pairwise comparison
-    print("Wilcox.test - pairwise comparison")
-    print(pairwise.wilcox.test(simpsondata5_2$index, simpsondata5_2$treatment, p.adjust.method = "BH"))   
-  } else {
-    print("Data not significant. Skipping pairwise comparison")
-  }
-  writeLines("\n--------------------------------------------------------------\n")
-  print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
-  print(summary(simpsonaov))
-  writeLines("\n--------------------------------------------------------------\n")
+    print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
 }
 ```
 <br>
@@ -373,48 +382,52 @@ ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=myco
 ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 ri
 
-richaov <- aov(index ~ treatment, data= richdata5_2)
-st <- shapiro.test(resid(richaov))
-bt <- bartlett.test(index ~ treatment, data= richdata5_2)
+if (params$stats == "run" ) {
+    richaov <- aov(index ~ treatment, data= richdata5_2)
+    st <- shapiro.test(resid(richaov))
+    bt <- bartlett.test(index ~ treatment, data= richdata5_2)
 
-if (st$p.value > .05 && bt$p.value > .05) {
-  print("Shapiro Test of normality - data is normal p-value > 0.05")
-  print(shapiro.test(resid(richaov)))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
-  print(bartlett.test(index ~ treatment, data= richdata5_2))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("ANOVA Results")
-  print(summary(richaov))
-  writeLines("\n--------------------------------------------------------------\n")
-  #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
-  print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
-  print(TukeyHSD(richaov))
-  writeLines("\n--------------------------------------------------------------\n")
+    if (st$p.value > .05 && bt$p.value > .05) {
+      print("Shapiro Test of normality - data is normal p-value > 0.05")
+      print(shapiro.test(resid(richaov)))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+      print(bartlett.test(index ~ treatment, data= richdata5_2))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("ANOVA Results")
+      print(summary(richaov))
+      writeLines("\n--------------------------------------------------------------\n")
+      #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+      print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+      print(TukeyHSD(richaov))
+      writeLines("\n--------------------------------------------------------------\n")
+    } else {
+      print("Shapiro Test of normality - data is normal if p-value > 0.05")
+      print(shapiro.test(resid(richaov)))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+      print(bartlett.test(index ~ treatment, data= richdata5_2))
+      writeLines("\n--------------------------------------------------------------\n")
+      print("Data either not normal or variance not homogenous")
+      print("Kruskal-Wallis Test - test significant if p <.05")
+      #Kruskal-Wallis test - significant p <.05
+      mykt <- kruskal.test(index ~ treatment, data= richdata5_2)
+      print(mykt)
+      writeLines("\n--------------------------------------------------------------\n")
+      if (mykt$p.value < .05) {
+        #Pairwise comparison
+        print("Wilcox.test - pairwise comparison")
+        print(pairwise.wilcox.test(richdata5_2$index, richdata5_2$treatment, p.adjust.method = "BH"))   
+      } else {
+        print("Data not significant. Skipping pairwise comparison")
+      }
+      writeLines("\n--------------------------------------------------------------\n")
+      print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+      print(summary(richaov))
+      writeLines("\n--------------------------------------------------------------\n")
+    }
 } else {
-  print("Shapiro Test of normality - data is normal if p-value > 0.05")
-  print(shapiro.test(resid(richaov)))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
-  print(bartlett.test(index ~ treatment, data= richdata5_2))
-  writeLines("\n--------------------------------------------------------------\n")
-  print("Data either not normal or variance not homogenous")
-  print("Kruskal-Wallis Test - test significant if p <.05")
-  #Kruskal-Wallis test - significant p <.05
-  mykt <- kruskal.test(index ~ treatment, data= richdata5_2)
-  print(mykt)
-  writeLines("\n--------------------------------------------------------------\n")
-  if (mykt$p.value < .05) {
-    #Pairwise comparison
-    print("Wilcox.test - pairwise comparison")
-    print(pairwise.wilcox.test(richdata5_2$index, richdata5_2$treatment, p.adjust.method = "BH"))   
-  } else {
-    print("Data not significant. Skipping pairwise comparison")
-  }
-  writeLines("\n--------------------------------------------------------------\n")
-  print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
-  print(summary(richaov))
-  writeLines("\n--------------------------------------------------------------\n")
+    print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
 }
 ```
 <br>
@@ -454,8 +467,12 @@ cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, col
 cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
 cen
 
-adn <- adonis(bray.distance~data5$treatment)
-adn
+if (params$stats == "run" ) {
+    adn <- adonis(bray.distance~data5$treatment)
+    adn
+} else {
+    print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
+}
 ```
 <br>
 <br>
