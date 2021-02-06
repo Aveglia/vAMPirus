@@ -7,15 +7,18 @@
 ************************************************************************************************************************************************
 # Introduction to vAMPirus
 
-The main motive behind vAMPirus is to provide a robust and easy-to-use bioinformatics workflow for virus amplicon sequencing analysis. The vAMPirus workflow
-allows easy reproducibility of project-specific analyses and is flexible enough to tailor each analysis to your own data.
+There were two motives behind the development of vAMPirus, one was to provide a an easy-to-use and flexible bioinformatics workflow for virus amplicon sequencing analysis. Another was to make it easier to standardize the chosen analytical approach across datasets or studies.
 
 ## Order of operations
 
-    1. Clone vAMPirus from github
-    2. Run the vAMPirus start up script to download Nextflow and create conda environment
+    1. Clone vAMPirus from github  -  `git clone https://github.com/Aveglia/vAMPirus.git`
+
+    2. Run the vAMPirus start up script to create conda environment, download Nextflow, a
+
     3. Edit vAMPirus configuration file
+
     4. Run DataCheck mode with dataset
+
     5. Run Analyze mode with desired clustering technique and %ID
 
 ## Contact/support:
@@ -47,7 +50,7 @@ dependencies, simply move to the vAMPirus directory and run the vampirus_startup
 
 The start up script will check your system for Nextflow and Anaconda/Miniconda and if they are not present, the script will ask
 if you would like to install these programs. If you answer with 'y', the script will install the missing programs and will build
-the vAMPirus conda environment and the installation is complete.
+the vAMPirus Conda environment and the installation is complete.
 
 You can also use the startup script to install different databases to use for vAMPirus analyses, these include:
 
@@ -320,8 +323,7 @@ NOTE: Sample names are extracted from read library names by using the string to 
 
 ### Metadata file
 
-For every analysis, vAMPirus generates a final report and uses a user supplied metadata file with sample names and treatment. Treatment is how vAMPirus groups samples in downstream statistical
-analyses performed to generate for the final report. For example, if comparing samples from different species of corals, you would set up a metadata file like so:
+For every analysis, vAMPirus generates a final report and uses a user supplied metadata file with sample names and treatment. Treatment is how vAMPirus groups samples in downstream statistical analyses performed to generate for the final report. For example, if comparing samples from different species of corals, you would set up a metadata file like so:
 
         sample,treatment
         Coral1,Ofaveolata
@@ -331,8 +333,7 @@ analyses performed to generate for the final report. For example, if comparing s
         Coral5,Mcavernosa
         Coral6,Mcavernosa
 
-The metadata file needs to be comma separated with the first column being "sample" and the second column must be "treatment". These species names could easily be replaced with "Heat"/"Control"
-or any other way you would like to categorize the samples.
+The metadata file needs to be comma separated with the first column being "sample" and the second column must be "treatment". These species names could easily be replaced with "Heat"/"Control" or any other way you would like to categorize the samples.
 
 ## The mandatory arguments
 

@@ -5,7 +5,7 @@
                                 vAMPirusv0.1.0
 ========================================================================================
                        Virus Amplicon Sequencing Analysis Pipeline
-                       Author: Alex J. Veglia
+                       Author: Alex J. Veglia and Ramon Rivera-Vicens
                        Version: 0.1.0 (dev) LAST EDIT: 5/30/20
 ----------------------------------------------------------------------------------------
 */

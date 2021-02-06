@@ -6,3 +6,4 @@ Things to work on for the future:
 
 3. Test if we can add "if" statement to "label" section
 rm tmp_line.list tmpline2.list ORFs_on_rdrp_scafs.csv name.list
+add stats option to help
