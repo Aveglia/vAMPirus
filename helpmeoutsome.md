@@ -7,19 +7,7 @@
 ************************************************************************************************************************************************
 # Introduction to vAMPirus
 
-There were two motives behind the development of vAMPirus, one was to provide a an easy-to-use and flexible bioinformatics workflow for virus amplicon sequencing analysis. Another was to make it easier to standardize the chosen analytical approach across datasets or studies.
-
-## Order of operations
-
-    1. Clone vAMPirus from github  -  `git clone https://github.com/Aveglia/vAMPirus.git`
-
-    2. Run the vAMPirus start up script to create conda environment, download Nextflow, a
-
-    3. Edit vAMPirus configuration file
-
-    4. Run DataCheck mode with dataset
-
-    5. Run Analyze mode with desired clustering technique and %ID
+PUT PARAGRAPH SUMMARY HERE
 
 ## Contact/support:
 
@@ -29,11 +17,21 @@ Please contact Alex Veglia at ajv5@rice.edu with any feedback or questions. Any 
 
 If you do use vAMPirus for your analyses, please cite the following ->
 
-Veglia, A.J. *et.al.,* 2020
-
-
+Veglia, A.J., Rivera Vicens, R., Grupstra, C., Howe-Kerr, L., and Correa A.M.S. (2020) vAMPirus: An automated virus amplicon sequencing analysis pipeline. Zenodo. DOI:
 
 # Getting started
+
+## Order of operations
+
+    1. Clone vAMPirus from github  -  `git clone https://github.com/Aveglia/vAMPirus.git`
+
+    2. Run the vAMPirus start up script to install dependencies and any databases specified
+
+    3. Edit vAMPirus configuration file
+
+    4. Run DataCheck mode with dataset
+
+    5. Run Analyze mode with desired clustering technique and %ID
 
 ## Installing vAMPirus
 
@@ -121,13 +119,18 @@ A test dataset is provided and you can test your vAMPirus installation by runnin
 
 ## The Nextflow workflow manager and the "launch command"
 
-vAMPirus is deployed using the Nextflow workflow manager which "enables scalable and reproducible scientific workflows using software containers. It allows the
+### Nextflow
+
+vAMPirus is deployed using the Nextflow pipeline manager which "enables scalable and reproducible scientific workflows using software containers. It allows the
 adaptation of pipelines written in the most common scripting languages. Its fluent DSL simplifies the implementation and the deployment of complex parallel and reactive
 workflows on clouds and clusters." To learn more about Nextflow and to learn more how to monitor your submitted jobs from a web portal with Nextflow Tower, visit nextflow.io.
 
-With vAMPirus being integrated into Nextflow it is just as easy to run vAMPirus on a HPC as it is to run locally on your personal machine. This is where the configuration file comes into play and we will discuss this in more detail in the next section. First, lets understand the basics of how to launch vAMPirus using Nextflow.
+With vAMPirus being integrated into Nextflow it is just as easy to run vAMPirus on a HPC as it is to run locally on your personal machine.
 
-Here is a basic "launch command" to deploy the vAMPirus pipeline (we will talk more about the mandatory/optional arguments of vAMPirus later):
+### The "launch" command
+
+Here is a basic "launch" command to deploy the vAMPirus pipeline:
+
 
 `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -profile [conda,docker,singularity] --Analyze`
 
@@ -181,13 +184,11 @@ an error or decide you would like to change a parameter/add a type of clustering
 
 ### The configuration file (vampirus.config)
 
-Nextflow deployment of vAMPirus relies on the use of the configuration file (vampirus.config) that is found in the vAMPirus program directory. The configuration file is a great way to store parameters/options
-used in your analyses. It also makes it pretty easy to set and keep track of multiple parameters as well as storing custom default values that you feel work best for your data. You can also have multiple copies
+Nextflow deployment of vAMPirus relies on the use of the configuration file (vampirus.config) that is found in the vAMPirus program directory. The configuration file is a great way to store parameters/options used in your analyses. It also makes it pretty easy to set and keep track of multiple parameters as well as storing custom default values that you feel work best for your data. You can also have multiple copies
 of vAMPirus configuration files with different parameters, you would just have to specify the correct file with the "-c" argument shown in the section before.
 
 Furthermore, the configuration file contains analysis-specific parameters AND resource-specific Nextflow launching parameters. A benefit of Nextflow integration, is that you can run the vAMPirus workflow on a large
-HPC just as easily as you could on your local machine. If you look at line 151 and greater in the vampirus.config file, you will see resource-specific parameters that you can alter before any run. Nexflow is capable
-of submitting jobs automatically using slurm and PBS, check out the Nextflow docs to learn more (https://www.nextflow.io/docs/latest/executor.html)!
+HPC just as easily as you could on your local machine. If you look at line 151 and greater in the vampirus.config file, you will see resource-specific parameters that you can alter before any run. Nexflow is capable of submitting jobs automatically using slurm and PBS, check out the Nextflow docs to learn more (https://www.nextflow.io/docs/latest/executor.html)!
 
 ### Setting parameter values
 
