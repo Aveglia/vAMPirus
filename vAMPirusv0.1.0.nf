@@ -3090,7 +3090,7 @@ if (params.Analyze) {
                 bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus} restrictleft=25 k=12 ordered=t mink=2 ktrim=l ecco=t rcomp=t minlength=200 tbo tpe
                 """
             }
-	  }
+        }
 
     process QualityCheck_2_DC {
 
