@@ -254,14 +254,14 @@ echo "Checking DataCheck mode:" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
-echo "Or if you plan to run vAMPirus using Singularity, use this test command:"
+echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck" >> STARTUP_HELP.txt
 echo "    " >> STARTUP_HELP.txt
 echo "Next, test the analysis pipeline:" >> STARTUP_HELP.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
-echo "Or if you plan to run vAMPirus using Singularity, use this test command:"
+echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
 echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
