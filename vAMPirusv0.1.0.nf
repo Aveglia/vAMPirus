@@ -466,7 +466,7 @@ if (params.Analyze) {
 
                 script:
                     // check if we need to check this outside processes
-                    if ( params.fwd == "" && params.rev == "" ) {
+                    if ( params.fwd == "" && params.rev == "" && !params.multi) {
                         """
                         bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.defaultFwdTrim} t=${task.cpus}
                         bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.defaultRevTrim} t=${task.cpus}
@@ -3068,7 +3068,7 @@ if (params.Analyze) {
 
         script:
             // add cocktail primer removal, easy, set a list, line by line seperated by , in a for loop
-            if ( params.fwd == "" && params.rev == "" ) {
+            if ( params.fwd == "" && params.rev == "" && !params.multi) {
                 """
                 bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.defaultFwdTrim} t=${task.cpus}
                 bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.defaultRevTrim} t=${task.cpus}
