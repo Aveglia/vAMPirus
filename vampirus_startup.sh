@@ -163,7 +163,7 @@ nextflow_c() {
     fi
 }
 
-if [[ $CONDA == "no"]]
+if [[ "$CONDA" == "no" ]]
 then  echo "Skipping Conda install and set up, if this was a mistake, you can always rerun the startup script"
       environment="/PATH/TO/"
 else
