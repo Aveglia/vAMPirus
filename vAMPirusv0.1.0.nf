@@ -303,6 +303,7 @@ log.info """\
         ======================================================
         Project name:                ${params.projtag}
         Working directory:           ${params.workingdir}
+        primers:                     ${params.primers}
         Minimum read length:	       ${params.minLen}
         Maximum read length:         ${params.maxLen}
         Database directory:          ${params.dbdir}
