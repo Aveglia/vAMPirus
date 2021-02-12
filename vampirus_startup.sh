@@ -9,18 +9,20 @@ You can also use this script to download reference databases for taxonomy assign
 
 General execution:
 
-vampirus_startup.sh -h -d [1|2|3|4]
+vampirus_startup.sh -h [-d 1|2|3|4]
 
     Command line options:
 
         [ -h ]                       	Print help information
 
-        [ -d 1|2|3|4 ]                  Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
+        [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
                                                     1 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
                                                     2 - Download only NCBIs Viral protein RefSeq database
                                                     3 - Download only the complete NCBI NR protein database
                                                     4 - Download all three databases
+
+        [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
 
 "
 
@@ -30,6 +32,7 @@ while getopts "hd:" OPTION; do
      case $OPTION in
          h) usage; exit;;
          d) DATABASE=${OPTARG};;
+         s) CONDA="no";;
      esac
 done
 shift $((OPTIND-1))      # required, to "eat" the options that have been processed
@@ -99,7 +102,7 @@ conda_c() {
                 source_c
                 if [ -f vampirus_env.yml ];then
                     echo -e "\n\t -- vAMPirus environment file found. Creating environment... --\n"
-                    conda env create -f vampirus_env.yml
+                    conda env create -f vampirus_env.yml && conda clean -a
                 else
                     echo -e "\n\t\e[31m -- ERROR: vAMPirus environment file not found (vAMPirus_env.yml). Please check requirements and rerun the pre-check --\e[39m\n"
                     exit 0
@@ -160,20 +163,24 @@ nextflow_c() {
     fi
 }
 
-echo "Alright, lets check your system for Conda..."
-conda_c
-echo "Editing path to conda directory in vampirus.config"
-environment="$(conda env list  | sed 's/*//g' | grep "vAMPirus" | head -1 | awk '{print $2}')"
-sed "s|CONDADIR|${environment}|g" "$mypwd"/vampirus.config > tmp1.config
-cat tmp1.config > "$mypwd"/vampirus.config
-rm tmp1.config
-
-echo "-------------------------------------------------------------------------------- Conda loop done"
+if [[ $CONDA == "no"]]
+then  echo "Skipping Conda install and set up, if this was a mistake, you can always rerun the startup script"
+      environment="/PATH/TO/"
+else
+      echo "Alright, lets check your system for Conda..."
+      conda_c
+      echo "Editing path to conda directory in vampirus.config"
+      environment="$(conda env list  | sed 's/*//g' | grep "vAMPirus" | head -1 | awk '{print $2}')"
+      sed "s|CONDADIR|${environment}|g" "$mypwd"/vampirus.config > tmp1.config
+      cat tmp1.config > "$mypwd"/vampirus.config
+      rm tmp1.config
+fi
+echo "-------------------------------------------------------------------------------- Conda check/install done"
 
 echo "Now lets check the status of Nextflow on your system..."
 nextflow_c
 
-echo "-------------------------------------------------------------------------------- nextflow loop done"
+echo "-------------------------------------------------------------------------------- Nextflow check/install done"
 
 if [[ $DATABASE -eq 1 ]]
 then    mkdir "$mypwd"/Databases
@@ -236,7 +243,7 @@ fi
 echo "-------------------------------------------------------------------------------- Database loop done"
 
 cd "$mypwd"
-echo "Ok, everything downloaded. To test installation, check out the STARTUP_HELP.txt file withing "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
+echo "Ok, everything downloaded. To test installation, check out the STARTUP_HELP.txt file within "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
 
 
 touch STARTUP_HELP.txt
@@ -244,11 +251,19 @@ echo "--------------------------------------------------------------------------
 echo "Ok, everything downloaded. To test installation, run the following commands and check for errors:" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
 echo "Checking DataCheck mode:" >> STARTUP_HELP.txt
+echo "   " >> STARTUP_HELP.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck" >> STARTUP_HELP.txt
+echo "   " >> STARTUP_HELP.txt
+echo "Or if you plan to run vAMPirus using Singularity, use this test command:"
+echo "   " >> STARTUP_HELP.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck" >> STARTUP_HELP.txt
 echo "    " >> STARTUP_HELP.txt
 echo "Next, test the analysis pipeline:" >> STARTUP_HELP.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
+echo "Or if you plan to run vAMPirus using Singularity, use this test command:"
+echo "   " >> STARTUP_HELP.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
 echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
 echo "Ok, if everything went well (green text was spit out by Nextflow), now you can move on to the fun. First, you should review the help docs and the vampirus.config in the vAMPirus directory." >> STARTUP_HELP.txt
@@ -261,7 +276,7 @@ echo "   " >> STARTUP_HELP.txt
 echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
 echo "OR using -profile option of Nextflow ..." >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --DataCheck" >> STARTUP_HELP.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --DataCheck" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
 echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
@@ -272,7 +287,7 @@ echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.co
 echo "   " >> STARTUP_HELP.txt
 echo "OR same command using -profile option of Nextflow ..." >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda --Analyze --ncASV --pcASV" >> STARTUP_HELP.txt
+echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
 echo "   " >> STARTUP_HELP.txt
 echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
 echo "    "
