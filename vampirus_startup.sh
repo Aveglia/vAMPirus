@@ -195,7 +195,7 @@ then    mkdir "$mypwd"/Databases
         rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
-        echo "Database downloaded, and configuration file edited, you still need to bunzip2 this database then just confirm the path was set correctly in the config file."
+        echo "Database downloaded and configuration file edited, you should confirm the path and database name was set correctly in the config file."
 elif [[ $DATABASE -eq 2 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
@@ -209,7 +209,7 @@ then    mkdir "$mypwd"/Databases
         rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
-        echo "Database downloaded, and configuration file edited, you still need to gunzip this database then just confirm the path was set correctly in the config file."
+        echo "Database downloaded and configuration file edited, you should confirm the path and database name was set correctly in the config file."
 elif [[ $DATABASE -eq 3 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
@@ -223,7 +223,7 @@ then    mkdir "$mypwd"/Databases
         rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
-        echo "Database downloaded, make sure you update the config file before running!"
+        echo "Database downloaded and configuration file edited, you should confirm the path and database name was set correctly in the config file."
 elif [[ $DATABASE -eq 4 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
