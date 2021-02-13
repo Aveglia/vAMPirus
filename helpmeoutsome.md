@@ -5,9 +5,14 @@
                                                         `'  `   `` ` ``    ``    `---``---`
                                              An automated virus amplicon sequencing analysis pipeline
 ************************************************************************************************************************************************
+#Table of contents
+
 # Introduction to vAMPirus
 
-PUT PARAGRAPH SUMMARY HERE
+Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program. Viruses are the most abundant life forms on the planet and with the advent of next-generation sequencing, there has been an increased effort in deciphering the global virome and its impact in nature. A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Even further, these approaches may be inaccessible for researchers with limited bioinformatics experience or those without access to subscription-based programs. For these reasons, we set out to develop an accessible automated virus amplicon sequencing analysis program (vAMPirus) that is flexible enough to allow users to tailor analyses to their data which can then be easily scaled and standardized across datasets.
+
+The vAMPirus program contains two different pipelines: 1. DataCheck pipeline: provides the user an interactive html report file containing information regarding sequencing success per sample as well as a preliminary look into the clustering behavior of the data which can be leveraged by the user to inform future analyses, and 2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. We anticipate that vAMPirus will benefit the virus community by promoting accessibility to in-depth analyses and the standardization of analytical practices facilitating reproducibility and cross-study comparisons.
+
 
 ## Contact/support:
 

@@ -2,11 +2,24 @@
 
                             An automated virus amplicon sequencing analysis pipeline
 
-# Introduction to vAMPirus
+# Quick intro
 
-The main motive behind vAMPirus is to provide a robust and easy-to-use bioinformatics workflow for virus amplicon sequencing analysis. The vAMPirus workflow
-allows easy reproducibility of project-specific analyses and is flexible enough to tailor your analysis to your own data.
+Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program.
 
+develop an accessible automated virus amplicon sequencing analysis program (vAMPirus) that is flexible enough to allow users to tailor analyses to their data which can then be easily scaled and standardized across datasets.
+
+The vAMPirus program contains two different pipelines:
+
+1. DataCheck pipeline: provides the user an interactive html report file containing information regarding sequencing success per sample as well as a preliminary look into the clustering behavior of the data which can be leveraged by the user to inform future analyses
+
+2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics.
+
+
+NOTE => This is a more brief overview of how to install and set up vAMPirus, for more detail see 
+
+## Contact/support:
+
+If you have a feature request or any feedback/questions, feel free to email vAMPirusHelp@gmail.com or you can open an Issue on GitHub.
 ## Order of operations
 
     1. Clone vAMPirus from github
@@ -85,26 +98,54 @@ So, if we wanted to download NCBIs Viral protein RefSeq database, we would just 
 
     `./vampirus_startup.sh -d 1`
 
-[This will check for Nextflow and Anaconda/Miniconda installations, then download specified database(s), which in this case is NCBIs RefSeq database.]
-
-It should be noted, that any database can be used, but it needs to be in fasta format and the headers for reference sequences need to match
-one of two patterns:
-
-    RVDB format (default) -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein [Marine RNA virus BC-4]"
-
-    NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003 [Zymoseptoria brevis]"
-
-During Taxonomy Assignment, vAMPirus infers results by extracting the information stored in the reference sequence headers. If the database sequence headers do not match these
-patterns, you are bound to see errors in the naming of files created during the Taxonomy Assignment phase of vAMPirus.
-
-The default is that vAMPirus assumes that the database headers are in RVDB format, to change this assumption, you would need to edit the configuration file at line 78 where "refseq=F". Change the "F" to "T" and
-you are good to go! You could also change this within the launch command with adding "--refseq T", but setting parameters will be discussed further in a section later.    
+[This will check for Nextflow and Anaconda/Miniconda installations, then download specified database(s), which in this case is NCBIs RefSeq database.]  
 
 ## Testing vAMPirus installation
 
     A test dataset is provided in the vAMPirus/example_data. To ensure that vAMPirus is set up properly before running with your own data, you can run:
 
     `nextflow run vAMPirusv0.1.0.nf -c ./example_data/vampirus_test.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --testing`
+
+## Example vAMPirus launch commands
+
+DataCheck pipeline =>
+
+Example 1. Launching the vAMPirus DataCheck pipeline using conda
+
+    `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck`
+
+Example 2. Launching the vAMPirus DataCheck pipeline using Singularity and multiple primer removal with the path to the fasta file with the primer sequences set in the launch command
+
+    `nextflow run vAMPirus.nf -c vampirus.config -profile singularity --DataCheck --multi --primers /PATH/TO/PRIMERs.fa`
+
+Example 3. Launching the vAMPirus DataCheck pipeline with primer removal by global trimming of 20 bp from forward reads and 26 bp from reverse reads
+
+    `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --GlobTrim 20,26`
+
+
+Analyze pipeline =>
+
+Example 4. Launching the vAMPirus Analyze pipeline with singularity with ASV and AminoType generation with all accesory analyses (taxonomy assignment, EMBOSS, IQTREE, statistics)
+
+    `nextflow run vAMPirus.nf -c vampirus.config -profile singularity --Analyze --stats run`
+
+Example 5. Launching the vAMPirus Analyze pipeline with conda to perform multiple primer removal and protein-based clustering of ASVs, but skip most of the extra analyses
+
+    `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --pcASV --skipPhylogeny --skipEMBOSS --skipTaxonomy --skipReport`
+
+Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV-related results
+
+    `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run`
+
+
+Resuming analyses =>
+
+If an analysis is interupted, you can use Nextflows "-resume" option that will start from the last cached "check point".
+
+For example if the analysis launched with the command from Example 6 above was interupted, all you would need to do is add the "-resume" to the end of the command like so:
+
+    `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run -resume`
+
 
 # What to cite:
 
