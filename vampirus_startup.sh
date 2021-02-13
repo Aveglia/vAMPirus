@@ -9,7 +9,7 @@ You can also use this script to download reference databases for taxonomy assign
 
 General execution:
 
-vampirus_startup.sh -h [-d 1|2|3|4]
+vampirus_startup.sh -h [-d 1|2|3|4] [-s]
 
     Command line options:
 
@@ -28,7 +28,7 @@ vampirus_startup.sh -h [-d 1|2|3|4]
 
 }
 
-while getopts "hd:" OPTION; do
+while getopts "hsd:" OPTION; do
      case $OPTION in
          h) usage; exit;;
          d) DATABASE=${OPTARG};;
@@ -164,7 +164,7 @@ nextflow_c() {
 }
 
 if [[ "$CONDA" == "no" ]]
-then  echo "Skipping Conda install and set up, if this was a mistake, you can always rerun the startup script"
+then  echo "Skipping Conda install and set up, if this was a mistake, you can always rerun the startup script."
       environment="/PATH/TO/"
 else
       echo "Alright, lets check your system for Conda..."
@@ -246,50 +246,53 @@ cd "$mypwd"
 echo "Ok, everything downloaded. To test installation, check out the STARTUP_HELP.txt file within "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
 
 
-touch STARTUP_HELP.txt
-echo "-------------------------------------------------------------------------------------------------------------------------------- TESTING YOUR INSTALLATION" >> STARTUP_HELP.txt
-echo "Ok, everything downloaded. To test installation, run the following commands and check for errors:" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "Checking DataCheck mode:" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck" >> STARTUP_HELP.txt
-echo "    " >> STARTUP_HELP.txt
-echo "Next, test the analysis pipeline:" >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
-echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "Ok, if everything went well (green text was spit out by Nextflow), now you can move on to the fun. First, you should review the help docs and the vampirus.config in the vAMPirus directory." >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING DataCheck PIPELINE WITH YOUR DATA" >> STARTUP_HELP.txt
-echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file:"
-echo "   " >> STARTUP_HELP.txt
-echo "First, run the DataCheck part of the pipeline using the -with-conda Nextflow option:" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "OR using -profile option of Nextflow ..." >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --DataCheck" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING Analyze PIPELINE WITH YOUR DATA" >> STARTUP_HELP.txt
-echo "Then you can run the analysis using the -with-conda Nextflow option, here is a launch command to run the complete analysis and statistical tests:" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "OR same command using -profile option of Nextflow ..." >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirusv0.1.0.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
-echo "   " >> STARTUP_HELP.txt
-echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
+if [[ $(ls "$mypwd"/STARTUP_HELP.txt | wc -l | awk '{print $1}') -eq 0 ]]
+then
+      touch STARTUP_HELP.txt
+      echo "-------------------------------------------------------------------------------------------------------------------------------- TESTING YOUR INSTALLATION" >> STARTUP_HELP.txt
+      echo "Ok, everything downloaded. To test installation, run the following commands and check for errors:" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "Checking DataCheck mode:" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck" >> STARTUP_HELP.txt
+      echo "    " >> STARTUP_HELP.txt
+      echo "Next, test the analysis pipeline:" >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "Ok, if everything went well (green text was spit out by Nextflow), now you can move on to the fun. First, you should review the help docs and the vampirus.config in the vAMPirus directory." >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING DataCheck PIPELINE WITH YOUR DATA" >> STARTUP_HELP.txt
+      echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file:"
+      echo "   " >> STARTUP_HELP.txt
+      echo "First, run the DataCheck part of the pipeline using the -with-conda Nextflow option:" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "OR using -profile option of Nextflow ..." >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --DataCheck" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING Analyze PIPELINE WITH YOUR DATA" >> STARTUP_HELP.txt
+      echo "Then you can run the analysis using the -with-conda Nextflow option, here is a launch command to run the complete analysis and statistical tests:" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "OR same command using -profile option of Nextflow ..." >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
+fi
 echo "    "
 echo "Setup script is complete!"
 echo "Check out the STARTUP_HELP.txt file for more information on how to move forward with the analysis."
