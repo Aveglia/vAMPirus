@@ -2,11 +2,14 @@
 
                             An automated virus amplicon sequencing analysis pipeline
 
+# Table of contents
+
+            * [Quick intro](#Quick-intro)
+                * [Contact/support](#Contact/support)  
+                                
 # Quick intro
 
 Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program.
-
-develop an accessible automated virus amplicon sequencing analysis program (vAMPirus) that is flexible enough to allow users to tailor analyses to their data which can then be easily scaled and standardized across datasets.
 
 The vAMPirus program contains two different pipelines:
 
@@ -15,18 +18,27 @@ The vAMPirus program contains two different pipelines:
 2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics.
 
 
-NOTE => This is a more brief overview of how to install and set up vAMPirus, for more detail see 
+NOTE => This is a more brief overview of how to install and set up vAMPirus, for more detail see the wiki.
 
 ## Contact/support:
 
 If you have a feature request or any feedback/questions, feel free to email vAMPirusHelp@gmail.com or you can open an Issue on GitHub.
+
+# Getting started
+
 ## Order of operations
 
-    1. Clone vAMPirus from github
-    2. Run the vAMPirus start up script to download Nextflow and create conda environment
-    3. Edit vAMPirus configuration file
-    4. Run DataCheck mode with dataset
-    5. Run Analyze mode with desired clustering technique and %ID
+    1. Clone vAMPirus from github  -  `git clone https://github.com/Aveglia/vAMPirus.git`
+
+    2. Run the vAMPirus start up script to install dependencies and any databases specified
+
+    3. Test vAMPirus pipelines with the supplied test dataset
+
+    4. Edit parameters in the vAMPirus configuration file
+
+    5. Run DataCheck mode with dataset
+
+    6. Run Analyze mode with desired clustering technique and %ID
 
 **Dependencies (will be built as a conda environment) ->**    
 
@@ -147,25 +159,39 @@ For example if the analysis launched with the command from Example 6 above was i
     `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run -resume`
 
 
-# What to cite:
+## How to cite:
 
     If you do use vAMPirus for your analyses, please cite the following ->
 
-        1. vAMPirus - Veglia, A.J. et.al. 2020
+        1. vAMPirus - Veglia, A.J., Rivera Vicens, R., Grupstra, C., Howe-Kerr, L., and Correa A.M.S. (2020) vAMPirus: An automated virus amplicon sequencing analysis pipeline. Zenodo. DOI:
+
         2. Diamond - Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi:10.1038/nmeth.3176
+
         3. FastQC - Andrews, S. (2010). FastQC:  A Quality Control Tool for High Throughput Sequence Data [Online]. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
+
         4. fastp - Chen, S., Zhou, Y., Chen, Y., & Gu, J. (2018). fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics, 34(17), i884-i890.
+
         5. Clustal Omega - Sievers, F., Wilm, A., Dineen, D., Gibson, T.J., Karplus, K., Li, W., Lopez, R., McWilliam, H., Remmert, M., Söding, J. and Thompson, J.D., 2011. Fast, scalable generation of high‐quality protein multiple
                            sequence alignments using Clustal Omega. Molecular systems biology, 7(1), p.539.
+
         6. IQ-TREE - Minh, B. Q., Schmidt, H. A., Chernomor, O., Schrempf, D., Woodhams, M. D., Von Haeseler, A., & Lanfear, R. (2020). IQ-TREE 2: New models and efficient methods for phylogenetic inference in the genomic era.
                      Molecular Biology and Evolution, 37(5), 1530-1534.
+
         7. ModelTest-NG - Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. (2020). ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. Molecular biology and
                           evolution, 37(1), 291-294.
+
         8. MAFFT - Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7: improvements in performance and usability. Molecular biology and evolution, 30(4), 772-780.
+
         9. vsearch - Rognes, T., Flouri, T., Nichols, B., Quince, C., & Mahé, F. (2016). VSEARCH: a versatile open source tool for metagenomics. PeerJ, 4, e2584.
+
         10. BBMap - Bushnell, B. (2014). BBTools software package. URL http://sourceforge. net/projects/bbmap.
+
         11. trimAl - Capella-Gutiérrez, S., Silla-Martínez, J. M., & Gabaldón, T. (2009). trimAl: a tool for automated alignment trimming in large-scale phylogenetic analyses. Bioinformatics, 25(15), 1972-1973.
+
         12. CD-HIT - Fu, L., Niu, B., Zhu, Z., Wu, S., & Li, W. (2012). CD-HIT: accelerated for clustering the next-generation sequencing data. Bioinformatics, 28(23), 3150-3152.
+
         13. EMBOSS - Rice, P., Longden, I., & Bleasby, A. (2000). EMBOSS: the European molecular biology open software suite.
+
         14. seqtk - Li, H. (2012). seqtk Toolkit for processing sequences in FASTA/Q formats. GitHub, 767, 69.
+
         15. UNOISE algorithm - R.C. Edgar (2016). UNOISE2: improved error-correction for Illumina 16S and ITS amplicon sequencing, https://doi.org/10.1101/081257
