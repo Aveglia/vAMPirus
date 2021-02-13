@@ -306,12 +306,8 @@ log.info """\
         Database directory:          ${params.dbdir}
         Database name:               ${params.dbname}
         Metadata file:               ${params.metadata}
-
-        Alright, lets get to it...
-
         """.stripIndent()
 
-// read files from here. This will be changed!
 if (params.readsTest) {
     println("\n\tRunning vAMPirus with TEST dataset\n")
     Channel
@@ -319,16 +315,15 @@ if (params.readsTest) {
         .ifEmpty{ exit 1, "params.readTest was empty - no input files supplied" }
         .into{ reads_ch; reads_qc_ch }
 } else {
-    println("\n\tEverything good to go, lets run vAMPirus!\n")
+    println("\n\tEverything ready for launch.\n")
     Channel
         .fromFilePairs("${params.reads}", checkIfExists: true)
         .into{ reads_ch; reads_qc_ch }
 }
 
-
 if (params.Analyze) {
 
-    println("\n\tRunning vAMPirus \n")
+    println("\n\tRunning vAMPirus Analyze pipeline - This might take a while, check out Nextflow tower (tower.nf) to remotely monitor the run.\n")
 
     if (!params.skipTaxonomy) {
 
@@ -804,7 +799,7 @@ if (params.Analyze) {
                                         echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
                                         echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                        echo ">OTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                        echo ">ncASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     else
@@ -820,7 +815,7 @@ if (params.Analyze) {
                                         echo "NO_HIT" >> length.list
                                         virus="NO"
                                         gene="HIT"
-                                        echo ">OTU\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                        echo ">ncASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                         j=\$((\$j+1))
                                         echo "\$s done."
                                     fi
@@ -1024,8 +1019,8 @@ if (params.Analyze) {
                             touch new_"\$name"_asvnames.txt
                             j=1
                             if [ `echo \${filename} | grep -c "ncASV"` -eq 1 ];then
-                                echo "[ncASV#]" > otu.list
-                                echo "[ncASV sequence length]" > length.list
+                                echo "[ASV#]" > otu.list
+                                echo "[ASV sequence length]" > length.list
                                 for s in \$(cat seqids.lst);do
                                     echo "Checking for \$s hit in diamond output"
                                     if [[ ${params.refseq} == "T" ]];then
@@ -1046,7 +1041,7 @@ if (params.Analyze) {
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                            echo ">ncASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                            echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             j=\$((\$j+1))
                                             echo "\$s done."
                                         else
@@ -1062,7 +1057,7 @@ if (params.Analyze) {
                                             echo "NO_HIT" >> length.list
                                             virus="NO"
                                             gene="HIT"
-                                            echo ">ncASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                            echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             j=\$((\$j+1))
                                             echo "\$s done."
                                         fi
@@ -1558,6 +1553,7 @@ if (params.Analyze) {
 
             script:
                 """
+                set +e
                 cp ${params.vampdir}/bin/rename_seq.py .
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${prot} >${params.projtag}_filtered_translations.fasta
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${prot} >${params.projtag}_problematic_translations.fasta
@@ -1964,6 +1960,7 @@ if (params.Analyze) {
             // add awk script to count seqs
             if (params.clusterAAIDlist) {
                 """
+                set +e
                 cp ${params.vampdir}/bin/rename_seq.py .
                 for id in `echo ${params.clusterAAIDlist} | tr "," "\\n"`;do
                         awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
@@ -2019,8 +2016,8 @@ if (params.Analyze) {
                         done
                         paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pcASVCluster\${id}_summary.csv
                         ./rename_seq.py ${params.projtag}_pcASV\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta
-                        stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4
-                        stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4
+                        stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4 overwrite=true
+                        stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4 overwrite=true
                         awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pcASV\${id}_problematic_translations.fasta
                         if [ `wc -l ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                             grep ">" ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
@@ -2037,6 +2034,7 @@ if (params.Analyze) {
                 """
             } else if (params.clusterAAID) {
                 """
+                set +e
                 cp ${params.vampdir}/bin/rename_seq.py .
                 id=${params.clusterAAID}
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
@@ -3353,6 +3351,7 @@ if (params.Analyze) {
         script:
         // add awk script to count seqs
             """
+            set +e
             cp ${params.vampdir}/bin/rename_seq.py .
             for id in `echo ${params.datacheckaaIDlist} | tr "," "\\n"`;do
                 if [ \${id} == ".55" ];then
@@ -3415,8 +3414,8 @@ if (params.Analyze) {
                 done
                 paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pcASVCluster\${id}_summary.csv
                 ./rename_seq.py ${params.projtag}_pcASV\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta
-                stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4
-                stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4
+                stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4 overwrite=true
+                stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4 overwrite=true
                 awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pcASV\${id}_problematic_translations.fasta
                 if [ `wc -l ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                     grep ">" ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
