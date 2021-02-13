@@ -15,135 +15,186 @@ def helpMessage() {
                                                                          Quick help, use --fullHelp for usage examples for vAMPirus v${workflow.manifest.version}
     ==============================================================================================================================================================================================
 
-        Steps:
-            1- Run the `vampirus_startup.sh` to install dependencies, then test installation by running with test dataset provided.
+            Steps:
+                1- Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases
 
-            2- Edit vampirus.config file for your analysis/data.
+                2- Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see STARTUP_HELP.txt for test commands and other examples)
 
-            3. Run vAMPirus --DataCheck and adjust parameters where you see fit.
+                3. Edit parameters in vampirus.config file
 
-            4. Run vAMPirus --Analyze
+                4. Launch the DataCheck pipeline to get summary information about your dataset
 
-            Example usage:
+                5. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length)
 
-                nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze
+                6. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
 
-        Help options:
+                7. Explore results directories and produced final reports
 
-                --help                          Print help information
 
-                --fullHelp                      Print even more help information
+            Usage:
 
-        Mandatory arguments (choose one):
+                    nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV]
 
-                --Analyze                       Run absolutely everything
 
-                --DataCheck                     Assess how data performs with during processing and clustering
+            --Help options--
 
-        Clustering arguments:
+                    --help                          Print help information
 
-                --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
+                    --fullHelp                      Print even more help information
 
-                --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
-        Skip arguments:
+            --Mandatory arguments (choose one)--
 
-                --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
+                    --Analyze                       Run absolutely everything
 
-                --skipFastQC                    Set this option to skiip FastQC steps in the pipeline
+                    --DataCheck                     Assess how data performs with during processing and clustering
 
-                --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
 
-                --skipPrimerRemoval             Set this option to skup Skip primer removal process
+            --ASV clustering arguments--
 
-                --skipAminoTyping               Set this option to skip AminoTyping processes
+                    --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
-                --skipTaxonomy                  Set this option to skip taxonomy assignment processes
+                    --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
-                --skipPhylogeny                 Set this option to skip phylogeny processes
 
-                --skipReport                    Set this option to skip report generation
+            --Skip options--
 
-        Analysis-specific options (will override information in the config file):
+                    --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
 
-            General information
+                    --skipFastQC                    Set this option to skiip FastQC steps in the pipeline
 
-                --projtag                       Set project name to be used as a prefix for output files
+                    --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
 
-                --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
+                    --skipPrimerRemoval             Set this option to skup Skip primer removal process
 
-                --mypwd                         Path to working directory that contains (i) the vAMPirus.nf script, (ii) the nextflow.config, and (iii) directory containing read libraries
+                    --skipAminoTyping               Set this option to skip AminoTyping processes
 
-                --email                         Your email for notifications for when jobs are submitted and completed
+                    --skipTaxonomy                  Set this option to skip taxonomy assignment processes
 
-                --reads                         Path to directory containing read libraries, must have *R{1,2}.fast{a,q} in the name
+                    --skipPhylogeny                 Set this option to skip phylogeny processes
 
-                --outdir                        Name of directory to store output of vAMPirus run
+      **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
-        Merged read length filtering options
+           --Project/analysis information--
 
-                --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
+                    --projtag                       Set project name to be used as a prefix for output files
 
-                --maxLen                        Maximum merged read length - reads with length equal to the specified max read length will be used to identifying unique sequences and  subsequent Amplicon Sequence Variant (ASV) analysis
+                    --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
 
-                --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
+                    --reads                         Path to directory containing read libraries, must have *R{1,2}* in the library names
 
-        Primer Removal options
+                    --workingdir                    Path to working directory where Nextflow will put all Nextflow and vAMPirus generated output files
 
-                --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences  #,#
+                    --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
-                --fwd                           Specify forward primer sequence pecific primer sequence on forward reads to be removed
 
-                --rev                           Reverse primer sequence
+            --Merged read length filtering--
 
-        Amplicon analysis options
+                    --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
 
-                --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
+                    --maxLen                        Maximum merged read length - reads with length equal to the specified max read length will be used to identifying unique sequences and  subsequent Amplicon Sequence Variant (ASV) analysis
 
-                --minSize                       Minimum size or representation for sequence to be considered in ASV generation
+                    --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
 
-                --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
 
-                --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+            --Primer removal--
 
-                --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
+                General primer removal parameters
 
-                --clusterAAIDlist               With --pcASV set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
+                    --primerLength                  Use this option to set the max primer length to restrict bbduk.sh primer trimming to the first x number of bases
 
-                --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
+                    --maxkmer                       Maximum kmer length for bbduk.sh to use for primer detection and removal (must be shorter than your primer length; default = 13)
 
+                    --minkmer                       Minimum kmer length for primer removal (default = 3)
 
-        Counts table options
+                    --minilen                       Minimum read length after adapter and primer removal (default = 200)
 
-                --asvcountID                    Similarity ID to use for ASV counts
+                Single primer set removal-
 
-                --ProtCountID                   Minimum amino acid sequence similarity for hit to count
+                    --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
 
-                --ProtCountsLength              Minimum alignment length for hit to count
+                    --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
 
+                    --rev                           Reverse primer sequence for reads to be detected and removed from reads (must specify forward sequence if providing reverse)
 
-        Taxonomy assignment parameters
+                Multiple primer set removal-
 
-                --dbname                       Specify name of database to use for analysis
+                    --multi                         Use this option to signal multiple primer sequence removal within the specified pipeline
 
-                --dbdir                        Path to Directory where database is being stored
+                    --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
 
-                --refseq                       Toggle use of RefSeq header format for Taxonomy assignment; default is Reverence Viral DataBase (RVDB)
 
-                --Bitscore                     Set minimum bitscore for Diamond command
+            --Amplicon Sequence Variant (ASV) genration and clustering--
 
-        Phylogeny analysis parameters
+                    --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
-                --ModelTnt                     Signals for vAMPirus to use nucleotide substitution model produced by ModelTest-NG
+                    --minSize                       Minimum size or representation for sequence to be considered in ASV generation
 
-                --ModelTaa                     Signals for vAMPirus to use amino acid substitution model produced by ModelTest-NG
+                    --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
 
-                --parametric                   Set to have IQ-TREE to perform parametric bootstrapping during tree making
+                    --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
 
-                --nonparametric                Set to have IQ-TREE to perform non-parametric bootstrapping during tree making
+                    --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
 
-                --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
+                    --clusterAAIDlist               With --pcASV set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
+                    --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
+
+
+           --Counts table generation--
+
+                    --asvcountID                    Similarity ID to use for ASV counts
+
+                    --ProtCountID                   Minimum amino acid sequence similarity for hit to count
+
+                    --ProtCountsLength              Minimum alignment length for hit to count
+
+                    --ProtCountsBit                 Minimum bitscore for hit to be counted
+
+
+            --Taxonomy assignment parameters--
+
+                    --dbname                       Specify name of database to use for analysis
+
+                    --dbdir                        Path to Directory where database is being stored
+
+                    --refseq                       Set "--refseq T" to toggle use of RefSeq header format; default is "F" to use Reverence Viral DataBase (RVDB) header
+
+                    --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
+
+                    --minID                        Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+
+                    --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+
+
+            --Phylogeny analysis parameters--
+
+              Setting customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D") - might be easier to set in the vampirus.config file at lines 108/109
+
+                    --iqCustomnt                   Use option to set custom options to use in all IQTREE analyses with nuceoltide sequences
+
+                    --iqCustomaa                   Use option to set custom options to use in all IQTREE analyses with amino acid sequences
+
+              These options below you can set at the command, for example, to set to use model from ModelTest-NG with parametric bootstrapping --ModelTnt --ModelTaa --parametric
+
+                    --ModelTnt=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with nuceoltide sequences (Default is IQ-TREE will do automatic model testing with ModelFinder Plus)
+
+                    --ModelTaa=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with amino acid sequences
+
+                    --parametric                   Set to use parametric bootstrapping in IQTREE analyses
+
+                    --nonparametric                Set to use parametric bootstrapping in IQTREE analyses
+
+                    --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
+
+
+              --Statistics options--
+
+                    --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
+
+                    --minimumCounts                Minimum number of hit counts for a sample to have to be included in the downstream statistical analyses and report generation
+
+                    --trymax                       Maximum number of iterations performed by metaMDS
 
         |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     """.stripIndent()
@@ -155,37 +206,48 @@ def fullHelpMessage() {
     ==============================================================================================================================================================================================
 
         Steps:
-            1- Run the `precheck_TransPi.sh` to install tools, set up the databases and directories for
+            1- Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases
 
-            2- Run vAMPirusv0.1.0.sh
+            2- Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see STARTUP_HELP.txt for test commands and other examples)
 
-            Usage:
+            3. Edit parameters in vampirus.config file
 
-                nextflow run vAMPirusv0.1.0.sh
+            4. Launch the DataCheck pipeline to get summary information about your dataset
 
-        Help options:
+            5. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length)
+
+            6. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
+
+            7. Explore results directories and produced final reports
+
+
+        Usage:
+
+                nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV]
+
+
+        --Help options--
 
                 --help                          Print help information
 
                 --fullHelp                      Print even more help information
 
-        Mandatory arguments (choose one):
+
+        --Mandatory arguments (choose one)--
 
                 --Analyze                       Run absolutely everything
 
-                --dataCheck                     Assess how data performs with during processing and clustering
+                --DataCheck                     Assess how data performs with during processing and clustering
 
-                --generateAAcounts              Provide vAMPirus with a translated fasta file and the merged reads you would like mapped and it will generate a protein counts file for you
 
-                --generateReport                Provide vAMPirus with paths to necessary files to generate a vAMPirus report
-
-        Clustering arguments:
+        --ASV clustering arguments--
 
                 --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
                 --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
-        Skip arguments:
+
+        --Skip options--
 
                 --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
 
@@ -201,21 +263,22 @@ def fullHelpMessage() {
 
                 --skipPhylogeny                 Set this option to skip phylogeny processes
 
-        Analysis-specific options (will override information in the config file):
+  **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
-            General information
+       --Project/analysis information--
 
                 --projtag                       Set project name to be used as a prefix for output files
 
                 --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
 
-                --mypwd                         Path to working directory that contains (i) the vAMPirus.nf script, (ii) the nextflow.config, and (iii) directory containing read libraries
+                --reads                         Path to directory containing read libraries, must have *R{1,2}* in the library names
 
-                --reads                         Path to directory containing read libraries, must have *R{1,2}.fast{a,q} in the name
+                --workingdir                    Path to working directory where Nextflow will put all Nextflow and vAMPirus generated output files
 
-                --outdir                        Name of directory to store output of vAMPirus run
+                --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
-        Merged read length filtering options
+
+        --Merged read length filtering--
 
                 --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
 
@@ -223,15 +286,35 @@ def fullHelpMessage() {
 
                 --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
 
-        Primer Removal options
 
-                --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences  #,#
+        --Primer removal--
 
-                --fwd                           Specify forward primer sequence pecific primer sequence on forward reads to be removed
+            General primer removal parameters
 
-                --rev                           Reverse primer sequence
+                --primerLength                  Use this option to set the max primer length to restrict bbduk.sh primer trimming to the first x number of bases
 
-        Amplicon analysis options
+                --maxkmer                       Maximum kmer length for bbduk.sh to use for primer detection and removal (must be shorter than your primer length; default = 13)
+
+                --minkmer                       Minimum kmer length for primer removal (default = 3)
+
+                --minilen                       Minimum read length after adapter and primer removal (default = 200)
+
+            Single primer set removal-
+
+                --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
+
+                --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
+
+                --rev                           Reverse primer sequence for reads to be detected and removed from reads (must specify forward sequence if providing reverse)
+
+            Multiple primer set removal-
+
+                --multi                         Use this option to signal multiple primer sequence removal within the specified pipeline
+
+                --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
+
+
+        --Amplicon Sequence Variant (ASV) genration and clustering--
 
                 --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
@@ -248,7 +331,7 @@ def fullHelpMessage() {
                 --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
 
-        Counts table options
+       --Counts table generation--
 
                 --asvcountID                    Similarity ID to use for ASV counts
 
@@ -256,31 +339,99 @@ def fullHelpMessage() {
 
                 --ProtCountsLength              Minimum alignment length for hit to count
 
+                --ProtCountsBit                 Minimum bitscore for hit to be counted
 
-        Taxonomy assignment parameters
+
+        --Taxonomy assignment parameters--
 
                 --dbname                       Specify name of database to use for analysis
 
                 --dbdir                        Path to Directory where database is being stored
 
-                --refseq                       Toggle use of RefSeq header format; default is Reverence Viral DataBase (RVDB)
+                --refseq                       Set "--refseq T" to toggle use of RefSeq header format; default is "F" to use Reverence Viral DataBase (RVDB) header
 
-                --Bitscore                     Set minimum bitscore for Diamond command
+                --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
 
-        Phylogeny analysis parameters
+                --minID                        Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
 
-                --ntmodeltrax                 Use this option to use the nucleotide model of substitution determined by ModelTest-NG
+                --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
 
-                --ptmodeltrax                 Use this option to use the amino acid model of substitution determined by ModelTest-NG
+
+        --Phylogeny analysis parameters--
+
+          Setting customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D") - might be easier to set in the vampirus.config file at lines 108/109
+
+                --iqCustomnt                   Use option to set custom options to use in all IQTREE analyses with nuceoltide sequences
+
+                --iqCustomaa                   Use option to set custom options to use in all IQTREE analyses with amino acid sequences
+
+          These options below you can set at the command, for example, to set to use model from ModelTest-NG with parametric bootstrapping --ModelTnt --ModelTaa --parametric
+
+                --ModelTnt=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with nuceoltide sequences (Default is IQ-TREE will do automatic model testing with ModelFinder Plus)
+
+                --ModelTaa=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with amino acid sequences
+
+                --parametric                   Set to use parametric bootstrapping in IQTREE analyses
+
+                --nonparametric                Set to use parametric bootstrapping in IQTREE analyses
+
+                --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
+
+
+          --Statistics options--
+
+                --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
+
+                --minimumCounts                Minimum number of hit counts for a sample to have to be included in the downstream statistical analyses and report generation
+
+                --trymax                       Maximum number of iterations performed by metaMDS
 
 
         |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
         #################################################################################################
 
-                                  Various examples on how to deploy vAMPirus
+                            Various example launch commands for deploying vAMPirus
 
         #################################################################################################
 
+
+        DataCheck pipeline =>
+
+        Example 1. Launching the vAMPirus DataCheck pipeline using conda
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck
+
+        Example 2. Launching the vAMPirus DataCheck pipeline using Singularity and multiple primer removal with the path to the fasta file with the primer sequences set in the launch command
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile singularity --DataCheck --multi --primers /PATH/TO/PRIMERs.fa
+
+        Example 3. Launching the vAMPirus DataCheck pipeline with primer removal by global trimming of 20 bp from forward reads and 26 bp from reverse reads
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --GlobTrim 20,26
+
+
+        Analyze pipeline =>
+
+        Example 4. Launching the vAMPirus Analyze pipeline with singularity with ASV and AminoType generation with all accesory analyses (taxonomy assignment, EMBOSS, IQTREE, statistics)
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile singularity --Analyze --stats run
+
+        Example 5. Launching the vAMPirus Analyze pipeline with conda to perform multiple primer removal and protein-based clustering of ASVs, but skip most of the extra analyses
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --pcASV --skipPhylogeny --skipEMBOSS --skipTaxonomy --skipReport
+
+        Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV-related results
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run
+
+
+        Resuming analyses =>
+
+        If an analysis is interupted, you can use Nextflows "-resume" option that will start from the last cached "check point".
+
+        For example if the analysis launched with the command from Example 6 above was interupted, all you would need to do is add the "-resume" to the end of the command like so:
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run -resume
 
 
     """.stripIndent()
@@ -726,7 +877,7 @@ if (params.Analyze) {
                     headers="headers.list"
                     for filename in ${notus};do
                         name=\$(ls \${filename} | awk -F ".fasta" '{print \$1}')
-                        diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                        diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" > access.list
                         echo "[e-value]" > evalue.list
@@ -853,7 +1004,7 @@ if (params.Analyze) {
                     done
                     for filename in ${asvs};do
                         name=\$(ls \${filename} | awk -F ".fasta" '{print \$1}')
-                        diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                        diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" > access.list
                         echo "[e-value]" > evalue.list
@@ -1006,7 +1157,7 @@ if (params.Analyze) {
                         headers="headers.list"
                         for filename in ${reads};do
                             name=\$(ls \${filename} | awk -F ".fasta" '{print \$1}')
-                            diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                            diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             echo "Preparing lists to generate summary .csv's"
                             echo "[Best hit accession number]" > access.list
                             echo "[e-value]" > evalue.list
@@ -1690,7 +1841,7 @@ if (params.Analyze) {
                     grep ">" \${virdb} >> headers.list
                     headers="headers.list"
                     name=\$(ls ${reads} | awk -F "_noTaxonomy" '{print \$1}')
-                    diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                    diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                     echo "Preparing lists to generate summary .csv's"
                     echo "[Best hit accession number]" >access.list
                     echo "[pcASV sequence length]" >length.list
@@ -1887,7 +2038,7 @@ if (params.Analyze) {
                 """
                 set +e
                 diamond makedb --in ${fasta} --db ${fasta}
-                diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_protCounts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_protCounts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1 --max-hsps 1
                 echo "OTU_ID" >tmp.col1.txt
                 echo "Generating sample id list"
                 grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
@@ -2136,7 +2287,7 @@ if (params.Analyze) {
                     headers="headers.list"
                     for filename in ${reads};do
                         name=\$(ls \${filename} | awk -F "_noTax" '{print \$1}')
-                        diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                        diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" >access.list
                         echo "[pcASV sequence length]" >length.list
@@ -2484,7 +2635,7 @@ if (params.Analyze) {
                     headers="headers.list"
                     for filename in ${reads};do
                         name=\$(ls \${filename} | awk -F ".fasta" '{print \$1}')
-                        diamond blastp -q \${filename} -d \${virdb} -p ${task.cpus} --min-score 50 --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1
+                        diamond blastp -q \${filename} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" >access.list
                         echo "[pcASV sequence length]" >length.list
@@ -2684,7 +2835,7 @@ if (params.Analyze) {
                 for filename in ${fasta};do
                     potu="\$( echo \${filename} | awk -F "_" '{print \$3}')"
                     diamond makedb --in \${filename} --db \${filename}
-                    diamond blastx -q ${merged} -d \${filename} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                    diamond blastx -q ${merged} -d \${filename} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --more-sensitive -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1 --max-hsps 1
                     echo "OTU_ID" >tmp.col1.txt
                     echo "Generating sample id list"
                     grep ">" \${filename} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
