@@ -312,7 +312,7 @@ postlhp
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Clustering Statistics</h2></div>
 <br>
 
-### Number of nOTUs per clustering percentage
+### Number of ncASVs per clustering percentage
 
 <br>
 
@@ -320,7 +320,7 @@ postlhp
 nn=read.csv(params$number_per_percentage_nucl, header=TRUE)
 #nn=read.csv("number_per_percentage_nucl.csv", header=T)
 nnp <- plot_ly(nn, x=nn[,1], y=nn[,2], type="scatter", mode = 'lines+markers', marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of nOTU: %{y}','<extra></extra>'))
+               width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of ncASVs: %{y}','<extra></extra>'))
 nnp <- nnp %>% layout(yaxis = list(title = "Number of nOTU"))
 nnp <- nnp %>% layout(xaxis = list(title = "Clustering ID %"))
 nnp
@@ -328,7 +328,7 @@ nnp
 NOTE: The "1" on the x-axis represents number of ASVs identified by vsearch
 <br>
 
-### Number of pOTUs per clustering percentage
+### Number of pcASVs per clustering percentage
 
 <br>
 
@@ -336,7 +336,7 @@ NOTE: The "1" on the x-axis represents number of ASVs identified by vsearch
 pn=read.csv(params$number_per_percentage_prot, header=TRUE)
 #pn=read.csv("number_per_percentage_prot.csv", header=T)
 pnp <- plot_ly(pn, x=pn[,1], y=pn[,2], type="scatter", mode = 'lines+markers', marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of pOTU: %{y}','<extra></extra>'))
+               width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of pcASVs: %{y}','<extra></extra>'))
 pnp <- pnp %>% layout(yaxis = list(title = "Number of pOTU"))
 pnp <- pnp %>% layout(xaxis = list(title = "Clustering ID %"))
 pnp
