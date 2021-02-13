@@ -4,8 +4,8 @@
 
 # Table of contents
 
-            * [Quick intro](#Quick-intro)
-                * [Contact/support](#Contact/support)  
+* [Quick intro](#Quick-intro)
+  * [Contact/support](#Contact/support)  
                                 
 # Quick intro
 

@@ -2916,7 +2916,7 @@ if (params.Analyze) {
                     ${counts} \
                     ${params.metadata} \
                     ${params.minimumCounts} \
-        	        ${matrix} \
+        	          ${matrix} \
                     ${taxonomy} \
                     ${params.trymax} \
                     ${params.stats}
