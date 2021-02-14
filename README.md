@@ -132,7 +132,7 @@ NOTE => If using Singularity, when you run the test command calling for singular
 
 Launch commands for testing (you do not need to edit anything in the config files for test commands):
 
-DataCheck test =>
+### DataCheck test =>
 
       `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck`
 
@@ -140,7 +140,7 @@ OR
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck`
 
-Analyze test =>
+### Analyze test =>
 
       `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run`
 
@@ -154,7 +154,7 @@ OR
 If you done the setup and confirmed installation success with the test commands, you are good to get going with your own data. Before getting started edit the configuration file with the parameters and other options you plan to use.
 
 Here are some example vAMPirus launch commands:
-DataCheck pipeline =>
+### DataCheck pipeline =>
 
 Example 1. Launching the vAMPirus DataCheck pipeline using conda
 
@@ -169,7 +169,7 @@ Example 3. Launching the vAMPirus DataCheck pipeline with primer removal by glob
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --GlobTrim 20,26`
 
 
-Analyze pipeline =>
+### Analyze pipeline =>
 
 Example 4. Launching the vAMPirus Analyze pipeline with singularity with ASV and AminoType generation with all accesory analyses (taxonomy assignment, EMBOSS, IQTREE, statistics)
 
@@ -184,7 +184,7 @@ Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV-re
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run`
 
 
-Resuming analyses =>
+##Resuming analyses =>
 
 If an analysis is interupted, you can use Nextflows "-resume" option that will start from the last cached "check point".
 
