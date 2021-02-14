@@ -45,7 +45,7 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
     5. Launch the DataCheck pipeline with your dataset and adjust parameters if necessary
     6. Launch the Analyze pipeline with your dataset
 
-### Dependencies (See How to cite section)    
+### Dependencies (see Who to cite section)    
 
     1. Python versions 3.6/2.7
     2. Diamond version 0.9.30
