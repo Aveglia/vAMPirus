@@ -13,7 +13,7 @@
   * [Setting up vAMPirus dependencies](##Setting-up-vAMPirus-dependencies)
 * [Testing vAMPirus install](#Testing-vAMPirus-installation)
 * [Running vAMPirus](#Running-vAMPirus)
-* [How to cite](#How-to-cite)
+* [Who to cite](#Who-to-cite)
 # Quick intro
 
 Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated virus amplicon sequencing analysis program.
@@ -190,7 +190,7 @@ Here are some example vAMPirus launch commands:
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run -resume`
 
 
-# How to cite:
+# Who to cite:
 
     If you do use vAMPirus for your analyses, please cite the following ->
 
