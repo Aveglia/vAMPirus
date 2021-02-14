@@ -14,6 +14,8 @@
 * [Testing vAMPirus install](#Testing-vAMPirus-installation)
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
+
+
 # Quick intro
 
 Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated virus amplicon sequencing analysis program.
@@ -27,16 +29,18 @@ The vAMPirus program contains two different pipelines:
 
 NOTE => This is a more brief overview of how to install and set up vAMPirus, for more detail see the wiki.
 
+
 ## Contact/support:
 
 If you have a feature request or any feedback/questions, feel free to email vAMPirusHelp@gmail.com or you can open an Issue on GitHub.
+
 
 # Getting started
 
 ## Quick order of operations
 
-    1. Clone vAMPirus from github  -  `git clone https://github.com/Aveglia/vAMPirus.git`
-    2. Execute the vampirus_startup.sh script to install dependencies and any databases specified - `cd ./vAMPirus; bash vampirus_startup.sh -h`
+    1. Clone vAMPirus from github
+    2. Execute the vampirus_startup.sh script to install dependencies and any databases specified
     3. Test installation with supplied test dataset
     5. Launch the DataCheck pipeline with your dataset and adjust parameters if necessary
     6. Launch the Analyze pipeline with your dataset
@@ -95,7 +99,7 @@ You can also use the startup script to install different databases to use for vA
 To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option.
 If we look at the script usage:
 
-General execution:
+`General execution:
 
 vampirus_startup.sh -h [-d 1|2|3|4] [-s]
 
@@ -110,7 +114,7 @@ vampirus_startup.sh -h [-d 1|2|3|4] [-s]
                                                     3 - Download only the complete NCBI NR protein database
                                                     4 - Download all three databases
 
-        [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
+        [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)`
 
 For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, run:
 
@@ -128,19 +132,19 @@ NOTE => If using Singularity, when you run the test command calling for singular
 
 Launch commands for testing (you do not need to edit anything in the config files for test commands):
 
-  DataCheck test =>
+DataCheck test =>
 
       `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck`
 
-      OR
+OR
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck`
 
-  Analyze test =>
+Analyze test =>
 
       `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run`
 
-      OR
+OR
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run`
 
@@ -150,42 +154,41 @@ Launch commands for testing (you do not need to edit anything in the config file
 If you done the setup and confirmed installation success with the test commands, you are good to get going with your own data. Before getting started edit the configuration file with the parameters and other options you plan to use.
 
 Here are some example vAMPirus launch commands:
+DataCheck pipeline =>
 
-  DataCheck pipeline =>
-
-  Example 1. Launching the vAMPirus DataCheck pipeline using conda
+Example 1. Launching the vAMPirus DataCheck pipeline using conda
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck`
 
-  Example 2. Launching the vAMPirus DataCheck pipeline using Singularity and multiple primer removal with the path to the fasta file with the primer sequences set in the launch command
+Example 2. Launching the vAMPirus DataCheck pipeline using Singularity and multiple primer removal with the path to the fasta file with the primer sequences set in the launch command
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile singularity --DataCheck --multi --primers /PATH/TO/PRIMERs.fa`
 
-  Example 3. Launching the vAMPirus DataCheck pipeline with primer removal by global trimming of 20 bp from forward reads and 26 bp from reverse reads
+Example 3. Launching the vAMPirus DataCheck pipeline with primer removal by global trimming of 20 bp from forward reads and 26 bp from reverse reads
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --GlobTrim 20,26`
 
 
-  Analyze pipeline =>
+Analyze pipeline =>
 
-  Example 4. Launching the vAMPirus Analyze pipeline with singularity with ASV and AminoType generation with all accesory analyses (taxonomy assignment, EMBOSS, IQTREE, statistics)
+Example 4. Launching the vAMPirus Analyze pipeline with singularity with ASV and AminoType generation with all accesory analyses (taxonomy assignment, EMBOSS, IQTREE, statistics)
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile singularity --Analyze --stats run`
 
-  Example 5. Launching the vAMPirus Analyze pipeline with conda to perform multiple primer removal and protein-based clustering of ASVs, but skip most of the extra analyses
+Example 5. Launching the vAMPirus Analyze pipeline with conda to perform multiple primer removal and protein-based clustering of ASVs, but skip most of the extra analyses
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --pcASV --skipPhylogeny --skipEMBOSS --skipTaxonomy --skipReport`
 
-  Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV-related results
+Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV-related results
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run`
 
 
-  Resuming analyses =>
+Resuming analyses =>
 
-  If an analysis is interupted, you can use Nextflows "-resume" option that will start from the last cached "check point".
+If an analysis is interupted, you can use Nextflows "-resume" option that will start from the last cached "check point".
 
-  For example if the analysis launched with the command from Example 6 above was interupted, all you would need to do is add the "-resume" to the end of the command like so:
+For example if the analysis launched with the command from Example 6 above was interupted, all you would need to do is add the "-resume" to the end of the command like so:
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run -resume`
 
