@@ -184,7 +184,7 @@ Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV-re
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run`
 
 
-##Resuming analyses =>
+## Resuming analyses =>
 
 If an analysis is interupted, you can use Nextflows "-resume" option that will start from the last cached "check point".
 
