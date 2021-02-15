@@ -33,5 +33,6 @@ dependencies:
   - r-cowplot=1.0.0
   - r-scales=1.1.1
   - bioconductor-ggtree=2.2.1
-  - bioconductor-biocparallel=1.22.0
+  - bioconductor-biocparallel=1.24.0
   - pigz=2.4
+  - r-biocmanager=1.30.10
