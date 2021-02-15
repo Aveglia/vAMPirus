@@ -57,31 +57,154 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 ## Order of operations
 
-    1. Clone vAMPirus from github  -  `git clone https://github.com/Aveglia/vAMPirus.git`
+1. Clone vAMPirus from github   
 
-    2. Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases
+2. Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases
 
-    3. Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see STARTUP_HELP.txt for test commands and other examples)
+3. Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see STARTUP_HELP.txt for test commands and other examples)
 
-    4. Edit parameters in vampirus.config file
+4. Edit parameters in vampirus.config file
 
-    5. Launch the DataCheck pipeline to get summary information about your dataset
+5. Launch the DataCheck pipeline to get summary information about your dataset
 
-    6. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length)
+6. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length)
 
-    7. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
+7. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
 
-    8. Explore results directories and produced final reports
+8. Explore results directories and produced final reports
+
 
 # Installing vAMPirus
 
 Clone the most recent version of vAMPirus from github using:
 
-`git clone https://github.com/Aveglia/vAMPirus.git`
+    git clone https://github.com/Aveglia/vAMPirus.git
+
+
+vAMPirus is integrated with Nextflow which relies on Java being installed on your system.
+
+    If you know you do not have it installed, see here for instructions on installing Java for different operating softwares -> https://opensource.com/article/19/11/install-java-linux
+
+    If you are unsure, you can check using:
+
+
+  which java
+
+    or
+
+
+  java -version
+
+    The output from either of those commands should let you know if you have Java on your system.
+
+
+## MacOS users
+
+If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment with conda or Singularity to use the vAMPirus Docker image. You can try without this, but you are more likely to run into errors.
+
+vAMPirus was developed on a Centos7/8 operating system so we will go through how to set up a Centos7 Vagrant virtual environment with Virtual Box.
+
+A few steps are a little long, but this is a one time process if done successfully.
+
+### Installing VM
+
+There are other ways to do this so if you are more comfortable creating a virtual environment another way, please do so.
+
+#### Install Homebrew
+
+Lets first install Homebrew for your system:
+
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"  
+
+There should be a message once the installation of the shallow-clone completed.
+
+This message provides a git command that you will need to execute to complete the installation (this step might take a while):
+
+
+
+then execute:
+
+    brew doctor
+
+    brew update
+
+(Information from  https://treehouse.github.io/installation-guides/mac/homebrew)
+
+Now we should be good to use Homebrew to install Vagrant and VirtualBox to set up the VPN.
+
+
+#### Install Vagrant and Virtual Box
+
+NOTE=> In this part of the setup, you will likely get an error where Oracle was denied permission to install programs. You will need to go to System Preferences -> Security and Privacy and allow Oracle permission to download programs.
+
+To learn more about Vagrant, visit their website - https://www.vagrantup.com/intro also look here http://sourabhbajaj.com/mac-setup/Vagrant/README.html
+
+First install cask:
+
+    brew install cask
+
+Then vagrant:
+
+    brew install vagrant
+
+vagrant-manager:
+
+    brew install vagrant-manager
+
+Virtual Box (WILL CAUSE ERROR IF ORACLE NOT GIVEN PERMISSION TO INSTALL DEPENDENCIES - SEE NOTE ABOVE):
+
+    break install virtualbox
+
+Alright, if you notice no errors during installation, you should be good to go and create the Centos 7 environment
+
+
+#### Building virtual environment
+
+See https://gist.github.com/jakebrinkmann/4ae0a59bf6f3b0b4929499d2ab832fbd and http://sourabhbajaj.com/mac-setup/Vagrant/README.html to provide better context to commands below.
+
+Lets make a directory for the Vagrant environment:
+
+    mkdir centos7_vampirus
+
+Lets move into the new directory:
+
+    cd ./centos7_vampirus
+
+Now lets configure the Vagrant file:
+
+    vagrant init centos/7
+
+Now there should be a Vagrantfile now in your current directory.
+
+
+
+
+then:
+
+    vagrant up
+
+At this point, we can now connect to our cento7 (which is the default for vagrant now) virtual environment with:
+
+    vagrant ssh
+
+You should now be in a fresh Centos7 virtual environment, almost done!
+
+#### Setting up the new Centos7 virtual environment
+
+Lets connect to our Centos7 virtual machine
+
+    vagrant ssh
+
+The first thing we will install is the core "Development tools" - https://www.cyberciti.biz/faq/centos-linux-install-gcc-c-c-compiler/
+
+    sudo yum -y group install "Development Tools"
+
+
 
 ## Setting up vAMPirus dependencies and checking installation
 
-To launch vAMPirus, you will need to have Nextflow (https://www.nextflow.io/) installed on your system. If you do not already, the vampirus_startup.sh script will install it for you.
+
+Once you have Java ready to go, you can run the vampirus_startup.sh script which will check for and install Nextflow for you.
 
 You will also need to decide whether you would like to set up and run vAMPirus with Anaconda/Miniconda OR with a container engine like Singularity.
 
@@ -91,15 +214,15 @@ If you plan to use Singularity, it will need to be installed separately prior to
 
 To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
 
-    `cd ./vAMPirus; ./vampirus_startup.sh -h`
+    cd ./vAMPirus; ./vampirus_startup.sh -h
 
 The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and will build the vAMPirus conda environment and the installation is complete.
 
 You can also use the startup script to install different databases to use for vAMPirus analyses, these include:
 
-    1. NCBIs Viral protein RefSeq database
-    2. The proteic version of the Reference Viral DataBase (RVDB) (See https://f1000research.com/articles/8-530)
-    3. The complete NCBI NR protein database
+1. NCBIs Viral protein RefSeq database
+2. The proteic version of the Reference Viral DataBase (RVDB) (See https://f1000research.com/articles/8-530)
+3. The complete NCBI NR protein database
 
 To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option.
 If we look at the script usage:
@@ -123,11 +246,11 @@ If we look at the script usage:
 
 For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, and check/install conda, run:
 
-    `./vampirus_startup.sh -d 1`
+    ./vampirus_startup.sh -d 1
 
 and if we wanted to do the same thing as above but skip the Conda check/installation, run:
 
-    `./vampirus_startup.sh -d 1 -s`
+    ./vampirus_startup.sh -d 1 -s
 
 It should be noted, that any protein database can be used, but it needs to be in fasta format and the headers for reference sequences need to match
 one of two patterns:
@@ -161,21 +284,38 @@ NOTE => If using Singularity, when you run the test command calling for singular
 
 Launch commands for testing (you do not need to edit anything in the config files for test commands):
 
+NOTE=> if using conda to run vAMPirus, you might need to activate the vAMPirus conda environment before launching with Nextflow to do so:
+
+    conda activate vAMPirus
+
+You can try to launch without the environment activated and if you see an error, its likely fixed by activating first.
+
+You can test without activating anything if you plan to run with Singularity.
+
 DataCheck test =>
 
-      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck`
+      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck
 
 OR
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck`
+      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck
 
 Analyze test =>
 
-      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run`
+      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run
 
 OR
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run`
+      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run
+
+### Resuming test analyses if you ran into an error
+
+If an analysis is interrupted, you can use Nextflows "-resume" option that will start from the last cached "check point".
+
+For example if the analysis launched with the test DataCheck launch command above was interrupted, all you would need to do is add the "-resume" to the end of the command like so:
+
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda,test --DataCheck -resume
+
 
 # Things to know before running vAMPirus
 
@@ -183,9 +323,13 @@ OR
 
 ### Nextflow
 
-vAMPirus is deployed using the Nextflow pipeline manager which "enables scalable and reproducible scientific workflows using software containers. It allows the
-adaptation of pipelines written in the most common scripting languages. Its fluent DSL simplifies the implementation and the deployment of complex parallel and reactive
-workflows on clouds and clusters." With vAMPirus being integrated into Nextflow it is just as easy to run vAMPirus on a HPC as it is to run locally on your personal machine.
+vAMPirus is deployed using the Nextflow pipeline manager which "enables scalable and reproducible scientific workflows using software containers. It allows the adaptation of pipelines written in the most common scripting languages. Its fluent DSL simplifies the implementation and the deployment of complex parallel and reactive workflows on clouds and clusters." With vAMPirus being integrated into Nextflow it is just as easy to run vAMPirus on a HPC as it is to run locally on your personal machine. It also makes it very easy to "resume" analyses after altering some parameters or even adding analyses.
+
+For example, say we want to first run the Analyze pipeline with only ASV-related analyses:
+
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --stats run --skipAminoTyping
+
+Once the analysis launched
 
 To learn more about Nextflow and to learn more how to monitor your submitted jobs from a web portal with Nextflow Tower, visit nextflow.io.
 
@@ -193,25 +337,20 @@ To learn more about Nextflow and to learn more how to monitor your submitted job
 
 Here is a basic "launch" command to deploy the vAMPirus pipeline:
 
-
-`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -profile [conda,singularity] --Analyze`
+       1             2                     3                       4                  5
+  nextflow run vAMPirus.nf -c vampirus.config -profile [conda,singularity] --Analyze|DataCheck
 
 In the command above, there are five necessary pieces of information needed to successfully launch the vAMPirus workflow:
 
-    1. The first is the location of the "nextflow" executable (could be in your $PATH, if so, just call like above).
+1. The first is the location of the "nextflow" executable (could be in your $PATH, if so, just call like above).
 
-    2. Second, you must tell Nextflow to "run" the vAMPirus program which is described in the "vAMPirusv0.1.0.nf" file. Depending on where you plan to submit this command,
-       you may have to specify the path to the vAMPirusv0.1.0.nf file or you can copy the file to your working directory.
+2. Second, you must tell Nextflow to "run" the vAMPirus program which is described in the "vAMPirus.nf" file. Depending on where you plan to submit this command, you may have to specify the path to the vAMPirus.nf file or you can copy the file to your working directory.
 
-    3. Next, we need to tell Nextflow what configuration file we would like to use for the vAMPirus run which is illustrated by the "-c vampirus.config" segment of the command.
-       We will talk more about the configuration file in the next section.
+3. Next, we need to tell Nextflow what configuration file we would like to use for the vAMPirus run which is illustrated by the "-c vampirus.config" segment of the command.
 
-    4. The next piece of information Nextflow needs is the environment to use for the vAMPirus workflow. The dependencies of vAMPirus are stored as a Docker image, Singulairy and Conda environment so we need
-       to tell Nextflow that we would like to run vAMPirus with conda and specifically the vAMPirus environment that was built when running the vampirus_startup.sh script during
-       installation. To find the path to the vAMPirus conda environment, you can run "conda info --envs" and this will give you the path to your conda environments.
+4. The next piece of information Nextflow needs is whether you plan to use the vAMPirus conda environment or the vAMPirus Docker container with singularity.
 
-    5. And finally, there are a few different mandatory arguments that one can set when running vAMPirus to specify the type of analysis the user would like to run (we will go over these
-       later in this documentation). In this example, we are using "--Analyze" which includes ASV and AminoType generation and all subsequent analyses (Taxonomy Assignment, Phylogeny, EMBOSS, etc.).
+5. Specify which vAMPirus pipeline you would like to launch
 
 Now that we have an understanding on how to deploy vAMPirus with Nextflow, lets look at how to set both analysis- and resource-related parameters for your vAMPirus runs.
 
@@ -252,9 +391,9 @@ Furthermore, the configuration file contains analysis-specific parameters AND re
 
 There are two ways to set parameters with Nextflow and vAMPirus:
 
-    1. Edit the config file:
+1. Edit the config file:
 
-        Here we have a block from the vampirus.config file that stores information related to your run:
+Here we have a block from the vampirus.config file that stores information related to your run:
 
             // Project/analyses- specific information
                 // Project name - Name that will be used as a prefix for naming files by vAMPirus
@@ -271,22 +410,20 @@ There are two ways to set parameters with Nextflow and vAMPirus:
                 // Directory to store output of vAMPirus analyses
                      outdir="results"
 
-        The first one in the block is the project tag or "projtag" which by default, if unchanged, will use the prefix "vAMPrun". To change this value, and any other parameter value, just edit right in the configuration
-        file so if you wanted to call the run "VirusRun1" you would edit the line to:
+The first one in the block is the project tag or "projtag" which by default, if unchanged, will use the prefix "vAMPrun". To change this value, and any other parameter value, just edit right in the configuration file so if you wanted to call the run "VirusRun1" you would edit the line to:
 
             // Project/analyses- specific information
                 // Project name - Name that will be used as a prefix for naming files by vAMPirus
                      projtag="VirusRun1"
 
 
-    2. Set the value within the launch command itself!
+2. Set the value within the launch command itself!
 
-        Instead of editing the configuration file directly, you could set parmeters within the launching command itself. So, for example, if we wanted to run the analysis with nucletide-based clustering of ASVs at 95%
-        similarity, you would do so like this:
+Instead of editing the configuration file directly, you could set parmeters within the launching command itself. So, for example, if we wanted to run the analysis with nucletide-based clustering of ASVs at 95%        similarity, you would do so like this:
 
-                `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --clusterNuclID .95`
+                nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclID .95
 
-        Here we use the "--Analyze" option that tells vAMPirus that we are ready to analyze soem data. Then the "--ncASV" argument with the "--clisterNuclID .95" tells vAMPirus we would like to cluster our ASVs based on 95% nucleotide similarity. The default ID value is stored at line 51 in the vampirus.config file (currently 85%), but as soon as you specify and provide a value in the command, the default value is overwritten.
+Here we use the "--Analyze" option that tells vAMPirus that we are ready to analyze soem data. Then the "--ncASV" argument with the "--clisterNuclID .95" tells vAMPirus we would like to cluster our ASVs based on 95% nucleotide similarity. The default ID value is stored at line 51 in the vampirus.config file (currently 85%), but as soon as you specify and provide a value in the command, the default value is overwritten.
 
 NOTE: Nextflow also has options in the launch command. To tell them apart, Nextflow options uses a single dash (e.g. -with-conda) while vAMPirus options are always with a double dash (e.g. --Analyze)
 
@@ -348,7 +485,7 @@ To specify certain parts of the vAMPirus workflow to perform in a given run, you
 
 To utilize these skip options, just add it to the launch command like so:
 
-    `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --clusterNuclID .95 --skipPhylogeny --skipTaxonomy`
+    nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclID .95 --skipPhylogeny --skipTaxonomy
 
 With this launch command, vAMPirus will perform ASV generation and nucleotide-based clustering to produce ncASVs, then will generate counts tables, matrices and the final report for you.
 
@@ -357,17 +494,17 @@ With this launch command, vAMPirus will perform ASV generation and nucleotide-ba
 
 ## Recommended order of operations
 
-    1. Clone vAMPirus from github
-    2. Run the vAMPirus start up script to download Nextflow and create conda environment
-    3. Edit vAMPirus configuration file
-    4. Run DataCheck mode with dataset
-    5. Run Analyze mode with desired clustering technique and %ID
+1. Clone vAMPirus from github
+2. Run the vAMPirus start up script to download Nextflow and create conda environment
+3. Edit vAMPirus configuration file
+4. Run DataCheck mode with dataset
+5. Run Analyze mode with desired clustering technique and %ID
 
 ## For the impatient
 
 Once you have everything set up and you have edited the parameters of interest in your configuration file you can run the following launch command for a full analysis:
 
-    `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --pcASV`
+   nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV
 
 This launch command will run all aspects of the vAMPirus workflow on your data and spit out final reports for each clustering %ID and technique.
 
@@ -395,7 +532,7 @@ The metadata file needs to be comma separated with the first column being "sampl
 
 The sample name in the metadata files must match the library names. For example, the read library names for the samples in the example above would need to be:
 
-  Coral1_R1.fastq.gz; Coral2_R2.fastq.gz; Coral2_R1.fastq.gz; Coral2_R2.fastq.gz; etc. etc.
+    Coral1_R1.fastq.gz; Coral2_R2.fastq.gz; Coral2_R1.fastq.gz; Coral2_R2.fastq.gz; etc. etc.
 
 ALSO, important to not have treatments be only numbers to avoid errors in the statistical analyses.
 
@@ -403,18 +540,18 @@ ALSO, important to not have treatments be only numbers to avoid errors in the st
 
 To run the vAMPirus workflow, you must specify one or two mandatory arguments:
 
-    1. "--DataCheck"
+1. "--DataCheck"
 
-        Usage example:
 
-            `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -profile [conda|singularity] --DataCheck`
+Usage example:
 
-        The DataCheck feature of vAMPirus is meant to give the user some information about their data so they can tailor their final analysis appropriately. In DataCheck mode, vAMPirus
-        performs all read processing operations then generates ASVS and performs nucleotide- and protein-based clustering at 24 different clustering percentages ranging from 55-99% ID.
-        vAMPirus then generates an html report that displays and visualizes read processing and clustering stats. It is recommended that before running any dataset through vAMPirus, you
-        run the data through the DataCheck.
+            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --DataCheck
 
-        Here is how Nextflow will display the list of processes vAMPirus will execute during DataCheck (executed with the launch command above):
+
+The DataCheck feature of vAMPirus is meant to give the user some information about their data so they can tailor their final analysis appropriately. In DataCheck mode, vAMPirus performs all read processing operations then generates ASVS and performs nucleotide- and protein-based clustering at 24 different clustering percentages ranging from 55-99% ID. vAMPirus then generates an html report that displays and visualizes read processing and clustering stats. It is recommended that before running any dataset through vAMPirus, you run the data through the DataCheck.
+
+
+Here is how Nextflow will display the list of processes vAMPirus will execute during DataCheck (executed with the launch command above):
 
                 executor >  local (57)
                 [8a/75e048] process > Build_database                                  [100%] 1 of 1 ✔
@@ -435,16 +572,18 @@ To run the vAMPirus workflow, you must specify one or two mandatory arguments:
                 [26/1143ba] process > combine_csv_DC                                  [100%] 1 of 1 ✔
                 [2e/e5fea3] process > Report_DataCheck                                [100%] 1 of 1 ✔
 
-        Every time you launch vAMPirus with Nextflow, you will see this kind of output that refreshes with the status of the different processes during the run.
+
+Every time you launch vAMPirus with Nextflow, you will see this kind of output that refreshes with the status of the different processes during the run.
 
 
-    2. "--Analyze"
+2. "--Analyze"
 
-        Usage example:
 
-        `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats run`
+Usage example:
 
-        Example Nextflow output for this launch command:
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats run
+
+Example Nextflow output for this launch command:
 
                 executor >  local (8)
                 [8a/75e048] process > Build_database                      [100%] 1 of 1 ✔
@@ -475,16 +614,16 @@ To run the vAMPirus workflow, you must specify one or two mandatory arguments:
                 [-        ] process > Report_AmynoType                    [100%] 1 of 1 ✔
 
 
-        The Analyze option allows vAMPirus to know that you plan to analyze your data with the given parameters either within the launch command or sourced from the configuration file. On
-        its own, "--Analyze" will run all read processing operations, generate ASVs, ASV counts files/matrices, ASV phylogeny, ASV taxonomy assignment, generate AminoTypes, AminoType counts/matrices,
-        AminoType phylogeny, AminoType taxonomy assignment and EMBOSS analyses. vAMPirus will also produce final reports for ASV and AminoType analyses.
 
-        To generate ncASVs (nucleotide clustered ASVs) or pcASVs (protein clustered ASVs) and run all subsequent analyses with them (phylogeny, taxonomy assignment, stats), you would just need to add the "--ncASV" and "--pcASV"
-        options like so:
+The Analyze option allows vAMPirus to know that you plan to analyze your data with the given parameters either within the launch command or sourced from the configuration file. On its own, "--Analyze" will run all read processing operations, generate ASVs, ASV counts files/matrices, ASV phylogeny, ASV taxonomy assignment, generate AminoTypes, AminoType counts/matrices, AminoType phylogeny, AminoType taxonomy assignment and EMBOSS analyses. vAMPirus will also produce final reports for ASV and AminoType analyses.
 
-        `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --pcASV --stats run`
 
-        Here is what the Nextflow output would look like for this launch command:
+To generate ncASVs (nucleotide clustered ASVs) or pcASVs (protein clustered ASVs) and run all subsequent analyses including stats with them (phylogeny, taxonomy assignment), you would just need to add the "--ncASV" and "--pcASV" options like so:
+
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run
+
+
+Here is what the Nextflow output would look like for this launch command:
 
                 executor >  local (8)
                 [-        ] process > Build_database                      [  0%] 0 of 1
@@ -529,13 +668,14 @@ To run the vAMPirus workflow, you must specify one or two mandatory arguments:
                 [-        ] process > Report_pcASV_AminoAcid               -
                 [-        ] process > Report_pcASV_Nucleotide              -
 
-        You can see that there are a few more processes now compared to the output of the previous launch command which is what we expect since we are asking vAMPirus to do a little bit more work for us :).
+
+You can see that there are a few more processes now compared to the output of the previous launch command which is what we expect since we are asking vAMPirus to do a little bit more work for us :).
 
 # Breaking it down: The vAMPirus workflow
 
 ## Read processing
 
-The read processing segment of vAMPirus includes FastQC report generation, adapter removal with fastp, primer removal with bbduk.sh, read merging with vsearch, and a final length filtering/global trimming with fastp and bbduk.sh.
+The read processing segment of both vAMPirus pipelines include FastQC report generation, adapter removal with fastp, primer removal with bbduk.sh, read merging with vsearch, and a final length filtering/global trimming with fastp and bbduk.sh.
 
 ### Adapter removal with fastp
 
@@ -545,40 +685,67 @@ Adapter contamination in reads are automatically detected with fastp. Overrepres
 
 There are two ways that vAMPirus is able to remove primer sequences from reads with bbduk.sh:
 
-    1. Primer removal by chopping off specified number of bases from each read (global trimming) -
+1. Primer removal by chopping off specified number of bases from each read (global trimming) -
 
-            This is the default action of vAMPirus if no primer sequences are specified. To use this method of primer removal, you must specify "--GlobTrim" and either specify the number of bases in the launch command like so:
+This is the default action of vAMPirus if no primer sequences are provided, to set the number of bases to remove from forward and reverse reads, use the "--GlobTrim" option in the launch command and specify the number of bases in the launch command like so:
 
-                `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --pcASV --GlobTrim 23,26`
+            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --GlobTrim 23,26
 
-            In this situation, we tell vAMPirus we would like to remove primers by trimming 23 bases from the forward reads and 26 bases from the reverse reads. The other way to initiate this method of primer removal is to add
-             the same information at line 39 in the configuration file:
+The command above is telling vAMPirus to have bbduk.sh remove primers by trimming 23 bases from the forward reads and 26 bases from the reverse reads. The other way to initiate this method of primer removal is to add the same information at line 38 in the configuration file:
 
-             // Primer Removal parameters
-                 // If not specifying primer sequences, forward and reverse reads will be trimmed by number of bases specified using --GlobTrim #basesfromforward,#basesfromreverse
-                     GlobTrim="23,26"
+          // Primer Removal parameters
+              // If not specifying primer sequences, forward and reverse reads will be trimmed by number of bases specified using --GlobTrim #basesfromforward,#basesfromreverse
+                 GlobTrim="23,26"
 
-            By adding the information to line 39, vAMPirus will automatically use this method and these parameters for primer removal. If you want to change the number of bases without editing the configuration file, all you would
-            need to do is then specify in the launch command with "--GlobTrim 20,27" and vAMPirus will ignore the "23,26" in the configuration file.
+By adding the information to line 38, vAMPirus will automatically use this method and these parameters for primer removal until told otherwise.
 
-            NOTE: Specifying global trimming by editing line 39 in the config file or using "--GlobTrim" in the launch command will override the use of primer sequences for removal if both are specified  
+If you want to change the number of bases without editing the configuration file, all you would need to do is then specify in the launch command with "--GlobTrim 20,27" and vAMPirus will ignore the "23,26" in the configuration file.
 
-    2. Primer removal by specifying primer sequences
+NOTE: Specifying global trimming by editing line 38 in the config file or using "--GlobTrim" in the launch command will also override the use of primer sequences for removal if both are specified  
 
-            To signal to vAMPirus to utilize this method of primer removal, similar to the previous method, you could edit the configuration file or specify within the launch command. To specify in launch command, we would need to used the "--fwd" and "--rev" options:
+2. Primer removal by specifying primer sequences -
 
-                `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --pcASV --fwd FWDPRIMER --rev REVPRIMER`
+You can tell vAMPirus to have bbduk.sh search for and remove either a single primer paire or multiple.
 
-            vAMPirus will then provide these sequences to bbduk.sh for them to be removed. The primer sequences could also be stored in the configuration file in lines 40-43:
+In the case where you are using a single primer pair, similar to the previous method, you could edit the configuration file or specify within the launch command.
 
-                // Specific primer sequence on forward reads to be removed
-                    fwd="FWDPRIMER"
+To specify in launch command, we would need to used the "--fwd" and "--rev" options:
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --fwd FWDPRIMER --rev REVPRIMER
+
+vAMPirus will then provide these sequences to bbduk.sh for them to be detected and removed.
+
+The primer sequences could also be stored in the configuration file in lines 43-46:
+
+            // Specific primer sequence on forward reads to be removed
+                fwd="FWDPRIMER"
                 // Reverse primer sequence
-                    rev="REVPRIMER"
+                rev="REVPRIMER"
+
+If you have multiple primer sequences to be removed, all you need to do is provide a fasta file with your primer sequences and signla multiple primer removal using the "--multi" option like so:
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --multi --primers /path/to/primers.fa
+
+You can set the path to the primer sequence fasta file within the launch command above or you can have it in the configuration file at line 44:
+
+            // Path to fasta file with primer sequences to remove (need to specify if using --multi option )
+                primers="/PATH/TO/PRIMERS.fasta"
+
+There are also a few other options you can change to best match what your data would need (lines 45-52):
+
+            // Primer length (default 26)- If trimming primers with the --multi option or by specifying primer sequences above, change this to the length of the longer of the two primer sequences
+                primerLength="26"
+            // Maximum kmer length for primer removal (must be shorter than your primer length; default = 13)
+                maxkmer="13"
+            // Minimum kmer length for primer removal (default = 3)
+                minkmer="3"
+            // Minimum read length after adapter and primer removal (default = 200)
+                minilen="200"
+
 
 ### Read merging and length filtering
 
-Read merging in the vAMPirus workflow is performed by vsearch and afterwards, reads are trimmed to the expected amplicon length (--maxLen) and any reads with lengths below the user specified minimum read length (--minLen). There are three parameters that you can edit to influence this segment of vAMPirus. If we look at lines 29-35:
+Read merging in the vAMPirus workflow is performed by vsearch and afterwards, reads are trimmed to the expected amplicon length (--maxLen) and any reads with lengths below the user specified minimum read length (--minLen). There are three parameters that you can edit to influence this segment of vAMPirus. If we look at lines 26-33:
 
     // Merged read length filtering parameters
         // Minimum merged read length - reads below the specified maximum read length will be used for counts only
@@ -590,13 +757,14 @@ Read merging in the vAMPirus workflow is performed by vsearch and afterwards, re
 
 The user can edit the minimum length (--minLen) for reads to be used for counts table generation, maximum length (--maxLen) for reads used to generate uniques and subsequent ASVs, and the expected error rate (--maxEE) for overlapping region of reads during read merging with vsearch. The values above are default and should be edited before running your data with --Analyze.
 
-This is where the DataCheck report is very useful, you can review the report and see the number of reads that merge per library and you can edit the expected error value to be less stringent if needed. The DataCheck report also
-contains a read length distribution that you can use to select an ideal maximum/minimum read length.
+This is where the DataCheck report is very useful, you can review the report and see the number of reads that merge per library and you can edit the expected error value to be less stringent if needed. The DataCheck report also contains a read length distribution that you can use to select an ideal maximum/minimum read length.
 
 
 ## Amplicon Sequence Variants, AminoTypes and Operational Taxonomic Units
 
-The goal of vAMPirus was to make it easy for the user to analyze their data is many different ways to potentially reveal patterns that would have been missed if limited to one method/pipeline. A major and sometimes difficult step in analyzing virus amplicon sequence data is deciding the method to use for identifying or defining different viral "species" in the data. To aid this process, vAMPirus has the DataCheck mode discussed above and has several different options for sequence clustering/analysis for the user to decide between.  
+The goal of vAMPirus was to make it easy for the user to analyze their data is many different ways to potentially reveal patterns that would have been missed if limited to one method/pipeline.
+
+A major and sometimes difficult step in analyzing virus amplicon sequence data is deciding the method to use for identifying or defining different viral "species" in the data. To aid this process, vAMPirus has the DataCheck mode discussed above and has several different options for sequence clustering/analysis for the user to decide between.  
 
  vAMPirus relies on vsearch using the UNOISE3 algorithm to generate Amplicon Sequencing Variants (ASVs) from dereplicated amplicon reads. ASVs are always generated by default and there are two parameters that the user can specify either in the launch command or by editing the configuration file at lines 45-49:
 
@@ -608,52 +776,55 @@ The goal of vAMPirus was to make it easy for the user to analyze their data is m
 
 The smaller the alpha value (--alpha) the more stringent vsearch is ASV generation while minimum size is the minimum representation of a unique sequence to have to be considered in the ASV generation.
 
-Now, onto clustering ASVs into Operation Taxonomic Units (OTUs). vAMPirus is able to use two different techniques for generating OTUs for the user:
+Launch command to produce only ASV-related analyses:
+
+    nextflow run v
+
+Now, onto clustering ASVs into clustered ASVs (cASVs). vAMPirus is able to use two different techniques for generating cASVs for the user:
 
 
-    1. AminoTyping -
+1. AminoTyping -
 
-        vAMPirus by default, unless the --skipAminoTyping option is set, will generate unique amino acid sequences or  "AminoTypes" from generated ASVs. These AminoTypes, barring any skip options set, will run through all the
-        same analyses as ASVs.
+vAMPirus by default, unless the --skipAminoTyping option is set, will generate unique amino acid sequences or  "AminoTypes" from generated ASVs. These AminoTypes, barring any skip options set, will run through all the same analyses as ASVs.
 
-        vAMPirus will translate the ASVs with Virtual Ribosome and relies on the user to specify the expected or minimum amino acid sequence length (--minAA) to be used for AminoTyping and pcASV generation (discussed below). For example, if you amplicon size is ~422 bp long, you would expect the amino acid translations to be ~140. Thus, you would either edit the --minAA value to be 140 in the configuration file (line 59) or in the launch command. You can make it shorter if you would like, but based on personal observation, a shorter translation is usually the result of stop codons present which would usually be removed from subsequent analysis. If there are any sequences below the minimum amino acid sequence length the problematic sequence(s) and its translation will be stored in a directory for you to review.     
+vAMPirus will translate the ASVs with Virtual Ribosome and relies on the user to specify the expected or minimum amino acid sequence length (--minAA) to be used for AminoTyping and pcASV generation (discussed below). For example, if you amplicon size is ~422 bp long, you would expect the amino acid translations to be ~140. Thus, you would either edit the --minAA value to be 140 in the configuration file (line 69) or in the launch command.
 
-        Example launch command:
+You can make it shorter if you would like, but based on personal observation, a shorter translation is usually the result of stop codons present which would usually be removed from subsequent analyses. If there are any sequences below the minimum amino acid sequence length the problematic sequence(s) and its translation will be stored in a directory for you to review.     
 
-            `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --minAA 140`
+Example launch command using the --minAA option:
+
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --minAA 140
 
 
-    2. Nucleotide-based clustering into OTUS (ncASVs) -
+2. Nucleotide-based clustering of ASVs  (ncASVs) -
 
-        In this technique, as the name infers, the clustering of ASVs into OTUs is based on nucleotide identity. To signal vAMPirus to generate ncASVs, we just add the "--ncASV" option to our launch command:
+In this technique, as the name infers, the clustering of ASVs into cASVs is based on nucleotide identity. To signal vAMPirus to generate ncASVs, we just add the "--ncASV" option to our launch command:
 
-                `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV`
+            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV
 
-        With ncASV analysis specified, vAMPirus will still generate ASVs and produce ASV-related results with a report, so you are not losing any results when you the clustering and this way, you can compare the reports afterwards.
+With ncASV analysis specified, vAMPirus will still generate ASVs and produce ASV-related results with a report, so you are not losing any results when you the clustering and this way, you can compare the reports afterwards.
 
-        vAMPirus allows you to specify either one or multiple clustering percentages that can be specified in the configuration file or the launch command. For each ID% specified, ncASVs will be generated and will be ran through
-        all subsequent processes (e.g. counts, phylogeny, taxonomy, report generation, etc.)
+vAMPirus allows you to specify either one or multiple clustering percentages that can be specified in the configuration file or the launch command. For each ID% specified, ncASVs will be generated and will be ran through all subsequent processes (e.g. counts, phylogeny, taxonomy, report generation, etc.)
 
             // Percent similarity to cluster nucleotide ASV sequences
                 clusterNuclID=".85"
             // List of percent similarities to cluster nucleotide ASV sequences - must be separated by a comma (ex. ".95,.96")
                 clusterNuclIDlist=""
 
-        Above, the specified clustering percentage (--clusterNuclID) for ncASV generation is 85%. The value must always be in decimal format and can be put into the launch command like so:
+Above, the specified clustering percentage (--clusterNuclID) for ncASV generation is 85%. The value must always be in decimal format and can be put into the launch command like so:
 
-            `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --clusterNuclID .85`
+            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclID .85 --stats run
 
-        You could also have a list of percentages to cluster by:
+You could also have a list of percentages to cluster by:
 
-            `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --clusterNuclIDlist .85,.90,.96`
+            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclIDlist .85,.90,.96 --stats run
 
-        Using "--clusterNuclIDlist" will override the single percentage clustering and vAMPirus will generate separate ncASVs fastas based on 85%, 90% and 96% nucleotide similarity, you could theoretically cluster by any amount
-        of percentages between 1-100 that your data requires or your heart desires.
+Using "--clusterNuclIDlist" will override the single percentage clustering and vAMPirus will generate separate ncASVs fastas based on 85%, 90% and 96% nucleotide similarity, you could theoretically cluster by any amount of percentages between 1-100 that your data requires or your heart desires.
 
 
-    3. Protein-based clustering into OTUs (pcASVs)
+3. Protein-based clustering of ASVs (pcASVs)
 
-        For this clustering method, ASVs are translated into amino acid sequences and clustered based on shared amino acid similarity, %ID is user specified in a similar manner to ncASV cluster options:
+For this clustering method, ASVs are translated into amino acid sequences and clustered based on shared amino acid similarity, %ID is user specified in a similar manner to ncASV cluster options:
 
             Lines 54-57 in vampirus.config ->
 
@@ -662,22 +833,23 @@ Now, onto clustering ASVs into Operation Taxonomic Units (OTUs). vAMPirus is abl
             // List of percent similarities to cluster aminoacid sequences - must be separated by ".95,.96"
                 clusterAAIDlist=""
 
-        When clustering for pcASVs, vAMPirus will create nucleotide and protein versions and both will go through the rest of the analyses within the pipeline (phylogeny, taxonomy, etc.). It should be noted that the --minAA option
-        described above in the AminoType section applies also to pcASV generation. If there are any sequences below the minimum amino acid sequence length, the problematic sequence(s) and its translation will be stored in a file for
-        you to review.
+When clustering for pcASVs, vAMPirus will create nucleotide and protein versions and both will go through the rest of the analyses within the pipeline (phylogeny, taxonomy, etc.).
 
-        Example launch command:
+It should be noted that the --minAA option described above in the AminoType section also applies to pcASV generation. If there are any sequences below the minimum amino acid sequence length, the problematic sequence(s) and its translation will be stored in a file for you to review.
 
-            `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --pcASV --clusterAAIDlist .85,.90,.96`
+Example launch command:
+
+          nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --stats run
 
 
 ## Counts tables and percent ID matrices
 
-vAMPirus generate nucleotide-based counts tables using vsearch and protein-based counts tables using Diamond. Counts tables and percent ID matrices are always produced for each ASV, AminoType and all OTU fasta files produced. Here
-are the parameters you can edit at lines 61-70:
+vAMPirus generate nucleotide-based counts tables using vsearch and protein-based counts tables using DIAMOND and a custom bash script. Counts tables and percent ID matrices are always produced for each ASV, AminoType and all cASV fasta files produced.
+
+Here are the parameters you can edit at lines 61-70:
 
     // Counts table generation parameters
-        // Similarity ID to use for ASV counts table
+        // Percent similarity to use for ASV/ncASV counts table generation with vsearch
             asvcountID=".97"
         // Protein counts table parameters
             // Minimum Bitscore for counts
@@ -687,44 +859,47 @@ are the parameters you can edit at lines 61-70:
             // Minimum alignment length for hit to count
                 ProtCountsLength="50"
 
-The "--asvcountID" is the percent ID during global alignment that vsearch would use to classify a hit to a given ASV. For all OTUs, the specified clustering percentage is used for counts. Protein-based counts file generation has a
-few more parameters the user can alter: "--ProtCountsBit" is the minimum bitscore for an alignment to be recorded, "--ProtCountID" is the minimum percent amino acid similarity an alignment needs to have to be recorded, and
-"--ProtCountsLength" is the minimum alignment length for a hit to be recorded.
+The "--asvcountID" is the percent ID during global alignment that vsearch would use to classify a hit to a given ASV. For all cASVs, the specified clustering percentage is used for counts.
+
+Protein-based counts file generation has a few more parameters the user can alter: "--ProtCountsBit" is the minimum bitscore for an alignment to be recorded, "--ProtCountID" is the minimum percent amino acid similarity an alignment needs to have to be recorded, and "--ProtCountsLength" is the minimum alignment length for a hit to be recorded.
 
 
 ## Phylogenetic analysis and model testing
 
-Phylogenetic trees are produced automatically for ASVs (unless --ncASV specified), ncASVs, pcASVs and AminoTypes using IQ-TREE. All produced sequence fastas are aligned using the MAFFT algorithm then alignments are trimmed
-automatically using TrimAl. Post alignment and trimming, there is some flexibility in this process where you can specify a few different aspects of the analysis:
+Phylogenetic trees are produced automatically for ASVs (unless --ncASV specified), ncASVs, pcASVs and AminoTypes using IQ-TREE. All produced sequence fastas are aligned using the MAFFT algorithm then alignments are trimmed automatically using TrimAl.
+
+Post alignment and trimming, there is some flexibility in this process where you can specify a few different aspects of the analysis:
 
 ### Substitution model testing
 
-ModelTest-NG is always ran to determine the substitution model and generate a starting tree to be used in the IQ-TREE command for all fasta files generated in the pipeline. The user decides whether they would like to use the model
-determined by ModelTest-NG in the IQ-TREE command or they can have ModelFinder Plus determine the model instead. By default, the ModelFinder Plus determined model is used, however, to trigger the use of the model determined by
-ModelTest-NG for both nucleotide and amino acid model testing, you would use "--ModelTnt" and "--ModelTaa". So:
+ModelTest-NG is always ran to determine the best substitution model and all of its output is stored for the users review.
 
-        Example launch command using ModelTest-NG ->
+vAMPirus uses IQTREE for phylogenetic analyses, and the user can decide if they would prefer to use the substitution model selected by ModelTest-NG for the IQTREE analysis by using the "--ModelTnt" and "--ModelTaa" options:
 
-        `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --ModelTnt --ModelTaa`
+    nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --ModelTnt --ModelTaa
 
-If you didn't want to use it for both, you would just use the "--ModelTnt" or "--ModelTaa" alone in the launch command.
+The launch command above will have IQTREE use the substitution model determined by ModelTest-NG in both nucleotide-based (--ModelTnt) and amino acid-based (--ModelTaa) phylogenetic analyses. If you didn't want to use it for both nucleotide and amino acid trees, you would just use the "--ModelTnt" or "--ModelTaa" alone in the launch command.
+
+By default IQTREE will determine the best model to use with ModelFinder Plus.
+
 
 ### Bootstrapping
 
-IQ-TREE is capable of performing parametric or non-parametric bootstrapping. You can specify which one using "--parametric" or "--nonparametric" and to set how many boostraps to perform, you would use "--boots #ofbootstraps" or edit
- line 92 in the vampirus.config file. Here is an example for creating a tree using the model determined by ModelTest-NG, non-parametric boostrapping and 500 bootstraps:
+IQ-TREE is capable of performing parametric or non-parametric bootstrapping. You can specify which one using "--parametric" or "--nonparametric" and to set how many boostraps to perform, you would use "--boots #ofbootstraps" or edit line 114 in the vampirus.config file.
 
-        `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --ModelTnt --ModelTaa --nonparametric --boots 500`
+Here is an example for creating a tree using the model determined by ModelTest-NG, non-parametric boostrapping and 500 bootstraps:
+
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --ModelTnt --ModelTaa --nonparametric --boots 500
 
 ### Custom IQ-TREE command
 
 The default IQ-TREE command looks like this:
 
-        `iqtree -s {alignment} --prefix {samplename} -m {model} --redo -t {startingtree} -nt auto -b {#bootstraps}`
+        iqtree -s {alignment} --prefix {samplename} -m {model} --redo -nt auto -b {#bootstraps}
 
 If you were to input your custom IQ-TREE command, you would add on to:
 
-        `iqtree -s {alignment} --prefix {samplename} --redo -t {startingtree} -T auto {YOUR_CUSTOM_COMMAND_HERE}`
+        iqtree -s {alignment} --prefix {samplename} --redo -T auto {YOUR_CUSTOM_COMMAND_HERE}
 
 To add your custom part of the IQ-TREE command, you would edit lines 82 and 83 for nucleotide and amino acid tree command, respectively:
 
@@ -733,10 +908,32 @@ To add your custom part of the IQ-TREE command, you would edit lines 82 and 83 f
                 iqCustomnt="-your Custom -IQ tree -command here"
                 iqCustomaa="-your Custom -IQ tree -command here"
 
+So, for example, if you set the configuration file like so:
+
+        // Phylogeny analysis parameters
+            // Customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D")
+                iqCustomnt="-option1 A -option2 B -option3 C"
+                iqCustomaa="-option1 A -option2 B -option3 C"
+
+And you used a launch command similar to:
+
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --nonparametric --boots 500
+
+The IQTREE commands for the ASV and AminoType phylogenetic analyses would be:
+
+        ASV IQTREE command ->
+
+        iqtree -s asv_alighnment.fasta --prefix TestRun --redo -T auto -option1 A -option2 B -option3 C
+
+        AminoType IQTREE command ->
+
+        iqtree -s aminotype_alighnment.fasta --prefix TestRun --redo -T auto -option1 A -option2 B -option3 C
+
+
 
 ## Taxonomy assignment
 
-vAMPirus uses Diamond blastx/blastp and the provided protein database to assign taxonomy to ASVs/OTUs/AminoTypes. There are summary files generated, one as a phyloseq object and the other as a .tsv with information in a different
+vAMPirus uses Diamond blastx/blastp and the provided protein database to assign taxonomy to ASVs/cASVs/AminoTypes. There are summary files generated, one as a phyloseq object and the other as a .tsv with information in a different
  arrangement. Results are also visualized as a donut graph in the final reports. You can adjust the following parameters:
 
     // Taxonomy assignment parameters
@@ -751,15 +948,33 @@ This was mentioned in an earlier section of the docs, but before running vAMPiru
  respectively. The database, currently, needs to be protein sequences and be in fasta format. The database can be a custom database but for proper reporting of the results, the headers need to follow either RVDB or RefSeq
  header formats:
 
-    1. RVDB format (default) -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein [Marine RNA virus BC-4]"
+1. RVDB format (default) -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein [Marine RNA virus BC-4]"
 
-    2. NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003 [Zymoseptoria brevis]"
+2. NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003 [Zymoseptoria brevis]"
 
 NOTE: By default, vAMPirus assumes the headers are in RVDB format, to trigger the use of NCBI RefSeq format, edit the "F" to "T" at line 78 in the config file or add "--refseq T" to the launch command.
 
 ## EMBOSS Analyses
 
 For pcASV protein files and AminoTypes, vAMPirus will run different protein physiochemical property analyses using scripts within EMBOSS. To skip this process, just add "--skipEMBOSS" to the launch command.
+
+## Statistical tests
+
+The vAMPirus Analyze pipeline will generate an interactive html report which includes all produced results and can also include statistical tests:
+
+    a. Shapiro Test of normality
+    b. Bartlett Test variance homogeneity
+    c. ANOVA
+    d. Tukey Honest Significant Differences (HSD)
+    e. Kruskal-Wallis test
+    f. Pairwise Wilcoxon
+    g. PERMANOVA
+
+To have these statistical tests ran and included in the final vAMPirus report, you will need to add the add "--stats run" to the launch command:
+
+    nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats run
+
+NOTE=> Be sure that there is more than 1 sample in each treatment category or there will be errors  
 
 # vAMPirus output
 
@@ -773,7 +988,7 @@ Nextflow produces a couple files that breakdown how and what parts of the vAMPir
 
 The DataCheck performed by vAMPirus includes "ReadProcessing", "Clustering", and "Report" generation. Here again is the launch command to run the DataCheck mode:
 
-        `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --DataCheck`
+        `nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --DataCheck`
 
 ### ReadProcessing - ${working_directory}/results/DataCheck/ReadProcessing
 
@@ -825,7 +1040,7 @@ In this directory, you will find a .html DataCheck report that can be opened in 
 
         3. Clustering statistics
 
-                In this section of the report, vAMPirus is showing the number of nucleotide- and protein-based OTUs assigned per clustering percentage. vAMPirus clusters ASVs and ASV translations by 24 different clustering percentages between 55-100%. The "100% clustering" data point in the "Number of ncASVs per clustering percentage" plot is the number of ASVs, it is important to know that ASV generation and clustering based on 100% is not the same, but we felt the number of ASVs is an important stat to know when comparing to the clustered data.
+                In this section of the report, vAMPirus is showing the number of nucleotide- and protein-based cASVs assigned per clustering percentage. vAMPirus clusters ASVs and ASV translations by 24 different clustering percentages between 55-100%. The "100% clustering" data point in the "Number of ncASVs per clustering percentage" plot is the number of ASVs, it is important to know that ASV generation and clustering based on 100% is not the same, but we felt the number of ASVs is an important stat to know when comparing to the clustered data.
 
 NOTE: Most, if not all, plots in vAMPirus reports are interactive meaning you can select and zoom on certain parts of the plot or you can use the legend to remove certain samples.
 
@@ -834,7 +1049,7 @@ NOTE: Most, if not all, plots in vAMPirus reports are interactive meaning you ca
 
 Depending on which optional arguments you add to your analyses (e.g. --pcASV, --ncASV, skip options), you will have different files produced, here we will go through the output of the full analysis stemming from this launch command:
 
-        `nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --pcASV`
+        `nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV`
 
 ### ReadProcessing - ${working_directory}/results/Analyze/ReadProcessing
 
@@ -920,52 +1135,69 @@ vAMPirus produces final reports for all taxonomic unit fastas produced in the ru
 
                 The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Species Richness.
 
+                Stats tests ran for each:
+
+                    a. Shapiro Test of normality
+                    b. Bartlett Test variance homogeneity
+                    c. ANOVA
+                    d. Tukey Honest Significant Differences (HSD)
+                    e. Kruskal-Wallis test
+                    f. Pairwise Wilcoxon
+                    g. PERMANOVA
+
+
         5. Distance to centroid box plot
 
         6. NMDS plots (2D and 3D)
 
-        7. Relative OTU abundance per sample bar chart
+        7. Relative ASV/cASV abundance per sample bar chart
 
-        8. Absolute OTU abundance per treatment bar chart
+        8. Absolute ASV/cASV abundance per treatment bar chart
 
         9. Pairwise percent ID heatmap
 
         10. Taxonomy results visualized in a donut plot
 
-        11. Visualized phylogentic tree
+        11. Visualized phylogenetic tree
 
 
 # All of the options
 
-### Help options:
+Usage:
+
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV]
+
+
+### Help options
 
         --help                          Print help information
 
         --fullHelp                      Print even more help information
 
-### Mandatory arguments (choose one):
+
+### Mandatory arguments (choose one)
 
         --Analyze                       Run absolutely everything
 
         --DataCheck                     Assess how data performs with during processing and clustering
 
-### Clustering arguments:
 
-        --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent
-                                        similarity or a list
+### ASV clustering arguments
 
-        --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or
-                                        a list
+        --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
-### Skip arguments:
+        --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
+
+
+### Skip options
 
         --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
 
-        --skipFastQC                    Set this option to skip FastQC steps in the pipeline
+        --skipFastQC                    Set this option to skiip FastQC steps in the pipeline
 
         --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
 
-        --skipPrimerRemoval             Set this option to skip primer removal process
+        --skipPrimerRemoval             Set this option to skup Skip primer removal process
 
         --skipAminoTyping               Set this option to skip AminoTyping processes
 
@@ -973,25 +1205,22 @@ vAMPirus produces final reports for all taxonomic unit fastas produced in the ru
 
         --skipPhylogeny                 Set this option to skip phylogeny processes
 
-        --skipReport                    Set this option to skip report generation
+**NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
-### Analysis-specific options (will override information in the config file):
-
-    General information
+### Project/analysis information
 
         --projtag                       Set project name to be used as a prefix for output files
 
         --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
 
-        --mypwd                         Path to working directory that contains (i) the vAMPirus.nf script, (ii) the nextflow.config, and (iii) directory containing read libraries
+        --reads                         Path to directory containing read libraries, must have *R{1,2}* in the library names
 
-        --email                         Your email for notifications for when jobs are submitted and completed
+        --workingdir                    Path to working directory where Nextflow will put all Nextflow and vAMPirus generated output files
 
-        --reads                         Path to directory containing read libraries, must have \*R{1,2}.fast{a,q} in the name
+        --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
-        --outdir                        Name of directory to store output of vAMPirus run
 
-### Merged read length filtering options
+### Merged read length filtering
 
         --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
 
@@ -999,15 +1228,35 @@ vAMPirus produces final reports for all taxonomic unit fastas produced in the ru
 
         --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
 
-### Primer Removal options
 
-        --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences  #,#
+### Primer removal
 
-        --fwd                           Specify forward primer sequence pecific primer sequence on forward reads to be removed
+    General primer removal parameters
 
-        --rev                           Reverse primer sequence
+        --primerLength                  Use this option to set the max primer length to restrict bbduk.sh primer trimming to the first x number of bases
 
-### Amplicon analysis options
+        --maxkmer                       Maximum kmer length for bbduk.sh to use for primer detection and removal (must be shorter than your primer length; default = 13)
+
+        --minkmer                       Minimum kmer length for primer removal (default = 3)
+
+        --minilen                       Minimum read length after adapter and primer removal (default = 200)
+
+    Single primer set removal-
+
+        --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
+
+        --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
+
+        --rev                           Reverse primer sequence for reads to be detected and removed from reads (must specify forward sequence if providing reverse)
+
+    Multiple primer set removal-
+
+        --multi                         Use this option to signal multiple primer sequence removal within the specified pipeline
+
+        --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
+
+
+### Amplicon Sequence Variant (ASV) genration and clustering
 
         --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
@@ -1023,7 +1272,8 @@ vAMPirus produces final reports for all taxonomic unit fastas produced in the ru
 
         --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
-### Counts table options
+
+### Counts table generation
 
         --asvcountID                    Similarity ID to use for ASV counts
 
@@ -1031,27 +1281,53 @@ vAMPirus produces final reports for all taxonomic unit fastas produced in the ru
 
         --ProtCountsLength              Minimum alignment length for hit to count
 
+        --ProtCountsBit                 Minimum bitscore for hit to be counted
+
+
 ### Taxonomy assignment parameters
 
         --dbname                       Specify name of database to use for analysis
 
         --dbdir                        Path to Directory where database is being stored
 
-        --refseq                       Toggle use of RefSeq header format for Taxonomy assignment; default is Reverence Viral DataBase (RVDB)
+        --refseq                       Set "--refseq T" to toggle use of RefSeq header format; default is "F" to use Reverence Viral DataBase (RVDB) header
 
-        --Bitscore                     Set minimum bitscore for Diamond command
+        --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
+
+        --minID                        Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+
+        --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+
 
 ### Phylogeny analysis parameters
 
-        --ModelTnt                     Signals for vAMPirus to use nucleotide substitution model produced by ModelTest-NG
+Setting customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D") - might be easier to set in the vampirus.config file at lines 108/109
 
-        --ModelTaa                     Signals for vAMPirus to use amino acid substitution model produced by ModelTest-NG
+        --iqCustomnt                   Use option to set custom options to use in all IQTREE analyses with nuceoltide sequences
 
-        --parametric                   Set to have IQ-TREE to perform parametric bootstrapping during tree making
+        --iqCustomaa                   Use option to set custom options to use in all IQTREE analyses with amino acid sequences
 
-        --nonparametric                Set to have IQ-TREE to perform non-parametric bootstrapping during tree making   
+These options below you can set at the command, for example, to set to use model from ModelTest-NG with parametric bootstrapping --ModelTnt --ModelTaa --parametric
+
+        --ModelTnt=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with nuceoltide sequences (Default is IQ-TREE will do automatic model testing with ModelFinder Plus)
+
+        --ModelTaa=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with amino acid sequences
+
+        --parametric                   Set to use parametric bootstrapping in IQTREE analyses
+
+        --nonparametric                Set to use parametric bootstrapping in IQTREE analyses
 
         --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
+
+
+### Statistics options
+
+        --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
+
+        --minimumCounts                Minimum number of hit counts for a sample to have to be included in the downstream statistical analyses and report generation
+
+        --trymax                       Maximum number of iterations performed by metaMDS
+
 
 
 # Usage examples
@@ -1062,7 +1338,7 @@ Here are some example launch commands:
 
 There is really only one launch command to run for --DataCheck:
 
-`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --DataCheck`
+`nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --DataCheck`
 
 Just submit this launch command with the correct paths and vAMPirus will run the DataCheck and produce a report for you to review. Parameters like --minAA or --maxLen apply to the --DataCheck.
 
@@ -1070,22 +1346,22 @@ Just submit this launch command with the correct paths and vAMPirus will run the
 
 ### Run it all with a list of cluster IDs!
 
-`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --pcASV --minLen 400 --maxLen 420 --clusterNuclIDlist .91,.92,.93 --clusterAAIDlist .91,.93,.95,.98`
+`nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --minLen 400 --maxLen 420 --clusterNuclIDlist .91,.92,.93 --clusterAAIDlist .91,.93,.95,.98`
 
 With this launch command, you are specifying that you would like to generate ncASVs and pcASVs by clustering at multiple percentages for each. You are also setting the minimum read length at 400 and maximum read length at 420. All analyses will be ran as well.
 
 ### Run --Analyze with no clustering, no taxonomy assignment, and parametric bootstrapping with 1500 bootstraps
 
-`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --skipTaxonomy --skipAminoTyping --parametric --boots 1500`
+`nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --skipTaxonomy --skipAminoTyping --parametric --boots 1500`
 
 For this command, you will run ASV generation alone generating counts tables, matrices and a phylogenetic tree.
 
 ### Run --Analyze to create pcASVs at a single clustering percentage
 
-`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --pcASV --clusterAAID .97 --skipAminoTyping --minLen 400 --maxLen 430`
+`nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAID .97 --skipAminoTyping --minLen 400 --maxLen 430`
 
 This command will produce results for ASVs and pcASVs.
 
 ### Run --Analyze to create ncASVs at a single clustering percentage
 
-`nextflow run vAMPirusv0.1.0.nf -c vampirus.config -with-conda /PATH/TO/miniconda3/env/vAMPirus --Analyze --ncASV --clusterNuclID .97 --skipAminoTyping --minLen 400 --maxLen 430 --asvcountID .95`
+`nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclID .97 --skipAminoTyping --minLen 400 --maxLen 430 --asvcountID .95`

@@ -35,6 +35,9 @@ knitr::include_graphics("vamplogo.png")
 ```
 
 ```{r load_libraries, include=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("BiocParallel")
 library(vegan)
 #library(rstatix)
 library(tidyverse)

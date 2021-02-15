@@ -131,9 +131,9 @@ nextflow_c() {
     check_nextflow=$( command -v nextflow )
     if [ "$check_nextflow" = "" ];then #&& [ "$ver" -gt "45" ];then
         echo "Nextflow is not system-wide, checking if its in the current working directory.."
-        check_nextflow=$( ls nextflow )
+        check_nextflow=$( ls "$mypwd"| grep -wc "nextflow" )
     fi
-    if [ "$check_nextflow" != "" ];then #&& [ "$ver" -gt "45" ];then
+    if [ "$check_nextflow" -eq 1 ];then #&& [ "$ver" -gt "45" ];then
         echo "Nextflow seems to be installed in your system and in your current \$PATH, great!"
     else
         echo "Nextflow does not to seem to be downloaded or specified in your \$PATH.."
@@ -244,9 +244,9 @@ echo "--------------------------------------------------------------------------
 
 cd "$mypwd"
 echo "Ok, everything downloaded. To test installation, check out the STARTUP_HELP.txt file within "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
+chmod a+x "$mypwd"/bin/virtualribosomev2/*
 
-
-if [[ $(ls "$mypwd"/STARTUP_HELP.txt | wc -l | awk '{print $1}') -eq 0 ]]
+if [[ $(ls "$mypwd"| grep -wc "STARTUP_HELP.txt") -eq 0 ]]
 then
       touch STARTUP_HELP.txt
       echo "-------------------------------------------------------------------------------------------------------------------------------- TESTING YOUR INSTALLATION" >> STARTUP_HELP.txt
