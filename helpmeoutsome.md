@@ -76,31 +76,12 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 # Installing vAMPirus
 
-Clone the most recent version of vAMPirus from github using:
-
-    git clone https://github.com/Aveglia/vAMPirus.git
-
-
-vAMPirus is integrated with Nextflow which relies on Java being installed on your system.
-
-If you know you do not have it installed, see here for instructions on installing Java for different operating softwares -> https://opensource.com/article/19/11/install-java-linux
-
-If you are unsure, you can check using:
-
-
-  which java
-
-    or
-
-
-  java -version
-
-    The output from either of those commands should let you know if you have Java on your system.
-
 
 ## MacOS users
 
-If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment with conda or Singularity to use the vAMPirus Docker image. You can try without this, but you are more likely to run into errors.
+If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment with conda or Singularity to use the vAMPirus Docker image.
+
+You can try to run directly on your system, but there may be errors.
 
 vAMPirus was developed on a Centos7/8 operating system so we will go through how to set up a Centos7 Vagrant virtual environment with Virtual Box.
 
@@ -112,7 +93,7 @@ There are other ways to do this so if you are more comfortable creating a virtua
 
 #### Install Homebrew
 
-Lets first install Homebrew for your system:
+Let's first install Homebrew for your system:
 
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"  
 
@@ -161,11 +142,11 @@ Alright, if you notice no errors during installation, you should be good to go a
 
 See https://gist.github.com/jakebrinkmann/4ae0a59bf6f3b0b4929499d2ab832fbd and http://sourabhbajaj.com/mac-setup/Vagrant/README.html to provide better context to commands below.
 
-Lets make a directory for the Vagrant environment:
+Let's make a directory for the Vagrant environment:
 
     mkdir centos7_vampirus
 
-Lets move into the new directory:
+Let's move into the new directory:
 
     cd ./centos7_vampirus
 
@@ -202,16 +183,18 @@ You can copy the block of code above and paste it into a file named Vagrantfile 
 
 Paste the block of code from above in this new file opened on your terminal window and then edit the lines with "vb.memory" and "vb.cpus" with the amount of resources you would the VM to have access to, then save the file.
 
-So, for example, if you have a laptop machine with 4 CPUs and 6 GB of memory (you can find out by looking at the "About this Mac") and you want to give your virtual machine access to 6 CPUs and 5 GB of memory you would edit those lines to look like:
+To see how many CPUs and memory your computer has, just go to About this Mac-> System report and there should be the details needed to decide how much to give your VM.
+
+So, for example, if you have a computer with 4 CPUs and 6 GB of memory and you want to give your virtual machine access to 3 CPUs and 5 GB of memory you would edit those lines to look like:
 
       config.vm.provider "virtualbox" do |vb|
-         vb.cpus = 6
+         vb.cpus = 3
          vb.memory = 5000
       end
 
 Little note -> 5000 = 5 GB ; 6000 = 6 GB; 30000 = 30 GB
 
-Now you should have a Vagrant file in your current directory and we can now "up" the virtual machine:
+Now you should have a Vagrant file in your current directory and we can now start "up" the new virtual machine:
 
     vagrant up
 
@@ -221,11 +204,37 @@ If no errors from the above command, we can now connect to our Centos7 virtual e
 
     vagrant ssh
 
-You should now be in a fresh Centos7 virtual environment and if you ls you should see the vAMPirus program directory.
+You should now be in your fresh Centos7 virtual environment and if you ls you will see the vAMPirus directory.
+
+You can now follow the normal directions for setting up vAMPirus with conda below.
+
+Please check out http://sourabhbajaj.com/mac-setup/Vagrant/README.html and https://www.vagrantup.com/docs/providers/virtualbox for understanding how to use Vagrant commands like "halt", "suspend" or "reload"
 
 
+## Installing vAMPirus
+
+### Cloning the repository (skip if you generated the Vagrant virtual environment)
+
+Clone the most recent version of vAMPirus from github using:
+
+    git clone https://github.com/Aveglia/vAMPirus.git
 
 
+vAMPirus is integrated with Nextflow which relies on Java being installed on your system.
+
+If you know you do not have it installed, see here for instructions on installing Java for different operating softwares -> https://opensource.com/article/19/11/install-java-linux
+
+If you are unsure, you can check using:
+
+
+    which java
+
+or
+
+
+    java -version
+
+The output from either of those commands should let you know if you have Java on your system.
 
 ## Setting up vAMPirus dependencies and checking installation
 
@@ -270,6 +279,7 @@ If we look at the script usage:
 
             [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
 
+
 For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, and check/install conda, run:
 
     ./vampirus_startup.sh -d 1
@@ -278,7 +288,8 @@ and if we wanted to do the same thing as above but skip the Conda check/installa
 
     ./vampirus_startup.sh -d 1 -s
 
-**IF YOU ARE ON THE VAGRANT VIRTUAL MACHINE, YOU WILL NEED TO
+NOTE -> if you end up installing Minicond3 using the script
+### Databases
 
 It should be noted, that any protein database can be used, but it needs to be in fasta format and the headers for reference sequences need to match
 one of two patterns:
@@ -380,7 +391,7 @@ In the command above, there are five necessary pieces of information needed to s
 
 5. Specify which vAMPirus pipeline you would like to launch
 
-Now that we have an understanding on how to deploy vAMPirus with Nextflow, lets look at how to set both analysis- and resource-related parameters for your vAMPirus runs.
+Now that we have an understanding on how to deploy vAMPirus with Nextflow, let's look at how to set both analysis- and resource-related parameters for your vAMPirus runs.
 
 ## The Nextflow monitoring screen
 
@@ -457,7 +468,7 @@ NOTE: Nextflow also has options in the launch command. To tell them apart, Nextf
 
 ### Setting computing resource parameters - Edit in lines 151-171 in vampirus.config
 
-Each process within the vAMPirus workflow is tagged with either "low_cpus", "norm_cpus", or "high_cpus" (see below) which lets Nextflow know the amount of cpus and memory required for each process, which will then be used for when Nextflow submits a given job or task. Nexflow actively assesses the amount of available resources on your machine and will submit tasks only when the proper amount of resources can be requested.
+Each process within the vAMPirus workflow is tagged with either "low_cpus", "norm_cpus", or "high_cpus" (see below) which let's Nextflow know the amount of cpus and memory required for each process, which will then be used for when Nextflow submits a given job or task. Nexflow actively assesses the amount of available resources on your machine and will submit tasks only when the proper amount of resources can be requested.
 
 From line 203-217 in the vAMPirus.config file is where you can edit these values for whichever machine you plan to run the workflow on.
 
