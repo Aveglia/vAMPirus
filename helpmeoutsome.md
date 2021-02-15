@@ -230,17 +230,19 @@ Clone the most recent version of vAMPirus from github using:
 
 vAMPirus is integrated with Nextflow which relies on Java being installed on your system.
 
-If you know you do not have it installed, see here for instructions on installing Java for different operating softwares -> https://opensource.com/article/19/11/install-java-linux
+If you know you do not have it installed, see here for instructions on installing Java for different operating software's -> https://opensource.com/article/19/11/install-java-linux ; for Debian https://phoenixnap.com/kb/how-to-install-java-ubuntu
 
 If you are unsure, you can check using:
 
 
     which java
 
+
 or
 
 
     java -version
+
 
 The output from either of those commands should let you know if you have Java on your system.
 
@@ -257,7 +259,10 @@ If you plan to use Singularity, it will need to be installed separately prior to
 
 To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
 
-    cd ./vAMPirus; ./vampirus_startup.sh -h
+    cd ./vAMPirus; bash vampirus_startup.sh -h
+
+>You can make the vampirus_startup.sh scrip an exectuable with -> chmod +x vampirus_startup.sh ; ./vampirus_startup.sh
+
 
 The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and will build the vAMPirus conda environment and the installation is complete.
 
@@ -296,7 +301,7 @@ and if we wanted to do the same thing as above but skip the Conda check/installa
 
     ./vampirus_startup.sh -d 1 -s
 
-NOTE -> if you end up installing Minicond3 using the script you should close and re-open the terminal window after everything is completed. Then move to the vAMPirus directory and run the test commands.
+NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed. Then move to the vAMPirus directory and run the test commands.
 
 
 ### Databases
