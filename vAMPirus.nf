@@ -1670,7 +1670,6 @@ if (params.Analyze) {
 
                   label 'low_cpus'
 
-
                   publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
 
                   input:
@@ -1687,7 +1686,9 @@ if (params.Analyze) {
                       ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
                       """
 
-          } else {
+          }
+
+    } else {
 
             process Translate_For_AminoTyping {
 
@@ -2093,28 +2094,56 @@ if (params.Analyze) {
 
     if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
 
-        process Translation_For_pcASV_Generation {
+            if (params.sing) {
 
-            label 'low_cpus'
+              process Translating_For_pcASV_Generation {
 
-            conda 'python=2.7'
+                      label 'low_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
 
-            input:
-                file(fasta) from nucl2aa
+                      input:
+                          file(fasta) from nucl2aa
 
-            output:
-                file("*ASV_translations.fasta") into clustering_aa
-                file("*_ASV_translations_report") into reportaa_VR
-                file("*_ASV_nucleotide.fasta") into asvfastaforaaclust
+                      output:
+                          file("*ASV_translations.fasta") into clustering_aa
+                          file("*_ASV_translations_report") into reportaa_VR
+                          file("*_ASV_nucleotide.fasta") into asvfastaforaaclust
 
-            script:
-                """
-                ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASV_translations.fasta --report ${params.projtag}_ASV_translations_report
-                cp ${fasta} ${params.projtag}_ASV_nucleotide.fasta
-                """
-        }
+                      script:
+                          """
+                          conda activate virtualribosome
+
+                          ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
+                          """
+
+              }
+
+        } else {
+
+              process Translation_For_pcASV_Generation {
+
+                  label 'low_cpus'
+
+                  conda 'python=2.7'
+
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
+
+                  input:
+                      file(fasta) from nucl2aa
+
+                  output:
+                      file("*ASV_translations.fasta") into clustering_aa
+                      file("*_ASV_translations_report") into reportaa_VR
+                      file("*_ASV_nucleotide.fasta") into asvfastaforaaclust
+
+                  script:
+                      """
+                      ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASV_translations.fasta --report ${params.projtag}_ASV_translations_report
+                      cp ${fasta} ${params.projtag}_ASV_nucleotide.fasta
+                      """
+              }
+          }
 
         process Generate_pcASVs {
 
@@ -3489,7 +3518,35 @@ if (params.Analyze) {
         }
     }
 
-    process Translation_For_ProteinBased_Clustering_DC {
+
+    if (params.sing) {
+
+      process Translating_For_ProteinClustering_DC {
+
+              label 'low_cpus'
+
+              publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
+
+              input:
+                  file(fasta) from nucl2aa
+
+              output:
+                  file("*ASVprotforclust.fasta") into clustering_aa
+                  file("*_translation_report") into reportaa_VR
+                  file("*_ASV_all.fasta") into asvfastaforaaclust
+
+              script:
+                  """
+                  conda activate virtualribosome
+
+                  ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
+                  """
+
+      }
+
+      } else {
+
+       process Translation_For_ProteinBased_Clustering_DC {
 
         label 'norm_cpus'
 
@@ -3510,7 +3567,8 @@ if (params.Analyze) {
             ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
             cp ${fasta} ${params.projtag}_ASV_all.fasta
             """
-    }
+       }
+     }
 
     process Protein_clustering_DC {
 
