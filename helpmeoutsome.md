@@ -116,7 +116,7 @@ Lets first install Homebrew for your system:
 
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"  
 
-Just a heads up, there might be a message once isntallation has completed saying that shallow-clone of Homebrew was installed.
+Just a heads up, there might be a message once installation has completed saying that shallow-clone of Homebrew was installed.
 
 In this situation before running the following commands be sure to execute the git command provided by Homebrew in this message to complete the full Homebrew installation (this step might take a while).
 
@@ -174,9 +174,38 @@ To build the Centos7 virtual machine, Vagrant will need a configuration file.
 
 We will make our own that looks like this:
 
+      Vagrant.configure("2") do |config|
+
+        config.vm.box = "centos/7"
+        config.vm.provider "virtualbox" do |vb|
+           vb.cpus = CPUSforVM
+           vb.memory = MBmemoryforVM
+        end
+        config.vm.provision "shell", inline: <<-SHELL
+           yum -y update
+           yum -y group install "Development Tools"
+           yum -y install wget
+           yum -y install libarchive-devel
+           yum -y install squashfs-tools
+           yum -y install java-11-openjdk-devel
+           yum -y install java-11-openjdk
+           yum -y install epel-release
+           yum -y install htop
+           yum -y install nano
+           git clone https://github.com/Aveglia/vAMPirus.git
+           wget  https://github.com/singularityware/singularity/releases/download/2.5.2/singularity-2.5.2.tar.gz
+              SHELL
+      end
+
+You can copy the block of code above and paste it into a file named Vagrantfile within the centos7_vampirus directory in your new virtual machine:
+
+    nano -l Vagrantfile
+
+Paste the block of code from above in this new file opened on your terminal window and then edit the line with "vb.memory" and "vb.cpus" with the amount of resources you would the VM to have access.
+
+So, for example, if you have a laptop machine with 4 CPUs and 6 GB of memory (you can find out by looking at the "About this Mac")
 
 
-We are going to make edits to this file to ensure that your Centos7 virtual machine
 
 
 then:
