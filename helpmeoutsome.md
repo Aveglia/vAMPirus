@@ -83,9 +83,9 @@ Clone the most recent version of vAMPirus from github using:
 
 vAMPirus is integrated with Nextflow which relies on Java being installed on your system.
 
-    If you know you do not have it installed, see here for instructions on installing Java for different operating softwares -> https://opensource.com/article/19/11/install-java-linux
+If you know you do not have it installed, see here for instructions on installing Java for different operating softwares -> https://opensource.com/article/19/11/install-java-linux
 
-    If you are unsure, you can check using:
+If you are unsure, you can check using:
 
 
   which java
@@ -122,9 +122,8 @@ In this situation before running the following commands be sure to execute the g
 
 Once done with the full installation, execute:
 
-    brew doctor
-and
-    brew update
+    brew doctor && brew update
+
 
 (Information from  https://treehouse.github.io/installation-guides/mac/homebrew)
 
@@ -151,9 +150,9 @@ vagrant-manager:
 
 Virtual Box (WILL CAUSE ERROR IF ORACLE NOT GIVEN PERMISSION TO INSTALL DEPENDENCIES):
 
-    break install virtualbox
+    brew install virtualbox
 
-NOTE=> In this part of the setup, you might get an error saying Oracle was denied permission to install programs. You will need to go to System Preferences->Security and Privacy->General and allow Oracle permission to download programs.
+NOTE=> In this part of the setup, you might get an error saying Oracle was denied permission to install programs. You will need to go to System Preferences->Security and Privacy->General and allow Oracle permission to download programs and you .
 
 Alright, if you notice no errors during installation, you should be good to go and create the Centos 7 environment
 
@@ -192,7 +191,7 @@ We will make our own that looks like this:
            yum -y install epel-release
            yum -y install htop
            yum -y install nano
-           git clone https://github.com/Aveglia/vAMPirus.git
+           #git clone https://github.com/Aveglia/vAMPirus.git
            wget  https://github.com/singularityware/singularity/releases/download/2.5.2/singularity-2.5.2.tar.gz
               SHELL
       end
@@ -201,22 +200,28 @@ You can copy the block of code above and paste it into a file named Vagrantfile 
 
     nano -l Vagrantfile
 
-Paste the block of code from above in this new file opened on your terminal window and then edit the line with "vb.memory" and "vb.cpus" with the amount of resources you would the VM to have access.
+Paste the block of code from above in this new file opened on your terminal window and then edit the lines with "vb.memory" and "vb.cpus" with the amount of resources you would the VM to have access to, then save the file.
 
-So, for example, if you have a laptop machine with 4 CPUs and 6 GB of memory (you can find out by looking at the "About this Mac")
+So, for example, if you have a laptop machine with 4 CPUs and 6 GB of memory (you can find out by looking at the "About this Mac") and you want to give your virtual machine access to 6 CPUs and 5 GB of memory you would edit those lines to look like:
 
+      config.vm.provider "virtualbox" do |vb|
+         vb.cpus = 6
+         vb.memory = 5000
+      end
 
+Little note -> 5000 = 5 GB ; 6000 = 6 GB; 30000 = 30 GB
 
-
-then:
+Now you should have a Vagrant file in your current directory and we can now "up" the virtual machine:
 
     vagrant up
 
-At this point, we can now connect to our cento7 (which is the default for vagrant now) virtual environment with:
+note -> this will be a few different packages so it might take a moment
+
+If no errors from the above command, we can now connect to our Centos7 virtual environment with:
 
     vagrant ssh
 
-You should now be in a fresh Centos7 virtual environment, almost done!
+You should now be in a fresh Centos7 virtual environment and if you ls you should see the vAMPirus program directory.
 
 
 
@@ -272,6 +277,8 @@ For example, if you would like to install Nextflow, download NCBIs Viral protein
 and if we wanted to do the same thing as above but skip the Conda check/installation, run:
 
     ./vampirus_startup.sh -d 1 -s
+
+**IF YOU ARE ON THE VAGRANT VIRTUAL MACHINE, YOU WILL NEED TO
 
 It should be noted, that any protein database can be used, but it needs to be in fasta format and the headers for reference sequences need to match
 one of two patterns:
