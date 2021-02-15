@@ -1664,26 +1664,49 @@ if (params.Analyze) {
 
     if (!params.skipAminoTyping) {
 
-        process Translate_For_AminoTyping {
+        if (params.sing) { process Translating_For_Aminotypes {
 
-            label 'low_cpus'
+                  label 'low_cpus'
 
-            conda 'python=2.7'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
 
-            input:
-                file(fasta) from asvsforAminotyping
+                  input:
+                      file(fasta) from asvsforAminotyping
 
-            output:
-                file("${params.projtag}_all_translations.fasta") into amintypegen
-                file("${params.projtag}_translation_report") into proteinstage_vap_report
+                  output:
+                      file("${params.projtag}_all_translations.fasta") into amintypegen
+                      file("${params.projtag}_translation_report") into proteinstage_vap_report
 
-            script:
-                """
-                ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
-                """
-        }
+                  script:
+                      """
+                      conda activate virtualribosome
+
+                      ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
+                      """
+
+          } else { process Translate_For_AminoTyping {
+
+              label 'low_cpus'
+
+              conda 'python=2.7'
+
+              publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
+
+              input:
+                  file(fasta) from asvsforAminotyping
+
+              output:
+                  file("${params.projtag}_all_translations.fasta") into amintypegen
+                  file("${params.projtag}_translation_report") into proteinstage_vap_report
+
+              script:
+                  """
+                  ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
+                  """
+          }
+
+       }
 
         process Generate_AminoTypes {
 
