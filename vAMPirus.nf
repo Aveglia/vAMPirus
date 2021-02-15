@@ -1664,7 +1664,9 @@ if (params.Analyze) {
 
     if (!params.skipAminoTyping) {
 
-        if (params.sing) { process Translating_For_Aminotypes {
+        if (params.sing) {
+
+          process Translating_For_Aminotypes {
 
                   label 'low_cpus'
 
@@ -1685,7 +1687,9 @@ if (params.Analyze) {
                       ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
                       """
 
-          } else { process Translate_For_AminoTyping {
+          } else {
+
+            process Translate_For_AminoTyping {
 
               label 'low_cpus'
 
