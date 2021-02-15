@@ -5,7 +5,7 @@
 
 # Introduction to vAMPirus
 
-Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program. Viruses are the most abundant life forms on the planet and with the advent of next-generation sequencing, there has been an increased effort in deciphering the global virome and its impact in nature. A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Even further, these approaches may be inaccessible for researchers with limited bioinformatics experience or those without access to subscription-based programs. For these reasons, we set out to develop an accessible automated virus amplicon sequencing analysis program (vAMPirus) that is flexible enough to allow users to tailor analyses to their data which can then be easily scaled and standardized across datasets.
+Viruses are the most abundant biological entities on the planet and with advances in next-generation sequencing technologies, there has been significant effort in deciphering the global virome and its impact in nature (Suttle 2007; Breitbart 2019). A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program that is integrated with the Nextflow workflow manager facilitation easy scalability and standardization of analyses.
 
 The vAMPirus program contains two different pipelines:
 
@@ -116,16 +116,14 @@ Lets first install Homebrew for your system:
 
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"  
 
-There should be a message once the installation of the shallow-clone completed.
+Just a heads up, there might be a message once isntallation has completed saying that shallow-clone of Homebrew was installed.
 
-This message provides a git command that you will need to execute to complete the installation (this step might take a while):
+In this situation before running the following commands be sure to execute the git command provided by Homebrew in this message to complete the full Homebrew installation (this step might take a while).
 
-
-
-then execute:
+Once done with the full installation, execute:
 
     brew doctor
-
+and
     brew update
 
 (Information from  https://treehouse.github.io/installation-guides/mac/homebrew)
@@ -135,9 +133,9 @@ Now we should be good to use Homebrew to install Vagrant and VirtualBox to set u
 
 #### Install Vagrant and Virtual Box
 
-NOTE=> In this part of the setup, you will likely get an error where Oracle was denied permission to install programs. You will need to go to System Preferences -> Security and Privacy and allow Oracle permission to download programs.
-
 To learn more about Vagrant, visit their website - https://www.vagrantup.com/intro also look here http://sourabhbajaj.com/mac-setup/Vagrant/README.html
+
+Be sure to keep an eye out for times that Brew is asking for your password to give permission to Vagrant to install completely
 
 First install cask:
 
@@ -151,9 +149,11 @@ vagrant-manager:
 
     brew install vagrant-manager
 
-Virtual Box (WILL CAUSE ERROR IF ORACLE NOT GIVEN PERMISSION TO INSTALL DEPENDENCIES - SEE NOTE ABOVE):
+Virtual Box (WILL CAUSE ERROR IF ORACLE NOT GIVEN PERMISSION TO INSTALL DEPENDENCIES):
 
     break install virtualbox
+
+NOTE=> In this part of the setup, you might get an error saying Oracle was denied permission to install programs. You will need to go to System Preferences->Security and Privacy->General and allow Oracle permission to download programs.
 
 Alright, if you notice no errors during installation, you should be good to go and create the Centos 7 environment
 
@@ -170,13 +170,13 @@ Lets move into the new directory:
 
     cd ./centos7_vampirus
 
-Now lets configure the Vagrant file:
+To build the Centos7 virtual machine, Vagrant will need a configuration file.
 
-    vagrant init centos/7
-
-Now there should be a Vagrantfile now in your current directory.
+We will make our own that looks like this:
 
 
+
+We are going to make edits to this file to ensure that your Centos7 virtual machine
 
 
 then:
@@ -189,15 +189,7 @@ At this point, we can now connect to our cento7 (which is the default for vagran
 
 You should now be in a fresh Centos7 virtual environment, almost done!
 
-#### Setting up the new Centos7 virtual environment
 
-Lets connect to our Centos7 virtual machine
-
-    vagrant ssh
-
-The first thing we will install is the core "Development tools" - https://www.cyberciti.biz/faq/centos-linux-install-gcc-c-c-compiler/
-
-    sudo yum -y group install "Development Tools"
 
 
 

@@ -447,16 +447,15 @@ if (params.help) {
 
 // This will be printed to the user in each run. here thy can check if the values the selected are fine
 log.info """\
-
-        =========================================================
-        vAMPirus v${workflow.manifest.version} - Virus Amplicon Sequencing Analysis Pipeline
-        =========================================================
-        Project name:                ${params.projtag}
-        Working directory:           ${params.workingdir}
-        Results directory:           ${params.outdir}
-        Database directory:          ${params.dbdir}
-        Database name:               ${params.dbname}
-        Metadata file:               ${params.metadata}
+================================================================================================================================================
+                              vAMPirus v${workflow.manifest.version} - Virus Amplicon Sequencing Analysis Pipeline
+================================================================================================================================================
+                                            Project name:                ${params.projtag}
+                                            Working directory:           ${params.workingdir}
+                                            Results directory:           ${params.outdir}
+                                            Database directory:          ${params.dbdir}
+                                            Database name:               ${params.dbname}
+                                            Metadata file:               ${params.metadata}
         """.stripIndent()
 
 if (params.readsTest) {
