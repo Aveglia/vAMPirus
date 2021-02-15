@@ -173,7 +173,7 @@ We will make our own that looks like this:
            yum -y install htop
            yum -y install nano
            #git clone https://github.com/Aveglia/vAMPirus.git
-           wget  https://github.com/singularityware/singularity/releases/download/2.5.2/singularity-2.5.2.tar.gz
+           yum -y install singularity
               SHELL
       end
 
@@ -206,7 +206,15 @@ If no errors from the above command, we can now connect to our Centos7 virtual e
 
 You should now be in your fresh Centos7 virtual environment and if you ls you will see the vAMPirus directory.
 
-You can now follow the normal directions for setting up vAMPirus with conda below.
+You can now follow the normal directions for setting up vAMPirus with singularity.
+
+But here is the quick overview of recommended next steps:
+
+    cd ./vAMPirus; bash vampirus_startup.sh -s
+
+After running the above you should now have Nextflow installed. Now, build the Singularity image and test the installation with:
+
+
 
 Please check out http://sourabhbajaj.com/mac-setup/Vagrant/README.html and https://www.vagrantup.com/docs/providers/virtualbox for understanding how to use Vagrant commands like "halt", "suspend" or "reload"
 
@@ -288,7 +296,9 @@ and if we wanted to do the same thing as above but skip the Conda check/installa
 
     ./vampirus_startup.sh -d 1 -s
 
-NOTE -> if you end up installing Minicond3 using the script
+NOTE -> if you end up installing Minicond3 using the script you should close and re-open the terminal window after everything is completed. Then move to the vAMPirus directory and run the test commands.
+
+
 ### Databases
 
 It should be noted, that any protein database can be used, but it needs to be in fasta format and the headers for reference sequences need to match
