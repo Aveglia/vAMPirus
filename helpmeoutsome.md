@@ -16,7 +16,7 @@
         * [Building and starting](#Building-and-starting-your-virtual-environment)
         * [Transferring files](#Transferring-files-to-and-from-VM-with-Vagrant-scp)
 * [Installing vAMPirus](#Installing-vAMPirus)  
-    * [Cloning the repository](#Cloning-the-repository-(skip-if-you-generated-the-Vagrant-virtual-environment)
+    * [Cloning the repository](#Cloning-the-repository-(skip-if-you-generated-the-Vagrant-virtual-environment))
     * [Setting up vAMPirus](#Setting-up-vAMPirus-dependencies-and-checking-installation)
     * [Databases](#Databases)
 * [Running vAMPirus](#Running-vAMpirus)
