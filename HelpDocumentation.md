@@ -220,11 +220,11 @@ But here is the quick overview of recommended next steps:
 
 After running the above you should now have Nextflow installed. Now, build the Singularity image and test the installation with (be sure to run from inside the vAMPirus program directory):
 
-    nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck
+    ./nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck
 
 then test the Analyze pipeline with:
 
-    nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run
+    ./nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run
 
 Please check out http://sourabhbajaj.com/mac-setup/Vagrant/README.html and https://www.vagrantup.com/docs/providers/virtualbox for understanding how to use Vagrant commands like "halt", "suspend" or "reload"
 
@@ -335,11 +335,11 @@ If we look at the script usage:
 
 For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, and check/install conda, run:
 
-    ./vampirus_startup.sh -d 1
+    bash vampirus_startup.sh -d 1
 
 and if we wanted to do the same thing as above but skip the Conda check/installation, run:
 
-    ./vampirus_startup.sh -d 1 -s
+    bash vampirus_startup.sh -d 1 -s
 
 NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed. Then move to the vAMPirus directory and run the test commands.
 
@@ -523,7 +523,7 @@ The first one in the block is the project tag or "projtag" which by default, if 
                      projtag="VirusRun1"
 
 
-2. Set the value within the launch command itself!
+2. Set the value within the launch command itself:
 
 Instead of editing the configuration file directly, you could set parmeters within the launching command itself. So, for example, if we wanted to run the analysis with nucletide-based clustering of ASVs at 95%        similarity, you would do so like this:
 
@@ -1155,7 +1155,7 @@ NOTE: Most, if not all, plots in vAMPirus reports are interactive meaning you ca
 
 Depending on which optional arguments you add to your analyses (e.g. --pcASV, --ncASV, skip options), you will have different files produced, here we will go through the output of the full analysis stemming from this launch command:
 
-        `nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV`
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run
 
 ### ReadProcessing - ${working_directory}/results/Analyze/ReadProcessing
 
@@ -1205,7 +1205,7 @@ For each clustering technique (i.e. ASVs, AminoTypes, ncASVs and pcASVs) perform
 
         1. Counts - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Counts
 
-            The Counts directory is where you can find the OTU counts tables as .csv files (and .biome as well for nucleotide counts tables).
+            The Counts directory is where you can find the counts tables as .csv files (and .biome as well for nucleotide counts tables).
 
         2. Phylogeny - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Phylogeny
 
@@ -1217,7 +1217,7 @@ For each clustering technique (i.e. ASVs, AminoTypes, ncASVs and pcASVs) perform
 
         4. Matrix - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Matrix
 
-            The Matric directory is where you can find all Percent Identity matrices for produced taxonomic unit fastas.
+            The Matric directory is where you can find all Percent Identity matrices for produced ASV/cASV/AmintoType fastas.
 
         5. EMBOSS - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/EMBOSS
 
@@ -1241,7 +1241,7 @@ vAMPirus produces final reports for all taxonomic unit fastas produced in the ru
 
                 The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Species Richness.
 
-                Stats tests ran for each:
+                Stats tests included with "--stats run":
 
                     a. Shapiro Test of normality
                     b. Bartlett Test variance homogeneity
@@ -1274,28 +1274,28 @@ Usage:
         nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV]
 
 
-### Help options
+--Help options--
 
         --help                          Print help information
 
         --fullHelp                      Print even more help information
 
 
-### Mandatory arguments (choose one)
+--Mandatory arguments (choose one)--
 
         --Analyze                       Run absolutely everything
 
         --DataCheck                     Assess how data performs with during processing and clustering
 
 
-### ASV clustering arguments
+--ASV clustering arguments--
 
         --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
         --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
 
-### Skip options
+--Skip options--
 
         --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
 
@@ -1313,7 +1313,7 @@ Usage:
 
 **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
-### Project/analysis information
+--Project/analysis information--
 
         --projtag                       Set project name to be used as a prefix for output files
 
@@ -1326,7 +1326,7 @@ Usage:
         --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
 
-### Merged read length filtering
+--Merged read length filtering--
 
         --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
 
@@ -1335,7 +1335,7 @@ Usage:
         --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
 
 
-### Primer removal
+--Primer removal--
 
     General primer removal parameters
 
@@ -1362,24 +1362,24 @@ Usage:
         --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
 
 
-### Amplicon Sequence Variant (ASV) genration and clustering
+--Amplicon Sequence Variant (ASV) genration and clustering--
 
         --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
         --minSize                       Minimum size or representation for sequence to be considered in ASV generation
 
-        --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
+        --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
 
-        --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+        --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide-based clustering of ASVs with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
 
-        --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
+        --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for protein-based ASV clustering to generate pcASVs[ Example: --clusterAAID .97 ]
 
-        --clusterAAIDlist               With --pcASV set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
+        --clusterAAIDlist               With --pcASV set, use this option to perform protein-based ASV clustering to generate pcASVs with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
         --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
 
-### Counts table generation
+--Counts table generation--
 
         --asvcountID                    Similarity ID to use for ASV counts
 
@@ -1390,7 +1390,7 @@ Usage:
         --ProtCountsBit                 Minimum bitscore for hit to be counted
 
 
-### Taxonomy assignment parameters
+--Taxonomy assignment parameters--
 
         --dbname                       Specify name of database to use for analysis
 
@@ -1405,15 +1405,15 @@ Usage:
         --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
 
 
-### Phylogeny analysis parameters
+--Phylogeny analysis parameters--
 
-Setting customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D") - might be easier to set in the vampirus.config file at lines 108/109
+  Setting customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D") - might be easier to set in the vampirus.config file at lines 108/109
 
         --iqCustomnt                   Use option to set custom options to use in all IQTREE analyses with nuceoltide sequences
 
         --iqCustomaa                   Use option to set custom options to use in all IQTREE analyses with amino acid sequences
 
-These options below you can set at the command, for example, to set to use model from ModelTest-NG with parametric bootstrapping --ModelTnt --ModelTaa --parametric
+  These options below you can set at the command, for example, to set to use model from ModelTest-NG with parametric bootstrapping --ModelTnt --ModelTaa --parametric
 
         --ModelTnt=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with nuceoltide sequences (Default is IQ-TREE will do automatic model testing with ModelFinder Plus)
 
@@ -1426,7 +1426,7 @@ These options below you can set at the command, for example, to set to use model
         --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
 
 
-### Statistics options
+  --Statistics options--
 
         --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
 
