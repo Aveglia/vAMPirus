@@ -53,7 +53,7 @@ If you do use vAMPirus for your analyses, please cite the following ->
 15. UNOISE algorithm - R.C. Edgar (2016). UNOISE2: improved error-correction for Illumina 16S and ITS amplicon sequencing, https://doi.org/10.1101/081257
 
 
-# Getting started
+# Getting started with vAMPirus
 
 ## Order of operations
 
@@ -74,19 +74,19 @@ If you do use vAMPirus for your analyses, please cite the following ->
 8. Explore results directories and produced final reports
 
 
-# Installing and running vAMPirus
-
 ## Windows OS users
 
-vAMPirus has been set up and tested on Windows 10 using Ubuntu sandbox which is a new feature of Windows 10 - Windows Subsystem for Linux -> https://docs.microsoft.com/en-us/windows/wsl/about
+vAMPirus has been set up and tested on Windows 10 using Ubuntu Sandbox (https://wiki.ubuntu.com/WSL) which is a new feature of Windows 10 - See Windows Subsystem for Linux -> https://docs.microsoft.com/en-us/windows/wsl/about
 
 All you will need to do is set up the subsystem with whatever flavor of Linux you favor and then you can follow the directions for installation and running as normal.
+
+Search for Linux in the Microsoft store -> https://www.microsoft.com/en-us/search?q=linux
 
 It should be noted that vAMPirus was developed on Centos7/8.
 
 ## MacOS users
 
-If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment with conda or Singularity to use the vAMPirus Docker image.
+If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment and use Singularity with the vAMPirus Docker image to run your analyses.
 
 You can try to run directly on your system, but there may be errors caused by differences between Apply and GNU versions of tools like "sort".
 
@@ -289,6 +289,10 @@ or
 
 The output from either of those commands should let you know if you have Java on your system.
 
+You will also need to decide if you plan to use a container engine like Docker (https://www.docker.com/) or Singularity (https://singularity.lbl.gov/) or the package manager Conda (https://docs.conda.io/en/latest/).
+
+The startup script provided in the vAMPirus program directory will install Conda for you if you tell it to (see below), however, unless you plan to run in the Vagrant VM as described above, you will need to install Docker or Singularity before running vAMPirus.
+
 ## Setting up vAMPirus dependencies and checking installation
 
 
@@ -370,9 +374,13 @@ An example of custom headers if you plan to use a custom database:
   `>acc|Custom|VP2000.1|Custom|VP2000| capsid protein [T7 phage isolate]`
    AMINOACIDSEQUENCE
 
-### Using Singularity
+### Using Singularity [ https://singularity.lbl.gov/ ]
 
+In the testing period of vAMPirus, we noticed that building the Conda environment on personal computers (2-4 CPUs; 6-8 GB memory) could be a slow process.
 
+If you are having errors during the set up process due to Conda, you can use the container engine Singularity to take advantage of the vAMPirus Docker image.
+
+For Linux users you can install Singularity following the instructions here -> https://singularity.lbl.gov/install-linux
 
 ## Testing vAMPirus installation
 
