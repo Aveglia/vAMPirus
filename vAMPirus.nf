@@ -2106,7 +2106,7 @@ if (params.Analyze) {
                           file(fasta) from nucl2aa
 
                       output:
-                          file("*ASV_translations.fasta") into clustering_aa
+                          file("*ASV*translations.fasta") into clustering_aa
                           file("*_ASV_translations_report") into reportaa_VR
                           file("*_ASV_nucleotide.fasta") into asvfastaforaaclust
 
@@ -2134,7 +2134,7 @@ if (params.Analyze) {
                       file(fasta) from nucl2aa
 
                   output:
-                      file("*ASV_translations.fasta") into clustering_aa
+                      file("*ASV*translations.fasta") into clustering_aa
                       file("*_ASV_translations_report") into reportaa_VR
                       file("*_ASV_nucleotide.fasta") into asvfastaforaaclust
 
