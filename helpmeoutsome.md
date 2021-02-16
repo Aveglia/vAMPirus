@@ -74,30 +74,39 @@ If you do use vAMPirus for your analyses, please cite the following ->
 8. Explore results directories and produced final reports
 
 
-# Installing vAMPirus
+# Installing and running vAMPirus
 
+## Windows OS users
+
+vAMPirus has been set up and tested on Windows 10 using Ubuntu sandbox which is a new feature of Windows 10 - Windows Subsystem for Linux -> https://docs.microsoft.com/en-us/windows/wsl/about
+
+All you will need to do is set up the subsystem with whatever flavor of Linux you favor and then you can follow the directions for installation and running as normal.
+
+It should be noted that vAMPirus was developed on Centos7/8.
 
 ## MacOS users
 
 If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment with conda or Singularity to use the vAMPirus Docker image.
 
-You can try to run directly on your system, but there may be errors.
+You can try to run directly on your system, but there may be errors caused by differences between Apply and GNU versions of tools like "sort".
 
 vAMPirus was developed on a Centos7/8 operating system so we will go through how to set up a Centos7 Vagrant virtual environment with Virtual Box.
 
 A few steps are a little long, but this is a one time process if done successfully.
 
-### Installing VM
+### Installing and running the VM on MacOS
 
 There are other ways to do this so if you are more comfortable creating a virtual environment another way, please do so.
 
 #### Install Homebrew
 
-Let's first install Homebrew for your system:
+Let's first install Homebrew for your system, if you know you have it already and you've checked its not a "shallow clone" of Homebrew, you can skip this.
+
+If you are unsure, just run this:
 
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"  
 
-Just a heads up, there might be a message once installation has completed saying that shallow-clone of Homebrew was installed.
+Just a heads up, there might be a message once installation has completed saying that shallow clone of Homebrew was installed.
 
 In this situation before running the following commands be sure to execute the git command provided by Homebrew in this message to complete the full Homebrew installation (this step might take a while).
 
@@ -129,6 +138,10 @@ vagrant-manager:
 
     brew install vagrant-manager
 
+Next, we will need to install Vagrant scp plugin so you can transfer files back and forth from your host computer to the virtual machine you will create:
+
+    vagrant plugin install vagrant-scp
+
 Virtual Box (WILL CAUSE ERROR IF ORACLE NOT GIVEN PERMISSION TO INSTALL DEPENDENCIES):
 
     brew install virtualbox
@@ -138,7 +151,7 @@ NOTE=> In this part of the setup, you might get an error saying Oracle was denie
 Alright, if you notice no errors during installation, you should be good to go and create the Centos 7 environment
 
 
-#### Building virtual environment
+#### Building and starting your virtual environment
 
 See https://gist.github.com/jakebrinkmann/4ae0a59bf6f3b0b4929499d2ab832fbd and http://sourabhbajaj.com/mac-setup/Vagrant/README.html to provide better context to commands below.
 
@@ -212,11 +225,41 @@ But here is the quick overview of recommended next steps:
 
     cd ./vAMPirus; bash vampirus_startup.sh -s
 
-After running the above you should now have Nextflow installed. Now, build the Singularity image and test the installation with:
+After running the above you should now have Nextflow installed. Now, build the Singularity image and test the installation with (be sure to run from inside the vAMPirus program directory):
 
+    nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck
 
+then test the Analyze pipeline with:
+
+    nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run
 
 Please check out http://sourabhbajaj.com/mac-setup/Vagrant/README.html and https://www.vagrantup.com/docs/providers/virtualbox for understanding how to use Vagrant commands like "halt", "suspend" or "reload"
+
+### Transferring files to and from VM with Vagrant scp
+
+Being a virtual environment, all the files within your VM is not easily accessible from your host computer. To transfer files (read libraries or results) to and from your virtual environment you will need to use Vagrant scp.
+
+Please note and be aware of the fact that when you scp to and from your VM you essentially have a duplicated
+
+For more in depth instructions for how to use this command, see https://medium.com/@smartsplash/using-scp-and-vagrant-scp-in-virtualbox-to-copy-from-guest-vm-to-host-os-and-vice-versa-9d2c828b6197
+
+But briefly:
+
+#### Moving files from host computer to Vagrant Centos7 VM
+
+Starting from your host computer (meaning not ssh'd into the Cenots7 virtual enviroment) ->
+
+    vagrant scp /Path/to/files/on/host/computer :/path/to/directory/in/virtual/environment
+
+You should then see a notification of it being transferred 100%
+
+#### Moving files from Vagrant Centos7 VM to host computer
+
+Starting from your host computer (meaning not ssh'd into the Cenots7 virtual enviroment) ->
+
+    vagrant scp :/path/to/files/in/virtual/environment /Path/to/directory/on/host/computer
+
+You should then see a notification of it being transferred 100%
 
 
 ## Installing vAMPirus
@@ -327,6 +370,9 @@ An example of custom headers if you plan to use a custom database:
   `>acc|Custom|VP2000.1|Custom|VP2000| capsid protein [T7 phage isolate]`
    AMINOACIDSEQUENCE
 
+### Using Singularity
+
+
 
 ## Testing vAMPirus installation
 
@@ -373,7 +419,9 @@ For example if the analysis launched with the test DataCheck launch command abov
 
 # Things to know before running vAMPirus
 
+
 ## The Nextflow workflow manager and the "launch command"
+
 
 ### Nextflow
 

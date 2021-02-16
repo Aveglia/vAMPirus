@@ -249,8 +249,9 @@ chmod a+x "$mypwd"/bin/virtualribosomev2/*
 if [[ $(ls "$mypwd"| grep -wc "STARTUP_HELP.txt") -eq 0 ]]
 then
       touch STARTUP_HELP.txt
-      echo "-------------------------------------------------------------------------------------------------------------------------------- TESTING YOUR INSTALLATION" >> STARTUP_HELP.txt
-      echo "Ok, everything downloaded. To test installation, run the following commands and check for errors:" >> STARTUP_HELP.txt
+      echo "-------------------------------------------------------------------------------------------------------------------------------- TESTING YOUR INSTALLATION; be sure to run from inside the vAMPirus program directory" >> STARTUP_HELP.txt
+      echo "   " >> STARTUP_HELP.txt
+      echo "Ok, everything downloaded. To test installation, run the following commands and check for errors (be sure to run from inside the vAMPirus program directory):" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
       echo "Checking DataCheck mode:" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
