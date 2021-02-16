@@ -884,7 +884,7 @@ The smaller the alpha value (--alpha) the more stringent vsearch is ASV generati
 
 Launch command to produce only ASV-related analyses:
 
-    nextflow run v
+    nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats run --skipAminoTyping
 
 Now, onto clustering ASVs into clustered ASVs (cASVs). vAMPirus is able to use two different techniques for generating cASVs for the user:
 
@@ -1027,13 +1027,13 @@ And you used a launch command similar to:
 
 The IQTREE commands for the ASV and AminoType phylogenetic analyses would be:
 
-        ASV IQTREE command ->
+ASV IQTREE command ->
 
-        iqtree -s asv_alighnment.fasta --prefix TestRun --redo -T auto -option1 A -option2 B -option3 C
+      iqtree -s asv_alighnment.fasta --prefix TestRun --redo -T auto -option1 A -option2 B -option3 C
 
-        AminoType IQTREE command ->
+AminoType IQTREE command ->
 
-        iqtree -s aminotype_alighnment.fasta --prefix TestRun --redo -T auto -option1 A -option2 B -option3 C
+      iqtree -s aminotype_alighnment.fasta --prefix TestRun --redo -T auto -option1 A -option2 B -option3 C
 
 
 
@@ -1100,53 +1100,53 @@ The DataCheck performed by vAMPirus includes "ReadProcessing", "Clustering", and
 
 Within the ReadProcessing directory you will find all files related to each step of read processing:
 
-        1. FastQC - ${working_directory}/results/DataCheck/ReadProcessing/FastQC
+1. FastQC - ${working_directory}/results/DataCheck/ReadProcessing/FastQC
 
-                In this directory you will find FastQC html reports for pre-cleaned and post-cleaned individual read libraries.
+In this directory you will find FastQC html reports for pre-cleaned and post-cleaned individual read libraries.
 
-        2. AdapterRemoval - ${working_directory}/results/DataCheck/ReadProcessing/AdapterRemoval
+2. AdapterRemoval - ${working_directory}/results/DataCheck/ReadProcessing/AdapterRemoval
 
-                Here we have resulting fastq files with adapter sequences removed. Fastp also generates its own reports which can also be found in "./fastpOut".
+Here we have resulting fastq files with adapter sequences removed. Fastp also generates its own reports which can also be found in "./fastpOut".
 
-        3. PrimerRemoval - ${working_directory}/results/DataCheck/ReadProcessing/PrimerRemoval
+3. PrimerRemoval - ${working_directory}/results/DataCheck/ReadProcessing/PrimerRemoval
 
-                Similar to the adapter removal directory, here you have the clean read libraries that have had adapter and primer sequences removed.
+Similar to the adapter removal directory, here you have the clean read libraries that have had adapter and primer sequences removed.
 
-        4. ReadMerging - ${working_directory}/results/DataCheck/ReadProcessing/ReadMerging
+4. ReadMerging - ${working_directory}/results/DataCheck/ReadProcessing/ReadMerging
 
-                There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report.
+There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report.
 
 ### Clustering - ${working_directory}/results/DataCheck/Clustering
 
 As the name would suggest, the files within this directory are related to the clustering process of "--DataCheck". There isn't too much in here, but here is the breakdown anyway:
 
-        1. ASVs - ${working_directory}/results/DataCheck/Clustering/ASVs
+1. ASVs - ${working_directory}/results/DataCheck/Clustering/ASVs
 
-                In this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits.
+In this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits.
 
-        2. Nucleotide - ${working_directory}/results/DataCheck/Clustering/Nucleotide
+2. Nucleotide - ${working_directory}/results/DataCheck/Clustering/Nucleotide
 
-                This directory stores a .csv file that shows the number of clusters or ncASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
+This directory stores a .csv file that shows the number of clusters or ncASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
 
-        3. Aminoacid - ${working_directory}/results/DataCheck/Clustering/Aminoacid
+3. Aminoacid - ${working_directory}/results/DataCheck/Clustering/Aminoacid
 
-                Similar to Nucleotide, the Aminoacid directory contained the .csv that shows the number of clusters or pcASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
+Similar to Nucleotide, the Aminoacid directory contained the .csv that shows the number of clusters or pcASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
 
 ### Report - ${working_directory}/results/DataCheck/Report
 
 In this directory, you will find a .html DataCheck report that can be opened in any browser. The report contains the following information and it meant to allow the user to tailor their vAMPirus pipeline run to their data (i.e. maximum read length, clustering percentage, etc.):
 
-        1. Pre- and post-adapter removal read statistics
+1. Pre- and post-adapter removal read statistics
 
-                This is the first section of the DataCheck report which has (i) a read stats table which includes read lengths/number of reads/gc content, (ii) a box plot comparing overall read length distribution before and after adapter removal, and (iii) another box plot showing the influence of adapter removal on read length.
+This is the first section of the DataCheck report which has (i) a read stats table which includes read lengths/number of reads/gc content, (ii) a box plot comparing overall read length distribution before and after adapter removal, and (iii) another box plot showing the influence of adapter removal on read length.
 
-        2. Post-merging statistics
+2. Post-merging statistics
 
-                The second section of the report displays several plots tracking the changes in certain data-related properties before and after the final read cleaning steps (e.g. length filtering and global trimming). These properties include (i) pre/post-filtering reads per sample, (ii) pre/post-filtering base frequency per position on reads, (iii) pre/post-filtering mean quality score per position, (iv) pre/post-filtering GC-content, (v) pre/post-filtering reads per quality score, (vi) pre/post-filtering merged read length distribution.
+The second section of the report displays several plots tracking the changes in certain data-related properties before and after the final read cleaning steps (e.g. length filtering and global trimming). These properties include (i) pre/post-filtering reads per sample, (ii) pre/post-filtering base frequency per position on reads, (iii) pre/post-filtering mean quality score per position, (iv) pre/post-filtering GC-content, (v) pre/post-filtering reads per quality score, (vi) pre/post-filtering merged read length distribution.
 
-        3. Clustering statistics
+3. Clustering statistics
 
-                In this section of the report, vAMPirus is showing the number of nucleotide- and protein-based cASVs assigned per clustering percentage. vAMPirus clusters ASVs and ASV translations by 24 different clustering percentages between 55-100%. The "100% clustering" data point in the "Number of ncASVs per clustering percentage" plot is the number of ASVs, it is important to know that ASV generation and clustering based on 100% is not the same, but we felt the number of ASVs is an important stat to know when comparing to the clustered data.
+In this section of the report, vAMPirus is showing the number of nucleotide- and protein-based cASVs assigned per clustering percentage. vAMPirus clusters ASVs and ASV translations by 24 different clustering percentages between 55-100%. The "100% clustering" data point in the "Number of ncASVs per clustering percentage" plot is the number of ASVs, it is important to know that ASV generation and clustering based on 100% is not the same, but we felt the number of ASVs is an important stat to know when comparing to the clustered data.
 
 NOTE: Most, if not all, plots in vAMPirus reports are interactive meaning you can select and zoom on certain parts of the plot or you can use the legend to remove certain samples.
 
@@ -1161,110 +1161,90 @@ Depending on which optional arguments you add to your analyses (e.g. --pcASV, --
 
 Very similar to the "ReadProcessing" directory created in DataCheck, you will find the following:
 
-        1. FastQC - ${working_directory}/results/Analyze/ReadProcessing/FastQC
+1. FastQC - ${working_directory}/results/Analyze/ReadProcessing/FastQC
 
-                In this directory you will find FastQC html reports for pre-cleaned and post-cleaned individual read libraries.
+In this directory you will find FastQC html reports for pre-cleaned and post-cleaned individual read libraries.
 
-        2. AdapterRemoval - ${working_directory}/results/Analyze/ReadProcessing/AdapterRemoval
+2. AdapterRemoval - ${working_directory}/results/Analyze/ReadProcessing/AdapterRemoval
 
-                Here we have resulting fastq files with adapter sequences removed. Fastp also generates its own reports which can also be found in "./fastpOut".
+Here we have resulting fastq files with adapter sequences removed. Fastp also generates its own reports which can also be found in "./fastpOut".
 
-        3. PrimerRemoval - ${working_directory}/results/Analyze/ReadProcessing/PrimerRemoval
+3. PrimerRemoval - ${working_directory}/results/Analyze/ReadProcessing/PrimerRemoval
 
-                Similar to the adapter removal directory, here you have the clean read libraries that have had adapter and primer sequences removed.
+Similar to the adapter removal directory, here you have the clean read libraries that have had adapter and primer sequences removed.
 
-        4. ReadMerging - ${working_directory}/results/Analyze/ReadProcessing/ReadMerging
+4. ReadMerging - ${working_directory}/results/Analyze/ReadProcessing/ReadMerging
 
-                There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report if ran before Analyze.
+There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report if ran before Analyze.
 
 ### Clustering - ${working_directory}/results/Analyze/Clustering
 
 The clustering directory will contain all files produced for whichever clustering technique you specified (with the launch command above, all are specified):
 
-        1. ASVs - ${working_directory}/results/Analyze/Clustering/ASVs
+1. ASVs - ${working_directory}/results/Analyze/Clustering/ASVsIn this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits.
 
-            In this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits.
+2. AminoTypes - ${working_directory}/results/Analyze/Clustering/AminoTypesThe AminoTypes directory has a few different subdirectories, in the main directory, however, is the fasta file with the AminoTypes used in all subsequent analyses. The first subdirectory is called "Translation" which includes the raw ASV translation file along with a report spit out by VirtualRibosome. The next subdirectory is "Problematic", where any translations that were below the given "--minAA" length will be reported, if none were deemed "problematic" then the directory will be empty. All problematic amino acid sequence AND their corresponding ASVs are stored in fasta files for you to review. The final subdirectory is "SummaryFiles" where you can find a "map" of sorts to track which ASVs contributed to which AminoTypes and a .gc file containing information on length of translated sequences.
 
-        2. AminoTypes - ${working_directory}/results/Analyze/Clustering/AminoTypes
+3. ncASV - ${working_directory}/results/Analyze/Clustering/ncASVIn this directory, you will find the fasta files corresponding to the clustering percentage(s) you specified for the run.
 
-            The AminoTypes directory has a few different subdirectories, in the main directory, however, is the fasta file with the AminoTypes used in all subsequent analyses. The first subdirectory is called "Translation" which includes the raw ASV translation file along with a report spit out by VirtualRibosome. The next subdirectory is "Problematic", where any translations that were below the given "--minAA" length will be reported, if none were deemed "problematic" then the directory will be empty. All problematic amino acid sequence AND their corresponding ASVs are stored in fasta files for you to review. The final subdirectory is "SummaryFiles" where you can find a "map" of sorts to track which ASVs contributed to which AminoTypes and a .gc file containing information on length of translated sequences.
-
-        3. ncASV - ${working_directory}/results/Analyze/Clustering/ncASV
-
-            In this directory, you will find the fasta files corresponding to the clustering percentage(s) you specified for the run.
-
-        4. pcASV - ${working_directory}/results/Analyze/Clustering/pcASV
-
-            Looking in this directory, you probably notice some similar subdirectories. The pcASV directory also contains the Summary, Problematic, and Translation subsirectories we saw in the AminoType directory. The other important files in this directory is the nucleotide and amino acid versions of the pcASVs generated for whichever clustering percentage(s) specified.
-
-            An important note for when creating pcASVs is that the subsequent analyses (phylogenies, taxonomy assignment, etc.) are run on both nucloetide and amino acid pcASV fastas. To create these files, vAMPirus translates the ASVs, checks for problematic sequences, then clusters the translated sequences by the given percentage(s). After clustering, vAMPirus will go pcASV by pcASV extracting the nucleotide sequences of the ASVs that clustered within a given pcASV. The extracted nucleotide sequences are then used to generate a consensus nucleotide sequence(s) per pcASV.        
+4. pcASV - ${working_directory}/results/Analyze/Clustering/pcASVLooking in this directory, you probably notice some similar subdirectories. The pcASV directory also contains the Summary, Problematic, and Translation subsirectories we saw in the AminoType directory. The other important files in this directory is the nucleotide and amino acid versions of the pcASVs generated for whichever clustering percentage(s) specified.An important note for when creating pcASVs is that the subsequent analyses (phylogenies, taxonomy assignment, etc.) are run on both nucloetide and amino acid pcASV fastas. To create these files, vAMPirus translates the ASVs, checks for problematic sequences, then clusters the translated sequences by the given percentage(s). After clustering, vAMPirus will go pcASV by pcASV extracting the nucleotide sequences of the ASVs that clustered within a given pcASV. The extracted nucleotide sequences are then used to generate a consensus nucleotide sequence(s) per pcASV.        
 
 ### Analyses - ${working_directory}/results/Analyze/Analyses
 
 For each clustering technique (i.e. ASVs, AminoTypes, ncASVs and pcASVs) performed in a given run, resulting taxonomic unit fastas will go through the following analyses (unless skip options are used):
 
-        1. Counts - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Counts
+1. Counts - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/CountsThe Counts directory is where you can find the counts tables as .csv files (and .biome as well for nucleotide counts tables).
 
-            The Counts directory is where you can find the counts tables as .csv files (and .biome as well for nucleotide counts tables).
+2. Phylogeny - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/PhylogenyUnless told otherwise, vAMPirus will produce phylogenetic trees for all taxonomic unit fastas using IQ-TREE. The options for this analysis was discussed in a previous section of the docs. In the phylogeny output directory, you will find three subdirectories: (i) ./Alignment - contains trimmed MAFFT alignment used for tree, (ii) ./ModelTest - contains output files from substitution model prediction with ModelTest-NG, and (iii) ./IQ-TREE - where you can find all output files from IQ-TREE with the file of (usual) interest is the ".treefile".
 
-        2. Phylogeny - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Phylogeny
+3.  Taxonomy - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/TaxonomyvAMPirus uses Diamond blastp/x and the supplied PROTEIN database for taxonomy assignment of sequences. In the Taxonomy directory, you will find (i) a subdirectory called "DiamondOutput" which contains the original output file produced by Diamond, (ii) a fasta file that has taxonomy assignments within the sequence headers, and (iii) three different summary files (one being a phyloseq object with taxonomic information, a tab-separated summary file for review by the user and a summary table looking at abundance of specific hits).
 
-            Unless told otherwise, vAMPirus will produce phylogenetic trees for all taxonomic unit fastas using IQ-TREE. The options for this analysis was discussed in a previous section of the docs. In the phylogeny output directory, you will find three subdirectories: (i) ./Alignment - contains trimmed MAFFT alignment used for tree, (ii) ./ModelTest - contains output files from substitution model prediction with ModelTest-NG, and (iii) ./IQ-TREE - where you can find all output files from IQ-TREE with the file of (usual) interest is the ".treefile".
+4. Matrix - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/MatrixThe Matric directory is where you can find all Percent Identity matrices for produced ASV/cASV/AmintoType fastas.
 
-        3.  Taxonomy - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Taxonomy
-
-            vAMPirus uses Diamond blastp/x and the supplied PROTEIN database for taxonomy assignment of sequences. In the Taxonomy directory, you will find (i) a subdirectory called "DiamondOutput" which contains the original output file produced by Diamond, (ii) a fasta file that has taxonomy assignments within the sequence headers, and (iii) three different summary files (one being a phyloseq object with taxonomic information, a tab-separated summary file for review by the user and a summary table looking at abundance of specific hits).
-
-        4. Matrix - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Matrix
-
-            The Matric directory is where you can find all Percent Identity matrices for produced ASV/cASV/AmintoType fastas.
-
-        5. EMBOSS - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/EMBOSS
-
-            Several different protein physiochemical properties for all amino acid sequences are assessed using EMBOSS scripts (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/groups.html). There are four different subdirectories within EMBOSS, these include (i) ./ProteinProperties - contains files and plots regarding multiple different physiochemical properties (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/pepstats.html), (ii) ./IsoelectricPoint - contains a text file and a .svg image with plots showing the isoelectric point of protein (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/iep.html), (iii) ./HydrophobicMoment - information related to hydrophobic moments of amino acid sequences (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/hmoment.html), and (iv) ./2dStructure - information about 2D structure of proteins (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/protein_2d_structure_group.html).
+5. EMBOSS - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/EMBOSSSeveral different protein physiochemical properties for all amino acid sequences are assessed using EMBOSS scripts (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/groups.html). There are four different subdirectories within EMBOSS, these include (i) ./ProteinProperties - contains files and plots regarding multiple different physiochemical properties (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/pepstats.html), (ii) ./IsoelectricPoint - contains a text file and a .svg image with plots showing the isoelectric point of protein (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/iep.html), (iii) ./HydrophobicMoment - information related to hydrophobic moments of amino acid sequences (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/hmoment.html), and (iv) ./2dStructure - information about 2D structure of proteins (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/protein_2d_structure_group.html).
 
 ### FinalReport - ${working_directory}/results/Analyze/FinalReport
 
 vAMPirus produces final reports for all taxonomic unit fastas produced in the run. These reports contain the following information:
 
-        1. Pre- and post-adapter removal read statistics
+1. Pre- and post-adapter removal read statistics
 
-                This is the first section of the final report and similar to the DataCheck report,there is (i) a read stats table which includes read lengths/number of reads/gc content, (ii) a box plot comparing overall read length distribution before and after adapter removal, and (iii) another box plot showing the influence of adapter removal on read length.
+This is the first section of the final report and similar to the DataCheck report,there is (i) a read stats table which includes read lengths/number of reads/gc content, (ii) a box plot comparing overall read length distribution before and after adapter removal, and (iii) another box plot showing the influence of adapter removal on read length.
 
-        2. Number of reads per sample
+2. Number of reads per sample
 
-                This is a plot that looks at number of reads per sample, similar to what is seen in the DataCheck report.
+This is a plot that looks at number of reads per sample, similar to what is seen in the DataCheck report.
 
-        3. Rarefaction curves
+3. Rarefaction curves
 
-        4. Diversity analyses box Plots
+4. Diversity analyses box Plots
 
-                The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Species Richness.
+The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Species Richness.
 
-                Stats tests included with "--stats run":
+Stats tests included with "--stats run":
 
-                    a. Shapiro Test of normality
-                    b. Bartlett Test variance homogeneity
-                    c. ANOVA
-                    d. Tukey Honest Significant Differences (HSD)
-                    e. Kruskal-Wallis test
-                    f. Pairwise Wilcoxon
-                    g. PERMANOVA
+    a. Shapiro Test of normality
+    b. Bartlett Test variance homogeneity
+    c. ANOVA
+    d. Tukey Honest Significant Differences (HSD)
+    e. Kruskal-Wallis test
+    f. Pairwise Wilcoxon
+    g. PERMANOVA
 
 
-        5. Distance to centroid box plot
+5. Distance to centroid box plot
 
-        6. NMDS plots (2D and 3D)
+6. NMDS plots (2D and 3D)
 
-        7. Relative ASV/cASV abundance per sample bar chart
+7. Relative ASV/cASV abundance per sample bar chart
 
-        8. Absolute ASV/cASV abundance per treatment bar chart
+8. Absolute ASV/cASV abundance per treatment bar chart
 
-        9. Pairwise percent ID heatmap
+9. Pairwise percent ID heatmap
 
-        10. Taxonomy results visualized in a donut plot
+10. Taxonomy results visualized in a donut plot
 
-        11. Visualized phylogenetic tree
+11. Visualized phylogenetic tree
 
 
 # All of the options
