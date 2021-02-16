@@ -49,7 +49,7 @@ library(knitr)
 library(kableExtra) #install.packages("kableExtra")
 library(rmarkdown)
 library(processx) #install.packages("processx")
-register(MulticoreParam(4))
+#register(MulticoreParam(4))
 ```
 
 ```{r colors, include=FALSE}

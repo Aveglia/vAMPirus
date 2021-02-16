@@ -51,7 +51,7 @@ library(plotly)
 library(knitr)
 library(kableExtra) #install.packages("kableExtra")
 library(rmarkdown)
-register(MulticoreParam(4))
+#register(MulticoreParam(4))
 ```
 
 ```{r colors, include=FALSE}
