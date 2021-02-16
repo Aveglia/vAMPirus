@@ -10,7 +10,8 @@
   * [Order of operations](##Order-of-operations)
     * [Dependencies](###Dependencies-(See-How-to-cite))
 * [Installing vAMPirus](#Installing-vAMPirus)
-  * [Setting up vAMPirus dependencies](##Setting-up-vAMPirus-dependencies)
+  * [Setting up vAMPirus dependencies](#Setting-up-vAMPirus-dependencies)
+    * [Quick set up](#vAMPirus-startup-script)
 * [Testing vAMPirus install](#Testing-vAMPirus-installation)
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
@@ -69,6 +70,28 @@ If you plan to use a container engine like Singularity, the dependencies of vAMP
 
 # Installing vAMPirus
 
+## Windows OS users
+
+vAMPirus has been set up and tested on Windows 10 using Ubuntu Sandbox (https://wiki.ubuntu.com/WSL) which is a new feature of Windows 10 - See Windows Subsystem for Linux -> https://docs.microsoft.com/en-us/windows/wsl/about
+
+All you will need to do is set up the subsystem with whatever flavor of Linux you favor and then you can follow the directions for installation and running as normal.
+
+Search for Linux in the Microsoft store -> https://www.microsoft.com/en-us/search?q=linux
+
+It should be noted that vAMPirus was developed on Centos7/8.
+
+
+## MacOS users
+
+If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment and use Singularity with the vAMPirus Docker image to run your analyses.
+
+You can try to run directly on your system, but there may be errors caused by differences between Apply and GNU versions of tools like "sort".
+
+See the vAMPirus wiki page for instructions on running vAMPirus with a MacOS machine.
+
+
+## Linux OS users
+
 Clone the most recent version of vAMPirus from GitHub using:
 
   git clone https://github.com/Aveglia/vAMPirus.git
@@ -76,17 +99,37 @@ Clone the most recent version of vAMPirus from GitHub using:
 
 ## Setting up vAMPirus dependencies
 
-To launch vAMPirus, you will need to have Nextflow (https://www.nextflow.io/) installed on your system. If you do not already, the vampirus_startup.sh script will install it for you.
+vAMPirus is integrated with Nextflow (https://www.Nextflow.io) which relies on Java being installed on your system.
 
-You will also need to decide whether you would like to set up and run vAMPirus with Anaconda/Miniconda OR with a container engine like Singularity.
+If you know you do not have it installed, see here for instructions on installing Java for different operating software's -> https://opensource.com/article/19/11/install-java-linux ; for Debian https://phoenixnap.com/kb/how-to-install-java-ubuntu
 
-If you plan on using Anaconda, the startup script will install conda (if necessary) and build a vAMPirus environment with all necessary dependencies.
+If you are unsure, you can check using:
 
-If you plan to use Singularity, it will need to be installed separately prior to launching the vAMPirus.nf script.
+
+    which java
+
+
+or
+
+
+    java -version
+
+
+The output from either of those commands should let you know if you have Java on your system.
+
+You will also need to decide if you plan to use a container engine like Docker (https://www.docker.com/) or Singularity (https://singularity.lbl.gov/) or the package manager Conda (https://docs.conda.io/en/latest/).
+
+The startup script provided in the vAMPirus program directory will install Conda for you if you tell it to (see below), however, unless you plan to run in the Vagrant VM as described above, you will need to install Docker or Singularity before running vAMPirus.
+
+
+### vAMPirus startup script
 
 To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
 
-    cd ./vAMPirus; ./vampirus_startup.sh -h
+    cd ./vAMPirus; bash vampirus_startup.sh -h
+
+>You can make the vampirus_startup.sh scrip an exectuable with -> chmod +x vampirus_startup.sh ; ./vampirus_startup.sh
+
 
 The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and will build the vAMPirus conda environment and the installation is complete.
 
@@ -97,6 +140,7 @@ You can also use the startup script to install different databases to use for vA
 3. The complete NCBI NR protein database
 
 To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option.
+
 If we look at the script usage:
 
     General execution:
@@ -116,17 +160,17 @@ If we look at the script usage:
 
             [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
 
-For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, run:
 
-    `./vampirus_startup.sh -d 1`
+For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, and check/install conda, run:
+
+    bash vampirus_startup.sh -d 1
 
 and if we wanted to do the same thing as above but skip the Conda check/installation, run:
 
-    `./vampirus_startup.sh -d 1 -s`
+    bash vampirus_startup.sh -d 1 -s
 
-### For MacOS users
+NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed. Then move to the vAMPirus directory and run the test commands.
 
-To be safe, it is recommended that MacOS users set up and install Singularity to use the vAMPirus Docker image. We have noticed errors caused by m
 
 # Testing vAMPirus installation
 
