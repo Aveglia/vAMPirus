@@ -130,13 +130,13 @@ def helpMessage() {
 
                     --minSize                       Minimum size or representation for sequence to be considered in ASV generation
 
-                    --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
+                    --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
 
                     --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
 
-                    --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
+                    --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for protein-based ASV clustering to generation pcASVs  [ Example: --clusterAAID .97 ]
 
-                    --clusterAAIDlist               With --pcASV set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
+                    --clusterAAIDlist               With --pcASV set, use this option to perform protein-based ASV clustering to generate pcASVs with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
                     --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
@@ -320,13 +320,13 @@ def fullHelpMessage() {
 
                 --minSize                       Minimum size or representation for sequence to be considered in ASV generation
 
-                --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide sequences into OTUs by [ Example: --clusterNuclID .97 ]
+                --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
 
-                --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+                --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide-based clustering of ASVs with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
 
-                --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for amino acid-based OTU clustering [ Example: --clusterAAID .97 ]
+                --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for protein-based ASV clustering to generate pcASVs[ Example: --clusterAAID .97 ]
 
-                --clusterAAIDlist               With --pcASV set, use this option to perform amino acid-based OTU clustering with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
+                --clusterAAIDlist               With --pcASV set, use this option to perform protein-based ASV clustering to generate pcASVs with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
                 --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
@@ -450,12 +450,12 @@ log.info """\
 ================================================================================================================================================
                               vAMPirus v${workflow.manifest.version} - Virus Amplicon Sequencing Analysis Pipeline
 ================================================================================================================================================
-                                            Project name:                ${params.projtag}
-                                            Working directory:           ${params.workingdir}
-                                            Results directory:           ${params.outdir}
-                                            Database directory:          ${params.dbdir}
-                                            Database name:               ${params.dbname}
-                                            Metadata file:               ${params.metadata}
+                                        Project name:                ${params.projtag}
+                                        Working directory:           ${params.workingdir}
+                                        Results directory:           ${params.outdir}
+                                        Database directory:          ${params.dbdir}
+                                        Database name:               ${params.dbname}
+                                        Metadata file:               ${params.metadata}
         """.stripIndent()
 
 if (params.readsTest) {
