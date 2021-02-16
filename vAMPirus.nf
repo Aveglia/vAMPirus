@@ -2114,7 +2114,8 @@ if (params.Analyze) {
                           """
                           conda init && source activate virtualribosome
 
-                          ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
+                          ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASV_translations.fasta --report ${params.projtag}_ASV_translations_report
+                          cp ${fasta} ${params.projtag}_ASV_nucleotide.fasta
                           """
 
               }
