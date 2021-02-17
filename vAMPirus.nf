@@ -832,14 +832,14 @@ if (params.Analyze) {
                 for id in `echo ${params.clusterNuclIDlist} | tr "," "\\n"`;do
                     vsearch --cluster_fast ${params.projtag}_ASV.fasta --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
                 done
-                mv ${params.projtag}_ASV.fasta ./${params.projtag}_ASVs.fasta
+                cp ${params.projtag}_ASV.fasta ./${params.projtag}_ASVs.fasta
                 """
             } else if (params.clusterNuclID) {
                 """
                 mv ${fasta} ./${params.projtag}_ASV.fasta
                 id=${params.clusterNuclID}
                 vsearch --cluster_fast ${params.projtag}_ASV.fasta --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
-                mv ${params.projtag}_ASV.fasta ./${params.projtag}_ASVs.fasta
+                cp ${params.projtag}_ASV.fasta ./${params.projtag}_ASVs.fasta
                 """
             }
         }
