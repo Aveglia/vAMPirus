@@ -828,16 +828,18 @@ if (params.Analyze) {
             script:
             if (params.clusterNuclIDlist) {
                 """
+                mv ${fasta} ./${params.projtag}_ASV.fasta
                 for id in `echo ${params.clusterNuclIDlist} | tr "," "\\n"`;do
-                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
+                    vsearch --cluster_fast ${params.projtag}_ASV.fasta --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
                 done
-                cp ${fasta} ${params.projtag}_ASVs.fasta
+                mv ${params.projtag}_ASV.fasta ./${params.projtag}_ASVs.fasta
                 """
             } else if (params.clusterNuclID) {
                 """
+                mv ${fasta} ./${params.projtag}_ASV.fasta
                 id=${params.clusterNuclID}
-                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
-                cp ${fasta} ./${params.projtag}_ASVs.fasta
+                vsearch --cluster_fast ${params.projtag}_ASV.fasta --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
+                mv ${params.projtag}_ASV.fasta ./${params.projtag}_ASVs.fasta
                 """
             }
         }
