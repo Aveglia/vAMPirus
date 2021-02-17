@@ -63,7 +63,7 @@ source_c() {
     fi
 }
 conda_c() {
-    source_c
+    source_c ~/.bashrc
     cd $mypwd
     #Check conda and environment
     check_conda=$( command -v conda )
@@ -102,7 +102,7 @@ conda_c() {
                 source_c
                 if [ -f vampirus_env.yml ];then
                     echo -e "\n\t -- vAMPirus environment file found. Creating environment... --\n"
-                    conda env create -f vampirus_env.yml && conda clean -a
+                    conda env create -f vampirus_env.yml
                 else
                     echo -e "\n\t\e[31m -- ERROR: vAMPirus environment file not found (vAMPirus_env.yml). Please check requirements and rerun the pre-check --\e[39m\n"
                     exit 0

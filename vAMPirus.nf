@@ -152,7 +152,7 @@ def helpMessage() {
                     --ProtCountsBit                 Minimum bitscore for hit to be counted
 
 
-            --Taxonomy assignment parameters--
+            --Taxonomy inference parameters--
 
                     --dbname                       Specify name of database to use for analysis
 
@@ -342,7 +342,7 @@ def fullHelpMessage() {
                 --ProtCountsBit                 Minimum bitscore for hit to be counted
 
 
-        --Taxonomy assignment parameters--
+        --Taxonomy inference parameters--
 
                 --dbname                       Specify name of database to use for analysis
 
@@ -850,7 +850,7 @@ if (params.Analyze) {
 
         if (params.ncASV) {
 
-            process Nucleotide_Taxonomy_Assignment {
+            process Nucleotide_Taxonomy_Inference {
 
                 label 'high_cpus'
 
@@ -999,7 +999,7 @@ if (params.Analyze) {
                         rm "\$name"_genes.list
                         rm newnames.list
                         rm access.list
-                        echo "Done Assigning Taxonomy To : \${filename} "
+                        echo "Taxonomy inferred for: \${filename} "
                     done
                     for filename in ${asvs};do
                         name=\$(ls \${filename} | awk -F ".fasta" '{print \$1}')
@@ -1126,7 +1126,7 @@ if (params.Analyze) {
                         rm "\$name"_genes.list
                         rm newnames.list
                         rm access.list
-                        echo "Done Assigning Taxonomy To : \${filename} "
+                        echo "Taxonomy inferred for: \${filename} "
                     done
                     rm headers.list
                     """
@@ -1134,7 +1134,7 @@ if (params.Analyze) {
 
             } else {
 
-                process ASV_Taxonomy_Assignment {
+                process ASV_Taxonomy_Inference {
 
                     label 'high_cpus'
 
@@ -1363,7 +1363,7 @@ if (params.Analyze) {
                             rm "\$name"_genes.list
                             rm newnames.list
                             rm access.list
-                            echo "Done Assigning Taxonomy To : \${filename} "
+                            echo "Taxonomy inferred for: \${filename} "
                         done
                         rm headers.list
                         """
@@ -1846,7 +1846,7 @@ if (params.Analyze) {
 
         if (!params.skipTaxonomy) {
 
-            process AminoType_Taxonomy_Assignment {
+            process AminoType_Taxonomy_Inference {
 
                 label 'high_cpus'
 
@@ -1989,7 +1989,7 @@ if (params.Analyze) {
                     rm "\$name"_genes.list
                     rm newnames.list
                     rm access.list
-                    echo "Done Assigning Taxonomy To : ${reads} "
+                    echo "Taxonomy inferred for: ${reads} "
                     """
             }
         }
@@ -2318,7 +2318,7 @@ if (params.Analyze) {
 
         if (!params.skipTaxonomy) {
 
-            process pcASV_Nucleotide_Taxonomy_Assignment {
+            process pcASV_Nucleotide_Taxonomy_Inference {
 
                 label 'high_cpus'
 
@@ -2463,7 +2463,7 @@ if (params.Analyze) {
                         rm "\$name"_genes.list
                         rm newnames.list
                         rm access.list
-                        echo "Done Assigning Taxonomy To : \${filename} "
+                        echo "Taxonomy inferred for: \${filename} "
                     done
                     rm *headers.list
                     """
@@ -2667,7 +2667,7 @@ if (params.Analyze) {
 
         if (!params.skipTaxonomy) {
 
-            process pcASV_AminoAcid_Taxonomy_Assignment {
+            process pcASV_AminoAcid_Taxonomy_Inference {
 
                 label 'high_cpus'
 
@@ -2810,7 +2810,7 @@ if (params.Analyze) {
                         rm "\$name"_genes.list
                         rm newnames.list
                         rm access.list
-                        echo "Done Assigning Taxonomy To : \${filename} "
+                        echo "Taxonomy inferred for: \${filename} "
                     done
                     rm *headers.list
                     """

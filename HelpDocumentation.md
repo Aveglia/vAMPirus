@@ -77,6 +77,74 @@ Search for Linux in the Microsoft store -> https://www.microsoft.com/en-us/searc
 
 It should be noted that vAMPirus was developed on Centos7/8.
 
+Here are some brief instructions for setting up Ubuntu 20.04 LTS on Windows 10 sourced from https://ubuntu.com/tutorials/ubuntu-on-windows#1-overview
+
+NOTE=> if you have an anti-virus program installed, it might block the installation of Nextflow, you will just need to allow.
+
+### Enable WSL on your Windows 10 computer
+
+To run the Ubuntu WSL on your Windows 10 computer, you first need to enable the WSL features.
+
+Open command prompt as Administrator by:
+
+Searching "command" in the Cortana search bar -> "Command Prompt" should show up, right click on it -> click "Run as administrator"
+
+Now you should have a command prompt window open.
+
+First enable WSL 1 by executing ->
+
+    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+
+Next enable WSL 2 by executing ->
+
+    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+Then you will have to restart your computer and come back to this point ---
+
+After you restart your computer, you can now go to the Microsoft Store app on your laptop and download the Ubuntu app -> https://www.microsoft.com/en-us/p/ubuntu/9nblggh4msv6#activetab=pivot:overviewtab
+
+The first time you open the Ubuntu terminal you will be asked to set up your Unix account.
+
+Once you have your account set up, you can now move on to executing the following commands (you will be asked for your password when using sudo):
+
+First we will update the packages list for apt-get -
+
+    sudo apt -y update && sudo apt -y upgrade
+
+Second we will install development tools for Ubuntu -
+
+    sudo apt -y install build-essential && sudo apt install autoconf automake gdb git libffi-dev zlib1g-dev libssl-dev
+
+Next we will install Java to be able to run Nextflow -
+
+    sudo apt -y install openjdk-8-jre
+
+Now you have everything you need to get started as described in the * [Installing vAMPirus](#Installing-vAMPirus) section. However, here are some quick commands to install and set up Conda.
+
+NOTE=> Windows WSL currently can not run Singularity so you will have to install and run vAMPirus with Conda.
+
+
+#### Installing Conda for your Ubuntu WSL
+
+NOTE=> You could also run the vAMPirus startup script to install Conda for your system.
+
+Download the Miniconda3 installer ->
+
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh --no-check-certificate
+
+Now we can launch the installer with ->
+
+    bash Miniconda3-latest-Linux-x86_64.sh
+
+And you can then follow the on-screen instructions for installation and then you will likely need to close then re-open your Ubuntu terminal.
+
+You can check/confirm you have conda ready to go ->
+
+    conda init
+
+Once you have have your Conda ready, you can execute the vAMPirus startup script to install Nextflow and build the vAMPirus conda environment.
+
+
 ## MacOS users
 
 If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment and use Singularity with the vAMPirus Docker image to run your analyses.
@@ -346,8 +414,8 @@ RVDB format (default) -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural po
 
 NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003 [Zymoseptoria brevis]"
 
-During Taxonomy Assignment, vAMPirus infers results by extracting the information stored in the reference sequence headers. If the database sequence headers do not match these
-patterns, you are bound to see errors in the naming of files created during the Taxonomy Assignment phase of vAMPirus.
+During Taxonomy Inference, vAMPirus infers results by extracting the information stored in the reference sequence headers. If the database sequence headers do not match these
+patterns, you are bound to see errors in the naming of files created during the Taxonomy Inference phase of vAMPirus.
 
 The default is that vAMPirus assumes that the database headers are in RVDB format, to change this assumption, you would need to edit the configuration file at line 78 where "refseq=F". You could also signal the use of RefSeq format headers within the launch command with adding "--refseq T".
 
@@ -603,7 +671,7 @@ With this launch command, vAMPirus will perform ASV generation and nucleotide-ba
 
 Once you have everything set up and you have edited the parameters of interest in your configuration file you can run the following launch command for a full analysis:
 
-   nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run 
+   nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run
 
 This launch command will run all aspects of the vAMPirus workflow on your data and spit out final reports for each clustering %ID and technique.
 
@@ -1030,12 +1098,12 @@ AminoType IQTREE command ->
 
 
 
-## Taxonomy assignment
+## Taxonomy Inference
 
 vAMPirus uses Diamond blastx/blastp and the provided protein database to assign taxonomy to ASVs/cASVs/AminoTypes. There are summary files generated, one as a phyloseq object and the other as a .tsv with information in a different
  arrangement. Results are also visualized as a donut graph in the final reports. You can adjust the following parameters:
 
-    // Taxonomy assignment parameters
+    // Taxonomy inference parameters
         // Specify name of database to use for analysis
             dbname="DATABASENAME.FASTA"
         // Path to Directory where database is being stored
@@ -1363,7 +1431,7 @@ Usage:
         --ProtCountsBit                 Minimum bitscore for hit to be counted
 
 
---Taxonomy assignment parameters--
+--Taxonomy inference parameters--
 
         --dbname                       Specify name of database to use for analysis
 

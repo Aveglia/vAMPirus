@@ -1,0 +1,37 @@
+Hello there, to get started with vAMPirus you can run any of the following depending on your situation:
+
+Before running anything, you can learn a little about the vampirus_startup.sh with the help info:
+
+        bash vampirus_startup.sh -h
+
+You will see ->
+
+General execution:
+
+vampirus_startup.sh -h [-d 1|2|3|4] [-s]
+
+    Command line options:
+
+        [ -h ]                       	Print help information
+
+        [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
+
+                                                    1 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                    2 - Download only NCBIs Viral protein RefSeq database
+                                                    3 - Download only the complete NCBI NR protein database
+                                                    4 - Download all three databases
+
+        [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
+
+
+1. Run vampirus_startup.sh to install Miniconda3, build the vAMPirus conda environment, and install Nextflow:
+
+        bash vampirus_startup.sh
+
+2. Run vampirus_startup.sh to install Miniconda3, build the vAMPirus conda environment, donwload the RVDB database and install Nextflow:
+
+        bash vampirus_startup.sh -d 1
+
+3. Run vampirus_startup.sh to install Nextflow and the RVDB database (this would be the command if not using conda or you already have conda installed/environment built):
+
+        bash vampirus_startup.sh -s -d 1
