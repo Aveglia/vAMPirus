@@ -139,7 +139,7 @@ Virtual Box (WILL CAUSE ERROR IF ORACLE NOT GIVEN PERMISSION TO INSTALL DEPENDEN
 
     brew install virtualbox
 
-NOTE=> In this part of the setup, you might get an error saying Oracle was denied permission to install programs. You will need to go to System Preferences->Security and Privacy->General and allow Oracle permission to download programs and you .
+NOTE=> In this part of the setup, you might get an error saying Oracle was denied permission to install programs. You will need to go to System Preferences->Security and Privacy->General and allow Oracle permission to download programs and then rerun the above command.
 
 Alright, if you notice no errors during installation, you should be good to go and create the Centos 7 environment
 
@@ -284,18 +284,11 @@ The output from either of those commands should let you know if you have Java on
 
 You will also need to decide if you plan to use a container engine like Docker (https://www.docker.com/) or Singularity (https://singularity.lbl.gov/) or the package manager Conda (https://docs.conda.io/en/latest/).
 
-The startup script provided in the vAMPirus program directory will install Conda for you if you tell it to (see below), however, unless you plan to run in the Vagrant VM as described above, you will need to install Docker or Singularity before running vAMPirus.
+The startup script provided in the vAMPirus program directory will install Conda for you if you tell it to (see below), however, you will need to install Docker or Singularity separately before running vAMPirus.
+
 
 ## Setting up vAMPirus dependencies and checking installation
 
-
-Once you have Java ready to go, you can run the vampirus_startup.sh script which will check for and install Nextflow for you.
-
-You will also need to decide whether you would like to set up and run vAMPirus with Anaconda/Miniconda OR with a container engine like Singularity.
-
-If you plan on using Anaconda, the startup script will install conda (if necessary) and build a vAMPirus environment with all necessary dependencies.
-
-If you plan to use Singularity, it will need to be installed separately prior to launching the vAMPirus.nf script.
 
 To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
 
@@ -335,13 +328,13 @@ If we look at the script usage:
 
 For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, and check/install conda, run:
 
-    bash vampirus_startup.sh -d 1
+    bash vampirus_startup.sh -d 2
 
 and if we wanted to do the same thing as above but skip the Conda check/installation, run:
 
-    bash vampirus_startup.sh -d 1 -s
+    bash vampirus_startup.sh -d 2 -s
 
-NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed. Then move to the vAMPirus directory and run the test commands.
+NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed.
 
 
 ### Databases
@@ -443,8 +436,8 @@ To learn more about Nextflow and to learn more how to monitor your submitted job
 
 Here is a basic "launch" command to deploy the vAMPirus pipeline:
 
-       1             2                     3                       4                  5
-  nextflow run vAMPirus.nf -c vampirus.config -profile [conda,singularity] --Analyze|DataCheck
+          1             2                   3                       4                  5
+       nextflow run vAMPirus.nf -c vampirus.config -profile [conda,singularity] --Analyze|DataCheck
 
 In the command above, there are five necessary pieces of information needed to successfully launch the vAMPirus workflow:
 
@@ -610,7 +603,7 @@ With this launch command, vAMPirus will perform ASV generation and nucleotide-ba
 
 Once you have everything set up and you have edited the parameters of interest in your configuration file you can run the following launch command for a full analysis:
 
-   nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV
+   nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run 
 
 This launch command will run all aspects of the vAMPirus workflow on your data and spit out final reports for each clustering %ID and technique.
 
