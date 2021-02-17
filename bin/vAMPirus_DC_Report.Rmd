@@ -59,6 +59,10 @@ mycol=c('#088da5','#73cdc8','#ff6f61','#7cb8df','#88b04b','#00a199','#6B5B95','#
 ```
 <br>
 <br>
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NOTE: Plots are interactive and you can use the legend to specify samples/treatment of interest. You can also download an .svg version of each figure within this report.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+<br>
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pre- and Post-Adapter Removal Read Stats</h2></div>
 <br>
 ```{r readstats, echo=FALSE}
@@ -78,6 +82,7 @@ ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_before, name="Reads before 
 ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_after, name="Reads after filtering")
 #ptotal <- ptotal %>% layout(title=list(text="Number of reads before and after filtering"))
 ptotal <- ptotal %>% layout(legend = list(x=10,y=.5))
+ptotal <- ptotal %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 ptotal
 ```
 <br>
@@ -92,6 +97,7 @@ pr <- pr %>% add_boxplot(y=reads_stats$R2_before_length, name="R2 length before"
 pr <- pr %>% add_boxplot(y=reads_stats$R2_after_length, name="R2 length after")
 #pr <- pr %>% layout(title = "R1 and R2 Length")
 pr <- pr %>% layout(legend = list(x=10,y=.5))
+pr <- pr %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 pr
 ```
 <br>
@@ -111,6 +117,7 @@ prerp <- plot_ly(prer, x = ~reads, y = ~sample, name = "Sample", type = 'scatter
                mode = "markers", marker = list(color = "#088da5"),
                hovertemplate = paste('Sample: %{y}','<br>Total reads: %{x}','<extra></extra>'))
 prerp <- prerp %>% layout(xaxis = list(title = "Total reads"),yaxis = list(title = "Sample"))
+prerp <- prerp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 prerp
 ```
 
@@ -126,6 +133,7 @@ postrp <- plot_ly(postr, x = ~reads, y = ~sample, name = "Sample", type = 'scatt
                mode = "markers", marker = list(color = "#088da5"),
                hovertemplate = paste('Sample: %{y}','<br>Total reads: %{x}','<extra></extra>'))
 postrp <- postrp %>% layout(xaxis = list(title = "Total reads"),yaxis = list(title = "Sample"))
+postrp <- postrp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 postrp
 ```
 
@@ -146,6 +154,7 @@ precp <- precp %>% add_trace(y=as.numeric(prec[,3]), name="N", opacity = .8, mar
 precp <- precp %>% layout(xaxis=list(title="Base position"))
 precp <- precp %>% layout(yaxis=list(title="Base Frequency", range = c(0,1)))
 precp <- precp %>% layout(legend = list(x=10,y=.5), hovermode = "x unified")
+precp <- precp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 precp
 ```
 
@@ -166,6 +175,7 @@ postcp <- postcp %>% add_trace(y=as.numeric(postc[,3]), name="N", opacity = .8, 
 postcp <- postcp %>% layout(xaxis=list(title="Base position"))
 postcp <- postcp %>% layout(yaxis=list(title="Base Frequency", range = c(0,1)))
 postcp <- postcp %>% layout(legend = list(x=10,y=.5), hovermode = "x unified")
+postcp <- postcp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 postcp
 ```
 
@@ -181,6 +191,7 @@ preqp <- plot_ly(x=c(1:nrow(preq)),y=as.numeric(preq[,2]),type="scatter", mode =
 preqp <- preqp %>% layout(xaxis=list(title="Base position"))
 preqp <- preqp %>% layout(yaxis=list(title="Mean quality", range = c(0,41)))
 preqp <- preqp %>% layout(legend = list(x=10,y=.5), hovermode = "x unified")
+preqp <- preqp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 preqp
 ```
 
@@ -197,6 +208,7 @@ postqp <- plot_ly(x=c(1:nrow(postq)),y=as.numeric(postq[,2]),type="scatter", mod
 postqp <- postqp %>% layout(xaxis=list(title="Base position"))
 postqp <- postqp %>% layout(yaxis=list(title="Mean quality", range = c(0,41)))
 postqp <- postqp %>% layout(legend = list(x=10,y=.5), hovermode = "x unified")
+postqp <- postqp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 postqp
 ```
 
@@ -216,6 +228,7 @@ pregcp <- plot_ly(pregc, x=~V1, y=~V2, type="bar", marker=list(color='#088da5', 
                width = .1)), hovertemplate = paste('GC content: %{x}','<br>Count: %{y}','<extra></extra>'))
 pregcp <- pregcp %>% layout(yaxis = list(title = "Count"))
 pregcp <- pregcp %>% layout(xaxis = list(title = "GC content"))
+pregcp <- pregcp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 pregcp
 ```
 
@@ -235,6 +248,7 @@ postgcp <- plot_ly(postgc, x=~V1, y=~V2, type="bar", marker=list(color='#088da5'
                width = .1)), hovertemplate = paste('GC content: %{x}','<br>Count: %{y}','<extra></extra>'))
 postgcp <- postgcp %>% layout(yaxis = list(title = "Count"))
 postgcp <- postgcp %>% layout(xaxis = list(title = "GC content"))
+postgcp <- postgcp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 postgcp
 ```
 
@@ -253,6 +267,7 @@ preaqp <- plot_ly(preaq, x=preaq[,1], y=preaq[,2], type="bar", marker=list(color
                width = .1)), hovertemplate = paste('Average quality: %{x}','<br>Count: %{y}','<extra></extra>'))
 preaqp <- preaqp %>% layout(yaxis = list(title = "Count"))
 preaqp <- preaqp %>% layout(xaxis = list(title = "Average quality"))
+preaqp <- preaqp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 preaqp
 ```
 
@@ -272,6 +287,7 @@ postaqp <- plot_ly(postaq, x=postaq[,1], y=postaq[,2], type="bar", marker=list(c
                width = .1)), hovertemplate = paste('Average quality: %{x}','<br>Count: %{y}','<extra></extra>'))
 postaqp <- postaqp %>% layout(yaxis = list(title = "Count"))
 postaqp <- postaqp %>% layout(xaxis = list(title = "Average quality"))
+postaqp <- postaqp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 postaqp
 ```
 
@@ -290,6 +306,7 @@ prelhp <- plot_ly(prelh, x=prelh[,1], y=prelh[,2], type="bar", marker=list(color
                width = .1)), hovertemplate = paste('Read Length: %{x}','<br>Count: %{y}','<extra></extra>'))
 prelhp <- prelhp %>% layout(yaxis = list(title = "Count"))
 prelhp <- prelhp %>% layout(xaxis = list(title = "Read Length"))
+prelhp <- prelhp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 prelhp
 ```
 
@@ -306,6 +323,7 @@ postlhp <- plot_ly(postlh, x=postlh[,1], y=postlh[,2], type="bar", marker=list(c
                width = .1)), hovertemplate = paste('Read Length: %{x}','<br>Count: %{y}','<extra></extra>'))
 postlhp <- postlhp %>% layout(yaxis = list(title = "Count"))
 postlhp <- postlhp %>% layout(xaxis = list(title = "Read Length"))
+postlhp <- postlhp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 postlhp
 ```
 
@@ -324,6 +342,7 @@ nnp <- plot_ly(nn, x=nn[,1], y=nn[,2], type="scatter", mode = 'lines+markers', m
                width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of ncASVs: %{y}','<extra></extra>'))
 nnp <- nnp %>% layout(yaxis = list(title = "Number of nOTU"))
 nnp <- nnp %>% layout(xaxis = list(title = "Clustering ID %"))
+nnp <- nnp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 nnp
 ```
 NOTE: The "1" on the x-axis represents number of ASVs identified by vsearch
@@ -340,6 +359,7 @@ pnp <- plot_ly(pn, x=pn[,1], y=pn[,2], type="scatter", mode = 'lines+markers', m
                width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of pcASVs: %{y}','<extra></extra>'))
 pnp <- pnp %>% layout(yaxis = list(title = "Number of pOTU"))
 pnp <- pnp %>% layout(xaxis = list(title = "Clustering ID %"))
+pnp <- pnp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 pnp
 ```
 NOTE: The "1" represents the number of AminoTypes which are unique amino acid sequences in your dataset

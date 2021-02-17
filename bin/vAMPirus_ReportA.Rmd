@@ -55,8 +55,9 @@ library(processx) #install.packages("processx")
 mycol=c('#088da5','#73cdc8','#ff6f61','#7cb8df','#88b04b','#00a199','#6B5B95','#92A8D1','#b0e0e6','#ff7f50','#088d9b','#E15D44','#e19336')
 ```
 <br>
-
-NOTE: Most plots are interactive and you can use the legend to specify samples/treatment of interest
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NOTE: Most plots are interactive and you can use the legend to specify samples/treatment of interest. You can also download an .svg version of each figure within this report.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 <br>
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pre- and Post-Adapter Removal Read Stats</h2></div>
@@ -95,6 +96,7 @@ ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_before, name="Reads before 
 ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_after, name="Reads after filtering")
 #ptotal <- ptotal %>% layout(title=list(text="Number of reads before and after filtering"))
 ptotal <- ptotal %>% layout(legend = list(x=10,y=.5))
+ptotal <- ptotal %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 ptotal
 ```
 <br>
@@ -109,6 +111,7 @@ pr <- pr %>% add_boxplot(y=reads_stats$R2_before_length, name="R2 length before"
 pr <- pr %>% add_boxplot(y=reads_stats$R2_after_length, name="R2 length after")
 #pr <- pr %>% layout(title = "R1 and R2 Length")
 pr <- pr %>% layout(legend = list(x=10,y=.5))
+pr <- pr %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 pr
 ```
 <br>
@@ -160,6 +163,7 @@ data4 <- data3%>%
 con <- plot_ly(data4, x = ~sum, y = ~sample, name = "Sample", type = 'scatter',
                mode = "markers", marker = list(color = "#088da5"), hovertemplate = paste('Sample: %{y}','<br>Total reads: %{x}','<extra></extra>'))
 con <- con %>% layout(xaxis = list(title = "Total reads"), yaxis = list(title = "Sample"))
+con <- con %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 con
 ```
 <br>
@@ -227,6 +231,7 @@ shannondata5_2 <- merge(shannondata5, metadata, by="sample")
 sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
 sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
+sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 sh
 
 if (params$stats == "run" ) {
@@ -306,6 +311,7 @@ simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
 s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
 s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
+s <- s %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 s
 
 if (params$stats == "run" ) {
@@ -382,6 +388,7 @@ richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
 ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
 ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
+ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 ri
 
 if (params$stats == "run" ) {
@@ -467,6 +474,7 @@ df2 <- merge(df, metadata, by="sample")
 cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
 cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
+cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 cen
 
 if (params$stats == "run" ) {
@@ -518,6 +526,7 @@ p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
 
 fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
 fff <- fff %>% layout(legend=list(y=.5))
+fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 fff
 
 } else {
@@ -553,6 +562,7 @@ p3d <- plot_ly(data.scores.3, x= ~ NMDS1, y = ~ NMDS2, z = ~ NMDS3, text = ~past
         marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
         )
 p3d <- p3d %>% layout(legend=list(y=.5))
+p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 p3d
 
 } else {
@@ -592,6 +602,7 @@ datalong <- datay %>%
 ddd <- plot_ly(datalong, x=~sample, y=~reads, color=~hit, colors=mycol)
 ddd <- ddd %>% layout(type='bar', barmode = 'stack')
 ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
+ddd <- ddd %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 ddd
 ```
 <br>
@@ -617,6 +628,7 @@ datalong <- datalong %>%
 asp2 <- plot_ly(datalong, y=~hit, x=~reads, color=~treatment, colors=mycol,text = ~paste("Sample: ", sample), opacity=.9)
 asp2 <- asp2 %>% layout(type='bar', barmode = 'group')
 asp2 <- asp2 %>% layout(yaxis = list(title = '', categoryorder = "total ascending"), legend = list(x=10,y=.5))
+asp2 <- asp2 %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 asp2
 ```
 <br>
@@ -676,10 +688,9 @@ tp <- tp %>% layout(title = "Taxonomy distribution",  showlegend = F,
                     xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                     yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
                     )
-
+tp <- tp %>% config(toImageButtonOptions=list(format='svg',filename='custom_image', height= 500, width= 800, scale= 1))
 tp
 ```
-This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL.
 <br>
 <br>
 <br>

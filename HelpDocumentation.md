@@ -155,9 +155,11 @@ vAMPirus was developed on a Centos7/8 operating system so we will go through how
 
 A few steps are a little long, but this is a one time process if done successfully.
 
+
 ### Installing and running the VM on MacOS
 
 There are other ways to do this so if you are more comfortable creating a virtual environment another way, please do so.
+
 
 #### Install Homebrew
 
@@ -296,6 +298,7 @@ then test the Analyze pipeline with:
 
 Please check out http://sourabhbajaj.com/mac-setup/Vagrant/README.html and https://www.vagrantup.com/docs/providers/virtualbox for understanding how to use Vagrant commands like "halt", "suspend" or "reload"
 
+
 ### Transferring files to and from VM with Vagrant scp
 
 Being a virtual environment, all the files within your VM is not easily accessible from your host computer. To transfer files (read libraries or results) to and from your virtual environment you will need to use Vagrant scp.
@@ -306,6 +309,7 @@ For more in depth instructions for how to use this command, see https://medium.c
 
 But briefly:
 
+
 #### Moving files from host computer to Vagrant Centos7 VM
 
 Starting from your host computer (meaning not ssh'd into the Cenots7 virtual enviroment) ->
@@ -313,6 +317,7 @@ Starting from your host computer (meaning not ssh'd into the Cenots7 virtual env
     vagrant scp /Path/to/files/on/host/computer :/path/to/directory/in/virtual/environment
 
 You should then see a notification of it being transferred 100%
+
 
 #### Moving files from Vagrant Centos7 VM to host computer
 
@@ -361,6 +366,7 @@ The startup script provided in the vAMPirus program directory will install Conda
 To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
 
     cd ./vAMPirus; bash vampirus_startup.sh -h
+
 
 >You can make the vampirus_startup.sh scrip an exectuable with -> chmod +x vampirus_startup.sh ; ./vampirus_startup.sh
 
@@ -428,6 +434,39 @@ An example of custom headers if you plan to use a custom database:
   `>acc|Custom|VP2000.1|Custom|VP2000| capsid protein [T7 phage isolate]`
    AMINOACIDSEQUENCE
 
+### Using Singularity
+
+For Linux users you can install Singularity following the instructions here -> https://singularity.lbl.gov/install-linux
+
+#### Ubuntu installation
+
+Enable NeuroDebian repository ->
+
+       sudo wget -O- http://neuro.debian.net/lists/xenial.us-ca.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+
+       sudo apt-key adv --recv-keys --keyserver hkp://pool.sks-keyservers.net:80 0xA5D32F012649A5A9
+
+update ->
+
+       sudo apt-get update
+
+Install singularity ->
+
+   sudo apt-get install -y singularity-container
+
+Test its installed ->
+
+       singularity --version
+
+       output should look like : 2.6.1-distro
+
+#### Centos installation
+
+Using the yum package manager ->
+
+       sudo yum -y install singularity
+
+
 ## Running vAMpirus
 
 ### Testing vAMPirus installation
@@ -464,6 +503,7 @@ OR
 
       nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run
 
+
 ### Resuming test analyses if you ran into an error
 
 If an analysis is interrupted, you can use Nextflows "-resume" option that will start from the last cached "check point".
@@ -472,18 +512,8 @@ For example if the analysis launched with the test DataCheck launch command abov
 
       nextflow run vAMPirus.nf -c vampirus.config -profile conda,test --DataCheck -resume
 
-### Using Singularity
-
-Singularity[https://singularity.lbl.gov/ ]
-
-In the testing period of vAMPirus, we noticed that building the Conda environment on personal computers (2-4 CPUs; 6-8 GB memory) could be a slow process.
-
-If you are having errors during the set up process due to Conda, you can use the container engine Singularity to take advantage of the vAMPirus Docker image.
-
-For Linux users you can install Singularity following the instructions here -> https://singularity.lbl.gov/install-linux
 
 # Things to know before running vAMPirus
-
 
 ## The Nextflow workflow manager and the "launch command"
 
