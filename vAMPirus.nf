@@ -822,24 +822,22 @@ if (params.Analyze) {
                 file(fasta) from reads_vsearch5_ch
 
             output:
-                tuple file("*_ncASV*.fasta"), file("*_ASVs.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
-                tuple file("*_ncASV*.fasta"), file("*_ASVs.fasta") into nuclFastas_forphylogeny
+                tuple file("*_ncASV*.fasta"), file("*ASV.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
+                tuple file("*_ncASV*.fasta"), file("*ASV.fasta") into nuclFastas_forphylogeny
 
             script:
             if (params.clusterNuclIDlist) {
                 """
-                mv ${fasta} ./${params.projtag}_ASV.fasta
+                cp ${fasta} ./${params.projtag}_ASV.fasta
                 for id in `echo ${params.clusterNuclIDlist} | tr "," "\\n"`;do
                     vsearch --cluster_fast ${params.projtag}_ASV.fasta --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
                 done
-                cp ${params.projtag}_ASV.fasta ./${params.projtag}_ASVs.fasta
                 """
             } else if (params.clusterNuclID) {
                 """
-                mv ${fasta} ./${params.projtag}_ASV.fasta
+                cp ${fasta} ./${params.projtag}_ASV.fasta
                 id=${params.clusterNuclID}
                 vsearch --cluster_fast ${params.projtag}_ASV.fasta --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
-                cp ${params.projtag}_ASV.fasta ./${params.projtag}_ASVs.fasta
                 """
             }
         }
