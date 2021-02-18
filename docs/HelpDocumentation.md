@@ -1,6 +1,5 @@
-![vAMPirus logo](https://sync.palmuc.org/index.php/s/gscg4m4PtdN5ZwY/preview)
+![vAMPirus logo](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vamplogo.png)
 
-                            An automated virus amplicon sequencing analysis pipeline
 
 # Table of contents
 * [Introduction to vAMPirus](#Introduction-to-vAMPirus)
