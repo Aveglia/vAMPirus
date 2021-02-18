@@ -1,6 +1,9 @@
-![vAMPirus logo](https://sync.palmuc.org/index.php/s/gscg4m4PtdN5ZwY/preview)
+![vAMPirus logo](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vamplogo.png)
 
-                            An automated virus amplicon sequencing analysis pipeline
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4549695.svg)](https://doi.org/10.5281/zenodo.4549695)
+[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
+[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
+[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 
 # Table of contents
 
@@ -33,7 +36,7 @@ The vAMPirus program contains two different pipelines:
 ![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_analysisUPDATED.png)
 
 
-NOTE => This is a more brief overview of how to install and set up vAMPirus, for more detail see the wiki.
+NOTE => This is a more brief overview of how to install and set up vAMPirus, for more detail see the [manual](https://github.com/Aveglia/vAMPirus/blob/master/docs/HelpDocumentation.md).
 
 
 ## Contact/support:
@@ -83,8 +86,7 @@ All you will need to do is set up the subsystem with whatever flavor of Linux yo
 
 Search for Linux in the Microsoft store -> https://www.microsoft.com/en-us/search?q=linux
 
-It should be noted that vAMPirus was developed on Centos7/8.
-
+For more detail see the [manual](https://github.com/Aveglia/vAMPirus/blob/master/docs/HelpDocumentation.md).
 
 ## MacOS users
 
@@ -92,10 +94,10 @@ If you plan to run vAMPirus on a Mac computer, it is recommended that you set up
 
 You can try to run directly on your system, but there may be errors caused by differences between Apply and GNU versions of tools like "sort".
 
-See the vAMPirus wiki page for instructions on running vAMPirus with a MacOS machine.
+For more detail see the [manual](https://github.com/Aveglia/vAMPirus/blob/master/docs/HelpDocumentation.md).
 
 
-## Linux OS users
+## Cloning repository
 
 Clone the most recent version of vAMPirus from GitHub using:
 
