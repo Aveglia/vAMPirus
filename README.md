@@ -101,7 +101,11 @@ For more detail see the [manual](https://github.com/Aveglia/vAMPirus/blob/master
 
 Clone the most recent version of vAMPirus from GitHub using:
 
-  git clone https://github.com/Aveglia/vAMPirus.git
+    git clone https://github.com/Aveglia/vAMPirus.git
+
+OR you can download the most recent stable release vAMPirus v1.0.1 (Capsomere I) by using:
+
+    wget https://github.com/Aveglia/vAMPirus/archive/v1.0.1.tar.gz
 
 
 ## Setting up vAMPirus dependencies
