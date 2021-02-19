@@ -1,6 +1,6 @@
 ![vAMPirus logo](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vamplogo.png)
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4549695.svg)](https://doi.org/10.5281/zenodo.4549851)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4549851.svg)](https://doi.org/10.5281/zenodo.4549851)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
