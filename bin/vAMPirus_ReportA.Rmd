@@ -234,7 +234,7 @@ sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis
 sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
 sh
 
-if (params$stats == "run" ) {
+if (params$stats == "true" ) {
     shannonaov <- aov(index ~ treatment, data= shannondata5_2)
     st <- shapiro.test(resid(shannonaov))
     bt <- bartlett.test(index ~ treatment, data= shannondata5_2)
@@ -314,7 +314,7 @@ s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=l
 s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
 s
 
-if (params$stats == "run" ) {
+if (params$stats == "true" ) {
     simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
     st <- shapiro.test(resid(simpsonaov))
     bt <- bartlett.test(index ~ treatment, data= simpsondata5_2)
@@ -391,7 +391,7 @@ ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis
 ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
 ri
 
-if (params$stats == "run" ) {
+if (params$stats == "true" ) {
     richaov <- aov(index ~ treatment, data= richdata5_2)
     st <- shapiro.test(resid(richaov))
     bt <- bartlett.test(index ~ treatment, data= richdata5_2)
@@ -477,7 +477,7 @@ cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), 
 cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
 cen
 
-if (params$stats == "run" ) {
+if (params$stats == "true" ) {
     adn <- adonis(bray.distance~data5$treatment)
     adn
 } else {
