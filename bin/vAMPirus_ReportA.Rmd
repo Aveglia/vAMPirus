@@ -234,11 +234,7 @@ sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis
 sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
 sh
 
-<<<<<<< HEAD
-if ( params$stats == "run" ) {
-=======
 if (params$stats == "true" ) {
->>>>>>> 30a9e1bb8f9117d2ef17bc056eb05aca87bd7434
     shannonaov <- aov(index ~ treatment, data= shannondata5_2)
     st <- shapiro.test(resid(shannonaov))
     bt <- bartlett.test(index ~ treatment, data= shannondata5_2)
