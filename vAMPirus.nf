@@ -2975,7 +2975,7 @@ if (params.Analyze) {
         	          ${matrix} \
                     ${taxonomy} \
                     ${params.trymax} \
-                    ${params.stats}
+                    ${params.stats} 
                     """
                 }
 

@@ -30,7 +30,7 @@ The vAMPirus program contains two different pipelines:
 
 ![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_datacheckUPDATED.png)
 
-2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics.
+2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. NOTE- stats option has changed on 2/19/21; you only need to add "--stats" to the launch commmand without "run"
 
 
 ![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_analysisUPDATED.png)
@@ -189,19 +189,19 @@ Launch commands for testing (you do not need to edit anything in the config file
 
 ### DataCheck test =>
 
-      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck`
+      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck
 
 OR
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck`
+      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck
 
 ### Analyze test =>
 
-      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run`
+      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats
 
 OR
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run`
+      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats
 
 
 # Running vAMPirus
@@ -213,30 +213,30 @@ Here are some example vAMPirus launch commands:
 
 Example 1. Launching the vAMPirus DataCheck pipeline using conda
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck`
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck
 
 Example 2. Launching the vAMPirus DataCheck pipeline using Singularity and multiple primer removal with the path to the fasta file with the primer sequences set in the launch command
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity --DataCheck --multi --primers /PATH/TO/PRIMERs.fa`
+      nextflow run vAMPirus.nf -c vampirus.config -profile singularity --DataCheck --multi --primers /PATH/TO/PRIMERs.fa
 
 Example 3. Launching the vAMPirus DataCheck pipeline with primer removal by global trimming of 20 bp from forward reads and 26 bp from reverse reads
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --GlobTrim 20,26`
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --GlobTrim 20,26
 
 
 ### Analyze pipeline =>
 
 Example 4. Launching the vAMPirus Analyze pipeline with singularity with ASV and AminoType generation with all accesory analyses (taxonomy assignment, EMBOSS, IQTREE, statistics)
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity --Analyze --stats run`
+      nextflow run vAMPirus.nf -c vampirus.config -profile singularity --Analyze --stats
 
 Example 5. Launching the vAMPirus Analyze pipeline with conda to perform multiple primer removal and protein-based clustering of ASVs, but skip most of the extra analyses
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --pcASV --skipPhylogeny --skipEMBOSS --skipTaxonomy --skipReport`
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --pcASV --skipPhylogeny --skipEMBOSS --skipTaxonomy --skipReport
 
 Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV-related results
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run`
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats
 
 
 ## Resuming analyses =>
@@ -245,7 +245,7 @@ If an analysis is interrupted, you can use Nextflows "-resume" option that will 
 
 For example if the analysis launched with the command from Example 6 above was interrupted, all you would need to do is add the "-resume" to the end of the command like so:
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run -resume`
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats -resume
 
 
 # Who to cite:

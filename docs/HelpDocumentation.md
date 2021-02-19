@@ -327,7 +327,7 @@ After running the above you should now have Nextflow installed. Now, build the S
 
 then test the Analyze pipeline with:
 
-    ./nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run
+    ./nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats
 
 Please check out http://sourabhbajaj.com/mac-setup/Vagrant/README.html and https://www.vagrantup.com/docs/providers/virtualbox for understanding how to use Vagrant commands like "halt", "suspend" or "reload"
 
@@ -530,11 +530,11 @@ OR
 
 Analyze test =>
 
-      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run
+      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats
 
 OR
 
-      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run
+      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats
 
 
 ### Resuming test analyses if you ran into an error
@@ -557,7 +557,7 @@ vAMPirus is deployed using the Nextflow pipeline manager which "enables scalable
 
 For example, say we want to first run the Analyze pipeline with only ASV-related analyses:
 
-      nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --stats run --skipAminoTyping
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --stats --skipAminoTyping
 
 Once the analysis launched
 
@@ -734,7 +734,7 @@ With this launch command, vAMPirus will perform ASV generation and nucleotide-ba
 
 Once you have everything set up and you have edited the parameters of interest in your configuration file you can run the following launch command for a full analysis:
 
-   nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run
+   nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats
 
 This launch command will run all aspects of the vAMPirus workflow on your data and spit out final reports for each clustering %ID and technique.
 
@@ -811,7 +811,7 @@ Every time you launch vAMPirus with Nextflow, you will see this kind of output t
 
 Usage example:
 
-        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats run
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats
 
 Example Nextflow output for this launch command:
 
@@ -850,7 +850,7 @@ The Analyze option allows vAMPirus to know that you plan to analyze your data wi
 
 To generate ncASVs (nucleotide clustered ASVs) or pcASVs (protein clustered ASVs) and run all subsequent analyses including stats with them (phylogeny, taxonomy assignment), you would just need to add the "--ncASV" and "--pcASV" options like so:
 
-        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats
 
 
 Here is what the Nextflow output would look like for this launch command:
@@ -1008,7 +1008,7 @@ The smaller the alpha value (--alpha) the more stringent vsearch is ASV generati
 
 Launch command to produce only ASV-related analyses:
 
-    nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats run --skipAminoTyping
+    nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats --skipAminoTyping
 
 Now, onto clustering ASVs into clustered ASVs (cASVs). vAMPirus is able to use two different techniques for generating cASVs for the user:
 
@@ -1043,11 +1043,11 @@ vAMPirus allows you to specify either one or multiple clustering percentages tha
 
 Above, the specified clustering percentage (--clusterNuclID) for ncASV generation is 85%. The value must always be in decimal format and can be put into the launch command like so:
 
-            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclID .85 --stats run
+            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclID .85 --stats
 
 You could also have a list of percentages to cluster by:
 
-            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclIDlist .85,.90,.96 --stats run
+            nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclIDlist .85,.90,.96 --stats
 
 Using "--clusterNuclIDlist" will override the single percentage clustering and vAMPirus will generate separate ncASVs fastas based on 85%, 90% and 96% nucleotide similarity, you could theoretically cluster by any amount of percentages between 1-100 that your data requires or your heart desires.
 
@@ -1069,7 +1069,7 @@ It should be noted that the --minAA option described above in the AminoType sect
 
 Example launch command:
 
-          nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --stats run
+          nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --stats
 
 
 ## Counts tables and percent ID matrices
@@ -1200,9 +1200,9 @@ The vAMPirus Analyze pipeline will generate an interactive html report which inc
     f. Pairwise Wilcoxon
     g. PERMANOVA
 
-To have these statistical tests ran and included in the final vAMPirus report, you will need to add the add "--stats run" to the launch command:
+To have these statistical tests ran and included in the final vAMPirus report, you will need to add the add "--stats" to the launch command:
 
-    nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats run
+    nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats
 
 NOTE=> Be sure that there is more than 1 sample in each treatment category or there will be errors  
 
@@ -1279,7 +1279,7 @@ NOTE: Most, if not all, plots in vAMPirus reports are interactive meaning you ca
 
 Depending on which optional arguments you add to your analyses (e.g. --pcASV, --ncASV, skip options), you will have different files produced, here we will go through the output of the full analysis stemming from this launch command:
 
-        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats
 
 ### ReadProcessing - ${working_directory}/results/Analyze/ReadProcessing
 
@@ -1345,7 +1345,7 @@ This is a plot that looks at number of reads per sample, similar to what is seen
 
 The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Species Richness.
 
-Stats tests included with "--stats run":
+Stats tests included with "--stats":
 
     a. Shapiro Test of normality
     b. Bartlett Test variance homogeneity
@@ -1532,7 +1532,7 @@ Usage:
 
   --Statistics options--
 
-        --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
+        --stats                        Set "--stats" to signal statstical tests to be performed and included in the final report
 
         --minimumCounts                Minimum number of hit counts for a sample to have to be included in the downstream statistical analyses and report generation
 
