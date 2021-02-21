@@ -34,7 +34,7 @@ The vAMPirus program contains two different pipelines:
 
 ![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_datacheckUPDATED.png)
 
-2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics.
+2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. NOTE- stats option has changed on 2/19/21; you only need to add "--stats" to the launch commmand without "run"
 
 
 ![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_analysisUPDATED.png)
@@ -281,7 +281,7 @@ We will make our own that looks like this:
            yum -y install epel-release
            yum -y install htop
            yum -y install nano
-           #git clone https://github.com/Aveglia/vAMPirus.git
+           git clone https://github.com/Aveglia/vAMPirus.git
            yum -y install singularity
               SHELL
       end
