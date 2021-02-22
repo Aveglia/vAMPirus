@@ -262,11 +262,11 @@ then
       echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck" >> STARTUP_HELP.txt
       echo "    " >> STARTUP_HELP.txt
       echo "Next, test the analysis pipeline:" >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
       echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
       echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
       echo "Ok, if everything went well (green text was spit out by Nextflow), now you can move on to the fun. First, you should review the help docs and the vampirus.config in the vAMPirus directory." >> STARTUP_HELP.txt
@@ -286,11 +286,11 @@ then
       echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING Analyze PIPELINE WITH YOUR DATA" >> STARTUP_HELP.txt
       echo "Then you can run the analysis using the -with-conda Nextflow option, here is a launch command to run the complete analysis and statistical tests:" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
       echo "OR same command using -profile option of Nextflow ..." >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
       echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
 fi
