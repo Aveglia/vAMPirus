@@ -186,9 +186,9 @@ if [[ $DATABASE -eq 1 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
-        echo "Database installation: RVDB version 19.0 (latest as of 2020-06)"
-        curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
-        bunzip2 U-RVDBv19.0-prot.fasta.bz2
+        echo "Database installation: RVDB version 20.0 (latest as of 2020-09)"
+        curl -o U-RVDBv20.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv20.0-prot.fasta.bz2
+        bunzip2 U-RVDBv20.0-prot.fasta.bz2
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/U-RVDBv19.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
