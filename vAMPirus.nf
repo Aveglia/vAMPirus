@@ -540,7 +540,7 @@ if (params.DataCheck || params.Analyze) {
 
                 tag "${sample_id}"
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/FastQC/PreClean", mode: "copy", overwrite: true
+                publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/FastQC/PreClean", mode: "copy", overwrite: true
 
                 input:
                     tuple sample_id, file(reads) from reads_qc_ch
@@ -563,8 +563,8 @@ if (params.DataCheck || params.Analyze) {
 
                 tag "${sample_id}"
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
+                publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
+                publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
                 input:
                     tuple sample_id, file(reads) from reads_ch
@@ -599,7 +599,7 @@ if (params.DataCheck || params.Analyze) {
 
                 tag "${sample_id}"
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
+                publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
 
                 input:
                     tuple sample_id, file(reads) from reads_fastp_ch
@@ -646,7 +646,7 @@ if (params.DataCheck || params.Analyze) {
 
                 tag "${sample_id}"
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/FastQC/PostClean", mode: "copy", overwrite: true
+                publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/FastQC/PostClean", mode: "copy", overwrite: true
 
                 input:
                     tuple sample_id, file(reads) from readsforqc2
@@ -668,8 +668,8 @@ if (params.DataCheck || params.Analyze) {
 
         tag "${sample_id}"
 
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Individual", mode: "copy", overwrite: true, pattern: "*mergedclean.fastq"
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Individual/notmerged", mode: "copy", overwrite: true, pattern: "*notmerged*.fastq"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Individual", mode: "copy", overwrite: true, pattern: "*mergedclean.fastq"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Individual/notmerged", mode: "copy", overwrite: true, pattern: "*notmerged*.fastq"
 
         input:
             tuple sample_id, file(reads) from reads_bbduk_ch
@@ -691,7 +691,7 @@ if (params.DataCheck || params.Analyze) {
 
         label 'low_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch1_ch
@@ -710,7 +710,7 @@ if (params.DataCheck || params.Analyze) {
 
         label 'low_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging", mode: "copy", overwrite: true
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging", mode: "copy", overwrite: true
 
         input:
             file(names) from names
@@ -731,10 +731,10 @@ if (params.DataCheck || params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true, pattern: "*_merged_preFilt*.fasta"
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging", mode: "copy", overwrite: true, pattern: "*Lengthfiltered.fastq"
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Histograms/pre_length_filtering", mode: "copy", overwrite: true, pattern: "*preFilt_*st.txt"
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Histograms/post_length_filtering", mode: "copy", overwrite: true, pattern: "*postFilt_*st.txt"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true, pattern: "*_merged_preFilt*.fasta"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging", mode: "copy", overwrite: true, pattern: "*Lengthfiltered.fastq"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/pre_length_filtering", mode: "copy", overwrite: true, pattern: "*preFilt_*st.txt"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/post_length_filtering", mode: "copy", overwrite: true, pattern: "*postFilt_*st.txt"
 
         input:
             file(reads) from collect_samples_ch
@@ -759,10 +759,10 @@ if (params.DataCheck || params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true, pattern: "*_merged_preFilt*.fasta"
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging", mode: "copy", overwrite: true, pattern: "*Lengthfiltered.fastq"
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Histograms/pre_length_filtering", mode: "copy", overwrite: true, pattern: "*preFilt_*st.txt"
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Histograms/post_length_filtering", mode: "copy", overwrite: true, pattern: "*postFilt_*st.txt"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true, pattern: "*_merged_preFilt*.fasta"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging", mode: "copy", overwrite: true, pattern: "*Lengthfiltered.fastq"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/pre_length_filtering", mode: "copy", overwrite: true, pattern: "*preFilt_*st.txt"
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/post_length_filtering", mode: "copy", overwrite: true, pattern: "*postFilt_*st.txt"
 
         input:
             file(reads) from collect_samples_ch
@@ -826,7 +826,7 @@ if (params.DataCheck || params.Analyze) {
 
         label 'low_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/ReadProcessing/ReadMerging/Uniques", mode: "copy", overwrite: true
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Uniques", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch2_ch
