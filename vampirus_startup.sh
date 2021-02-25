@@ -170,7 +170,7 @@ else
       echo "Alright, lets check your system for Conda..."
       conda_c
       echo "Editing path to conda directory in vampirus.config"
-      environment="$(conda env list  | sed 's/*//g' | grep "vAMPirus" | head -1 | awk '{print $2}')"
+      environment="$(conda info -e | awk '$1 == "vAMPirus" {print $2}')"
       sed "s|CONDADIR|${environment}|g" "$mypwd"/vampirus.config > tmp1.config
       cat tmp1.config > "$mypwd"/vampirus.config
       rm tmp1.config
