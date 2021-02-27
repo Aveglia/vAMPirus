@@ -463,12 +463,12 @@ if (params.readsTest) {
     Channel
         .fromFilePairs(params.readsTest)
         .ifEmpty{ exit 1, "params.readTest was empty - no input files supplied" }
-        .into{ reads_ch; reads_qc_ch }
+        .into{ reads_ch; reads_qc_ch; reads_processing }
 } else {
     println("\n\tEverything ready for launch.\n")
     Channel
         .fromFilePairs("${params.reads}", checkIfExists: true)
-        .into{ reads_ch; reads_qc_ch }
+        .into{ reads_ch; reads_qc_ch; reads_processing }
 }
 
 if (params.DataCheck || params.Analyze) {
@@ -530,7 +530,7 @@ if (params.DataCheck || params.Analyze) {
         }
     }
 
-    if (!params.skipReadProcessing) {
+    if (!params.skipReadProcessing || !params.skipMerging ) {
 
         if (!params.skipFastQC) {
 
@@ -589,6 +589,7 @@ if (params.DataCheck || params.Analyze) {
             reads_ch
                 .set{ reads_fastp_ch }
             fastp_results = Channel.empty()
+
         }
 
         if (!params.skipPrimerRemoval) {
@@ -613,7 +614,7 @@ if (params.DataCheck || params.Analyze) {
                         """
                         bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.defaultFwdTrim} t=${task.cpus}
                         bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.defaultRevTrim} t=${task.cpus}
-        		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+        		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
                         """
                     } else if ( params.GlobTrim && !params.GlobTrim == "" ) {
                         """
@@ -621,7 +622,7 @@ if (params.DataCheck || params.Analyze) {
                         RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
                         bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
                         bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
-        		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+        		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
                         """
                     } else if ( params.multi && params.primers ) {
                         """
@@ -636,9 +637,10 @@ if (params.DataCheck || params.Analyze) {
         } else {
             reads_fastp_ch
                 .set{ reads_bbduk_ch }
+
         }
 
-        if (!params.skipFastQC) {
+        if (!params.skipFastQC && !params.skipPrimerRemoval) {
 
             process QualityCheck_2 {
 
@@ -660,32 +662,44 @@ if (params.DataCheck || params.Analyze) {
                     """
             }
         }
-    }
-
-    process Read_Merging {
-
-        label 'norm_cpus'
-
-        tag "${sample_id}"
-
-        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Individual", mode: "copy", overwrite: true, pattern: "*mergedclean.fastq"
-        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Individual/notmerged", mode: "copy", overwrite: true, pattern: "*notmerged*.fastq"
-
-        input:
-            tuple sample_id, file(reads) from reads_bbduk_ch
-
-        output:
-            file("*_mergedclean.fastq") into reads_vsearch1_ch
-            file("*.name") into names
-            file("*notmerged*.fastq") into notmerged
-
-        script:
-            """
-            vsearch --fastq_mergepairs ${reads[0]} --reverse ${reads[1]} --threads ${task.cpus} --fastqout ${sample_id}_mergedclean.fastq --fastqout_notmerged_fwd ${sample_id}_notmerged_fwd.fastq --fastqout_notmerged_rev ${sample_id}_notmerged_rev.fastq --fastq_maxee ${params.maxEE} --relabel ${sample_id}.
-            echo ${sample_id} > ${sample_id}.name
-            """
+    } else {
+        reads_ch
+            .set{ reads_bbduk_ch }
 
     }
+
+    if (!params.skipMerging) {
+
+        process Read_Merging {
+
+            label 'norm_cpus'
+
+            tag "${sample_id}"
+
+            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Individual", mode: "copy", overwrite: true, pattern: "*mergedclean.fastq"
+            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Individual/notmerged", mode: "copy", overwrite: true, pattern: "*notmerged*.fastq"
+
+            input:
+                tuple sample_id, file(reads) from reads_bbduk_ch
+
+            output:
+                file("*_mergedclean.fastq") into reads_vsearch1_ch
+                file("*.name") into names
+                file("*notmerged*.fastq") into notmerged
+
+            script:
+                """
+                vsearch --fastq_mergepairs ${reads[0]} --reverse ${reads[1]} --threads ${task.cpus} --fastqout ${sample_id}_mergedclean.fastq --fastqout_notmerged_fwd ${sample_id}_notmerged_fwd.fastq --fastqout_notmerged_rev ${sample_id}_notmerged_rev.fastq --fastq_maxee ${params.maxEE} --relabel ${sample_id}.
+                echo ${sample_id} > ${sample_id}.name
+                """
+
+        }
+
+    } else {
+        reads_bbduk_ch
+          .set{ reads_vsearch1_ch }
+    }
+
 
     process Compile_Reads {
 
@@ -904,14 +918,14 @@ if (params.DataCheck || params.Analyze) {
                 echo "\${id},\${numb}" >> number_per_percentage_nucl.csv
             done
             yo=\$(grep -c ">" ${fasta})
-	        echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
+	          echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
             """
             }
         }
 
         if (params.sing) {
 
-          process Translating_For_ProteinClustering_DC {
+            process Translating_For_ProteinClustering_DC {
 
                   label 'low_cpus'
 
@@ -931,34 +945,33 @@ if (params.DataCheck || params.Analyze) {
 
                       ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
                       cp ${fasta} ${params.projtag}_ASV_all.fasta
-
                       """
 
-          }
+            }
 
           } else {
 
            process Translation_For_ProteinBased_Clustering_DC {
 
-            label 'norm_cpus'
+               label 'norm_cpus'
 
-            conda 'python=2.7'
+               conda 'python=2.7'
 
-            publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
+               publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
 
-            input:
-                file(fasta) from nucl2aa
+               input:
+                    file(fasta) from nucl2aa
 
-            output:
-                file("*ASVprotforclust.fasta") into clustering_aa
-                file("*_translation_report") into reportaa_VR
-                file("*_ASV_all.fasta") into asvfastaforaaclust
+                output:
+                    file("*ASVprotforclust.fasta") into clustering_aa
+                    file("*_translation_report") into reportaa_VR
+                    file("*_ASV_all.fasta") into asvfastaforaaclust
 
-            script:
-                """
-                ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
-                cp ${fasta} ${params.projtag}_ASV_all.fasta
-                """
+                script:
+                    """
+                    ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
+                    cp ${fasta} ${params.projtag}_ASV_all.fasta
+                    """
            }
          }
 
@@ -1068,25 +1081,43 @@ if (params.DataCheck || params.Analyze) {
                     """
             }
 
-            process combine_csv_DC {
+            if (!params.skipReadProcessing || !params.skipMerging ) {
 
-                input:
-                    file(csv) from fastp_csv_in1
-                        .collect()
+                process combine_csv_DC {
 
-                output:
-                    file("final_reads_stats.csv") into fastp_csv_dc
+                    input:
+                        file(csv) from fastp_csv_in1
+                            .collect()
 
-                script:
-                    """
-                    cat ${csv} >all_reads_stats.csv
-                    head -n1 all_reads_stats.csv >tmp.names.csv
-                    cat all_reads_stats.csv | grep -v ""Sample,Total_"" >tmp.reads.stats.csv
-                    cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
-                    rm tmp.names.csv tmp.reads.stats.csv
-                    """
+                    output:
+                        file("final_reads_stats.csv") into fastp_csv_dc
 
+                    script:
+                        """
+                        cat ${csv} >all_reads_stats.csv
+                        head -n1 all_reads_stats.csv >tmp.names.csv
+                        cat all_reads_stats.csv | grep -v ""Sample,Total_"" >tmp.reads.stats.csv
+                        cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
+                        rm tmp.names.csv tmp.reads.stats.csv
+                        """
+
+                }
+            } else {
+
+                process skip_combine_csv_DC {
+                    output:
+                        file("filter_reads.txt") into fastp_csv_dc
+
+                    script:
+                        """
+                        echo "Read processing steps skipped." >filter_reads.txt
+                        """
+                }
             }
+
+            report_dc_in = Channel.create()
+            fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot
+             ).into(report_dc_in)
 
             process Report_DataCheck {
 
@@ -1095,21 +1126,8 @@ if (params.DataCheck || params.Analyze) {
                 publishDir "${params.workingdir}/${params.outdir}/DataCheck/Report", mode: "copy", overwrite: true, pattern: '*.{html}'
 
                 input:
-                    file(fastpcsv) from fastp_csv_dc
-                    file(reads_per_sample_preFilt) from reads_per_sample_preFilt
-                    file(read_per_sample_postFilt) from reads_per_sample_postFilt
-                    file(preFilt_baseFrequency) from prefilt_basefreq
-                    file(postFilt_baseFrequency) from postFilt_basefreq
-                    file(preFilt_qualityScore) from prefilt_qualityscore
-                    file(postFilt_qualityScore) from postFilt_qualityscore
-                    file(preFilt_gcContent) from prefilt_gccontent
-                    file(postFilt_gcContent) from postFilt_gccontent
-                    file(preFilt_averageQuality) from prefilt_averagequality
-                    file(postFilt_averageQuaulity) from postFilt_averagequality
-                    file(preFilt_length) from prefilt_length
-                    file(postFilt_length) from postFilt_length
-                    file(number_per_percentage_nucl) from number_per_percent_nucl_plot
-                    file(number_per_percentage_prot) from number_per_percent_prot_plot
+                    file(files) from report_dc_in
+                        .collect()
 
                 output:
                    file("*.html") into datacheckreport
@@ -1119,19 +1137,9 @@ if (params.DataCheck || params.Analyze) {
                     cp ${params.vampdir}/bin/vAMPirus_DC_Report.Rmd .
                     cp ${params.vampdir}/example_data/conf/vamplogo.png .
                     Rscript -e "rmarkdown::render('vAMPirus_DC_Report.Rmd',output_file='${params.projtag}_DataCheck_Report.html')" ${params.projtag} \
-                    ${fastpcsv} \
-                    ${reads_per_sample_preFilt} \
-                    ${read_per_sample_postFilt} \
-                    ${preFilt_baseFrequency} \
-                    ${postFilt_baseFrequency} \
-                    ${preFilt_qualityScore} \
-                    ${postFilt_qualityScore} \
-                    ${preFilt_averageQuality} \
-                    ${postFilt_averageQuaulity} \
-                    ${preFilt_length} \
-                    ${postFilt_length} \
-                    ${number_per_percentage_nucl} \
-                    ${number_per_percentage_prot}
+                    ${params.skipReadProcessing} \
+                    ${params.skipMerging} \
+                    ${params.skipAdapterRemoval}
                     """
             }
 
