@@ -62,8 +62,8 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
     cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
     writeLines("\n--------------------------------------------------------------\n")
 } else {
-    if (params$skipAdapterRemoval == "false")
-        reads_stats=read.csv("final_reads_stats.csv"))
+    if (params$skipAdapterRemoval == "false") {
+        reads_stats=read.csv("final_reads_stats.csv")
         paged_table(reads_stats,options = list(rows.print = 10))
     } else {
         # file fore here
@@ -173,7 +173,7 @@ postrp
 <br>
 
 ```{r preClean_baseFrequency, echo=FALSE}
-prec=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_baseFrequency_hist.csv"), header=TRUE)
+prec=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_baseFrequency_hist.csv"), header=TRUE))
 #prec=read.csv("PVID_vAMPtest1_all_merged_preFilt_preClean_baseFrequency_hist.csv", header=TRUE)
 precp <- plot_ly(x=c(1:nrow(prec)),y=as.numeric(prec[,2]), type="scatter", mode = "markers", name="A", opacity = .8, markers=list(color='#088da5'))
 precp <- precp %>% add_trace(y=as.numeric(prec[,3]), name="C", opacity = .8, markers=list(color='#e19336'))
@@ -194,7 +194,7 @@ precp
 <br>
 
 ```{r postClean_baseFrequency, echo=FALSE}
-postc=read.csv(paste(params$projtag,sep="","_all_merged_postFilt_baseFrequency_hist.csv"), header=TRUE)
+postc=read.csv(paste(params$projtag,sep="","_all_merged_postFilt_baseFrequency_hist.csv"), header=TRUE))
 #postc=read.csv("PVID_vAMPtest1_all_merged_postFilt_baseFrequency_hist.csv", header=TRUE)
 postcp <- plot_ly(x=c(1:nrow(postc)),y=as.numeric(postc[,2]),type="scatter", mode = "markers", name="A", opacity = .8, markers=list(color='#088da5'))
 postcp <- postcp %>% add_trace(y=as.numeric(postc[,3]), name="C", opacity = .8, markers=list(color='#e19336'))
@@ -214,9 +214,14 @@ postcp
 
 <br>
 
+```{bash test_bash, echo=FALSE}
+cat *_all_merged_preFilt_preClean_qualityScore_hist.csv | grep -v "#" >final_qc.csv
+```
 ```{r preClean_qualityScore, echo=FALSE}
-preq=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_qualityScore_hist.csv", header=TRUE)
-preqp <- plot_ly(x=c(1:nrow(preq)),y=as.numeric(preq[,2]),type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
+#preq=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_qualityScore_hist.csv", header=TRUE))
+preq=read.csv("final_qc.csv",header=F)
+#preqp <- plot_ly(x=c(1:nrow(preq)),y=as.numeric(preq[,2]),type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
+preqp <- plot_ly(preq,x=~V1, y=~V2,type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
 preqp <- preqp %>% layout(xaxis=list(title="Base position"))
 preqp <- preqp %>% layout(yaxis=list(title="Mean quality", range = c(0,41)))
 preqp <- preqp %>% layout(legend = list(x=10,y=.5), hovermode = "x unified")
@@ -231,7 +236,7 @@ preqp
 <br>
 
 ```{r postClean_qualityScore, echo=FALSE}
-podtq=read.csv(paste(params$projtag,sep="","_all_merged_postFilt_qualityScore_hist.csv", header=TRUE)
+podtq=read.csv(paste(params$projtag,sep="","_all_merged_postFilt_qualityScore_hist.csv", header=TRUE))
 #postq=read.csv("PVID_vAMPtest1_all_merged_postFilt_qualityScore_hist.csv", header=TRUE)
 postqp <- plot_ly(x=c(1:nrow(postq)),y=as.numeric(postq[,2]),type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
 postqp <- postqp %>% layout(xaxis=list(title="Base position"))
@@ -290,7 +295,7 @@ cat *all_merged_postFilt_gcContent_hist.csv | grep "#" | tr -d "#"
 <br>
 
 ```{r pre_averageQuality_hist, echo=FALSE}
-preaq=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_averageQuality_hist.csv", header=TRUE)
+preaq=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_averageQuality_hist.csv", header=TRUE))
 #preaq=read.csv("PVID_vAMPtest1_all_merged_preFilt_preClean_averageQuality_hist.csv", header=T)
 preaqp <- plot_ly(preaq, x=preaq[,1], y=preaq[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('Average quality: %{x}','<br>Count: %{y}','<extra></extra>'))
@@ -328,7 +333,7 @@ postaqp
 
 
 ```{r pre_length_hist, echo=FALSE}
-prelh=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_length_hist.csv", header=TRUE)
+prelh=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_length_hist.csv", header=TRUE))
 #prelh=read.csv("PVID_vAMPtest1_all_merged_preFilt_preClean_length_hist.csv", header=T)
 prelhp <- plot_ly(prelh, x=prelh[,1], y=prelh[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('Read Length: %{x}','<br>Count: %{y}','<extra></extra>'))
@@ -345,7 +350,7 @@ prelhp
 <br>
 
 ```{r post_length_hist, echo=FALSE}
-postlh=read.csv(paste(params$projtag,sep="","_all_merged_postFilt_length_hist.csv", header=TRUE)
+postlh=read.csv(paste(params$projtag,sep="","_all_merged_postFilt_length_hist.csv", header=TRUE))
 #postlh=read.csv("PVID_vAMPtest1_all_merged_postFilt_length_hist.csv", header=T)
 postlhp <- plot_ly(postlh, x=postlh[,1], y=postlh[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('Read Length: %{x}','<br>Count: %{y}','<extra></extra>'))
