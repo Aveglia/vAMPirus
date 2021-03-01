@@ -269,7 +269,7 @@ if (params$stats == "true" ) {
       if (mykt$p.value < .05) {
         #Pairwise comparison
         print("Wilcox.test - pairwise comparison")
-        print(pairwise.wilcox.test(shannondata5_2$index, shannondata5_2$treatment, p.adjust.method = "BH"))   
+        print(pairwise.wilcox.test(shannondata5_2$index, shannondata5_2$treatment, p.adjust.method = "BH"))
       } else {
         print("Data not significant. Skipping pairwise comparison")
       }
@@ -349,7 +349,7 @@ if (params$stats == "true" ) {
       if (mykt$p.value < .05) {
         #Pairwise comparison
         print("Wilcox.test - pairwise comparison")
-        print(pairwise.wilcox.test(simpsondata5_2$index, simpsondata5_2$treatment, p.adjust.method = "BH"))   
+        print(pairwise.wilcox.test(simpsondata5_2$index, simpsondata5_2$treatment, p.adjust.method = "BH"))
       } else {
         print("Data not significant. Skipping pairwise comparison")
       }
@@ -426,7 +426,7 @@ if (params$stats == "true" ) {
       if (mykt$p.value < .05) {
         #Pairwise comparison
         print("Wilcox.test - pairwise comparison")
-        print(pairwise.wilcox.test(richdata5_2$index, richdata5_2$treatment, p.adjust.method = "BH"))   
+        print(pairwise.wilcox.test(richdata5_2$index, richdata5_2$treatment, p.adjust.method = "BH"))
       } else {
         print("Data not significant. Skipping pairwise comparison")
       }
