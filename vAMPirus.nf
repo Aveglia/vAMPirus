@@ -471,6 +471,21 @@ if (params.readsTest) {
         .into{ reads_ch; reads_qc_ch; reads_processing }
 }
 
+// HERE fix if stament and list names. Also is not an integer
+if (params.clusterNuclIDlist == "") {
+    msize=params.clusterNuclIDlist
+    def slist=msize.split(',').collect{it as int}
+    def nnuc=slist.size()
+} else {
+    def nnuc=1
+}
+
+if (params.clusterAAIDlist == "") {
+    msize2=params.clusterAAIDlist
+    def slist2=msize2.split(',').collect{it as int}
+    def naa=slist2.size()
+}
+
 if (params.DataCheck || params.Analyze) {
 
     println("\n\tRunning vAMPirus Analyze pipeline - This might take a while, check out Nextflow tower (tower.nf) to remotely monitor the run.\n")
@@ -1154,19 +1169,21 @@ if (params.DataCheck || params.Analyze) {
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ncASV", mode: "copy", overwrite: true, pattern: '*ncASV*.fasta'
 
                 input:
+                    each x from 1..nnuc
                     file(fasta) from reads_vsearch5_ch
 
                 output:
+                    //HERE - sepearte avs and ncasv out and proceeses. matrix, couts and phylogeny
                     tuple file("*_ncASV*.fasta"), file("*ASV.fasta") into ( nuclFastas_forDiamond_ch, nuclFastas_forCounts_ch, nuclFastas_forMatrix_ch)
-                    tuple file("*_ncASV*.fasta"), file("*ASV.fasta") into nuclFastas_forphylogeny
+                    file("*_ncASV*.fasta") into nuclFastas_forphylogeny_ncasv
+                    file("*ASV.fasta") into nuclFastas_forphylogeny_asv
 
                 script:
                 if (params.clusterNuclIDlist) {
+                    nid=slist1.get(x-1)
                     """
                     cp ${fasta} ./${params.projtag}_ASV.fasta
-                    for id in `echo ${params.clusterNuclIDlist} | tr "," "\\n"`;do
-                        vsearch --cluster_fast ${params.projtag}_ASV.fasta --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id \${id}
-                    done
+                    vsearch --cluster_fast ${params.projtag}_ASV.fasta --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id ${nid}
                     """
                 } else if (params.clusterNuclID) {
                     """
@@ -1721,7 +1738,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
-                        file("*ncASV*counts.csv") into notu_counts_plots
+                        tuple val("${id}"), file("*ncASV*counts.csv") into notu_counts_plots
                         file("*_ASV*counts.csv") into asv_counts_plots
 
                     script:
@@ -1880,25 +1897,68 @@ if (params.DataCheck || params.Analyze) {
 
                     if (!params.skipPhylogeny) { // need to edit paths
 
+                        nuclFastas_forphylogeny_asv = Channel.create()
+                        nuclFastas_forphylogeny_ncasv = Channel.create()
+                        nuclFastas_forphylogeny.into(nuclFastas_forphylogeny_asv, nuclFastas_forphylogeny_ncasv)
+
+                      process ASV_Phylogeny {
+
+                              label 'norm_cpus'
+
+                              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
+                              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
+                              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+
+                              input:
+                                  file(asvs) from nuclFastas_forphylogeny_asv
+
+                              output:
+                                  tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results
+                                  file("*iq.treefile") into nucl_phyl_plot
+
+                              script:
+                                  """
+                                      pre=\$(echo \${filename} | awk -F ".fasta" '{print \$1}' )
+                                      mafft --thread ${task.cpus} --maxiterate 15000 --auto \${filename} >\${pre}_ALN.fasta
+                                      trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
+                                      # Nucleotide_ModelTest
+                                      modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                                      # Nucleotide_Phylogeny
+                                      if [ "${params.iqCustomnt}" != "" ];then
+                                          iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
+                                      elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
+                                          mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                                          iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                                      elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
+                                          mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
+                                          iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                                      elif [ "${params.nonparametric}" != "false" ];then
+                                          iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
+                                      elif [ "${params.parametric}" != "false" ];then
+                                          iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                      else
+                                          iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                      fi
+                                  done
+                                  """
+                          }
+
                         if (params.ncASV) {
 
-                            process Nucleotide_Phylogeny {
+                            process ncASV_Phylogeny {
 
                                     label 'norm_cpus'
 
                                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ncASV*aln.*'
                                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ncASV*mt*'
                                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ncASV*iq*'
-                                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*_ASV*aln.*'
-                                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*_ASV*mt*'
-                                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*_ASV*iq*'
 
                                     input:
-                                        tuple file(notus), file(asvs) from nuclFastas_forphylogeny
+                                        tuple file(notus), file(asvs) from nuclFastas_forphylogeny_ncasv
 
                                     output:
-                                        tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results
-                                        file("*iq.treefile") into nucl_phyl_plot
+                                        tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results_ncasv
+                                        file("*iq.treefile") into nucl_phyl_plot_ncasv
 
                                     script:
                                         """
@@ -1925,77 +1985,12 @@ if (params.DataCheck || params.Analyze) {
                                                 iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                                             fi
                                         done
-                                        for filename in ${asvs};do
-                                            pre=\$(echo \${filename} | awk -F ".fasta" '{print \$1}' )
-                                            mafft --thread ${task.cpus} --maxiterate 15000 --auto \${filename} >\${pre}_ALN.fasta
-                                            trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
-                                            # Nucleotide_ModelTest
-                                            modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
-                                            # Nucleotide_Phylogeny
-                                            if [ "${params.iqCustomnt}" != "" ];then
-                                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
-                                            elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                                mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
-                                            elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                                                mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
-                                            elif [ "${params.nonparametric}" != "false" ];then
-                                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
-                                            elif [ "${params.parametric}" != "false" ];then
-                                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                                            else
-                                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                                            fi
-                                        done
                                         """
                                 }
-                            } else {
 
-                                process ASV_Phylogeny {
+                        }
 
-                                        label 'norm_cpus'
-
-                                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
-                                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
-                                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
-
-                                        input:
-                                            file(asvs) from nuclFastas_forphylogeny
-
-                                        output:
-                                            tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results
-                                            file("*iq.treefile") into nucl_phyl_plot
-
-                                        script:
-                                            """
-                                            for filename in ${asvs};do
-                                                pre=\$(echo \${filename} | awk -F ".fasta" '{print \$1}' )
-                                                mafft --thread ${task.cpus} --maxiterate 15000 --auto \${filename} >\${pre}_ALN.fasta
-                                                trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
-                                                # Nucleotide_ModelTest
-                                                modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
-                                                # Nucleotide_Phylogeny
-                                                if [ "${params.iqCustomnt}" != "" ];then
-                                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
-                                                elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                                    mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
-                                                elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                                                    mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
-                                                elif [ "${params.nonparametric}" != "false" ];then
-                                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
-                                                elif [ "${params.parametric}" != "false" ];then
-                                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                                                else
-                                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                                                fi
-                                            done
-                                            """
-                                    }
-                            }
-                    }
+            }
 
             if (!params.skipAminoTyping) {
 
@@ -2782,7 +2777,7 @@ if (params.DataCheck || params.Analyze) {
                                 echo "     " > sequence.list
                                 grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                                 rm "\$name"_tmpssasv.fasta
-                                paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloseqLikeObject.csv
+                                paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloseqObject.csv
                                 paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
                                 for x in *phyloseqObject.csv;do
                                     echo "\$x"
@@ -3301,11 +3296,11 @@ if (params.DataCheck || params.Analyze) {
                 nucl_phyl_plot -> ${params.projtag}_ASV_iq.treefile
                 */
                 report_asv = Channel.create()
-                asv_counts_plots.mix(taxplot1, asv_heatmap, nucl_phyl_plot).flatten().buffer(size:4).toList().into(report_asv)
+                asv_counts_plots.mix(taxplot1, asv_heatmap, nucl_phyl_plot).flatten().buffer(size:4).into(report_asv)
 
                 if (params.ncASV) {
-                    report_ncasv = Channel.empty()
-                    notu_counts_plots.mix(taxplot1a, notu_heatmap, nucl_phyl_plot).flatten().toSortedList().flatten().buffer(size:4).toList().into(report_ncasv)
+                    report_ncasv = Channel.create()
+                    notu_counts_plots.mix(taxplot1a, notu_heatmap, nucl_phyl_plot_ncasv).flatten().toSortedList().flatten().buffer(size:4).into(report_ncasv)
                     /*
                     notu_counts_plots -> ${params.projtag}_ncASV${id}_counts.csv
                     taxplot1a -> ${params.projtag}_ncASV${id}_summary_for_plot.csv
@@ -3318,7 +3313,7 @@ if (params.DataCheck || params.Analyze) {
 
                 if (params.pcASV) {
                     report_pcasv_aa = Channel.create()
-                    potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot).flatten().toSortedList().flatten().buffer(size:4).toList().into(report_pcasv_aa)
+                    potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot).flatten().toSortedList().flatten().buffer(size:4).into(report_pcasv_aa)
                     /*Report_pcASV_AminoAcid
                     potu_Acounts -> ${params.projtag}_pcASV${id}_noTaxonomy_counts.csv
                     taxplot4 -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_summary_for_plot.csv
@@ -3326,7 +3321,7 @@ if (params.DataCheck || params.Analyze) {
                     potu_Atree_plot -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_iq.treefile
                     */
                     report_pcasv_nucl = Channel.create()
-                    potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot).flatten().toSortedList().flatten().buffer(size:4).toList().into(report_pcasv_nucl)
+                    potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot).flatten().toSortedList().flatten().buffer(size:4).into(report_pcasv_nucl)
                     /*Report_pcASV_Nucleotide
                     potu_Ncounts_for_report -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_counts.csv
                     taxplot3 -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_summary_for_plot.csv
@@ -3340,7 +3335,7 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipAminoTyping) {
                     report_aminotypes = Channel.create()
-                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot).flatten().buffer(size:4).toList().into(report_aminotypes)
+                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot).flatten().buffer(size:4).into(report_aminotypes)
                     /*
                     Report_AminoTypes
                     aminocounts_plot -> ${params.projtag}_AminoType_counts.csv
@@ -3352,7 +3347,8 @@ if (params.DataCheck || params.Analyze) {
                     report_aminotypes = Channel.empty()
                 }
 
-                report_asv.mix(report_ncasv, report_pcasv_aa, report_pcasv_nucl,report_aminotypes).buffer(size:1).into(report_all_ch)
+                report_all_ch = Channel.create()
+                report_asv.mix(report_ncasv, report_pcasv_aa, report_pcasv_nucl, report_aminotypes).buffer(size:1).flatten().toList().view().into(report_all_ch)
 
                 process Report {
 
@@ -3363,14 +3359,13 @@ if (params.DataCheck || params.Analyze) {
                     input:
                         file(csv) from fastp_csv_in
                         file(files) from report_all_ch
-                            .collect()
 
                     output:
                         file("*.html") into report_all_out
 
                     script:
                         """
-                        name=\$( ls -1 | grep -w "_summary_for_plot.csv" | awk -F "_summary_for_plot.csv" '{print \$1}')
+                        name=\$( ls *summary_for_plot.csv | awk -F "_summary_for_plot.csv" '{print \$1}')
                         cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
                         cp ${params.vampdir}/example_data/conf/vamplogo.png .
                         Rscript -e "rmarkdown::render('vAMPirus_Report.Rmd',output_file='\${name}_Report.html')" \${name} \
