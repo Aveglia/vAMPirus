@@ -2115,7 +2115,7 @@ if (params.DataCheck || params.Analyze) {
 
                     script:
                         """
-                        name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
+                        name=\$( echo ${prot} | awk -F "_noTax" '{print \$1}')
                         clustalo -i ${prot} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                         clustalo -i ${prot} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
                         for x in *q.matrix;do
@@ -2348,7 +2348,7 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             """
                             # Protein_Alignment
-                            pre=\$(echo ${prot} | awk -F ".fasta" '{print \$1}' )
+                            pre=\$(echo ${prot} | awk -F "_noTax" '{print \$1}' )
                             mafft --thread ${task.cpus} --maxiterate 15000 --auto ${prot} >\${pre}_ALN.fasta
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
@@ -2782,14 +2782,14 @@ if (params.DataCheck || params.Analyze) {
                                 echo "     " > sequence.list
                                 grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                                 rm "\$name"_tmpssasv.fasta
-                                paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloseqObject.csv
+                                paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloseqLikeObject.csv
                                 paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
                                 for x in *phyloseqObject.csv;do
                                     echo "\$x"
                                     lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
                                     tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
                                     sed 's/ /_/g' tmpcol.list > tmp2col.list;
-                                    cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
+                                    cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_noTaxonomy_summary_for_plot.csv;
                                     rm tmpcol.list tmp2col.list
                                 done
                                 rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list seqids.lst otu.list ;
@@ -2889,28 +2889,28 @@ if (params.DataCheck || params.Analyze) {
                                 trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
 
                                 # pcASV_Nucleotide_ModelTest
-                                modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                                modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_noTaxonomy_mt -d nt -s 203 --disable-checkpoint
 
                                 # pcASV_Nucleotide_Phylogeny
                                 if [ "${params.iqCustomnt}" != "" ];then
-                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
+                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq --redo -T auto ${params.iqCustomnt}
 
                                 elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
                                     mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m \${mod} --redo-nt auto -b ${params.boots}
 
                                 elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
                                     mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                                 elif [ "${params.nonparametric}" != "false" ];then
-                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -b ${params.boots}
 
                                 elif [ "${params.parametric}" != "false" ];then
-                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
                                 else
-                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                                 fi
                             done
                             """
@@ -3245,7 +3245,7 @@ if (params.DataCheck || params.Analyze) {
                 		            echo "\$z counted"
                 	            done
                            done
-                           paste -d "," tmp.col1.txt *col.txt > ${params.projtag}_\${potu}_counts.csv
+                           paste -d "," tmp.col1.txt *col.txt > ${params.projtag}_aminoacid_\${potu}_noTaxonomy_counts.csv
                            rm tmp*
                            rm *col.txt
                         done
@@ -3264,7 +3264,7 @@ if (params.DataCheck || params.Analyze) {
                                 .collect()
 
                         output:
-                            file("final_reads_stats.csv") into ( fastp_csv1, fastp_csv2, fastp_csv3, fastp_csv4, fastp_csv5 )
+                            file("final_reads_stats.csv") into fastp_csv_in
 
                         script:
                             """
@@ -3276,364 +3276,120 @@ if (params.DataCheck || params.Analyze) {
                             """
 
                     }
+                } else {
+
+                    process skip_combine_csv {
+
+                        output:
+                            file("filter_reads.txt") into fastp_csv_in
+
+                        script:
+                            """
+                            echo "Read processing steps skipped." >filter_reads.txt
+                            """
+
+                    }
+
                 }
 
 
                 //NEW REPORT !!!!!!!!!!!!!!!!!
-
-                if (params.ncASV) {
-
-                    notu_counts_plots.mix(taxplot1a,notu_heatmap,nucl_phyl_plot,fastp_csv2)
-
-                    /*
-                    notu_counts_plots -> ${params.projtag}_ncASV${id}_counts.csv
-                    taxplot1a -> ${params.projtag}_ncASV${id}_summary_for_plot.csv
-                    notu_heatmap -> ${params.projtag}_ncASV${id}_PercentID.matrix
-                    nucl_phyl_plot -> ${params.projtag}_ncASV${id}_iq.treefile
-                    fastp_csv2 -> final_reads_stats.csv
-                    */
-
-                }
-
-                if (params.pcASV) {
-
-                    potu_Acounts.mix(taxplot4,potu_aa_heatmap,potu_Atree_plot,fastp_csv3)
-
-                    /*Report_pcASV_AminoAcid
-                    potu_Acounts -> ${params.projtag}_pcASV${id}_counts.csv
-                    taxplot4 -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_summary_for_plot.csv
-                    potu_aa_heatmap -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_PercentID.matrix
-                    potu_Atree_plot -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_iq.treefile
-                    fastp_csv3 -> final_reads_stats.csv
-                    */
-
-                    potu_Ncounts_for_report.mix(taxplot3,potu_nucl_heatmap,potu_Ntree_plot,fastp_csv4)
-
-                    /*Report_pcASV_Nucleotide
-                    potu_Ncounts_for_report -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_counts.csv
-                    taxplot3 -> ${params.projtag}_nucleotide_pcASV${id}_summary_for_plot.csv
-                    potu_nucl_heatmap -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_PercentID.matrix
-                    potu_Ntree_plot -> ${params.projtag}_nucleotide_pcASV${id}_iq.treefile
-                    fastp_csv4 -> final_reads_stats.csv
-                    */
-
-                }
-
-                if (!params.skipAminoTyping) {
-
-                    aminocounts_plot.mix(taxplot2,aminotype_heatmap,amino_rax_plot,fastp_csv5)
-
-                    /*
-                    Report_AminoTypes
-                    aminocounts_plot -> ${params.projtag}_AminoType_counts.csv
-                    taxplot2 -> ${params.projtag}_AminoTypes_summary_for_plot.csv
-                    aminotype_heatmap -> ${params.projtag}_AminoTypes_noTaxonomy_PercentID.matrix
-                    amino_rax_plot -> ${params.projtag}_AminoTypes_noTaxonomy_iq.treefile
-                    fastp_csv5 -> final_reads_stats.csv
-                    */
-                }
-
                 /*Report_ASV
                 asv_counts_plots -> ${params.projtag}_ASV_counts.csv
                 taxplot1 -> ${params.projtag}_ASV_summary_for_plot.csv
                 asv_heatmap -> ${params.projtag}_ASV_PercentID.matrix
                 nucl_phyl_plot -> ${params.projtag}_ASV_iq.treefile
-                fastp_csv1 -> final_reads_stats.csv
                 */
-                asv_counts_plots.mix(taxplot1,asv_heatmap,nucl_phyl_plot,fastp_csv1)
+                report_asv = Channel.create()
+                asv_counts_plots.mix(taxplot1, asv_heatmap, nucl_phyl_plot).flatten().buffer(size:4).toList().into(report_asv)
 
-                // what?
-                //process_combine_csv
-                //fastp_csv_in2 -> ${sample_id}_reads_stats.csv
+                if (params.ncASV) {
+                    report_ncasv = Channel.empty()
+                    notu_counts_plots.mix(taxplot1a, notu_heatmap, nucl_phyl_plot).flatten().toSortedList().flatten().buffer(size:4).toList().into(report_ncasv)
+                    /*
+                    notu_counts_plots -> ${params.projtag}_ncASV${id}_counts.csv
+                    taxplot1a -> ${params.projtag}_ncASV${id}_summary_for_plot.csv
+                    notu_heatmap -> ${params.projtag}_ncASV${id}_PercentID.matrix
+                    nucl_phyl_plot -> ${params.projtag}_ncASV${id}_iq.treefile
+                    */
+                } else {
+                    report_ncasv = Channel.empty()
+                }
+
+                if (params.pcASV) {
+                    report_pcasv_aa = Channel.create()
+                    potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot).flatten().toSortedList().flatten().buffer(size:4).toList().into(report_pcasv_aa)
+                    /*Report_pcASV_AminoAcid
+                    potu_Acounts -> ${params.projtag}_pcASV${id}_noTaxonomy_counts.csv
+                    taxplot4 -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_summary_for_plot.csv
+                    potu_aa_heatmap -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_PercentID.matrix
+                    potu_Atree_plot -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_iq.treefile
+                    */
+                    report_pcasv_nucl = Channel.create()
+                    potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot).flatten().toSortedList().flatten().buffer(size:4).toList().into(report_pcasv_nucl)
+                    /*Report_pcASV_Nucleotide
+                    potu_Ncounts_for_report -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_counts.csv
+                    taxplot3 -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_summary_for_plot.csv
+                    potu_nucl_heatmap -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_PercentID.matrix
+                    potu_Ntree_plot -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_iq.treefile
+                    */
+                } else {
+                     report_pcasv_aa = Channel.empty()
+                     report_pcasv_nucl = Channel.empty()
+                }
+
+                if (!params.skipAminoTyping) {
+                    report_aminotypes = Channel.create()
+                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot).flatten().buffer(size:4).toList().into(report_aminotypes)
+                    /*
+                    Report_AminoTypes
+                    aminocounts_plot -> ${params.projtag}_AminoType_counts.csv
+                    taxplot2 -> ${params.projtag}_AminoTypes_summary_for_plot.csv
+                    aminotype_heatmap -> ${params.projtag}_AminoTypes_PercentID.matrix
+                    amino_rax_plot -> ${params.projtag}_AminoTypes_iq.treefile
+                    */
+                } else {
+                    report_aminotypes = Channel.empty()
+                }
+
+                report_asv.mix(report_ncasv, report_pcasv_aa, report_pcasv_nucl,report_aminotypes).buffer(size:1).into(report_all_ch)
 
                 process Report {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReports", mode: "copy", overwrite: true
 
                     input:
+                        file(csv) from fastp_csv_in
                         file(files) from report_all_ch
                             .collect()
 
                     output:
                         file("*.html") into report_all_out
 
-                    """
-                    name=\$( ls -1 | grep -w "_summary_for_plot.csv" | awk -F "_summary_for_plot.csv" '{print \$1}')
-                    cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
-                    cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                    Rscript -e "rmarkdown::render('vAMPirus_ReportA.Rmd',output_file='\${name}_Report.html')" \${name} \
-                    ${params.skipReadProcessing} \
-                    ${params.skipMerging} \
-                    ${params.skipAdapterRemoval} \
-                    ${params.skipTaxonomy} \
-                    ${params.skipPhylogeny} \
-                    ${params.trymax} \
-                    ${params.stats} \
-                    ${params.metadata} \
-                    ${params.minimumCounts}
-                    """
+                    script:
+                        """
+                        name=\$( ls -1 | grep -w "_summary_for_plot.csv" | awk -F "_summary_for_plot.csv" '{print \$1}')
+                        cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
+                        cp ${params.vampdir}/example_data/conf/vamplogo.png .
+                        Rscript -e "rmarkdown::render('vAMPirus_Report.Rmd',output_file='\${name}_Report.html')" \${name} \
+                        ${params.skipReadProcessing} \
+                        ${params.skipMerging} \
+                        ${params.skipAdapterRemoval} \
+                        ${params.skipTaxonomy} \
+                        ${params.skipPhylogeny} \
+                        ${params.trymax} \
+                        ${params.stats} \
+                        ${params.metadata} \
+                        ${params.minimumCounts}
+                        """
                 }
 
-                if (params.ncASV) {
-
-                    process Report_ASV {
-
-                        label 'norm_cpus'
-
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
-
-                        input:
-                            file(counts) from asv_counts_plots
-                            file(taxonomy) from taxplot1
-                            file(matrix) from asv_heatmap
-                            file(readsstats) from fastp_csv1
-
-                        output:
-                            file("*.html") into report_summaryA
-
-                        script:
-                            """
-                            name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                            cp ${params.vampdir}/bin/vAMPirus_ReportA.Rmd .
-                            cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                            Rscript -e "rmarkdown::render('vAMPirus_ReportA.Rmd',output_file='\${name}_Report.html')" \${name} \
-                            ${readsstats} \
-                            ${counts} \
-                            ${params.metadata} \
-                            ${params.minimumCounts} \
-                	          ${matrix} \
-                            ${taxonomy} \
-                            ${params.trymax} \
-                            ${params.stats}
-
-                            """
-                        }
-
-                    process Report_ncASV {
-
-                        label 'norm_cpus'
-
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport/ncASV", mode: "copy", overwrite: true
-
-                        input:
-                            file(counts) from notu_counts_plots
-                            file(taxonomy) from taxplot1a
-                            file(matrix) from notu_heatmap
-                            file(phylogeny) from nucl_phyl_plot
-                            file(readsstats) from fastp_csv2
-
-                        output:
-                            file("*.html") into report_summaryB
-
-                        script:
-                            """
-                            cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
-                            cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                            for x in *_summary_for_plot.csv;do
-                                name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                                id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
-                                Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_Report.html')" \${name} \
-                                ${readsstats} \
-                                \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
-                                ${params.metadata} \
-                                ${params.minimumCounts} \
-                    	        \$( echo ${matrix} | tr " " "\\n" | grep "\${id}" ) \
-                                \$( echo ${taxonomy} | tr " " "\\n" | grep "\${id}" ) \
-                                \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" ) \
-                                ${params.trymax} \
-                                ${params.stats}
-                            done
-                            """
-                        }
-
-                    if (!params.skipAminoTyping) {
-
-                        process Report_AminoTypes {
-
-                            label 'norm_cpus'
-
-                            publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
-
-                            input:
-                                file(counts) from aminocounts_plot
-                                file(taxonomy) from taxplot2
-                                file(matrix) from aminotype_heatmap
-                                file(phylogeny) from amino_rax_plot
-                                file(readsstats) from fastp_csv5
-
-                            output:
-                                file("*.html") into report_summaryE
-
-                            script:
-                                """
-                                name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                                cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
-                                cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                                Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_AminoType_Report.html')" \${name} \
-                                ${readsstats} \
-                                ${counts} \
-                                ${params.metadata} \
-                                ${params.minimumCounts} ${matrix} \
-                                ${taxonomy} \
-                                ${phylogeny} \
-                                ${params.trymax} \
-                                ${params.stats}
-                                """
-                            }
-                        }
-                    } else {
-
-                            process Report_ASVs {
-
-                                label 'norm_cpus'
-
-                                publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
-
-                                input:
-                                    file(counts) from asv_counts_plots
-                                    file(taxonomy) from taxplot1
-                                    file(matrix) from asv_heatmap
-                                    file(phylogeny) from nucl_phyl_plot
-                                    file(readsstats) from fastp_csv1
-
-                                output:
-                                    file("*.html") into report_summaryA
-
-                                script:
-                                    """
-                                    name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                                    cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
-                                    cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                                    Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_ASV_Report.html')" \${name} \
-                                    ${readsstats} \
-                                    ${counts} \
-                                    ${params.metadata} \
-                                    ${params.minimumCounts} \
-                                    ${matrix} \
-                                    ${taxonomy} \
-                                    ${phylogeny} \
-                                    ${params.trymax} \
-                                    ${params.stats}
-                                    """
-                            }
-
-                            if (!params.skipAminoTyping) {
-
-                                process Report_AminoType {
-
-                                    label 'norm_cpus'
-
-                                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport", mode: "copy", overwrite: true
-
-                                    input:
-                                        file(counts) from aminocounts_plot
-                                        file(taxonomy) from taxplot2
-                                        file(matrix) from aminotype_heatmap
-                                        file(phylogeny) from amino_rax_plot
-                                        file(readsstats) from fastp_csv5
-
-                                    output:
-                                        file("*.html") into report_summaryE
-
-                                    script:
-                                        """
-                                        name=\$( echo ${taxonomy} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                                        cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
-                                        cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                                        Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_AminoType_Report.html')" \${name} \
-                                        ${readsstats} \
-                                        ${counts} \
-                                        ${params.metadata} \
-                                        ${params.minimumCounts} ${matrix} \
-                                        ${taxonomy} \
-                                        ${phylogeny} \
-                                        ${params.trymax} \
-                                        ${params.stats}
-                                        """
-                                }
-                            }
-                        }
-
-                    if (params.pcASV) {
-
-                        process Report_pcASV_AminoAcid {
-
-                            label 'norm_cpus'
-
-                            publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport/pcASV/Aminoacid", mode: "copy", overwrite: true
-
-                            input:
-                                file(counts) from potu_Acounts
-                                file(taxonomy) from taxplot4
-                                file(matrix) from potu_aa_heatmap
-                                file(phylogeny) from potu_Atree_plot
-                                file(readsstats) from fastp_csv3
-
-                            output:
-                                file("*.html") into report_summaryC
-
-                            script:
-                                """
-                                cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
-                                cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                                for x in *_summary_for_plot.csv;do
-                                    name=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}')
-                                    id=\$( echo \${x} | awk -F "_noTaxonomy_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
-                                    Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_pcASVaa\${id}_Report.html')" \${name} \
-                                    ${readsstats} \
-                                    \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
-                                    ${params.metadata} \
-                                    ${params.minimumCounts} \
-                        	        \$( echo ${matrix} | tr " " "\\n" | grep "\${id}" ) \
-                                    \$( echo ${taxonomy} | tr " " "\\n" | grep "\${id}" ) \
-                                    \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" ) \
-                                    ${params.trymax} \
-                                    ${params.stats}
-                                done
-                                """
-                            }
-
-                        process Report_pcASV_Nucleotide {
-
-                            label 'norm_cpus'
-
-                            publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReport/pcASV/Nucleotide", mode: "copy", overwrite: true
-
-                            input:
-                                file(counts) from potu_Ncounts_for_report
-                                file(taxonomy) from taxplot3
-                                file(matrix) from potu_nucl_heatmap
-                                file(phylogeny) from potu_Ntree_plot
-                                file(readsstats) from fastp_csv4
-
-                            output:
-                                file("*.html") into report_summaryD
-
-                            script:
-                                """
-                                cp ${params.vampdir}/bin/vAMPirus_ReportB.Rmd .
-                                cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                                for x in *_summary_for_plot.csv;do
-                                    name=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}')
-                                    id=\$( echo \${x} | awk -F "_summary_for_plot.csv" '{print \$1}' | cut -f 2 -d "." )
-                                    Rscript -e "rmarkdown::render('vAMPirus_ReportB.Rmd',output_file='\${name}_pcASVnt\${id}_Report.html')" \${name} \
-                                    ${readsstats} \
-                                    \$( echo ${counts} | tr " " "\\n" | grep "\${id}" ) \
-                                    ${params.metadata} \
-                                    ${params.minimumCounts} \
-                        	        \$( echo ${matrix} | tr " " "\\n" | grep "\${id}" ) \
-                                    \$( echo ${taxonomy} | tr " " "\\n" | grep "\${id}" ) \
-                                    \$( echo ${phylogeny} | tr " " "\\n" | grep "\${id}" ) \
-                                    ${params.trymax} \
-                                    ${params.stats}
-                                done
-                                """
-                        }
-                    }
             }
-    }
+
+        }
+
 } else {
     println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
     exit 0
