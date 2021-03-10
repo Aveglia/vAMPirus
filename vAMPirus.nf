@@ -938,225 +938,194 @@ if (params.DataCheck || params.Analyze) {
             }
         }
 
-        if (params.sing) {
+       process Translation_For_ProteinBased_Clustering_DC {
 
-            process Translating_For_ProteinClustering_DC {
+           label 'norm_cpus'
 
-                  label 'low_cpus'
+           publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
 
-                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
+           input:
+                file(fasta) from nucl2aa
 
-                  input:
-                      file(fasta) from nucl2aa
+            output:
+                file("*ASVprotforclust.fasta") into clustering_aa
+                file("*_translation_report") into reportaa_VR
+                file("*_ASV_all.fasta") into asvfastaforaaclust
 
-                  output:
-                      file("*ASVprotforclust.fasta") into clustering_aa
-                      file("*_translation_report") into reportaa_VR
-                      file("*_ASV_all.fasta") into asvfastaforaaclust
+            script:
+                """
+                ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
+                cp ${fasta} ${params.projtag}_ASV_all.fasta
+                """
+       }
 
-                  script:
-                      """
-                      conda init && source activate virtualribosome
+        process Protein_clustering_DC {
 
-                      ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
-                      cp ${fasta} ${params.projtag}_ASV_all.fasta
-                      """
+            label 'norm_cpus'
 
-            }
+            publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
-          } else {
+            input:
+                file(fasta) from clustering_aa
+                file(asvs) from asvfastaforaaclust
 
-           process Translation_For_ProteinBased_Clustering_DC {
+            output:
+                file("number_per_percentage_prot.csv") into number_per_percent_prot_plot
 
-               label 'norm_cpus'
-
-               conda 'python=2.7'
-
-               publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
-
-               input:
-                    file(fasta) from nucl2aa
-
-                output:
-                    file("*ASVprotforclust.fasta") into clustering_aa
-                    file("*_translation_report") into reportaa_VR
-                    file("*_ASV_all.fasta") into asvfastaforaaclust
-
-                script:
-                    """
-                    ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
-                    cp ${fasta} ${params.projtag}_ASV_all.fasta
-                    """
-           }
-         }
-
-            process Protein_clustering_DC {
-
-                label 'norm_cpus'
-
-                publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid", mode: "copy", overwrite: true, pattern: '*{.csv}'
-
-                input:
-                    file(fasta) from clustering_aa
-                    file(asvs) from asvfastaforaaclust
-
-                output:
-                    file("number_per_percentage_prot.csv") into number_per_percent_prot_plot
-
-                script:
-                // add awk script to count seqs
-                    """
-                    set +e
-                    cp ${params.vampdir}/bin/rename_seq.py .
-                    for id in `echo ${params.datacheckaaIDlist} | tr "," "\\n"`;do
-                        if [ \${id} == ".55" ];then
-                            word=3
-                        elif [ \${id} == ".65" ];then
-                            word=4
-                        else
-                            word=5
-                        fi
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
-                        cd-hit -i ${params.projtag}_filtered_proteins.fasta -n \${word} -c \${id} -o ${params.projtag}_pcASV\${id}.fasta
-                        sed 's/>Cluster />Cluster_/g' ${params.projtag}_pcASV\${id}.fasta.clstr >${params.projtag}_pcASV\${id}.clstr
-                        grep ">Cluster_" ${params.projtag}_pcASV\${id}.clstr >temporaryclusters.list
-                        y=\$(grep -c ">Cluster_" ${params.projtag}_pcASV\${id}.clstr)
-                        echo ">Cluster_"\${y}"" >> ${params.projtag}_pcASV\${id}.clstr
-                        t=1
-                        b=1
-                        for x in \$(cat temporaryclusters.list);do
-                            echo "Extracting \$x"
-                            name="\$( echo \$x | awk -F ">" '{print \$2}')"
-                            clust="pcASV"\${t}""
-                            echo "\${name}"
-                            awk '/^>'\${name}'\$/,/^>Cluster_'\${b}'\$/' ${params.projtag}_pcASV\${id}.clstr > "\${name}"_"\${clust}"_tmp.list
-                            t=\$(( \${t}+1 ))
-                            b=\$(( \${b}+1 ))
+            script:
+            // add awk script to count seqs
+                """
+                set +e
+                cp ${params.vampdir}/bin/rename_seq.py .
+                for id in `echo ${params.datacheckaaIDlist} | tr "," "\\n"`;do
+                    if [ \${id} == ".55" ];then
+                        word=3
+                    elif [ \${id} == ".65" ];then
+                        word=4
+                    else
+                        word=5
+                    fi
+                    awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
+                    cd-hit -i ${params.projtag}_filtered_proteins.fasta -n \${word} -c \${id} -o ${params.projtag}_pcASV\${id}.fasta
+                    sed 's/>Cluster />Cluster_/g' ${params.projtag}_pcASV\${id}.fasta.clstr >${params.projtag}_pcASV\${id}.clstr
+                    grep ">Cluster_" ${params.projtag}_pcASV\${id}.clstr >temporaryclusters.list
+                    y=\$(grep -c ">Cluster_" ${params.projtag}_pcASV\${id}.clstr)
+                    echo ">Cluster_"\${y}"" >> ${params.projtag}_pcASV\${id}.clstr
+                    t=1
+                    b=1
+                    for x in \$(cat temporaryclusters.list);do
+                        echo "Extracting \$x"
+                        name="\$( echo \$x | awk -F ">" '{print \$2}')"
+                        clust="pcASV"\${t}""
+                        echo "\${name}"
+                        awk '/^>'\${name}'\$/,/^>Cluster_'\${b}'\$/' ${params.projtag}_pcASV\${id}.clstr > "\${name}"_"\${clust}"_tmp.list
+                        t=\$(( \${t}+1 ))
+                        b=\$(( \${b}+1 ))
+                    done
+                    ls *_tmp.list
+                    u=1
+                    for x in *_tmp.list;do
+                        name="\$(echo \$x | awk -F "_p" '{print \$1}')"
+                        echo "\${name}"
+                        cluster="\$(echo \$x | awk -F "_" '{print \$3}')"
+                        echo "\${cluster}"
+                        grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > \${name}_\${cluster}_seqs_tmps.list
+                        seqtk subseq ${asvs} \${name}_\${cluster}_seqs_tmps.list > \${name}_\${cluster}_nucleotide_sequences.fasta
+                        vsearch --cluster_fast \${name}_\${cluster}_nucleotide_sequences.fasta --id 0.2 --centroids \${name}_\${cluster}_centroids.fasta
+                        grep ">" \${name}_\${cluster}_centroids.fasta >> \${name}_\${cluster}_tmp_centroids.list
+                        for y in \$( cat \${name}_\${cluster}_tmp_centroids.list );do
+                            echo ">\${cluster}_type"\$u"" >> \${name}_\${cluster}_tmp_centroid.newheaders
+                            u=\$(( \${u}+1 ))
                         done
-                        ls *_tmp.list
                         u=1
-                        for x in *_tmp.list;do
-                            name="\$(echo \$x | awk -F "_p" '{print \$1}')"
-                            echo "\${name}"
-                            cluster="\$(echo \$x | awk -F "_" '{print \$3}')"
-                            echo "\${cluster}"
-                            grep "ASV" \$x | awk -F ", " '{print \$2}' | awk -F "_" '{print \$1}' | awk -F ">" '{print \$2}' > \${name}_\${cluster}_seqs_tmps.list
-                            seqtk subseq ${asvs} \${name}_\${cluster}_seqs_tmps.list > \${name}_\${cluster}_nucleotide_sequences.fasta
-                            vsearch --cluster_fast \${name}_\${cluster}_nucleotide_sequences.fasta --id 0.2 --centroids \${name}_\${cluster}_centroids.fasta
-                            grep ">" \${name}_\${cluster}_centroids.fasta >> \${name}_\${cluster}_tmp_centroids.list
-                            for y in \$( cat \${name}_\${cluster}_tmp_centroids.list );do
-                                echo ">\${cluster}_type"\$u"" >> \${name}_\${cluster}_tmp_centroid.newheaders
-                                u=\$(( \${u}+1 ))
-                            done
-                            u=1
-                            ./rename_seq.py \${name}_\${cluster}_centroids.fasta \${name}_\${cluster}_tmp_centroid.newheaders \${cluster}_types_labeled.fasta
-                        done
-                        cat *_types_labeled.fasta >> ${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta
-                        grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
-                        grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
-                        paste -d"," temporaryclusters.list tmphead.list >tmp.info.csv
-                        grep ">" ${params.projtag}_pcASV\${id}.fasta >lala.list
-                        j=1
-                        for x in \$(cat lala.list);do
-                            echo ">${params.projtag}_pcASV\${j}" >>${params.projtag}_aminoheaders.list
-                            echo "\${x},>${params.projtag}_pcASV\${j}" >>tmpaminotype.info.csv
-                            j=\$(( \${j}+1 ))
-                        done
-                        rm lala.list
-                        awk -F "," '{print \$2}' tmp.info.csv >>tmporder.list
-                        for x in \$(cat tmporder.list);do
-                            grep -w "\$x" tmpaminotype.info.csv | awk -F "," '{print \$2}' >>tmpder.list
-                        done
-                        paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pcASVCluster\${id}_summary.csv
-                        ./rename_seq.py ${params.projtag}_pcASV\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta
-                        stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4 overwrite=true
-                        stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4 overwrite=true
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pcASV\${id}_problematic_translations.fasta
-                        if [ `wc -l ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
-                            grep ">" ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
-                            seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pcASV\${id}_problematic_nucleotides.fasta
-                        else
-                           rm ${params.projtag}_pcASV\${id}_problematic_translations.fasta
-                        fi
-                        rm *.list
-                        rm Cluster*
-                        rm *types*
-                        rm *tmp*
-                        rm ${params.projtag}_pcASV\${id}.fast*
+                        ./rename_seq.py \${name}_\${cluster}_centroids.fasta \${name}_\${cluster}_tmp_centroid.newheaders \${cluster}_types_labeled.fasta
                     done
-                    for x in *aminoacid*noTaxonomy.fasta;do
-                        id=\$( echo \$x | awk -F "_noTax" '{print \$1}' | awk -F "pcASV" '{print \$2}')
-                        numb=\$( grep -c ">" \$x)
-                        echo "\${id},\${numb}" >> number_per_percentage_protz.csv
+                    cat *_types_labeled.fasta >> ${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta
+                    grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$3}' | awk -F "." '{print \$1}' >tmphead.list
+                    grep -w "*" ${params.projtag}_pcASV\${id}.clstr | awk '{print \$2}' | awk -F "," '{print \$1}' >tmplen.list
+                    paste -d"," temporaryclusters.list tmphead.list >tmp.info.csv
+                    grep ">" ${params.projtag}_pcASV\${id}.fasta >lala.list
+                    j=1
+                    for x in \$(cat lala.list);do
+                        echo ">${params.projtag}_pcASV\${j}" >>${params.projtag}_aminoheaders.list
+                        echo "\${x},>${params.projtag}_pcASV\${j}" >>tmpaminotype.info.csv
+                        j=\$(( \${j}+1 ))
                     done
-                    yesirr=\$( wc -l number_per_percentage_protz.csv | awk '{print \$1}')
-                    tail -\$(( \${yesirr}-1 )) number_per_percentage_protz.csv > number_per_percentage_prot.csv
-                    head -1 number_per_percentage_protz.csv >> number_per_percentage_prot.csv
-                    rm number_per_percentage_protz.csv
-                    """
-            }
+                    rm lala.list
+                    awk -F "," '{print \$2}' tmp.info.csv >>tmporder.list
+                    for x in \$(cat tmporder.list);do
+                        grep -w "\$x" tmpaminotype.info.csv | awk -F "," '{print \$2}' >>tmpder.list
+                    done
+                    paste -d "," temporaryclusters.list tmplen.list tmphead.list tmpder.list >${params.projtag}_pcASVCluster\${id}_summary.csv
+                    ./rename_seq.py ${params.projtag}_pcASV\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta
+                    stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4 overwrite=true
+                    stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4 overwrite=true
+                    awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pcASV\${id}_problematic_translations.fasta
+                    if [ `wc -l ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
+                        grep ">" ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
+                        seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pcASV\${id}_problematic_nucleotides.fasta
+                    else
+                       rm ${params.projtag}_pcASV\${id}_problematic_translations.fasta
+                    fi
+                    rm *.list
+                    rm Cluster*
+                    rm *types*
+                    rm *tmp*
+                    rm ${params.projtag}_pcASV\${id}.fast*
+                done
+                for x in *aminoacid*noTaxonomy.fasta;do
+                    id=\$( echo \$x | awk -F "_noTax" '{print \$1}' | awk -F "pcASV" '{print \$2}')
+                    numb=\$( grep -c ">" \$x)
+                    echo "\${id},\${numb}" >> number_per_percentage_protz.csv
+                done
+                yesirr=\$( wc -l number_per_percentage_protz.csv | awk '{print \$1}')
+                tail -\$(( \${yesirr}-1 )) number_per_percentage_protz.csv > number_per_percentage_prot.csv
+                head -1 number_per_percentage_protz.csv >> number_per_percentage_prot.csv
+                rm number_per_percentage_protz.csv
+                """
+        }
 
-            if (!params.skipReadProcessing || !params.skipMerging ) {
+        if (!params.skipReadProcessing || !params.skipMerging ) {
 
-                process combine_csv_DC {
-
-                    input:
-                        file(csv) from fastp_csv_in1
-                            .collect()
-
-                    output:
-                        file("final_reads_stats.csv") into fastp_csv_dc
-
-                    script:
-                        """
-                        cat ${csv} >all_reads_stats.csv
-                        head -n1 all_reads_stats.csv >tmp.names.csv
-                        cat all_reads_stats.csv | grep -v ""Sample,Total_"" >tmp.reads.stats.csv
-                        cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
-                        rm tmp.names.csv tmp.reads.stats.csv
-                        """
-
-                }
-            } else {
-
-                process skip_combine_csv_DC {
-                    output:
-                        file("filter_reads.txt") into fastp_csv_dc
-
-                    script:
-                        """
-                        echo "Read processing steps skipped." >filter_reads.txt
-                        """
-                }
-            }
-
-            report_dc_in = Channel.create()
-            fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot
-             ).into(report_dc_in)
-
-            process Report_DataCheck {
-
-                label 'norm_cpus'
-
-                publishDir "${params.workingdir}/${params.outdir}/DataCheck/Report", mode: "copy", overwrite: true, pattern: '*.{html}'
+            process combine_csv_DC {
 
                 input:
-                    file(files) from report_dc_in
+                    file(csv) from fastp_csv_in1
                         .collect()
 
                 output:
-                   file("*.html") into datacheckreport
+                    file("final_reads_stats.csv") into fastp_csv_dc
 
                 script:
                     """
-                    cp ${params.vampdir}/bin/vAMPirus_DC_Report.Rmd .
-                    cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                    Rscript -e "rmarkdown::render('vAMPirus_DC_Report.Rmd',output_file='${params.projtag}_DataCheck_Report.html')" ${params.projtag} \
-                    ${params.skipReadProcessing} \
-                    ${params.skipMerging} \
-                    ${params.skipAdapterRemoval}
+                    cat ${csv} >all_reads_stats.csv
+                    head -n1 all_reads_stats.csv >tmp.names.csv
+                    cat all_reads_stats.csv | grep -v ""Sample,Total_"" >tmp.reads.stats.csv
+                    cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
+                    rm tmp.names.csv tmp.reads.stats.csv
+                    """
+
+            }
+        } else {
+
+            process skip_combine_csv_DC {
+                output:
+                    file("filter_reads.txt") into fastp_csv_dc
+
+                script:
+                    """
+                    echo "Read processing steps skipped." >filter_reads.txt
                     """
             }
+        }
+
+        report_dc_in = Channel.create()
+        fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot
+         ).into(report_dc_in)
+
+        process Report_DataCheck {
+
+            label 'norm_cpus'
+
+            publishDir "${params.workingdir}/${params.outdir}/DataCheck/Report", mode: "copy", overwrite: true, pattern: '*.{html}'
+
+            input:
+                file(files) from report_dc_in
+                    .collect()
+
+            output:
+               file("*.html") into datacheckreport
+
+            script:
+                """
+                cp ${params.vampdir}/bin/vAMPirus_DC_Report.Rmd .
+                cp ${params.vampdir}/example_data/conf/vamplogo.png .
+                Rscript -e "rmarkdown::render('vAMPirus_DC_Report.Rmd',output_file='${params.projtag}_DataCheck_Report.html')" ${params.projtag} \
+                ${params.skipReadProcessing} \
+                ${params.skipMerging} \
+                ${params.skipAdapterRemoval}
+                """
+        }
 
     } else if (params.Analyze) {
 
@@ -1994,53 +1963,24 @@ if (params.DataCheck || params.Analyze) {
 
             if (!params.skipAminoTyping) {
 
-                if (params.sing) {
+                process Translate_For_AminoTyping {
 
-                  process Translating_For_Aminotypes {
+                  label 'low_cpus'
 
-                          label 'low_cpus'
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
 
-                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
+                  input:
+                      file(fasta) from asvsforAminotyping
 
-                          input:
-                              file(fasta) from asvsforAminotyping
+                  output:
+                      file("${params.projtag}_all_translations.fasta") into amintypegen
+                      file("${params.projtag}_translation_report") into proteinstage_vap_report
 
-                          output:
-                              file("${params.projtag}_all_translations.fasta") into amintypegen
-                              file("${params.projtag}_translation_report") into proteinstage_vap_report
-
-                          script:
-                              """
-                              conda init && source activate virtualribosome
-
-                              ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
-                              """
-
-                  }
-
-            } else {
-
-                    process Translate_For_AminoTyping {
-
-                      label 'low_cpus'
-
-                      conda 'python=2.7'
-
-                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
-
-                      input:
-                          file(fasta) from asvsforAminotyping
-
-                      output:
-                          file("${params.projtag}_all_translations.fasta") into amintypegen
-                          file("${params.projtag}_translation_report") into proteinstage_vap_report
-
-                      script:
-                          """
-                          ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
-                          """
-                  }
-               }
+                  script:
+                      """
+                      ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
+                      """
+                }
 
                 process Generate_AminoTypes {
 
@@ -2423,57 +2363,26 @@ if (params.DataCheck || params.Analyze) {
 
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
 
-                    if (params.sing) {
+                process Translation_For_pcASV_Generation {
 
-                      process Translating_For_pcASV_Generation {
+                      label 'low_cpus'
 
-                              label 'low_cpus'
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
 
-                              publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
+                      input:
+                          file(fasta) from nucl2aa
 
-                              input:
-                                  file(fasta) from nucl2aa
+                      output:
+                          file("*ASV*translations.fasta") into clustering_aa
+                          file("*_ASV_translations_report") into reportaa_VR
+                          file("*_ASV_nucleotide.fasta") into asvfastaforaaclust
 
-                              output:
-                                  file("*ASV*translations.fasta") into clustering_aa
-                                  file("*_ASV_translations_report") into reportaa_VR
-                                  file("*_ASV_nucleotide.fasta") into asvfastaforaaclust
-
-                              script:
-                                  """
-                                  conda init && source activate virtualribosome
-
-                                  ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASV_translations.fasta --report ${params.projtag}_ASV_translations_report
-                                  cp ${fasta} ${params.projtag}_ASV_nucleotide.fasta
-                                  """
-
-                      }
-
-                } else {
-
-                      process Translation_For_pcASV_Generation {
-
-                          label 'low_cpus'
-
-                          conda 'python=2.7'
-
-                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
-
-                          input:
-                              file(fasta) from nucl2aa
-
-                          output:
-                              file("*ASV*translations.fasta") into clustering_aa
-                              file("*_ASV_translations_report") into reportaa_VR
-                              file("*_ASV_nucleotide.fasta") into asvfastaforaaclust
-
-                          script:
-                              """
-                              ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASV_translations.fasta --report ${params.projtag}_ASV_translations_report
-                              cp ${fasta} ${params.projtag}_ASV_nucleotide.fasta
-                              """
-                      }
-                  }
+                      script:
+                          """
+                          ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASV_translations.fasta --report ${params.projtag}_ASV_translations_report
+                          cp ${fasta} ${params.projtag}_ASV_nucleotide.fasta
+                          """
+                }
 
                 process Generate_pcASVs {
 
