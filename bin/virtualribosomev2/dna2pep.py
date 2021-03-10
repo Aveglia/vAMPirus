@@ -248,7 +248,7 @@ validDNA = "ATUGCYRSWKMBDHVN"
 complDNA = "TAACGRYWSMKVHDBN"
 
 allValid = validDNA+validDNA.lower()
-transTable = string.maketrans(validDNA+validDNA.lower(),complDNA+complDNA.lower())
+transTable = str.maketrans(validDNA+validDNA.lower(),complDNA+complDNA.lower())
 
 pwidth = 90
 
@@ -407,7 +407,7 @@ def writeTab(seqs, outstream):
 
 def openForWriteOrDie(outfile):
 	try:
-		outstream = file(outfile,"w")
+		outstream = open(outfile,"w")
 
 	except IOError as xxx_todo_changeme:
 		(strerror) = xxx_todo_changeme
@@ -417,11 +417,11 @@ def openForWriteOrDie(outfile):
 	return outstream
 
 def parseOpts():
-        # Quick hack to overrule the -h and --help feature
-        # build into the optpase module
-        if "-h" in sys.argv or "--help" in sys.argv:
-                print(__doc__)
-                sys.exit(0)
+	# Quick hack to overrule the -h and --help feature
+	# build into the optpase module
+	if "-h" in sys.argv or "--help" in sys.argv:
+		print(__doc__)
+		sys.exit(0)
 
 	parser = OptionParser()
 
@@ -454,10 +454,10 @@ def parseOpts():
 	parser.add_option("-c","--comment",        action = "store_true", dest = "keepcomment",    default=False)
 	parser.add_option("-C","--processcomment", action = "store_true", dest = "processcomment", default=False)
 
-        # Debug
-        parser.add_option("-d","--debug", action="store_true", dest="debug", default=False)
+	# Debug
+	parser.add_option("-d","--debug", action="store_true", dest="debug", default=False)
 
-        (opt, args) = parser.parse_args()
+	(opt, args) = parser.parse_args()
 
 	# Check reading frame
 	if not opt.readingframe in ["1", "2", "3", "-1", "-2", "-3", "all", "plus","minus"]:
@@ -505,7 +505,7 @@ if __name__ == "__main__":
 		lines = []
 		for fn in args:
 			try:
-				lines += (file(fn,"r").readlines())
+				lines += (open(fn,"r").readlines())
 			except:
 				sys.stderr.write("ERROR: Cannot read from file '%s'\n" % fn)
 				sys.exit(-1)
