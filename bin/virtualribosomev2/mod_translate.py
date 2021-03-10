@@ -1,4 +1,4 @@
-#!/usr/local/python/bin/python
+#!/usr/bin/env python3
 
 #    Copyright 2002,2003,2004,2005 Rasmus Wernersson, Technical University of Denmark
 #
@@ -35,7 +35,7 @@ class TransTableRec:
 		self.description  = ""
 		self.d_all        = {}
 		self.d_first      = {}
-		
+
 	def toString(self):
 		return "Description: %s\nd_all: %s\nd_first: %s" % (self.description,str(self.d_all),str(self.d_first))
 
@@ -96,7 +96,7 @@ iupac["V"] = "ACG"	#not T ("U" is Uracile)
 
 iupac["N"] = "ACGT"	#aNy
 
-alphaDNA       = "ACGTRYMKWSBDHVN" 
+alphaDNA       = "ACGTRYMKWSBDHVN"
 alphaDNAStrict = "ACGT"
 alphaPep       ="*ACDEFGHIKLMNPQRSTVWY"
 
@@ -112,19 +112,19 @@ def parseNcbiTable(lines):
 	for line in lines.split("\n"):
 		line = line.strip()
 		#print "!!!"+line
-		
+
 		if   line.startswith("name ") and (desc == ""):
 			dRec.description += line.split('"')[1]+" "
-			
+
 		elif line.startswith("id "):
 			tab_id = line.split()[1]
-			
+
 		elif line.startswith("ncbieaa"):
 			aa_all = line.split('"')[1]
-			
+
 		elif line.startswith("sncbieaa"):
 			aa_first = line.split('"')[1]
-		
+
 			c = 0
 			for b1 in "TCAG":
 				for b2 in "TCAG":
@@ -134,7 +134,7 @@ def parseNcbiTable(lines):
 						aaf = aa_first[c]
 						if aaf == "-": aaf = aa_all[c]
 						dRec.d_first[codon] = aaf
-						
+
 						c += 1
 			result[tab_id] = dRec
 			dRec = TransTableRec()
@@ -145,51 +145,51 @@ def parseMatrixLines(iterator):
 	result = {}
 	for line in iterator:
 		line = line.strip()
-		
-		if not line: 
+
+		if not line:
 			continue                # Ignore blank lines
-		if line.startswith("#"): 
+		if line.startswith("#"):
 			continue                # Ignore comment lines
-			
+
 		tokens = line.split()
 		try:
 			codon, aa = tokens
-			
+
 			# Skip invalid entries
-			if len(codon) <> 3: 
+			if len(codon) != 3:
 				badCodon = 1
 			else:
 				codon = codon.upper().replace("U","T")
-				for c in codon: 
+				for c in codon:
 					if not c in alphaDNAStrict: badCodon = 1
 				badCodon = 0
-				
+
 			if badCodon:
 				raise "Bad codon: %s [%s]" % (codon,line)
-					
-				
-			if len(aa) <> 1: #or (not aa in alphaPep):
+
+
+			if len(aa) != 1: #or (not aa in alphaPep):
 				raise "Bad aa: %s [%s]" % (aa,line)
-				
+
 			result[codon] = aa
-				
-		except Exception, e:
+
+		except Exception as e:
 			if DEBUG:
 				sys.stderr.write("Matrix Error - %s\n" % e)
-	
+
 	if len(d) != 64 and DEBUG:
 		sys.stderr.write("Matrix Error - size of matrix differs from 64 [%i]\n" % len(d))
-	
+
 	return result
-				
+
 
 def parseMatrixFile(filename):
-	if d_ncbi_table.has_key(filename):
+	if filename in d_ncbi_table:
 		dRec = d_ncbi_table[filename]
 		return dRec
-		
+
 	dRec = TransTableRec()
-	dRec.d_all = parseMatrixLines(open(filename,"r").xreadlines())
+	dRec.d_all = parseMatrixLines(open(filename,"r"))
 	dRec.d_first = dRec.d_all
 	dRec.description = "Custom translation table '%s'" % filename
 	return dRec
@@ -208,29 +208,29 @@ def trim_old(seq):
 # Assumption: Degenerate codons are rare - speed is not an issue
 def decode(codon,dRec,isFirst):
 	if len(codon) != 3: return []
-	
+
 	#Use the relevant translation table
 	if isFirst: d_gc = dRec.d_first
 	else:       d_gc = dRec.d_all
-	
+
 	#Check for the simple case: this is a standard non-degenerate codon
-	if d_gc.has_key(codon):
+	if codon in d_gc:
 		return [ d_gc[codon]]
-	
+
 	#The codon is to some degree degenerate - start the whole recursive scheme
 	result = []
-	
+
 	for i in range(0,3):
 		p = iupac[codon[i]]
 		if (len(p) > 1):
 			for c in p:
 				result += (decode(codon[0:i]+c+codon[i+1:3],dRec,isFirst))
 			return result
-		
+
 		if len(p) == 0:
 			return [] # Unknown/illegal char
 	#return [d[codon]]
-	
+
 def condense(lst):
 	result = []
 	for e in lst:
@@ -239,7 +239,7 @@ def condense(lst):
 
 def translate(seq,transRec):
 	return translate(seq,transRec,True,True)
-			
+
 def translate(seq,transRec,firstIsStartCodon,readThroughStopCodon):
 	debug = False
 	if not transRec:
@@ -248,14 +248,14 @@ def translate(seq,transRec,firstIsStartCodon,readThroughStopCodon):
 	result = []
 	seq = trim(seq)
 	if firstIsStartCodon: isFirst = True
-	else:                 isFirst = False 
+	else:                 isFirst = False
 	for i in range(0,len(seq),3):
 		aa = condense(decode(seq[i:i+3],transRec,isFirst))
-		if debug: print seq[i:i+3], aa
+		if debug: print(seq[i:i+3], aa)
 		if aa:
-			if aa[0] == "*" and not readThroughStopCodon: 
+			if aa[0] == "*" and not readThroughStopCodon:
 				break
-			
+
 			if len(aa) == 1: result.append(aa[0])
 			else:
 				s = string.join(aa,"")
@@ -264,12 +264,12 @@ def translate(seq,transRec,firstIsStartCodon,readThroughStopCodon):
 				else :                       result.append("X") #Any
 				#print seq[i:i+3]
 		isFirst = False
-		
-	pepseq = "".join(result)		
+
+	pepseq = "".join(result)
 	if debug:
-		print pepseq
+		print(pepseq)
 	return pepseq
-	
+
 # Annotate all possible start and stop codons
 def annotate(seq,transRec):
 	debug = False
@@ -279,18 +279,18 @@ def annotate(seq,transRec):
 	for i in range(0,len(seq),3):
 		codon = seq[i:i+3]
 		aa = condense(decode(codon,transRec,True))
-		if debug: print seq[i:i+3], aa
+		if debug: print(seq[i:i+3], aa)
 		if aa:
-			if   "*" in aa: 
+			if   "*" in aa:
 				result.append("*")
 			elif ["M"] == aa:
 				aa_int = condense(decode(codon,transRec,False))
 				if aa_int == ["M"]: result.append("M")
 				else:               result.append("m")
-			else:           
-				result.append(".")	
-		
-	return "".join(result)			
+			else:
+				result.append(".")
+
+	return "".join(result)
 
 #def translate(seq):
 #	translate(seq,None)
@@ -298,10 +298,10 @@ def annotate(seq,transRec):
 try:
 	import ncbi_genetic_codes
 	d_ncbi_table = parseNcbiTable(ncbi_genetic_codes.ncbi_gc_table)
-			
+
 except:
 	pass
-			
+
 if __name__ == "__main__":
 	for line in sys.stdin.readlines():
-		print translate(line,None,True,False)
+		print(translate(line,None,True,False))
