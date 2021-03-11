@@ -2201,7 +2201,7 @@ if (params.DataCheck || params.Analyze) {
                         set +e
                         cp ${params.vampdir}/bin/rename_seq.py .
                         awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
-                        cd-hit -i ${params.projtag}_filtered_proteins.fasta -c ${nid} -o ${params.projtag}_pcASV${nid}.fasta
+                        cd-hit -i ${params.projtag}_filtered_proteins.fasta -c .${nid} -o ${params.projtag}_pcASV${nid}.fasta
                         sed 's/>Cluster />Cluster_/g' ${params.projtag}_pcASV${nid}.fasta.clstr >${params.projtag}_pcASV${nid}.clstr
                         grep ">Cluster_" ${params.projtag}_pcASV${nid}.clstr >temporaryclusters.list
                         y=\$(grep -c ">Cluster_" ${params.projtag}_pcASV${nid}.clstr)
@@ -2293,7 +2293,7 @@ if (params.DataCheck || params.Analyze) {
                             file("*_summary_for_plot.csv") into taxplot3
 
                         script:
-                            mtag="ID=" + slist2.get(x-1)
+                            mtag="ID=" + nid
                             """
                             set +e
                             cp ${params.vampdir}/bin/rename_seq.py .
@@ -2446,7 +2446,7 @@ if (params.DataCheck || params.Analyze) {
                         file("*.csv") into potu_Ncounts_for_report
 
                     script:
-                        mtag="ID=" + slist2.get(x-1)
+                        mtag="ID=" + nid
                         """
                     	name=\$( echo ${potus} | awk -F ".fasta" '{print \$1}')
                     	vsearch --usearch_global ${merged} --db ${potus} --id .${nid} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
@@ -2473,7 +2473,7 @@ if (params.DataCheck || params.Analyze) {
 
                     script:
                         //check --percent-id second clustalo
-                        mtag="ID=" + slist2.get(x-1)
+                        mtag="ID=" + nid
                         """
                         name=\$( echo ${potus} | awk -F ".fasta" '{print \$1}')
                         clustalo -i ${potus} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
@@ -2503,7 +2503,7 @@ if (params.DataCheck || params.Analyze) {
                             file("*iq.treefile") into potu_Ntree_plot
 
                         script:
-                            mtag="ID=" + slist2.get(x-1)
+                            mtag="ID=" + nid
                             """
                             pre=\$( echo ${reads} | awk -F "_noTax" '{print \$1}' )
                             mafft --maxiterate 5000 --auto ${reads} >\${pre}_ALN.fasta
@@ -2553,7 +2553,7 @@ if (params.DataCheck || params.Analyze) {
                         file("*PercentID.matrix") into potu_aa_heatmap
 
                     script:
-                        mtag="ID=" + slist2.get(x-1)
+                        mtag="ID=" + nid
                         """
                         name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
                         clustalo -i ${prot} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
@@ -2586,7 +2586,7 @@ if (params.DataCheck || params.Analyze) {
 
                         script:
                             // check do I need for loop
-                            mtag="ID=" + slist2.get(x-1)
+                            mtag="ID=" + nid
                             """
                             name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
                             garnier -sequence ${prot} -outfile \${name}_2dStructures.garnier
@@ -2636,7 +2636,7 @@ if (params.DataCheck || params.Analyze) {
                             file("*_summary_for_plot.csv") into taxplot4
 
                         script:
-                            mtag="ID=" + slist2.get(x-1)
+                            mtag="ID=" + nid
                             """
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
@@ -2788,7 +2788,7 @@ if (params.DataCheck || params.Analyze) {
                             file("*iq.treefile") into potu_Atree_plot
 
                         script:
-                            mtag="ID=" + slist2.get(x-1)
+                            mtag="ID=" + nid
                             """
                             pre=\$( echo ${prot} | awk -F ".fasta" '{print \$1}' )
                             mafft --maxiterate 5000 --auto ${prot} >\${pre}_ALN.fasta
@@ -2826,6 +2826,8 @@ if (params.DataCheck || params.Analyze) {
 
                     label 'high_cpus'
 
+                    tag "${mtag}"
+
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Counts", mode: "copy", overwrite: true
 
                     input:
@@ -2839,6 +2841,7 @@ if (params.DataCheck || params.Analyze) {
 
                     script:
                         // check do I need for loop
+                        mtag="ID=" + nid
                         """
                         set +e
                         potu="\$( echo ${fasta} | awk -F "_" '{print \$3}')"
@@ -3004,8 +3007,6 @@ if (params.DataCheck || params.Analyze) {
                 }
 
             }
-
-        }
 
 } else {
     println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
