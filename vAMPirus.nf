@@ -445,7 +445,6 @@ if (params.help) {
     exit 0
 }
 
-// This will be printed to the user in each run. here thy can check if the values the selected are fine
 log.info """\
 ================================================================================================================================================
                               vAMPirus v${workflow.manifest.version} - Virus Amplicon Sequencing Analysis Pipeline
@@ -471,7 +470,6 @@ if (params.readsTest) {
         .into{ reads_ch; reads_qc_ch; reads_processing }
 }
 
-// HERE fix if stament and list names. Also is not an integer
 if (params.clusterNuclIDlist == "") {
     a=params.clusterNuclID
     slist=[a]
@@ -1141,7 +1139,7 @@ if (params.DataCheck || params.Analyze) {
             }
 
             if (!params.skipTaxonomy) {
-                // here nid for output??
+
                 process Nucleotide_Taxonomy_Inference {
 
                     label 'high_cpus'
@@ -1326,7 +1324,6 @@ if (params.DataCheck || params.Analyze) {
             }
 
             process Generate_ncASV_Matrices {
-                //here do I need the for loop
                 label 'low_cpus'
 
                 tag "${mtag}"
@@ -1346,15 +1343,8 @@ if (params.DataCheck || params.Analyze) {
                     name=\$( echo ${asvs}| awk -F ".fasta" '{print \$1}')
                     clustalo -i ${asvs} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
                     clustalo -i ${asvs} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                    for x in *q.matrix;do
-                        pre=\$(echo "\$x" | awk -F "q.matrix" '{print \$1}')
-                        ya=\$(wc -l \$x | awk '{print \$1}')
-                        echo "\$((\$ya-1))"
-                        tail -"\$((\$ya-1))" \$x > \${pre}z.matrix
-                        rm \$x
-                        cat \${pre}z.matrix | sed 's/ /,/g' | sed -E 's/(,*),/,/g' >\${pre}.matrix
-                        rm \${pre}z.matrix
-                    done
+                    cat \${name}_PercentIDq.matrix | tr " " ","  | grep "," >\${name}_PercentIDq.matrix
+                    rm \${name}_PercentIDq.matrix
                     """
                 }
 
