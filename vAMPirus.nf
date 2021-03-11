@@ -1343,7 +1343,7 @@ if (params.DataCheck || params.Analyze) {
                     name=\$( echo ${asvs}| awk -F ".fasta" '{print \$1}')
                     clustalo -i ${asvs} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
                     clustalo -i ${asvs} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                    cat \${name}_PercentIDq.matrix | tr " " ","  | grep "," >\${name}_PercentIDq.matrix
+                    cat \${name}_PercentIDq.matrix | tr " " ","  | grep "," >\${name}_PercentID.matrix
                     rm \${name}_PercentIDq.matrix
                     """
                 }
