@@ -472,15 +472,17 @@ if (params.readsTest) {
 }
 
 // HERE fix if stament and list names. Also is not an integer
-if (!params.clusterNuclIDlist == "") {
+if (params.clusterNuclIDlist == "") {
+    def nnuc=1
+} else {
     msize=params.clusterNuclIDlist
     def slist=msize.split(',').collect{it as int}
     def nnuc=slist.size()
-} else {
-    def nnuc=1
 }
 
 if (params.clusterAAIDlist == "") {
+    def naa=1
+} else {
     msize2=params.clusterAAIDlist
     def slist2=msize2.split(',').collect{it as int}
     def naa=slist2.size()
@@ -1155,7 +1157,7 @@ if (params.DataCheck || params.Analyze) {
                     """
                 } else if (params.clusterNuclID) {
                     """
-                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id .${params.clusterNuclID}
+                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV${params.clusterNuclID}.fasta --threads ${task.cpus} --relabel ncASV --id .${params.clusterNuclID}
                     """
                 }
             }
