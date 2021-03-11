@@ -473,19 +473,23 @@ if (params.readsTest) {
 
 // HERE fix if stament and list names. Also is not an integer
 if (params.clusterNuclIDlist == "") {
-    nnuc=1
+    a=params.clusterNuclID
+    slist=[a]
+    nnuc=slist.size()
 } else {
     msize=params.clusterNuclIDlist
-    def slist=msize.split(',').collect{it as int}
-    def nnuc=slist.size()
+    slist=msize.split(',').collect{it as int}
+    nnuc=slist.size()
 }
 
 if (params.clusterAAIDlist == "") {
-    naa=1
+    b=params.clusterAAID
+    slist2=[b]
+    naa=slist2.size()
 } else {
     msize2=params.clusterAAIDlist
     def slist2=msize2.split(',').collect{it as int}
-    def naa=slist2.size()
+    naa=slist2.size()
 }
 
 if (params.DataCheck || params.Analyze) {
@@ -1140,6 +1144,8 @@ if (params.DataCheck || params.Analyze) {
 
                 label 'norm_cpus'
 
+                tag "${mtag}"
+
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ncASV", mode: "copy", overwrite: true, pattern: '*ncASV*.fasta'
 
                 input:
@@ -1150,10 +1156,11 @@ if (params.DataCheck || params.Analyze) {
                     file("*_ncASV*.fasta") into ( nuclFastas_forphylogeny_ncasv, nuclFastas_forDiamond_ncasv_ch, nuclFastas_forCounts_ncasv_ch, nuclFastas_forMatrix_ncasv_ch )
 
                 script:
+                nid=slist.get(x-1)
+                mtag="ID=" + slist.get(x-1)
                 if (params.clusterNuclIDlist) {
-                    nid=slist1.get(x-1)
                     """
-                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id .${nid}
+                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV${nid}.fasta --threads ${task.cpus} --relabel ncASV --id .${nid}
                     """
                 } else if (params.clusterNuclID) {
                     """
@@ -1339,7 +1346,7 @@ if (params.DataCheck || params.Analyze) {
                         if [ `echo \${filename} | grep -c "ncASV"` -eq 1 ];then
                             ident=\$( echo \${filename} | awk -F "ncASV" '{print \$2}' | awk -F ".fasta" '{print \$1}')
                             name=\$( echo \${filename} | awk -F ".fasta" '{print \$1}')
-                            vsearch --usearch_global ${merged} --db \${filename} --id \${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
+                            vsearch --usearch_global ${merged} --db \${filename} --id .\${ident} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                             cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                             sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
                             rm \${name}_count.csv
