@@ -472,7 +472,7 @@ if (params.readsTest) {
 }
 
 // HERE fix if stament and list names. Also is not an integer
-if (params.clusterNuclIDlist == "") {
+if (!params.clusterNuclIDlist == "") {
     msize=params.clusterNuclIDlist
     def slist=msize.split(',').collect{it as int}
     def nnuc=slist.size()
@@ -1151,11 +1151,11 @@ if (params.DataCheck || params.Analyze) {
                 if (params.clusterNuclIDlist) {
                     nid=slist1.get(x-1)
                     """
-                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id ${nid}
+                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id .${nid}
                     """
                 } else if (params.clusterNuclID) {
                     """
-                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id ${params.clusterNuclID}
+                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel ncASV --id .${params.clusterNuclID}
                     """
                 }
             }
@@ -1173,7 +1173,7 @@ if (params.DataCheck || params.Analyze) {
                         file(asvs) from nuclFastas_forDiamond_ncasv_ch
 
                     output:
-                        file("*.fasta") into tax_labeled_fasta1
+                        file("*.fasta") into tax_labeled_fasta_ncasv
                         tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_ncasv
                         file("*ncASV*summary_for_plot.csv") into taxplot_ncasv
 
@@ -1327,9 +1327,9 @@ if (params.DataCheck || params.Analyze) {
                     file(merged) from nuclCounts_mergedreads_ch
 
                 output:
-                    tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch
+                    tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch_ncasv
                     tuple val("${id}"), file("*ncASV*counts.csv") into notu_counts_plots
-                    file("*_ASV*counts.csv") into asv_counts_plots
+                    file("*_ASV*counts.csv") into ncasv_counts_plots
 
                 script:
                     """
@@ -1430,7 +1430,7 @@ if (params.DataCheck || params.Analyze) {
 
         } else {
             reads_vsearch5_ch
-    	       .into{ nuclFastas_forDiamond_ch; nuclFastas_forCounts_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_ch }
+    	       .into{ nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch }
         }
 
         process ASV_Taxonomy_Inference {
@@ -1444,7 +1444,7 @@ if (params.DataCheck || params.Analyze) {
                 file(reads) from nuclFastas_forDiamond_asv_ch
 
             output:
-                file("*.fasta") into tax_labeled_fasta2
+                file("*.fasta") into tax_labeled_fasta_asv
                 tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
                 file("*_ASV*_summary_for_plot.csv") into taxplot_asv
 
@@ -1687,7 +1687,7 @@ if (params.DataCheck || params.Analyze) {
                 """
                 if [ `echo ${asvs} | grep -c "ASV"` -eq 1 ];then
                     name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                    vsearch --usearch_global ${merged} --db ${asvs} --id ${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
+                    vsearch --usearch_global ${merged} --db ${asvs} --id .${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
                     cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                     sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
                     rm \${name}_count.csv
@@ -1699,7 +1699,7 @@ if (params.DataCheck || params.Analyze) {
 
             label 'low_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Matrix", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
+            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Matrices", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
 
             input:
                 file(reads) from nuclFastas_forMatrix_asv_ch
@@ -1866,7 +1866,7 @@ if (params.DataCheck || params.Analyze) {
 
                     label 'low_cpus'
 
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Matrix", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Matrices", mode: "copy", overwrite: true
 
                     input:
                         file(prot) from aminotypesClustal
@@ -1967,7 +1967,7 @@ if (params.DataCheck || params.Analyze) {
                             diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             echo "Preparing lists to generate summary .csv's"
                             echo "[Best hit accession number]" >access.list
-                            echo "[pcASV sequence length]" >length.list
+                            echo "[AminoType sequence length]" >length.list
                             echo "[e-value]" >evalue.list
                             echo "[Bitscore]" >bit.list
                             echo "[Percent ID (aa)]" >pid.list
