@@ -1149,7 +1149,7 @@ if (params.DataCheck || params.Analyze) {
                     output:
                         file("*.fasta") into tax_labeled_fasta_ncasv
                         tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_ncasv
-                        file("*ncASV*summary_for_plot.csv") into taxplot_ncasv
+                        tuple nid, file("*ncASV*summary_for_plot.csv") into taxplot_ncasv
 
                     script:
                         mtag="ID=" + nid
@@ -1303,8 +1303,7 @@ if (params.DataCheck || params.Analyze) {
 
                 output:
                     tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch_ncasv
-                    tuple val("${id}"), file("*ncASV*counts.csv") into notu_counts_plots
-                    file("*ASV*counts.csv") into ncasv_counts_plots
+                    tuple nid, file("*ncASV*counts.csv") into notu_counts_plots
 
                 script:
                     mtag="ID=" + nid
@@ -1329,7 +1328,7 @@ if (params.DataCheck || params.Analyze) {
 
                 output:
                     file("*.matrix") into clustmatrices_ncasv
-                    file("*ncASV*PercentID.matrix") into notu_heatmap
+                    tuple nid, file("*ncASV*PercentID.matrix") into notu_heatmap
 
                 script:
                     mtag="ID=" + nid
@@ -1359,7 +1358,7 @@ if (params.DataCheck || params.Analyze) {
 
                           output:
                               tuple nid, file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results_ncasv
-                              file("*iq.treefile") into nucl_phyl_plot_ncasv
+                              tuple nid, file("*iq.treefile") into nucl_phyl_plot_ncasv
 
                           script:
                               mtag="ID=" + nid
@@ -1643,17 +1642,15 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch_asv
-                file("*_ASV*counts.csv") into asv_counts_plots_asv
+                file("*_ASV*counts.csv") into asv_counts_plots
 
             script:
                 """
-                if [ `echo ${asvs} | grep -c "ASV"` -eq 1 ];then
-                    name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                    vsearch --usearch_global ${merged} --db ${asvs} --id .${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
-                    cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
-                    sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
-                    rm \${name}_count.csv
-                fi
+                name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                vsearch --usearch_global ${merged} --db ${asvs} --id .${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
+                cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
+                sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
+                rm \${name}_count.csv
                 """
         }
 
@@ -1668,7 +1665,7 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 file("*.matrix") into clustmatrices_asv
-                file("*_ASV*PercentID.matrix") into asv_heatmap_asv
+                file("*_ASV*PercentID.matrix") into asv_heatmap
 
             script:
                 // remove if statement later (no fin)
@@ -2289,7 +2286,7 @@ if (params.DataCheck || params.Analyze) {
                         output:
                             file("*.fasta") into ( pcASV_labeled )
                             tuple file("*_phyloseqObject.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
-                            file("*_summary_for_plot.csv") into taxplot3
+                            tuple nid, file("*_summary_for_plot.csv") into taxplot3
 
                         script:
                             mtag="ID=" + nid
@@ -2440,7 +2437,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         tuple file("*_counts.txt"), file("*_counts.biome") into pcASVcounts_vsearch
-                        file("*.csv") into potu_Ncounts_for_report
+                        tuple nid, file("*.csv") into potu_Ncounts_for_report
 
                     script:
                         mtag="ID=" + nid
@@ -2466,7 +2463,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         file("*.matrix") into pcASVclustmatrices
-                        file("*PercentID.matrix") into potu_nucl_heatmap
+                        tuple nid, file("*PercentID.matrix") into potu_nucl_heatmap
 
                     script:
                         //check --percent-id second clustalo
@@ -2497,7 +2494,7 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pcASV_nucleotide_phylogeny_results
-                            file("*iq.treefile") into potu_Ntree_plot
+                            tuple nid, file("*iq.treefile") into potu_Ntree_plot
 
                         script:
                             mtag="ID=" + nid
@@ -2547,7 +2544,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         file("*.matrix") into pcASVaaMatrix
-                        file("*PercentID.matrix") into potu_aa_heatmap
+                        tuple nid, file("*PercentID.matrix") into potu_aa_heatmap
 
                     script:
                         mtag="ID=" + nid
@@ -2630,7 +2627,7 @@ if (params.DataCheck || params.Analyze) {
                         output:
                             file("*.fasta") into ( pcASV_labeledAA )
                             tuple file("*phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
-                            file("*_summary_for_plot.csv") into taxplot4
+                            tuple nid, file("*_summary_for_plot.csv") into taxplot4
 
                         script:
                             mtag="ID=" + nid
@@ -2782,7 +2779,7 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into pcASV_protein_phylogeny_results
-                            file("*iq.treefile") into potu_Atree_plot
+                            tuple nid, file("*iq.treefile") into potu_Atree_plot
 
                         script:
                             mtag="ID=" + nid
@@ -2834,7 +2831,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         tuple file("*_counts.csv"), file("*dmd.out") into potuaacounts_summary
-                        file("*counts.csv") into potu_Acounts
+                        tuple nid, file("*counts.csv") into potu_Acounts
 
                     script:
                         // check do I need for loop
@@ -2904,11 +2901,8 @@ if (params.DataCheck || params.Analyze) {
                             """
                             echo "Read processing steps skipped." >filter_reads.txt
                             """
-
                     }
-
                 }
-
 
                 //NEW REPORT !!!!!!!!!!!!!!!!!
                 /*Report_ASV
@@ -2918,11 +2912,11 @@ if (params.DataCheck || params.Analyze) {
                 nucl_phyl_plot -> ${params.projtag}_ASV_iq.treefile
                 */
                 report_asv = Channel.create()
-                asv_counts_plots.mix(taxplot1, asv_heatmap, nucl_phyl_plot).flatten().buffer(size:4).into(report_asv)
+                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv).flatten().buffer(size:4).into(report_asv)
 
                 if (params.ncASV) {
                     report_ncasv = Channel.create()
-                    notu_counts_plots.mix(taxplot1a, notu_heatmap, nucl_phyl_plot_ncasv).flatten().toSortedList().flatten().buffer(size:4).into(report_ncasv)
+                    notu_counts_plots.mix(taxplot_ncasv, notu_heatmap, nucl_phyl_plot_ncasv).groupTuple(by:0, size:4).into(report_ncasv)
                     /*
                     notu_counts_plots -> ${params.projtag}_ncASV${id}_counts.csv
                     taxplot1a -> ${params.projtag}_ncASV${id}_summary_for_plot.csv
@@ -2935,7 +2929,7 @@ if (params.DataCheck || params.Analyze) {
 
                 if (params.pcASV) {
                     report_pcasv_aa = Channel.create()
-                    potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot).flatten().toSortedList().flatten().buffer(size:4).into(report_pcasv_aa)
+                    potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot).groupTuple(by:0, size:4).into(report_pcasv_aa)
                     /*Report_pcASV_AminoAcid
                     potu_Acounts -> ${params.projtag}_pcASV${id}_noTaxonomy_counts.csv
                     taxplot4 -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_summary_for_plot.csv
@@ -2943,7 +2937,7 @@ if (params.DataCheck || params.Analyze) {
                     potu_Atree_plot -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_iq.treefile
                     */
                     report_pcasv_nucl = Channel.create()
-                    potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot).flatten().toSortedList().flatten().buffer(size:4).into(report_pcasv_nucl)
+                    potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot).groupTuple(by:0, size:4).into(report_pcasv_nucl)
                     /*Report_pcASV_Nucleotide
                     potu_Ncounts_for_report -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_counts.csv
                     taxplot3 -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_summary_for_plot.csv
@@ -2970,7 +2964,7 @@ if (params.DataCheck || params.Analyze) {
                 }
 
                 report_all_ch = Channel.create()
-                report_asv.mix(report_ncasv, report_pcasv_aa, report_pcasv_nucl, report_aminotypes).buffer(size:1).flatten().toList().view().into(report_all_ch)
+                report_asv.mix(report_ncasv, report_pcasv_aa, report_pcasv_nucl, report_aminotypes).view().into(report_all_ch)
 
                 process Report {
 
