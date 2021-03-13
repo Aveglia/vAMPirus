@@ -2270,7 +2270,6 @@ if (params.DataCheck || params.Analyze) {
                         rm ${params.projtag}_pcASV${nid}.fast*
                         """
                     }
-                }
 
                 if (!params.skipTaxonomy) {
 
@@ -3005,6 +3004,7 @@ if (params.DataCheck || params.Analyze) {
                 }
 
             }
+        }
 
 } else {
     println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
