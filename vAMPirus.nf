@@ -2964,7 +2964,7 @@ if (params.DataCheck || params.Analyze) {
                 }
 
                 report_all_ch = Channel.create()
-                report_asv.mix(report_ncasv, report_pcasv_aa, report_pcasv_nucl, report_aminotypes).view().into(report_all_ch)
+                report_asv.mix(report_ncasv, report_pcasv_aa, report_pcasv_nucl, report_aminotypes).map{it.flatten()}.into(report_all_ch)
 
                 process Report {
 
@@ -2981,7 +2981,6 @@ if (params.DataCheck || params.Analyze) {
 
                     script:
                         """
-                        if [ -e input.3 ];then cat input.3 | sed -r 's|\\[(\\/\\w+.*)\\]|\\1|g' | tr -d " " | tr "," "\\n" >flist.txt ; for x in `cat flist.txt`;do cp \$x . ;done ;fi
                         name=\$( ls *summary_for_plot.csv | awk -F "_summary_for_plot.csv" '{print \$1}')
                         cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
                         cp ${params.vampdir}/example_data/conf/vamplogo.png .
