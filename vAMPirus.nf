@@ -3004,15 +3004,26 @@ if (params.DataCheck || params.Analyze) {
     println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
     exit 0
 }
-
-workflow.onComplete {
-    log.info ( workflow.success ? \
-        "---------------------------------------------------------------------------------" \
-        + "\n\033[0;32mDone! Open the following reports in your browser\033[0m" \
-        + "\n\033[0;32mPipeline performance report: ${params.workingdir}/${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" \
-        + "\n\033[0;32mvAMPirus --DataCheck interactive report: ${params.workingdir}/${params.outdir}/DataCheck/*.hmtl\033[0m" \
-        + "\n\033[0;32mvAMPirus --Analyze interactive report: ${params.workingdir}/${params.outdir}/Analyze/*.hmtl\033[0m" \
-        : \
-        "---------------------------------------------------------------------------------" \
-        + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
+if (params.DataCheck) {
+    workflow.onComplete {
+        log.info ( workflow.success ? \
+            "---------------------------------------------------------------------------------" \
+            + "\n\033[0;32mDone! Open the following reports in your browser\033[0m" \
+            + "\n\033[0;32mPipeline performance report: ${params.workingdir}/${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" \
+            + "\n\033[0;32mvAMPirus --DataCheck interactive report: ${params.workingdir}/${params.outdir}/DataCheck/*.hmtl\033[0m" \
+            : \
+            "---------------------------------------------------------------------------------" \
+            + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
+    }
+} else if (params.Analyze) {
+    workflow.onComplete {
+        log.info ( workflow.success ? \
+            "---------------------------------------------------------------------------------" \
+            + "\n\033[0;32mDone! Open the following reports in your browser\033[0m" \
+            + "\n\033[0;32mPipeline performance report: ${params.workingdir}/${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" \
+            + "\n\033[0;32mvAMPirus --Analyze interactive report: ${params.workingdir}/${params.outdir}/Analyze/*.hmtl\033[0m" \
+            : \
+            "---------------------------------------------------------------------------------" \
+            + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
+    }
 }
