@@ -178,8 +178,8 @@ else
 fi
 
 echo "Downloading oligotyping program"
-conda init && source activate vAMPirus
-pip install oligotyping 
+conda init && conda activate vAMPirus
+pip install oligotyping
 conda deactivate
 
 echo "-------------------------------------------------------------------------------- Conda check/install done"
