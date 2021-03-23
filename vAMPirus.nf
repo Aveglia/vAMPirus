@@ -1237,8 +1237,7 @@ if (params.DataCheck || params.Analyze) {
         }
 
         report_dc_in = Channel.create()
-        fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot, amino_entro_csv, amino_entropy, asv_entro_csv, asv_entropy
-         ).into(report_dc_in)
+        fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot, amino_entro_csv, amino_entropy, asv_entro_csv, asv_entropy).into(report_dc_in)
 
         process Report_DataCheck {
 
@@ -1555,7 +1554,7 @@ if (params.DataCheck || params.Analyze) {
 
         } else {
             reads_vsearch5_ch
-    	       .into{ nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch, asv_for_med }
+    	       .into{ nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch; asv_for_med }
         }
 
         process ASV_Taxonomy_Inference { /////// editttt
