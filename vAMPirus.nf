@@ -1128,6 +1128,7 @@ if (params.DataCheck || params.Analyze) {
           output:
 
               file("*AminoType_entropy_breakdown.csv") into amino_entro_csv
+              file ("*.png") into
               file("*AminoTypes*") into aminos
 
           script:
@@ -1286,7 +1287,7 @@ if (params.DataCheck || params.Analyze) {
 
             if (!params.skipTaxonomy) {
 
-                process Nucleotide_Taxonomy_Inference {
+                process Nucleotide_Taxonomy_Inference { /////// editttt
 
                     label 'high_cpus'
 
@@ -1545,10 +1546,10 @@ if (params.DataCheck || params.Analyze) {
 
         } else {
             reads_vsearch5_ch
-    	       .into{ nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch }
+    	       .into{ nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch, asv_for_med }
         }
 
-        process ASV_Taxonomy_Inference {
+        process ASV_Taxonomy_Inference { /////// editttt
 
             label 'high_cpus'
 
@@ -1901,6 +1902,40 @@ if (params.DataCheck || params.Analyze) {
                   }
             }
 
+            if (params.asvMED) {
+
+                process ASV_Minimum_Entropy_Decomposition {
+
+                label 'low_cpus'
+
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASV/MED", mode: "copy", overwrite: true
+
+                input:
+
+                  file(asvs) from asv_for_med
+
+                output:
+
+                script:
+                """
+                    set +e
+                    #alignment
+                    mafft --thread ${task.cpus} --maxiterate 15000 --auto ${asvs} > ${params.projtag}_ASVs_mafftAlign.fasta
+                    #trimming
+                    trimal -in ${params.projtag}_ASVs_mafftAlign.fasta -out ${params.projtag}_ASVs_mafftAligned.fasta  -keepheader -fasta -automated1
+                    rm ${params.projtag}_ASVs_mafftAlign.fasta
+                    o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_mafftAligned.fasta
+                    mv ${params.projtag}_ASVs_mafftAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
+                    #entopy analysis
+                    entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
+                    #Decomposition
+                    oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} --skip-check-input --no-figures
+                    
+                """
+              }
+
+            }
+
             if (!params.skipAminoTyping) {
 
                 process Translate_For_AminoTyping {
@@ -1936,7 +1971,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         tuple file("*.fasta"), file("${params.projtag}_AminoTypes.clstr"), file("${params.projtag}_AminoType_summary_map.csv"), file("${params.projtag}_clustered.gc") into ( supplementalfiles )
-                        file("${params.projtag}_AminoTypes_noTaxonomy.fasta") into ( aminotypesCounts, aminotypesMafft, aminotypesClustal, aminotypesBlast, aminotypesEmboss )
+                        file("${params.projtag}_AminoTypes_noTaxonomy.fasta") into ( aminotypesCounts, aminotypesMafft, aminotypesClustal, aminotypesBlast, aminotypesEmboss, aminos_for_med )
 
                     script:
                         """
@@ -2299,6 +2334,28 @@ if (params.DataCheck || params.Analyze) {
                        rm *col.txt
                        """
                 }
+            }
+
+            if (params.aminoMED) {
+
+                  process AminoType_Minimum_Entropy_Decomposition {
+
+                  label 'low_cpus'
+
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASV/MED", mode: "copy", overwrite: true
+
+                  input:
+
+                    file(aminos) from aminos_for_med
+
+                  output:
+
+                  script:
+                  """
+
+                  """
+                  }
+
             }
 
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
