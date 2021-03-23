@@ -125,11 +125,6 @@ conda_c() {
     fi
 }
 
-echo "Downloading oligotyping program"
-conda init && source activate vAMPirus
-pip install oligotyping --yes
-conda deactivate
-
 nextflow_c() {
     source_c
     cd $mypwd
@@ -181,6 +176,12 @@ else
       cat tmp1.config > "$mypwd"/vampirus.config
       rm tmp1.config
 fi
+
+echo "Downloading oligotyping program"
+conda init && source activate vAMPirus
+pip install oligotyping 
+conda deactivate
+
 echo "-------------------------------------------------------------------------------- Conda check/install done"
 
 echo "Now lets check the status of Nextflow on your system..."
