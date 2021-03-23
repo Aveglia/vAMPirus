@@ -946,7 +946,7 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 file("number_per_percentage_prot.csv") into number_per_percent_prot_plot
-                file("*pcASV1.0_noTaxonomy*") into amino_med
+                file("*aminoacid_pcASV1.0_noTaxonomy.fasta") into amino_med
             script:
             // add awk script to count seqs
                 """
@@ -1115,7 +1115,7 @@ if (params.DataCheck || params.Analyze) {
             done
             rm above*
             mv ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY ./tmp.fasta
-            cat "Base_position  Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
+            echo "Base_position  Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
             cat tmp.fasta >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
             rm tmp.fasta
 
@@ -1196,7 +1196,7 @@ if (params.DataCheck || params.Analyze) {
             done
             rm above*
             mv ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY ./tmp.fasta
-            cat "Base_position  Shannons_Entropy" >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
+            echo "Base_position  Shannons_Entropy" >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
             cat tmp.fasta >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
             rm tmp.fasta
             """
