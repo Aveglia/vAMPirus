@@ -18,6 +18,7 @@ vampirus_startup.sh -h [-d 1|2|3|4] [-s]
         [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
                                                     1 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                          NOTE: need to use RVDB for sequence classification
                                                     2 - Download only NCBIs Viral protein RefSeq database
                                                     3 - Download only the complete NCBI NR protein database
                                                     4 - Download all three databases
@@ -124,6 +125,11 @@ conda_c() {
     fi
 }
 
+echo "Downloading oligotyping program"
+conda init && source activate vAMPirus
+pip install oligotyping --yes
+conda deactivate
+
 nextflow_c() {
     source_c
     cd $mypwd
@@ -186,15 +192,18 @@ if [[ $DATABASE -eq 1 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
-        echo "Database installation: RVDB version 19.0 (latest as of 2020-06)"
-        curl -o U-RVDBv19.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
-        bunzip2 U-RVDBv19.0-prot.fasta.bz2
+        echo "Database installation: RVDB version 21.0 (latest as of 2021-02)"
+        curl -o U-RVDBv21.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot.fasta.bz2
+        bunzip2 U-RVDBv21.0-prot.fasta.bz2
+        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/U-RVDBv19.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
+        sed "s|DATABASEANNOT|${dir}/U-RVDBv21.0-prot-hmm-txt.zip|g" tmp2.config > tmp3.config
         rm tmp1.config
-        cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
+        cat tmp3.config > "$mypwd"/vampirus.config
+        rm tmp3.config
         echo "Database downloaded and configuration file edited, you should confirm the path and database name was set correctly in the config file."
 elif [[ $DATABASE -eq 2 ]]
 then    mkdir "$mypwd"/Databases
