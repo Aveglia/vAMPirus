@@ -826,7 +826,7 @@ if (params.DataCheck || params.Analyze) {
             """
     }
 
-    process Extract_Uniques {
+    process Extracting_Uniques {
 
         label 'low_cpus'
 
@@ -872,7 +872,7 @@ if (params.DataCheck || params.Analyze) {
             file(fasta) from reads_vsearch4_ch
 
         output:
-            file("*ASVs.fasta") into ( reads_vsearch5_ch, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck )
+            file("*ASVs.fasta") into ( reads_vsearch5_ch, asv_med, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck )
 
         script:
             """
@@ -946,7 +946,7 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 file("number_per_percentage_prot.csv") into number_per_percent_prot_plot
-
+                file("*pcASV100*") into amino_med
             script:
             // add awk script to count seqs
                 """
@@ -1038,6 +1038,158 @@ if (params.DataCheck || params.Analyze) {
                 head -1 number_per_percentage_protz.csv >> number_per_percentage_prot.csv
                 rm number_per_percentage_protz.csv
                 """
+        }
+
+        process ASV_Shannons_Entropy_Analysis {
+
+          label 'norm_cpus'
+
+          publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+
+          input:
+              file(asvs) from asv_med
+
+          output:
+
+              file("*_ASV_entropy_breakdown.csv") into asv_entro_csv
+              file("*ASV*") into entrop
+
+          script:
+          """
+            set +e
+            #alignment
+            mafft --thread ${task.cpus} --maxiterate 15000 --auto ${asvs} > ${params.projtag}_ASVs_mafftAlign.fasta
+            #trimming
+            trimal -in ${params.projtag}_ASVs_mafftAlign.fasta -out ${params.projtag}_ASVs_mafftAligned.fasta  -keepheader -fasta -automated1
+            rm ${params.projtag}_ASVs_mafftAlign.fasta
+            o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_mafftAligned.fasta
+            mv ${params.projtag}_ASVs_mafftAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
+            #entopy analysis
+            entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
+            #summarize entropy peaks
+            awk '{print \$2}' testaligned.fasta-ENTROPY >> tmp_value.list
+            for x in \$(cat tmp_value.list)
+            do      echo "\$x"
+                    if [[ \$(echo ""\$x" > 0.0"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.0-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.1"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.1-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.2"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.2-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.3"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.3-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.4"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.4-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.5"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.5-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.6"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.6-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.7"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.7-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.8"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.8-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.9"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.9-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.0"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.0-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.5"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.5-.list
+                    fi
+            done
+            for z in above*.list;
+            do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
+                    echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_ASV_entropy_breakdown.csv
+            done
+            rm above*
+          """
+
+        }
+
+        process AminoType_Shannons_Entropy_Analysis {
+
+          label 'norm_cpus'
+
+          publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true, pattern: '*{.csv}'
+
+          input:
+              file(aminos) from amino_med
+
+          output:
+
+              file("*AminoType_entropy_breakdown.csv") into amino_entro_csv
+              file("*AminoTypes*") into aminos
+
+          script:
+          """
+            #alignment
+            mafft --thread ${task.cpus} --maxiterate 15000 --auto ${aminos} > ${params.projtag}_AminoTypes_mafftAlign.fasta
+            #trimming
+            trimal -in ${params.projtag}_AminoTypes_mafftAlign.fasta -out ${params.projtag}_AminoTypes_mafftAligned.fasta  -keepheader -fasta -automated1
+            rm ${params.projtag}_AminoTypes_mafftAlign.fasta
+            o-trim-uninformative-columns-from-alignment ${params.projtag}_AminoTypes_mafftAligned.fasta
+            mv ${params.projtag}_AminoTypes_mafftAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
+            #entropy analysis
+            entropy-analysis ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta --amino-acid-sequences
+            #summarize entropy peaks
+            awk '{print \$2}' ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
+            for x in \$(cat tmp_value.list)
+            do      echo "\$x"
+                    if [[ \$(echo ""\$x" > 0.0"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.0-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.1"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.1-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.2"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.2-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.3"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.3-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.4"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.4-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.5"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.5-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.6"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.6-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.7"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.7-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.8"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.8-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 0.9"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-0.9-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.0"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.0-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.5"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.5-.list
+                    fi
+            done
+            for z in above*.list;
+            do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
+                    echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_AminoType_entropy_breakdown.csv
+            done
+            rm above*
+
+          """
+
         }
 
         if (!params.skipReadProcessing || !params.skipMerging ) {
@@ -1366,11 +1518,13 @@ if (params.DataCheck || params.Analyze) {
                               pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
                               mafft --thread ${task.cpus} --maxiterate 15000 --auto ${asvs} >\${pre}_ALN.fasta
                               trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
+                              o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
+                              mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                               # Nucleotide_ModelTest
-                              modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                              modeltest-ng -i \${pre}_Aligned_informativeonly.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
                               # Nucleotide_Phylogeny
                               if [ "${params.iqCustomnt}" != "" ];then
-                                  iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
+                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
                               elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
                                   mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
                                   iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}

@@ -9,6 +9,7 @@ channels:
   - genomedk
 dependencies:
   - python=3.6
+  - blast=2.11.0
   - diamond=0.9.30
   - fastqc=0.11.9
   - fastp=0.20.1
