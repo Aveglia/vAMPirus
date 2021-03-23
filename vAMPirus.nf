@@ -1108,12 +1108,18 @@ if (params.DataCheck || params.Analyze) {
                     then    echo dope >> above-1.5-.list
                     fi
             done
-            echo "Base_position, Shannon's_Entropy" >> ${params.projtag}_ASV_entropy_breakdown.csv
+            echo "Entropy,Peaks_above" >> ${params.projtag}_ASV_entropy_breakdown.csv
             for z in above*.list;
             do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
                     echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_ASV_entropy_breakdown.csv
             done
             rm above*
+
+            mv ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY ./tmp.fasta
+            cat "Base_position  Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
+            cat tmp.fasta >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
+            rm tmp.fasta
+
           """
 
         }
@@ -1184,12 +1190,16 @@ if (params.DataCheck || params.Analyze) {
                     then    echo dope >> above-1.5-.list
                     fi
             done
-            echo "Base_position, Shannon's_Entropy" >> ${params.projtag}_AminoType_entropy_breakdown.csv
+            echo "Entropy,Peaks_above" >> ${params.projtag}_AminoType_entropy_breakdown.csv
             for z in above*.list;
             do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
                     echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_AminoType_entropy_breakdown.csv
             done
             rm above*
+            mv ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY ./tmp.fasta
+            cat "Base_position  Shannons_Entropy" >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
+            cat tmp.fasta >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
+            rm tmp.fasta
             """
         }
 
