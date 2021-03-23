@@ -1052,7 +1052,7 @@ if (params.DataCheck || params.Analyze) {
           output:
 
               file("*_ASV_entropy_breakdown.csv") into asv_entro_csv
-              file("")
+              file("Aligned_informativeonly.fasta-ENTROPY") into asv_entropy
               file("*ASV*") into entrop
 
           script:
@@ -1114,7 +1114,6 @@ if (params.DataCheck || params.Analyze) {
                     echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_ASV_entropy_breakdown.csv
             done
             rm above*
-
             mv ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY ./tmp.fasta
             cat "Base_position  Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
             cat tmp.fasta >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
@@ -1135,7 +1134,7 @@ if (params.DataCheck || params.Analyze) {
 
           output:
               file("*AminoType_entropy_breakdown.csv") into amino_entro_csv
-              file ("*.png") into
+              file ("*Aligned_informativeonly.fasta-ENTROPY") into amino_entropy
               file("*AminoTypes*") into aminos
 
           script:
@@ -1238,7 +1237,7 @@ if (params.DataCheck || params.Analyze) {
         }
 
         report_dc_in = Channel.create()
-        fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot
+        fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot, amino_entro_csv, amino_entropy, asv_entro_csv, asv_entropy
          ).into(report_dc_in)
 
         process Report_DataCheck {
