@@ -946,7 +946,7 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 file("number_per_percentage_prot.csv") into number_per_percent_prot_plot
-                file("*pcASV100*") into amino_med
+                file("*pcASV1.0_noTaxonomy*") into amino_med
             script:
             // add awk script to count seqs
                 """
