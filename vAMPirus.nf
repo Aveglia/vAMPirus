@@ -1052,6 +1052,7 @@ if (params.DataCheck || params.Analyze) {
           output:
 
               file("*_ASV_entropy_breakdown.csv") into asv_entro_csv
+              file("")
               file("*ASV*") into entrop
 
           script:
@@ -1067,7 +1068,7 @@ if (params.DataCheck || params.Analyze) {
             #entopy analysis
             entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
             #summarize entropy peaks
-            awk '{print \$2}' testaligned.fasta-ENTROPY >> tmp_value.list
+            awk '{print \$2}' ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
             for x in \$(cat tmp_value.list)
             do      echo "\$x"
                     if [[ \$(echo ""\$x" > 0.0"|bc -l) -eq 1 ]];
@@ -1107,6 +1108,7 @@ if (params.DataCheck || params.Analyze) {
                     then    echo dope >> above-1.5-.list
                     fi
             done
+            echo "Base_position, Shannon's_Entropy" >> ${params.projtag}_ASV_entropy_breakdown.csv
             for z in above*.list;
             do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
                     echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_ASV_entropy_breakdown.csv
@@ -1126,13 +1128,12 @@ if (params.DataCheck || params.Analyze) {
               file(aminos) from amino_med
 
           output:
-
               file("*AminoType_entropy_breakdown.csv") into amino_entro_csv
               file ("*.png") into
               file("*AminoTypes*") into aminos
 
           script:
-          """
+            """
             #alignment
             mafft --thread ${task.cpus} --maxiterate 15000 --auto ${aminos} > ${params.projtag}_AminoTypes_mafftAlign.fasta
             #trimming
@@ -1183,14 +1184,13 @@ if (params.DataCheck || params.Analyze) {
                     then    echo dope >> above-1.5-.list
                     fi
             done
+            echo "Base_position, Shannon's_Entropy" >> ${params.projtag}_AminoType_entropy_breakdown.csv
             for z in above*.list;
             do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
                     echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_AminoType_entropy_breakdown.csv
             done
             rm above*
-
-          """
-
+            """
         }
 
         if (!params.skipReadProcessing || !params.skipMerging ) {
@@ -1930,7 +1930,7 @@ if (params.DataCheck || params.Analyze) {
                     entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
                     #Decomposition
                     oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} --skip-check-input --no-figures
-                    
+
                 """
               }
 
