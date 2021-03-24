@@ -3229,7 +3229,7 @@ if (params.DataCheck) {
             "---------------------------------------------------------------------------------" \
             + "\n\033[0;32mDone! Open the following reports in your browser\033[0m" \
             + "\n\033[0;32mPipeline performance report: ${params.workingdir}/${params.outdir}/${params.tracedir}/vampirus_report.html\033[0m" \
-            + "\n\033[0;32mvAMPirus --DataCheck interactive report: ${params.workingdir}/${params.outdir}/DataCheck/*.hmtl\033[0m" \
+            + "\n\033[0;32mvAMPirus --DataCheck interactive report: ${params.workingdir}/${params.outdir}/DataCheck/Report/*.hmtl\033[0m" \
             : \
             "---------------------------------------------------------------------------------" \
             + "\n\033[0;31mSomething went wrong. Check error message below and/or log files.\033[0m" )
