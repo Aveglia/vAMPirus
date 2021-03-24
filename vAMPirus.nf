@@ -1052,7 +1052,7 @@ if (params.DataCheck || params.Analyze) {
           output:
 
               file("*_ASV_entropy_breakdown.csv") into asv_entro_csv
-              file("Aligned_informativeonly.fasta-ENTROPY") into asv_entropy
+              file("*Aligned_informativeonly.fasta-ENTROPY") into asv_entropy
               file("*ASV*") into entrop
 
           script:
