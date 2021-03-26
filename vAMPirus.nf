@@ -1916,8 +1916,8 @@ if (params.DataCheck || params.Analyze) {
 
                 label 'low_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASV/${params.projtag}_asvMED_${params.asvC}", mode: "copy", overwrite: true
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASV/${params.projtag}_asvMED_${params.asvC}/OLIGO-REPRESENTATIVES", mode: "copy", overwrite: true
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASV/MED", mode: "copy", overwrite: true
+
                 input:
 
                   file(asvs) from asv_for_med
@@ -1925,9 +1925,10 @@ if (params.DataCheck || params.Analyze) {
                 output:
                   file("*_ASV_Grouping.csv") into asvgroupscsv
                   file("${params.projtag}_ASV_group_reps_aligned.fasta") into groupreps
+                  file("${params.projtag}_asvMED_${params.asvC}")
 
                 script:
-                """
+                    """
                     #alignment
                     mafft --thread ${task.cpus} --maxiterate 15000 --auto ${asvs} > ${params.projtag}_ASVs_mafftAlign.fasta
                     #trimming
@@ -1941,7 +1942,7 @@ if (params.DataCheck || params.Analyze) {
                     oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                     #generatemaps
                     cd ./${params.projtag}_asvMED_${params.asvC}/OLIGO-REPRESENTATIVES/
-                    echo "ASV,Group,IDPattern"
+                    echo "ASV,GroupID,IDPattern"
                     j=1
                     for x in *_unique;
                     do      gid=$(echo \$x | awk -F "_" '{print \$1}')
@@ -1965,7 +1966,7 @@ if (params.DataCheck || params.Analyze) {
                     mv ${params.projtag}_ASV_Grouping.csv ../../
                     mv ${params.projtag}_ASV_group_reps_aligned.fasta ../../
                     cd ..
-                """
+                    """
               }
 
               process ASV_MED_Reps_phylogeny {
@@ -1983,32 +1984,32 @@ if (params.DataCheck || params.Analyze) {
                 file("*iq.treefile") into asv_group_rep_tree
 
               script:
-              """
-              # Protein_ModelTest
-              modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.protag}_ASV_Group_Reps_mt -d aa -s 203 --disable-checkpoint
+                  """
+                  # Protein_ModelTest
+                  modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.protag}_ASV_Group_Reps_mt -d aa -s 203 --disable-checkpoint
 
-              # Protein_Phylogeny
-              if [ "${params.iqCustomaa}" != "" ];then
-                  iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
+                  # Protein_Phylogeny
+                  if [ "${params.iqCustomaa}" != "" ];then
+                      iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
 
-              elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
-                  mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                  iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                  elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
+                      mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                      iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
 
-              elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                  mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                  iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                  elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
+                      mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                      iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
-              elif [ "${params.nonparametric}" != "false" ];then
-                  iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
+                  elif [ "${params.nonparametric}" != "false" ];then
+                      iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
 
-              elif [ "${params.parametric}" != "false" ];then
-                  iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                  elif [ "${params.parametric}" != "false" ];then
+                      iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
-              else
-                  iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-              fi
-              """
+                  else
+                      iqtree -s ${reps} --prefix ${params.protag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                  fi
+                  """
               }
 
               process Adding_ASV_MED_Info {
@@ -2021,14 +2022,20 @@ if (params.DataCheck || params.Analyze) {
                 file(counts) from asvcount_med
                 file(tree) from asvphy_med
                 file(map) from asvgroupscsv
-              output:
 
+              output:
+                file("${params.projtag}_ASV_Grouping_counts.csv") into asvgroupcounts
 
               script:
-              """
-
-
-              """
+                  """
+                  awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
+                  echo "GroupID" >> group.list
+                  for x in $(cat asv.list);
+                  do    group=$(grep -w \$x ${map} | awk -F "," '{print \$2}')
+                        echo "\$group" >> group.list
+                  done
+                  paste -d',' group.list ${counts} > ${params.projtag}_ASV_Grouping_counts.csv
+                  """
               }
             }
 
@@ -2534,6 +2541,40 @@ if (params.DataCheck || params.Analyze) {
                   """
                   }
 
+                  process Adding_AminoType_MED_Info {
+
+                  label 'low_cpus'
+
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny", mode: "copy", overwrite: true
+
+                  input:
+                    file(counts) from asvcount_med
+                    file(tree) from asvphy_med
+                    file(map) from asvgroupscsv
+
+                  output:
+                    file("${params.projtag}_AminoType_Grouping_counts.csv") into asvgroupcounts
+
+                  script:
+                 #map
+                 ASV1,GroupA,TAGCGAT
+
+                 #count
+                 #ASvs, Sample1,sample2
+                 asv1,1,2
+
+
+
+                      """
+                      awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
+                      echo "GroupID" >> group.list
+                      for x in $(cat amino.list);
+                      do    group=$(grep -w \$x ${map} | awk -F "," '{print \$2}')
+                            echo "\$group" >> group.list
+                      done
+                      paste -d',' group.list ${counts} > ${params.projtag}_AminoType_Grouping_counts.csv
+                      """
+                  }
             }
 
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
