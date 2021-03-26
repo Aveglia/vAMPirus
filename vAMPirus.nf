@@ -1954,7 +1954,7 @@ if (params.DataCheck || params.Analyze) {
 
                             done
                             rm asv.list
-                            echo "Group\${j}" >> ${params.projtag}_ASV_group_reps_aligned.fasta
+                            echo ">Group\${j}" >> ${params.projtag}_ASV_group_reps_aligned.fasta
                             echo "\$uni" > group.list
                             seqtk subseq ../OLIGO-REPRESENTATIVES.fasta group.list > group.fasta
                             tail -1 group.fasta >> ${params.projtag}_ASV_group_reps_aligned.fasta
