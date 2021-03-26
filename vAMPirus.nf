@@ -1948,16 +1948,16 @@ if (params.DataCheck || params.Analyze) {
                     do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
                             uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
                             grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
-                            seqtk subseq ${asvs} asv.list > Group"\${j}"_sequences.fasta
+                            seqtk subseq ../../${asvs} asv.list > Group"\${j}"_sequences.fasta
                             for z in \$( cat asv.list)
                             do      echo ""\$z",Group"\$gid","\$uni"" >> ${params.projtag}_ASV_Grouping.csv
 
                             done
                             rm asv.list
-                            echo "Group\${j}" >> ${params.projtag}_group_reps_aligned.fasta
+                            echo "Group\${j}" >> ${params.projtag}_ASV_group_reps_aligned.fasta
                             echo "\$uni" > group.list
                             seqtk subseq ../OLIGO-REPRESENTATIVES.fasta group.list > group.fasta
-                            tail -1 group.fasta >> ${params.projtag}_group_reps_aligned.fasta
+                            tail -1 group.fasta >> ${params.projtag}_ASV_group_reps_aligned.fasta
                             mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
                             mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
                             rm "\$gid"*.cPickle
