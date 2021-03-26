@@ -1949,7 +1949,7 @@ if (params.DataCheck || params.Analyze) {
                             uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
                             grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
                             seqtk subseq ${asvs} asv.list > Group"\${j}"_sequences.fasta
-                            for z in $( cat asv.list)
+                            for z in \$( cat asv.list)
                             do      echo ""\$z",Group"\$gid","\$uni"" >> ${params.projtag}_ASV_Grouping.csv
 
                             done
@@ -2030,8 +2030,8 @@ if (params.DataCheck || params.Analyze) {
                   """
                   awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
                   echo "GroupID" >> group.list
-                  for x in $(cat asv.list);
-                  do    group=$(grep -w \$x ${map} | awk -F "," '{print \$2}')
+                  for x in \$(cat asv.list);
+                  do    group=\$(grep -w \$x ${map} | awk -F "," '{print \$2}')
                         echo "\$group" >> group.list
                   done
                   paste -d',' group.list ${counts} > ${params.projtag}_ASV_Grouping_counts.csv
