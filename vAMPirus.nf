@@ -2509,7 +2509,7 @@ if (params.DataCheck || params.Analyze) {
                     file(reps) from atygroupreps
 
                   output:
-                    file("*_Aminotype_Group_Reps*") into align_results_aminmed
+                    file("*_AminoType_Group_Reps*") into align_results_aminmed
                     file("*iq.treefile") into amino_group_rep_tree
 
                   script:
