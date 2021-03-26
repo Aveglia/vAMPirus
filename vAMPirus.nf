@@ -2482,10 +2482,10 @@ if (params.DataCheck || params.Analyze) {
 
                           done
                           rm asv.list
-                          echo "Group\${j}" >> ${params.projtag}_AminoType_group_reps_aligned.fasta
+                          echo ">Group\${j}" >> ${params.projtag}_AminoType_group_reps_aligned.fasta
                           echo "\$uni" > group.list
                           seqtk subseq ../OLIGO-REPRESENTATIVES.fasta group.list > group.fasta
-                          tail -1 group.fasta >> ${params.projtag}_group_reps_aligned.fasta
+                          tail -1 group.fasta >> ${params.projtag}_AminoType_group_reps_aligned.fasta
                           mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
                           mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
                           rm "\$gid"*.cPickle
