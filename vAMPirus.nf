@@ -2477,7 +2477,7 @@ if (params.DataCheck || params.Analyze) {
                           uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
                           grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
                           seqtk subseq ${aminos} asv.list > Group"\${j}"_sequences.fasta
-                          for z in $( cat asv.list)
+                          for z in \$( cat asv.list)
                           do      echo ""\$z",Group"\$gid","\$uni"" >> ${params.projtag}_AminoType_Grouping.csv
 
                           done
