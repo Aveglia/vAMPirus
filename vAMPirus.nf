@@ -1980,7 +1980,7 @@ if (params.DataCheck || params.Analyze) {
                 file(reps) from groupreps
 
               output:
-                tuple file("*_Aminotype_Group_Reps") into align_results_asvmed
+                file("*_Aminotype_Group_Reps") into align_results_asvmed
                 file("*iq.treefile") into asv_group_rep_tree
 
               script:
@@ -2509,36 +2509,36 @@ if (params.DataCheck || params.Analyze) {
                     file(reps) from atygroupreps
 
                   output:
-                  tuple file("*_Aminotype_Group_Reps") into align_results_aminmed
-                  file("*iq.treefile") into amino_group_rep_tree
+                    file("*_Aminotype_Group_Reps") into align_results_aminmed
+                    file("*iq.treefile") into amino_group_rep_tree
 
                   script:
-                  """
-                  # Protein_ModelTest
-                  modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.protag}_AminoType_Group_Reps_mt -d aa -s 203 --disable-checkpoint
+                      """
+                      # Protein_ModelTest
+                      modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.protag}_AminoType_Group_Reps_mt -d aa -s 203 --disable-checkpoint
 
-                  # Protein_Phylogeny
-                  if [ "${params.iqCustomaa}" != "" ];then
-                      iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
+                      # Protein_Phylogeny
+                      if [ "${params.iqCustomaa}" != "" ];then
+                          iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
 
-                  elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
-                      mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                      iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                      elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
+                          mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                          iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
 
-                  elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                      mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                      iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                      elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
+                          mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                          iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
-                  elif [ "${params.nonparametric}" != "false" ];then
-                      iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
+                      elif [ "${params.nonparametric}" != "false" ];then
+                          iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
 
-                  elif [ "${params.parametric}" != "false" ];then
-                      iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                      elif [ "${params.parametric}" != "false" ];then
+                          iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
-                  else
-                      iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                  fi
-                  """
+                      else
+                          iqtree -s ${reps} --prefix ${params.protag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                      fi
+                      """
                   }
 
                   process Adding_AminoType_MED_Info {
