@@ -2357,7 +2357,7 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             tuple file("*_aln.fasta"), file("*_aln.html"), file("*.log"), file("*iq*"), file("*mt*") into alignprot_results
-                            file("*iq.treefile") into amino_rax_plot
+                            file("*iq.treefile") into (amino_rax_plot, amino_repphy)
 
                         script:
                             """
@@ -2407,7 +2407,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         tuple file("*_AminoType_counts.csv"), file("*dmd.out") into counts_summary
-                        file("*_AminoType_counts.csv") into aminocounts_plot
+                        file("*_AminoType_counts.csv") into (aminocounts_plot, aminocountmed)
 
                     script:
                         """
@@ -2473,8 +2473,8 @@ if (params.DataCheck || params.Analyze) {
                   echo "AminoType,Group,IDPattern"
                   j=1
                   for x in *_unique;
-                  do      gid=$(echo \$x | awk -F "_" '{print \$1}')
-                          uni=$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
+                  do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
+                          uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
                           grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
                           seqtk subseq ${aminos} asv.list > Group"\${j}"_sequences.fasta
                           for z in $( cat asv.list)
@@ -2548,28 +2548,19 @@ if (params.DataCheck || params.Analyze) {
                   publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny", mode: "copy", overwrite: true
 
                   input:
-                    file(counts) from asvcount_med
-                    file(tree) from asvphy_med
-                    file(map) from asvgroupscsv
+                    file(counts) from aminocountmed
+                    file(tree) from amino_repphy
+                    file(map) from atygroupscsv
 
                   output:
                     file("${params.projtag}_AminoType_Grouping_counts.csv") into asvgroupcounts
 
                   script:
-                 #map
-                 ASV1,GroupA,TAGCGAT
-
-                 #count
-                 #ASvs, Sample1,sample2
-                 asv1,1,2
-
-
-
                       """
                       awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
                       echo "GroupID" >> group.list
-                      for x in $(cat amino.list);
-                      do    group=$(grep -w \$x ${map} | awk -F "," '{print \$2}')
+                      for x in \$(cat amino.list);
+                      do    group=\$(grep -w \$x ${map} | awk -F "," '{print \$2}')
                             echo "\$group" >> group.list
                       done
                       paste -d',' group.list ${counts} > ${params.projtag}_AminoType_Grouping_counts.csv
