@@ -1980,7 +1980,7 @@ if (params.DataCheck || params.Analyze) {
                 file(reps) from groupreps
 
               output:
-                file("*_Aminotype_Group_Reps*") into align_results_asvmed
+                file("*_ASV_Group_Reps*") into align_results_asvmed
                 file("*iq.treefile") into asv_group_rep_tree
 
               script:
