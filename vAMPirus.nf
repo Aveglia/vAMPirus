@@ -2460,7 +2460,7 @@ if (params.DataCheck || params.Analyze) {
                   #alignment
                   mafft --thread ${task.cpus} --maxiterate 15000 --auto ${aminos} > ${params.projtag}_AminoTypes_mafftAlign.fasta
                   #trimming
-                  trimal -in ${params.projtag}_AmminoTypes_mafftAlign.fasta -out ${params.projtag}_AminoTypes_mafftAligned.fasta  -keepheader -fasta -automated1
+                  trimal -in ${params.projtag}_AminoTypes_mafftAlign.fasta -out ${params.projtag}_AminoTypes_mafftAligned.fasta  -keepheader -fasta -automated1
                   rm ${params.projtag}_AminoTypes_mafftAlign.fasta
                   o-trim-uninformative-columns-from-alignment ${params.projtag}_AminoTypes_mafftAligned.fasta
                   mv ${params.projtag}_AminoTypes_mafftAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
