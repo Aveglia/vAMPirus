@@ -2016,7 +2016,7 @@ if (params.DataCheck || params.Analyze) {
 
               label 'low_cpus'
 
-              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny", mode: "copy", overwrite: true
+              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/", mode: "copy", overwrite: true
 
               input:
                 file(counts) from asvcount_med
@@ -2545,7 +2545,7 @@ if (params.DataCheck || params.Analyze) {
 
                   label 'low_cpus'
 
-                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny", mode: "copy", overwrite: true
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/", mode: "copy", overwrite: true
 
                   input:
                     file(counts) from aminocountmed
@@ -2553,7 +2553,7 @@ if (params.DataCheck || params.Analyze) {
                     file(map) from atygroupscsv
 
                   output:
-                    file("${params.projtag}_AminoType_Grouping_counts.csv") into asvgroupcounts
+                    file("${params.projtag}_AminoType_Grouping_counts.csv") into amino_groupcounts
 
                   script:
                       """
