@@ -1295,7 +1295,9 @@ if (params.DataCheck || params.Analyze) {
 
             if (!params.skipTaxonomy) {
 
-                process Nucleotide_Taxonomy_Inference { /////// editttt
+              if (params.headers == "RefSeq") {
+
+                process ncASV_Taxonomy_Inference { /////// editttt
 
                     label 'high_cpus'
 
@@ -1309,7 +1311,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         file("*.fasta") into tax_labeled_fasta_ncasv
-                        tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_ncasv
+                        tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_ncasv
                         tuple nid, file("*ncASV*summary_for_plot.csv") into taxplot_ncasv
 
                     script:
@@ -1328,18 +1330,14 @@ if (params.DataCheck || params.Analyze) {
                         echo "[Percent ID (aa)]" > pid.list
                         echo "[Organism ID]" > "\$name"_virus.list
                         echo "[Gene]" > "\$name"_genes.list
+                        echo "[ncASV#]" > otu.list
+                        echo "[Sequence length]" > length.list
                         grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
                         echo "extracting genes and names"
                         touch new_"\$name"_asvnames.txt
-                        j=1
-                        if [ `echo ${asvs} | grep -c "ASV"` -eq 1 ];then
-                            for s in \$(cat seqids.lst);do
-                                echo "[ASV#]" > otu.list
-                                echo "[ASV sequence length]" > length.list
-                                echo "Checking for \$s hit in diamond output"
-                                if [[ ${params.refseq} == "T" ]];then
-                                    echo "RefSeq headers specified"
-                                    if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                        for s in \$(cat seqids.lst);do
+                            echo "Checking for \$s hit in diamond output"
+                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
                                         echo "Yep, there was a hit for \$s"
                                         echo "Extracting the information now:"
                                         acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
@@ -1355,10 +1353,9 @@ if (params.DataCheck || params.Analyze) {
                                         echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                         echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                        echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                        j=\$((\$j+1))
+                                        echo ">"\${s}"_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                         echo "\$s done."
-                                    else
+                            else
                                         echo "Ugh, there was no hit for \$s .."
                                         echo "We still love \$s though and we will add it to the final fasta file"
                                         echo "\$s" >> otu.list
@@ -1371,52 +1368,10 @@ if (params.DataCheck || params.Analyze) {
                                         echo "NO_HIT" >> length.list
                                         virus="NO"
                                         gene="HIT"
-                                        echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                        j=\$((\$j+1))
+                                        echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                         echo "\$s done."
-                                    fi
-                                else
-                                    echo "Using RVDB headers."
-                                    if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                        echo "Yep, there was a hit for \$s"
-                                        echo "Extracting the information now:"
-                                        acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
-                                        echo "\$s" >> otu.list
-                                        echo "\$acc" >> access.list
-                                        line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                        echo "\$line" | awk '{print \$10}' >> evalue.list
-                                        echo "\$line" | awk '{print \$11}' >> bit.list
-                                        echo "\$line" | awk '{print \$12}' >> pid.list
-                                        echo "\$line" | awk '{print \$2}' >> length.list
-                                        echo "Extracting virus and gene ID for \$s now"
-                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
-                                        echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
-                                        virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
-                                        echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                        echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                        j=\$((\$j+1))
-                                        echo "\$s done."
-                                    else
-                                        echo "Ugh, there was no hit for \$s .."
-                                        echo "We still love \$s though and we will add it to the final fasta file"
-                                        echo "\$s" >> otu.list
-                                        echo "NO_HIT" >> access.list
-                                        echo "NO_HIT" >> "\$name"_genes.list
-                                        echo "NO_HIT" >> "\$name"_virus.list
-                                        echo "NO_HIT" >> evalue.list
-                                        echo "NO_HIT" >> bit.list
-                                        echo "NO_HIT" >> pid.list
-                                        echo "NO_HIT" >> length.list
-                                        virus="NO"
-                                        gene="HIT"
-                                        echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                        j=\$((\$j+1))
-                                        echo "\$s done."
-                                    fi
-                                fi
-                            echo "Done with \$s"
-                            done
-                        fi
+                           fi
+                        done
                         echo "Now editing "\$name" fasta headers"
                         ###### rename_seq.py
                         ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
@@ -1427,9 +1382,9 @@ if (params.DataCheck || params.Analyze) {
                         echo "     " > sequence.list
                         grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                         rm "\$name"_tmpssasv.fasta
-                        paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloseqObject.csv
+                        paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                         paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                        for x in *phyloseqObject.csv;do
+                        for x in *phyloformat.csv;do
                             echo "\$x"
                             lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
                             tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
@@ -1437,17 +1392,134 @@ if (params.DataCheck || params.Analyze) {
                             cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                             rm tmpcol.list tmp2col.list
                         done
-                        rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list seqids.lst otu.list ;
-                        rm *asvnames.txt
-                        rm "\$name"_virus.list
-                        rm "\$name"_genes.list
-                        rm newnames.list
-                        rm access.list
-                        echo "Taxonomy inferred for: ${asvs}"
-                        rm headers.list
+                        rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                         """
-                    }
+                      }
+            } else if (params.headers == "RVDB") {
+
+              process ncASV_Taxonomy_Inference { /////// editttt
+
+                  label 'high_cpus'
+
+                  tag "${mtag}"
+
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Taxonomy", mode: "copy", overwrite: true, pattern: '*ncASV*.{fasta,csv,tsv}'
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*ncASV*dmd.out'
+
+                  input:
+                      tuple nid, file(asvs) from nuclFastas_forDiamond_ncasv_ch
+
+                  output:
+                      file("*.fasta") into tax_labeled_fasta_ncasv
+                      tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_ncasv
+                      tuple nid, file("*ncASV*summary_for_plot.csv") into taxplot_ncasv
+                      tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_ncasv
+
+                  script:
+                      mtag="ID=" + nid
+                      """
+                      cp ${params.vampdir}/bin/rename_seq.py .
+                      virdb=${params.dbdir}/${params.dbname}
+                      grep ">" \${virdb} > headers.list
+                      headers="headers.list"
+                      name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                      diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                      echo "Preparing lists to generate summary .csv's"
+                      echo "[Best hit accession number]" > access.list
+                      echo "[e-value]" > evalue.list
+                      echo "[Bitscore]" > bit.list
+                      echo "[Percent ID (aa)]" > pid.list
+                      echo "[Organism ID]" > "\$name"_virus.list
+                      echo "[Gene]" > "\$name"_genes.list
+                      echo "[ncASV#]" > otu.list
+                      echo "[Sequence length]" > length.list
+                      grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
+                      if [[ ${params.lsa} == "T" ]]
+                      then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
+                            echo "[Classification]" > classfication.list
+                      else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                      fi
+                      echo "extracting genes and names"
+                      touch new_"\$name"_asvnames.txt
+                      for s in \$(cat seqids.lst);do
+                          echo "Using RVDB headers."
+                          if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                              echo "Yep, there was a hit for \$s"
+                              echo "Extracting the information now:"
+                              acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
+                              echo "\$s" >> otu.list
+                              echo "\$acc" >> access.list
+                              line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                              echo "\$line" | awk '{print \$10}' >> evalue.list
+                              echo "\$line" | awk '{print \$11}' >> bit.list
+                              echo "\$line" | awk '{print \$12}' >> pid.list
+                              echo "\$line" | awk '{print \$2}' >> length.list
+                              echo "Extracting virus and gene ID for \$s now"
+                              gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                              echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                              virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                              echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                              echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                              if [[ ${params.lca} == "T" ]]
+                              then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                      lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                      echo "\$lcla" >> classfication.list
+                              fi
+                              echo "\$s done."
+                          else
+                              echo "Ugh, there was no hit for \$s .."
+                              echo "We still love \$s though and we will add it to the final fasta file"
+                              echo "\$s" >> otu.list
+                              echo "NO_HIT" >> access.list
+                              echo "NO_HIT" >> "\$name"_genes.list
+                              echo "NO_HIT" >> "\$name"_virus.list
+                              echo "NO_HIT" >> evalue.list
+                              echo "NO_HIT" >> bit.list
+                              echo "NO_HIT" >> pid.list
+                              echo "NO_HIT" >> length.list
+                              virus="NO"
+                              gene="HIT"
+                              echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                              if [[ ${params.lca} == "T" ]]
+                              then    echo "N/A" >> classfication.list
+                              fi
+                              echo "\$s done."
+                          fi
+                      echo "Done with \$s"
+                      done
+                      echo "Now editing "\$name" fasta headers"
+                      ###### rename_seq.py
+                      ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
+                      awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
+                      echo "[Sequence header]" > newnames.list
+                      cat new_"\$name"_asvnames.txt >> newnames.list
+                      touch sequence.list
+                      echo "     " > sequence.list
+                      grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
+                      rm "\$name"_tmpssasv.fasta
+                      if [[ ${params.lca} == "T" ]]
+                      then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                            paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                      else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                            paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                      fi
+                      if [[ ${params.lca} == "T" ]]
+                      then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
+                      fi
+                      for x in *phyloformat.csv;do
+                                echo "\$x"
+                                lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
+                                tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
+                                sed 's/ /_/g' tmpcol.list > tmp2col.list;
+                                cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
+                                rm tmpcol.list tmp2col.list
+                      done
+                      rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
+                      """
+                }
             }
+          }
+
 
             process Generate_ncASV_Counts_Table {
 
@@ -1535,17 +1607,17 @@ if (params.DataCheck || params.Analyze) {
                               if [ "${params.iqCustomnt}" != "" ];then
                                   iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
                               elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                  mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                  iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                                  mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
+                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
                               elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                                  mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                  iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
+                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                               elif [ "${params.nonparametric}" != "false" ];then
-                                  iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
                               elif [ "${params.parametric}" != "false" ];then
-                                  iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                               else
-                                  iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                               fi
                               """
                       }
@@ -1557,240 +1629,225 @@ if (params.DataCheck || params.Analyze) {
     	       .into{ nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch; asv_for_med }
         }
 
-        process ASV_Taxonomy_Inference { /////// editttt
+        if (!params.skipTaxonomy) {
 
-            label 'high_cpus'
+          if (params.headers == "RefSeq") {
 
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*_ASV*.{fasta,csv,tsv}'
-            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*_ASV*dmd.out'
+                process ASV_Taxonomy_Inference { /////// editttt
 
-            input:
-                file(reads) from nuclFastas_forDiamond_asv_ch
+                    label 'high_cpus'
 
-            output:
-                file("*.fasta") into tax_labeled_fasta_asv
-                tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
-                file("*_ASV*_summary_for_plot.csv") into taxplot_asv
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*_ASV*.{fasta,csv,tsv}'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*_ASV*dmd.out'
 
-            script:
-                """
-                cp ${params.vampdir}/bin/rename_seq.py .
-                virdb=${params.dbdir}/${params.dbname}
-                grep ">" \${virdb} > headers.list
-                headers="headers.list"
-                for filename in ${reads};do
-                    name=\$(ls \${filename} | awk -F ".fasta" '{print \$1}')
-                    diamond blastx -q \${filename} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
-                    echo "Preparing lists to generate summary .csv's"
-                    echo "[Best hit accession number]" > access.list
-                    echo "[e-value]" > evalue.list
-                    echo "[Bitscore]" > bit.list
-                    echo "[Percent ID (aa)]" > pid.list
-                    echo "[Organism ID]" > "\$name"_virus.list
-                    echo "[Gene]" > "\$name"_genes.list
-                    grep ">" \${filename} | awk -F ">" '{print \$2}' > seqids.lst
-                    echo "extracting genes and names"
-                    touch new_"\$name"_asvnames.txt
-                    j=1
-                    if [ `echo \${filename} | grep -c "ncASV"` -eq 1 ];then
+                    input:
+                        file(asvs) from nuclFastas_forDiamond_asv_ch
+
+                    output:
+                        file("*.fasta") into tax_labeled_fasta_asv
+                        tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
+                        file("*_ASV*_summary_for_plot.csv") into taxplot_asv
+
+                    script:
+                        """
+                        cp ${params.vampdir}/bin/rename_seq.py .
+                        virdb=${params.dbdir}/${params.dbname}
+                        grep ">" \${virdb} > headers.list
+                        headers="headers.list"
+                        name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                        diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                        echo "Preparing lists to generate summary .csv's"
+                        echo "[Best hit accession number]" > access.list
+                        echo "[e-value]" > evalue.list
+                        echo "[Bitscore]" > bit.list
+                        echo "[Percent ID (aa)]" > pid.list
+                        echo "[Organism ID]" > "\$name"_virus.list
+                        echo "[Gene]" > "\$name"_genes.list
                         echo "[ASV#]" > otu.list
-                        echo "[ASV sequence length]" > length.list
+                        echo "[Sequence length]" > length.list
+                        grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
+                        echo "extracting genes and names"
+                        touch new_"\$name"_asvnames.txt
                         for s in \$(cat seqids.lst);do
                             echo "Checking for \$s hit in diamond output"
-                            if [[ ${params.refseq} == "T" ]];then
-                                echo "RefSeq headers specified"
-                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                    echo "Yep, there was a hit for \$s"
-                                    echo "Extracting the information now:"
-                                    acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
-                                    echo "\$s" >> otu.list
-                                    echo "\$acc" >> access.list
-                                    line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                    echo "\$line" | awk '{print \$10}' >> evalue.list
-                                    echo "\$line" | awk '{print \$11}' >> bit.list
-                                    echo "\$line" | awk '{print \$12}' >> pid.list
-                                    echo "\$line" | awk '{print \$2}' >> length.list
-                                    echo "Extracting virus and gene ID for \$s now"
-                                    gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
-                                    echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
-                                    virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
-                                    echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                    echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                    j=\$((\$j+1))
-                                    echo "\$s done."
-                                else
-                                    echo "Ugh, there was no hit for \$s .."
-                                    echo "We still love \$s though and we will add it to the final fasta file"
-                                    echo "\$s" >> otu.list
-                                    echo "NO_HIT" >> access.list
-                                    echo "NO_HIT" >> "\$name"_genes.list
-                                    echo "NO_HIT" >> "\$name"_virus.list
-                                    echo "NO_HIT" >> evalue.list
-                                    echo "NO_HIT" >> bit.list
-                                    echo "NO_HIT" >> pid.list
-                                    echo "NO_HIT" >> length.list
-                                    virus="NO"
-                                    gene="HIT"
-                                    echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                    j=\$((\$j+1))
-                                    echo "\$s done."
-                                fi
+                            if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                        echo "Yep, there was a hit for \$s"
+                                        echo "Extracting the information now:"
+                                        acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
+                                        echo "\$s" >> otu.list
+                                        echo "\$acc" >> access.list
+                                        line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                        echo "\$line" | awk '{print \$10}' >> evalue.list
+                                        echo "\$line" | awk '{print \$11}' >> bit.list
+                                        echo "\$line" | awk '{print \$12}' >> pid.list
+                                        echo "\$line" | awk '{print \$2}' >> length.list
+                                        echo "Extracting virus and gene ID for \$s now"
+                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                        echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                                        virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
+                                        echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                                        echo ">"\${s}"_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                        echo "\$s done."
                             else
-                                echo "Using RVDB headers."
-                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                    echo "Yep, there was a hit for \$s"
-                                    echo "Extracting the information now:"
-                                    acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
-                                    echo "\$s" >> otu.list
-                                    echo "\$acc" >> access.list
-                                    line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                    echo "\$line" | awk '{print \$10}' >> evalue.list
-                                    echo "\$line" | awk '{print \$11}' >> bit.list
-                                    echo "\$line" | awk '{print \$12}' >> pid.list
-                                    echo "\$line" | awk '{print \$2}' >> length.list
-                                    echo "Extracting virus and gene ID for \$s now"
-                                    gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
-                                    echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
-                                    virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
-                                    echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                    echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                    j=\$((\$j+1))
-                                    echo "\$s done."
-                                else
-                                    echo "Ugh, there was no hit for \$s .."
-                                    echo "We still love \$s though and we will add it to the final fasta file"
-                                    echo "\$s" >> otu.list
-                                    echo "NO_HIT" >> access.list
-                                    echo "NO_HIT" >> "\$name"_genes.list
-                                    echo "NO_HIT" >> "\$name"_virus.list
-                                    echo "NO_HIT" >> evalue.list
-                                    echo "NO_HIT" >> bit.list
-                                    echo "NO_HIT" >> pid.list
-                                    echo "NO_HIT" >> length.list
-                                    virus="NO"
-                                    gene="HIT"
-                                    echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                    j=\$((\$j+1))
-                                    echo "\$s done."
-                                fi
-                            fi
-                            echo "Done with \$s"
-                            done
-                    else
-                        for s in \$(cat seqids.lst);do
-                            echo "[ASV#]" > otu.list
-                            echo "[ASV sequence length]" > length.list
-                            echo "Checking for \$s hit in diamond output"
-                            if [[ ${params.refseq} == "T" ]];then
-                                echo "RefSeq headers specified"
-                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                    echo "Yep, there was a hit for \$s"
-                                    echo "Extracting the information now:"
-                                    acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
-                                    echo "\$s" >> otu.list
-                                    echo "\$acc" >> access.list
-                                    line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                    echo "\$line" | awk '{print \$10}' >> evalue.list
-                                    echo "\$line" | awk '{print \$11}' >> bit.list
-                                    echo "\$line" | awk '{print \$12}' >> pid.list
-                                    echo "\$line" | awk '{print \$2}' >> length.list
-                                    echo "Extracting virus and gene ID for \$s now"
-                                    gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
-                                    echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
-                                    virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
-                                    echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                    echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                    j=\$((\$j+1))
-                                    echo "\$s done."
-                                else
-                                    echo "Ugh, there was no hit for \$s .."
-                                    echo "We still love \$s though and we will add it to the final fasta file"
-                                    echo "\$s" >> otu.list
-                                    echo "NO_HIT" >> access.list
-                                    echo "NO_HIT" >> "\$name"_genes.list
-                                    echo "NO_HIT" >> "\$name"_virus.list
-                                    echo "NO_HIT" >> evalue.list
-                                    echo "NO_HIT" >> bit.list
-                                    echo "NO_HIT" >> pid.list
-                                    echo "NO_HIT" >> length.list
-                                    virus="NO"
-                                    gene="HIT"
-                                    echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                    j=\$((\$j+1))
-                                    echo "\$s done."
-                                fi
-                            else
-                                echo "Using RVDB headers."
-                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                    echo "Yep, there was a hit for \$s"
-                                    echo "Extracting the information now:"
-                                    acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
-                                    echo "\$s" >> otu.list
-                                    echo "\$acc" >> access.list
-                                    line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                    echo "\$line" | awk '{print \$10}' >> evalue.list
-                                    echo "\$line" | awk '{print \$11}' >> bit.list
-                                    echo "\$line" | awk '{print \$12}' >> pid.list
-                                    echo "\$line" | awk '{print \$2}' >> length.list
-                                    echo "Extracting virus and gene ID for \$s now"
-                                    gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
-                                    echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
-                                    virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
-                                    echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                    echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                    j=\$((\$j+1))
-                                    echo "\$s done."
-                                else
-                                    echo "Ugh, there was no hit for \$s .."
-                                    echo "We still love \$s though and we will add it to the final fasta file"
-                                    echo "\$s" >> otu.list
-                                    echo "NO_HIT" >> access.list
-                                    echo "NO_HIT" >> "\$name"_genes.list
-                                    echo "NO_HIT" >> "\$name"_virus.list
-                                    echo "NO_HIT" >> evalue.list
-                                    echo "NO_HIT" >> bit.list
-                                    echo "NO_HIT" >> pid.list
-                                    echo "NO_HIT" >> length.list
-                                    virus="NO"
-                                    gene="HIT"
-                                    echo ">ASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                    j=\$((\$j+1))
-                                    echo "\$s done."
-                                fi
-                            fi
-                            echo "Done with \$s"
+                                        echo "Ugh, there was no hit for \$s .."
+                                        echo "We still love \$s though and we will add it to the final fasta file"
+                                        echo "\$s" >> otu.list
+                                        echo "NO_HIT" >> access.list
+                                        echo "NO_HIT" >> "\$name"_genes.list
+                                        echo "NO_HIT" >> "\$name"_virus.list
+                                        echo "NO_HIT" >> evalue.list
+                                        echo "NO_HIT" >> bit.list
+                                        echo "NO_HIT" >> pid.list
+                                        echo "NO_HIT" >> length.list
+                                        virus="NO"
+                                        gene="HIT"
+                                        echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                        echo "\$s done."
+                           fi
                         done
-                    fi
-                    echo "Now editing "\$name" fasta headers"
-                    ###### rename_seq.py
-                    ./rename_seq.py \${filename} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
-                    awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
-                    echo "[Sequence header]" > newnames.list
-                    cat new_"\$name"_asvnames.txt >> newnames.list
-                    touch sequence.list
-                    echo "     " > sequence.list
-                    grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
-                    rm "\$name"_tmpssasv.fasta
-                    paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloseqObject.csv
-                    paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                    for x in *phyloseqObject.csv;do
-                        echo "\$x"
-                        lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
-                        tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
-                        sed 's/ /_/g' tmpcol.list > tmp2col.list;
-                        cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
-                        rm tmpcol.list tmp2col.list
-                    done
-                    rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list seqids.lst otu.list ;
-                    rm *asvnames.txt
-                    rm "\$name"_virus.list
-                    rm "\$name"_genes.list
-                    rm newnames.list
-                    rm access.list
-                    echo "Taxonomy inferred for: \${filename} "
-                done
-                rm headers.list
-                """
+                        echo "Now editing "\$name" fasta headers"
+                        ###### rename_seq.py
+                        ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
+                        awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
+                        echo "[Sequence header]" > newnames.list
+                        cat new_"\$name"_asvnames.txt >> newnames.list
+                        touch sequence.list
+                        echo "     " > sequence.list
+                        grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
+                        rm "\$name"_tmpssasv.fasta
+                        paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                        paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                        for x in *phyloformat.csv;do
+                            echo "\$x"
+                            lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
+                            tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
+                            sed 's/ /_/g' tmpcol.list > tmp2col.list;
+                            cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
+                            rm tmpcol.list tmp2col.list
+                        done
+                        rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
+                        """
+                      }
+                } else if (params.headers == "RVDB") {
+
+                  process ASV_Taxonomy_Inference { /////// editttt
+
+                      label 'high_cpus'
+
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy", mode: "copy", overwrite: true, pattern: '*_ASV*.{fasta,csv,tsv}'
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*_ASV*dmd.out'
+
+                      input:
+                          file(asvs) from nuclFastas_forDiamond_asv_ch
+
+                      output:
+                          file("*.fasta") into tax_labeled_fasta_asv
+                          tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
+                          file("*_ASV*_summary_for_plot.csv") into taxplot_asv
+                          file("*_quick_Taxbreakdown.csv") into tax_table_asv
+
+                      script:
+                          """
+                          cp ${params.vampdir}/bin/rename_seq.py .
+                          virdb=${params.dbdir}/${params.dbname}
+                          grep ">" \${virdb} > headers.list
+                          headers="headers.list"
+                          name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                          diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                          echo "Preparing lists to generate summary .csv's"
+                          echo "[Best hit accession number]" > access.list
+                          echo "[e-value]" > evalue.list
+                          echo "[Bitscore]" > bit.list
+                          echo "[Percent ID (aa)]" > pid.list
+                          echo "[Organism ID]" > "\$name"_virus.list
+                          echo "[Gene]" > "\$name"_genes.list
+                          echo "[ASV#]" > otu.list
+                          echo "[Sequence length]" > length.list
+                          grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
+                          if [[ ${params.lsa} == "T" ]]
+                          then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
+                                echo "[Classification]" > classfication.list
+                          else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                          fi
+                          echo "extracting genes and names"
+                          touch new_"\$name"_asvnames.txt
+                          for s in \$(cat seqids.lst);do
+                              echo "Using RVDB headers."
+                              if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                  echo "Yep, there was a hit for \$s"
+                                  echo "Extracting the information now:"
+                                  acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
+                                  echo "\$s" >> otu.list
+                                  echo "\$acc" >> access.list
+                                  line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                  echo "\$line" | awk '{print \$10}' >> evalue.list
+                                  echo "\$line" | awk '{print \$11}' >> bit.list
+                                  echo "\$line" | awk '{print \$12}' >> pid.list
+                                  echo "\$line" | awk '{print \$2}' >> length.list
+                                  echo "Extracting virus and gene ID for \$s now"
+                                  gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                                  echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                                  virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                                  echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                                  echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                  if [[ ${params.lca} == "T" ]]
+                                  then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                          lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                          echo "\$lcla" >> classfication.list
+                                  fi
+                                  echo "\$s done."
+                              else
+                                  echo "Ugh, there was no hit for \$s .."
+                                  echo "We still love \$s though and we will add it to the final fasta file"
+                                  echo "\$s" >> otu.list
+                                  echo "NO_HIT" >> access.list
+                                  echo "NO_HIT" >> "\$name"_genes.list
+                                  echo "NO_HIT" >> "\$name"_virus.list
+                                  echo "NO_HIT" >> evalue.list
+                                  echo "NO_HIT" >> bit.list
+                                  echo "NO_HIT" >> pid.list
+                                  echo "NO_HIT" >> length.list
+                                  virus="NO"
+                                  gene="HIT"
+                                  echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                  if [[ ${params.lca} == "T" ]]
+                                  then    echo "N/A" >> classfication.list
+                                  fi
+                                  echo "\$s done."
+                              fi
+                          echo "Done with \$s"
+                          done
+                          echo "Now editing "\$name" fasta headers"
+                          ###### rename_seq.py
+                          ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
+                          awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
+                          echo "[Sequence header]" > newnames.list
+                          cat new_"\$name"_asvnames.txt >> newnames.list
+                          touch sequence.list
+                          echo "     " > sequence.list
+                          grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
+                          rm "\$name"_tmpssasv.fasta
+                          if [[ ${params.lca} == "T" ]]
+                          then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                                paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                          else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                                paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                          fi
+                          if [[ ${params.lca} == "T" ]]
+                          then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
+                          fi
+                          for x in *phyloformat.csv;do
+                                    echo "\$x"
+                                    lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
+                                    tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
+                                    sed 's/ /_/g' tmpcol.list > tmp2col.list;
+                                    cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
+                                    rm tmpcol.list tmp2col.list
+                          done
+                          rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
+                          """
+                }
+            }
         }
 
         process Generate_ASV_Counts_Tables {
@@ -1888,23 +1945,25 @@ if (params.DataCheck || params.Analyze) {
                           pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
                           mafft --thread ${task.cpus} --maxiterate 15000 --auto ${asvs} >\${pre}_ALN.fasta
                           trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
+                          o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
+                          mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                           # Nucleotide_ModelTest
-                          modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                          modeltest-ng -i \${pre}_Aligned_informativeonly.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
                           # Nucleotide_Phylogeny
                           if [ "${params.iqCustomnt}" != "" ];then
-                              iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
+                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
                           elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                              mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                              iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                              mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
+                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
                           elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                              mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                              iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                              mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
+                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                           elif [ "${params.nonparametric}" != "false" ];then
-                              iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
+                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
                           elif [ "${params.parametric}" != "false" ];then
-                              iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                           else
-                              iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                           fi
                           """
                   }
@@ -1916,7 +1975,7 @@ if (params.DataCheck || params.Analyze) {
 
                 label 'low_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASV/MED", mode: "copy", overwrite: true
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true
 
                 input:
 
@@ -2194,6 +2253,8 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipTaxonomy) {
 
+                  if (params.headers == "RefSeq") {
+
                     process AminoType_Taxonomy_Inference {
 
                         label 'high_cpus'
@@ -2202,7 +2263,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*TaxonomyLabels.fasta'
 
                         input:
-                            file(reads) from aminotypesBlast
+                            file(asvs) from aminotypesBlast
 
                         output:
                             tuple file("*_phyloseqObject.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AA_diamond
@@ -2213,117 +2274,72 @@ if (params.DataCheck || params.Analyze) {
                             """
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
-                            grep ">" \${virdb} >> headers.list
+                            grep ">" \${virdb} > headers.list
                             headers="headers.list"
-                            name=\$(ls ${reads} | awk -F "_noTaxonomy" '{print \$1}')
-                            diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                            name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                            diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             echo "Preparing lists to generate summary .csv's"
-                            echo "[Best hit accession number]" >access.list
-                            echo "[AminoType sequence length]" >length.list
-                            echo "[e-value]" >evalue.list
-                            echo "[Bitscore]" >bit.list
-                            echo "[Percent ID (aa)]" >pid.list
-                            echo "[AminoType#]" >otu.list
-                            echo "[Virus ID]" >"\$name"_virus.list
-                            echo "[Gene]" >"\$name"_genes.list
-                            grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
+                            echo "[Best hit accession number]" > access.list
+                            echo "[e-value]" > evalue.list
+                            echo "[Bitscore]" > bit.list
+                            echo "[Percent ID (aa)]" > pid.list
+                            echo "[Organism ID]" > "\$name"_virus.list
+                            echo "[Gene]" > "\$name"_genes.list
+                            echo "[AminoType#]" > otu.list
+                            echo "[Sequence length]" > length.list
+                            grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
                             echo "extracting genes and names"
                             touch new_"\$name"_asvnames.txt
-                            j=1
                             for s in \$(cat seqids.lst);do
                                 echo "Checking for \$s hit in diamond output"
-                                    if [[ ${params.refseq} == "T" ]];then
-                                        echo "RefSeq headers specified"
-                                        if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
                                             echo "Yep, there was a hit for \$s"
                                             echo "Extracting the information now:"
                                             acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
                                             echo "\$s" >> otu.list
                                             echo "\$acc" >> access.list
                                             line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                            echo "\$line" | awk '{print \$10}' >>evalue.list
-                                            echo "\$line" | awk '{print \$11}' >>bit.list
-                                            echo "\$line" | awk '{print \$12}' >>pid.list
-                                            echo "\$line" | awk '{print \$2}' >>length.list
+                                            echo "\$line" | awk '{print \$10}' >> evalue.list
+                                            echo "\$line" | awk '{print \$11}' >> bit.list
+                                            echo "\$line" | awk '{print \$12}' >> pid.list
+                                            echo "\$line" | awk '{print \$2}' >> length.list
                                             echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g')
+                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                            echo ">AminoType\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                            j=\$((\$j+1))
+                                            echo ">"\${s}"_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             echo "\$s done."
-                                        else
+                                else
                                             echo "Ugh, there was no hit for \$s .."
                                             echo "We still love \$s though and we will add it to the final fasta file"
                                             echo "\$s" >> otu.list
-                                            echo "NO_HIT" >>access.list
-                                            echo "NO_HIT" >>"\$name"_genes.list
-                                            echo "NO_HIT" >>"\$name"_virus.list
-                                            echo "NO_HIT" >>evalue.list
-                                            echo "NO_HIT" >>bit.list
-                                            echo "NO_HIT" >>pid.list
-                                            echo "NO_HIT" >>length.list
+                                            echo "NO_HIT" >> access.list
+                                            echo "NO_HIT" >> "\$name"_genes.list
+                                            echo "NO_HIT" >> "\$name"_virus.list
+                                            echo "NO_HIT" >> evalue.list
+                                            echo "NO_HIT" >> bit.list
+                                            echo "NO_HIT" >> pid.list
+                                            echo "NO_HIT" >> length.list
                                             virus="NO"
                                             gene="HIT"
-                                            echo ">AminoType\${j}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                            j=\$((\$\$1))
+                                            echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             echo "\$s done."
-                                    fi
-                                    else
-                                        echo "Using RVDB headers."
-                                        if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                            echo "Yep, there was a hit for \$s"
-                                            echo "Extracting the information now:"
-                                            acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
-                                            echo "\$s" >>otu.list
-                                            echo "\$acc" >>access.list
-                                            line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                            echo "\$line" | awk '{print \$10}' >>evalue.list
-                                            echo "\$line" | awk '{print \$11}' >>bit.list
-                                            echo "\$line" | awk '{print \$12}' >>pid.list
-                                            echo "\$line" | awk '{print \$2}' >>length.list
-                                            echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g')
-                                            echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
-                                            virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g')
-                                            echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
-                                            echo ">AminoType\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
-                                            j=\$((\$j+1))
-                                            echo "\$s done."
-                                        else
-                                            echo "Ugh, there was no hit for \$s .."
-                                            echo "We still love \$s though and we will add it to the final fasta file"
-                                            echo "\$s" >>otu.list
-                                            echo "NO_HIT" >>access.list
-                                            echo "NO_HIT" >>"\$name"_genes.list
-                                            echo "NO_HIT" >>"\$name"_virus.list
-                                            echo "NO_HIT" >>evalue.list
-                                            echo "NO_HIT" >>bit.list
-                                            echo "NO_HIT" >>pid.list
-                                            echo "NO_HIT" >>length.list
-                                            virus="NO"
-                                            gene="HIT"
-                                            echo ">AminoType\${j}_"\$virus"_"\$gene"" >>new_"\$name"_asvnames.txt
-                                            j=\$((\$j+1))
-                                            echo "\$s done."
-                                        fi
-                                    fi
-                            echo "Done with \$s"
+                               fi
                             done
                             echo "Now editing "\$name" fasta headers"
                             ###### rename_seq.py
-                            ./rename_seq.py ${reads} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
-                            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta > "\$name"_tmpssasv.fasta
+                            ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
+                            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
                             echo "[Sequence header]" > newnames.list
                             cat new_"\$name"_asvnames.txt >> newnames.list
                             touch sequence.list
                             echo "     " > sequence.list
                             grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                             rm "\$name"_tmpssasv.fasta
-                            paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloseqObject.csv
+                            paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                             paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                            for x in *phyloseqObject.csv;do
+                            for x in *phyloformat.csv;do
                                 echo "\$x"
                                 lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
                                 tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
@@ -2331,16 +2347,130 @@ if (params.DataCheck || params.Analyze) {
                                 cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                 rm tmpcol.list tmp2col.list
                             done
-                            rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list seqids.lst headers.list otu.list ;
-                            rm *asvnames.txt
-                            rm "\$name"_virus.list
-                            rm "\$name"_genes.list
-                            rm newnames.list
-                            rm access.list
-                            echo "Taxonomy inferred for: ${reads} "
+                            rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                             """
+                        }
+                    } else if (params.headers == "RVDB") {
+
+                      process AminoType_Taxonomy_Inference {
+
+                          label 'high_cpus'
+
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Taxonomy", mode: "copy", overwrite: true, pattern: '*TaxonomyLabels.fasta'
+
+                          input:
+                              file(asvs) from aminotypesBlast
+
+                          output:
+                              tuple file("*_phyloseqObject.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AA_diamond
+                              file("*_summary_for_plot.csv") into taxplot2
+                              file("*TaxonomyLabels.fasta") into tax_labeled_fasta2
+                              file("*_quick_Taxbreakdown.csv") into tax_table_amino
+
+                          script:
+                              """
+                              cp ${params.vampdir}/bin/rename_seq.py .
+                              virdb=${params.dbdir}/${params.dbname}
+                              grep ">" \${virdb} > headers.list
+                              headers="headers.list"
+                              name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                              diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              echo "Preparing lists to generate summary .csv's"
+                              echo "[Best hit accession number]" > access.list
+                              echo "[e-value]" > evalue.list
+                              echo "[Bitscore]" > bit.list
+                              echo "[Percent ID (aa)]" > pid.list
+                              echo "[Organism ID]" > "\$name"_virus.list
+                              echo "[Gene]" > "\$name"_genes.list
+                              echo "[AminoType#]" > otu.list
+                              echo "[Sequence length]" > length.list
+                              grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
+                              if [[ ${params.lsa} == "T" ]]
+                              then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
+                                    echo "[Classification]" > classfication.list
+                              else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                              fi
+                              echo "extracting genes and names"
+                              touch new_"\$name"_asvnames.txt
+                              for s in \$(cat seqids.lst);do
+                                  echo "Using RVDB headers."
+                                  if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                      echo "Yep, there was a hit for \$s"
+                                      echo "Extracting the information now:"
+                                      acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
+                                      echo "\$s" >> otu.list
+                                      echo "\$acc" >> access.list
+                                      line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                      echo "\$line" | awk '{print \$10}' >> evalue.list
+                                      echo "\$line" | awk '{print \$11}' >> bit.list
+                                      echo "\$line" | awk '{print \$12}' >> pid.list
+                                      echo "\$line" | awk '{print \$2}' >> length.list
+                                      echo "Extracting virus and gene ID for \$s now"
+                                      gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                                      echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                                      virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                                      echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                                      echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                      if [[ ${params.lca} == "T" ]]
+                                      then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                              lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                              echo "\$lcla" >> classfication.list
+                                      fi
+                                      echo "\$s done."
+                                  else
+                                      echo "Ugh, there was no hit for \$s .."
+                                      echo "We still love \$s though and we will add it to the final fasta file"
+                                      echo "\$s" >> otu.list
+                                      echo "NO_HIT" >> access.list
+                                      echo "NO_HIT" >> "\$name"_genes.list
+                                      echo "NO_HIT" >> "\$name"_virus.list
+                                      echo "NO_HIT" >> evalue.list
+                                      echo "NO_HIT" >> bit.list
+                                      echo "NO_HIT" >> pid.list
+                                      echo "NO_HIT" >> length.list
+                                      virus="NO"
+                                      gene="HIT"
+                                      echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                      if [[ ${params.lca} == "T" ]]
+                                      then    echo "N/A" >> classfication.list
+                                      fi
+                                      echo "\$s done."
+                                  fi
+                              echo "Done with \$s"
+                              done
+                              echo "Now editing "\$name" fasta headers"
+                              ###### rename_seq.py
+                              ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
+                              awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
+                              echo "[Sequence header]" > newnames.list
+                              cat new_"\$name"_asvnames.txt >> newnames.list
+                              touch sequence.list
+                              echo "     " > sequence.list
+                              grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
+                              rm "\$name"_tmpssasv.fasta
+                              if [[ ${params.lca} == "T" ]]
+                              then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                                    paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                              else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                                    paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                              fi
+                              if [[ ${params.lca} == "T" ]]
+                              then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
+                              fi
+                              for x in *phyloformat.csv;do
+                                        echo "\$x"
+                                        lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
+                                        tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
+                                        sed 's/ /_/g' tmpcol.list > tmp2col.list;
+                                        cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
+                                        rm tmpcol.list tmp2col.list
+                              done
+                              rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
+                              """
                     }
                 }
+             }
 
                 if (!params.skipPhylogeny) {
 
@@ -2691,6 +2821,8 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipTaxonomy) {
 
+                  if (params.headers == "RefSeq") {
+
                     process pcASV_Nucleotide_Taxonomy_Inference {
 
                         label 'high_cpus'
@@ -2702,7 +2834,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
 
                         input:
-                            tuple nid, file(reads) from pcASV_ntDiamond_ch
+                            tuple nid, file(asvs) from pcASV_ntDiamond_ch
 
                         output:
                             file("*.fasta") into ( pcASV_labeled )
@@ -2715,134 +2847,209 @@ if (params.DataCheck || params.Analyze) {
                             set +e
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
-                            grep ">" \${virdb} >> headers.list
+                            grep ">" \${virdb} > headers.list
                             headers="headers.list"
-                            name=\$(ls ${reads} | awk -F "_noTax" '{print \$1}')
-                            diamond blastx -q ${reads} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                            name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                            diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             echo "Preparing lists to generate summary .csv's"
-                            echo "[Best hit accession number]" >access.list
-                            echo "[pcASV sequence length]" >length.list
-                            echo "[e-value]" >evalue.list
-                            echo "[Bitscore]" >bit.list
-                            echo "[Percent ID (aa)]" >pid.list
-                            echo "[pcASV#]" >otu.list
-                            echo "[Virus ID]" >"\$name"_virus.list
-                            echo "[Gene]" >"\$name"_genes.list
-                            grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
+                            echo "[Best hit accession number]" > access.list
+                            echo "[e-value]" > evalue.list
+                            echo "[Bitscore]" > bit.list
+                            echo "[Percent ID (aa)]" > pid.list
+                            echo "[Organism ID]" > "\$name"_virus.list
+                            echo "[Gene]" > "\$name"_genes.list
+                            echo "[pcASV#]" > otu.list
+                            echo "[Sequence length]" > length.list
+                            grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
                             echo "extracting genes and names"
-                            touch new_"\$name"_headers.txt
-                            j=1
+                            touch new_"\$name"_asvnames.txt
                             for s in \$(cat seqids.lst);do
                                 echo "Checking for \$s hit in diamond output"
-                                    if [[ ${params.refseq} == "T" ]];then
-                                        echo "RefSeq headers specified"
-                                        if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
                                             echo "Yep, there was a hit for \$s"
                                             echo "Extracting the information now:"
                                             acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
                                             echo "\$s" >> otu.list
                                             echo "\$acc" >> access.list
                                             line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                            echo "\$line" | awk '{print \$10}' >>evalue.list
-                                            echo "\$line" | awk '{print \$11}' >>bit.list
-                                            echo "\$line" | awk '{print \$12}' >>pid.list
-                                            echo "\$line" | awk '{print \$2}' >>length.list
+                                            echo "\$line" | awk '{print \$10}' >> evalue.list
+                                            echo "\$line" | awk '{print \$11}' >> bit.list
+                                            echo "\$line" | awk '{print \$12}' >> pid.list
+                                            echo "\$line" | awk '{print \$2}' >> length.list
                                             echo "Extracting virus and gene ID for \$s now"
                                             gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                            echo ">pcASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
-                                            j=\$((\$j+1))
+                                            echo ">"\${s}"_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             echo "\$s done."
-                                        else
+                                else
                                             echo "Ugh, there was no hit for \$s .."
                                             echo "We still love \$s though and we will add it to the final fasta file"
                                             echo "\$s" >> otu.list
-                                            echo "NO_HIT" >>access.list
-                                            echo "NO_HIT" >>"\$name"_genes.list
-                                            echo "NO_HIT" >>"\$name"_virus.list
-                                            echo "NO_HIT" >>evalue.list
-                                            echo "NO_HIT" >>bit.list
-                                            echo "NO_HIT" >>pid.list
-                                            echo "NO_HIT" >>length.list
+                                            echo "NO_HIT" >> access.list
+                                            echo "NO_HIT" >> "\$name"_genes.list
+                                            echo "NO_HIT" >> "\$name"_virus.list
+                                            echo "NO_HIT" >> evalue.list
+                                            echo "NO_HIT" >> bit.list
+                                            echo "NO_HIT" >> pid.list
+                                            echo "NO_HIT" >> length.list
                                             virus="NO"
                                             gene="HIT"
-                                            echo ">pcASV\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
-                                            j=\$((\$j+1))
+                                            echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             echo "\$s done."
-                                    fi
-                                    else
-                                        echo "Using RVDB headers."
-                                        if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                            echo "Yep, there was a hit for \$s"
-                                            echo "Extracting the information now:"
-                                            acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
-                                            echo "\$s" >>otu.list
-                                            echo "\$acc" >>access.list
-                                            line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                            echo "\$line" | awk '{print \$10}' >>evalue.list
-                                            echo "\$line" | awk '{print \$11}' >>bit.list
-                                            echo "\$line" | awk '{print \$12}' >>pid.list
-                                            echo "\$line" | awk '{print \$2}' >>length.list
-                                            echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
-                                            echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
-                                            virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
-                                            echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
-                                            echo ">pcASV\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
-                                            j=\$((\$j+1))
-                                            echo "\$s done."
-                                        else
-                                            echo "Ugh, there was no hit for \$s .."
-                                            echo "We still love \$s though and we will add it to the final fasta file"
-                                            echo "\$s" >>otu.list
-                                            echo "NO_HIT" >>access.list
-                                            echo "NO_HIT" >>"\$name"_genes.list
-                                            echo "NO_HIT" >>"\$name"_virus.list
-                                            echo "NO_HIT" >>evalue.list
-                                            echo "NO_HIT" >>bit.list
-                                            echo "NO_HIT" >>pid.list
-                                            echo "NO_HIT" >>length.list
-                                            virus="NO"
-                                            gene="HIT"
-                                            echo ">pcASV\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
-                                            j=\$((\$j+1))
-                                            echo "\$s done."
-                                        fi
-                                    fi
-                            echo "Done with \$s"
+                               fi
                             done
                             echo "Now editing "\$name" fasta headers"
                             ###### rename_seq.py
-                            ./rename_seq.py ${reads} new_"\$name"_headers.txt "\$name"_TaxonomyLabels.fasta
-                            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta > "\$name"_tmpssasv.fasta
+                            ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
+                            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
                             echo "[Sequence header]" > newnames.list
-                            cat new_"\$name"_headers.txt >> newnames.list
+                            cat new_"\$name"_asvnames.txt >> newnames.list
                             touch sequence.list
                             echo "     " > sequence.list
                             grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                             rm "\$name"_tmpssasv.fasta
-                            paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloseqObject.csv
+                            paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                             paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                            for x in *phyloseqObject.csv;do
+                            for x in *phyloformat.csv;do
                                 echo "\$x"
                                 lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
                                 tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
                                 sed 's/ /_/g' tmpcol.list > tmp2col.list;
-                                cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_noTaxonomy_summary_for_plot.csv;
+                                cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                 rm tmpcol.list tmp2col.list
                             done
-                            rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list seqids.lst otu.list ;
-                            rm "\$name"_virus.list
-                            rm "\$name"_genes.list
-                            rm newnames.list
-                            rm access.list
-                            echo "Taxonomy inferred for: ${reads} "
-                            rm *headers.list
+                            rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                             """
+                        }
+                    } else if (params.headers == "RVDB") {
+
+                      process pcASV_Nucleotide_Taxonomy_Inference {
+
+                          label 'high_cpus'
+
+                          tag "${mtag}"
+
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
+
+                          input:
+                              tuple nid, file(asvs) from pcASV_ntDiamond_ch
+
+                          output:
+                              file("*.fasta") into ( pcASV_labeled )
+                              tuple file("*_phyloseqObject.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
+                              tuple nid, file("*_summary_for_plot.csv") into taxplot3
+                              file("*_quick_Taxbreakdown.csv") into tax_table_pcasvnt
+
+                          script:
+                              mtag="ID=" + nid
+                              """
+                              set +e
+                              cp ${params.vampdir}/bin/rename_seq.py .
+                              virdb=${params.dbdir}/${params.dbname}
+                              grep ">" \${virdb} > headers.list
+                              headers="headers.list"
+                              name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                              diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              echo "Preparing lists to generate summary .csv's"
+                              echo "[Best hit accession number]" > access.list
+                              echo "[e-value]" > evalue.list
+                              echo "[Bitscore]" > bit.list
+                              echo "[Percent ID (aa)]" > pid.list
+                              echo "[Organism ID]" > "\$name"_virus.list
+                              echo "[Gene]" > "\$name"_genes.list
+                              echo "[pcASV#]" > otu.list
+                              echo "[Sequence length]" > length.list
+                              grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
+                              if [[ ${params.lsa} == "T" ]]
+                              then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
+                                    echo "[Classification]" > classfication.list
+                              else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                              fi
+                              echo "extracting genes and names"
+                              touch new_"\$name"_asvnames.txt
+                              for s in \$(cat seqids.lst);do
+                                  echo "Using RVDB headers."
+                                  if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                      echo "Yep, there was a hit for \$s"
+                                      echo "Extracting the information now:"
+                                      acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
+                                      echo "\$s" >> otu.list
+                                      echo "\$acc" >> access.list
+                                      line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                      echo "\$line" | awk '{print \$10}' >> evalue.list
+                                      echo "\$line" | awk '{print \$11}' >> bit.list
+                                      echo "\$line" | awk '{print \$12}' >> pid.list
+                                      echo "\$line" | awk '{print \$2}' >> length.list
+                                      echo "Extracting virus and gene ID for \$s now"
+                                      gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                                      echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                                      virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                                      echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                                      echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                      if [[ ${params.lca} == "T" ]]
+                                      then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                              lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                              echo "\$lcla" >> classfication.list
+                                      fi
+                                      echo "\$s done."
+                                  else
+                                      echo "Ugh, there was no hit for \$s .."
+                                      echo "We still love \$s though and we will add it to the final fasta file"
+                                      echo "\$s" >> otu.list
+                                      echo "NO_HIT" >> access.list
+                                      echo "NO_HIT" >> "\$name"_genes.list
+                                      echo "NO_HIT" >> "\$name"_virus.list
+                                      echo "NO_HIT" >> evalue.list
+                                      echo "NO_HIT" >> bit.list
+                                      echo "NO_HIT" >> pid.list
+                                      echo "NO_HIT" >> length.list
+                                      virus="NO"
+                                      gene="HIT"
+                                      echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                      if [[ ${params.lca} == "T" ]]
+                                      then    echo "N/A" >> classfication.list
+                                      fi
+                                      echo "\$s done."
+                                  fi
+                              echo "Done with \$s"
+                              done
+                              echo "Now editing "\$name" fasta headers"
+                              ###### rename_seq.py
+                              ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
+                              awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
+                              echo "[Sequence header]" > newnames.list
+                              cat new_"\$name"_asvnames.txt >> newnames.list
+                              touch sequence.list
+                              echo "     " > sequence.list
+                              grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
+                              rm "\$name"_tmpssasv.fasta
+                              if [[ ${params.lca} == "T" ]]
+                              then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                                    paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                              else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                                    paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                              fi
+                              if [[ ${params.lca} == "T" ]]
+                              then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
+                              fi
+                              for x in *phyloformat.csv;do
+                                        echo "\$x"
+                                        lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
+                                        tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
+                                        sed 's/ /_/g' tmpcol.list > tmp2col.list;
+                                        cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
+                                        rm tmpcol.list tmp2col.list
+                              done
+                              rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
+                              """
                     }
                 }
+             }
+
 
                 process Generate_Nucleotide_pcASV_Counts {
 
@@ -3032,6 +3239,8 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipTaxonomy) {
 
+                  if (params.headers == "RefSeq") {
+
                     process pcASV_AminoAcid_Taxonomy_Inference {
 
                         label 'high_cpus'
@@ -3043,7 +3252,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
 
                         input:
-                            tuple nid, file(reads) from pcASV_aaDiamond_ch
+                            tuple nid, file(asvs) from pcASV_aaDiamond_ch
 
                         output:
                             file("*.fasta") into ( pcASV_labeledAA )
@@ -3055,116 +3264,72 @@ if (params.DataCheck || params.Analyze) {
                             """
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
-                            grep ">" \${virdb} >> headers.list
+                            grep ">" \${virdb} > headers.list
                             headers="headers.list"
-                            name=\$(ls ${reads} | awk -F ".fasta" '{print \$1}')
-                            diamond blastp -q ${reads} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                            name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                            diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             echo "Preparing lists to generate summary .csv's"
-                            echo "[Best hit accession number]" >access.list
-                            echo "[pcASV sequence length]" >length.list
-                            echo "[e-value]" >evalue.list
-                            echo "[Bitscore]" >bit.list
-                            echo "[Percent ID (aa)]" >pid.list
-                            echo "[pcASVaa#]" >otu.list
-                            echo "[Virus ID]" >"\$name"_virus.list
-                            echo "[Gene]" >"\$name"_genes.list
-                            grep ">" ${reads} | awk -F ">" '{print \$2}' > seqids.lst
+                            echo "[Best hit accession number]" > access.list
+                            echo "[e-value]" > evalue.list
+                            echo "[Bitscore]" > bit.list
+                            echo "[Percent ID (aa)]" > pid.list
+                            echo "[Organism ID]" > "\$name"_virus.list
+                            echo "[Gene]" > "\$name"_genes.list
+                            echo "[pcASV#]" > otu.list
+                            echo "[Sequence length]" > length.list
+                            grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
                             echo "extracting genes and names"
-                            touch new_"\$name"_headers.txt
-                            j=1
+                            touch new_"\$name"_asvnames.txt
                             for s in \$(cat seqids.lst);do
                                 echo "Checking for \$s hit in diamond output"
-                                    if [[ ${params.refseq} == "T" ]];then
-                                        echo "RefSeq headers specified"
-                                        if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
                                             echo "Yep, there was a hit for \$s"
                                             echo "Extracting the information now:"
                                             acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}')
                                             echo "\$s" >> otu.list
                                             echo "\$acc" >> access.list
                                             line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                            echo "\$line" | awk '{print \$10}' >>evalue.list
-                                            echo "\$line" | awk '{print \$11}' >>bit.list
-                                            echo "\$line" | awk '{print \$12}' >>pid.list
-                                            echo "\$line" | awk '{print \$2}' >>length.list
+                                            echo "\$line" | awk '{print \$10}' >> evalue.list
+                                            echo "\$line" | awk '{print \$11}' >> bit.list
+                                            echo "\$line" | awk '{print \$12}' >> pid.list
+                                            echo "\$line" | awk '{print \$2}' >> length.list
                                             echo "Extracting virus and gene ID for \$s now"
                                             gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
-                                            echo ">pcASVaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
-                                            j=\$((\$j+1))
+                                            echo ">"\${s}"_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             echo "\$s done."
-                                        else
+                                else
                                             echo "Ugh, there was no hit for \$s .."
                                             echo "We still love \$s though and we will add it to the final fasta file"
                                             echo "\$s" >> otu.list
-                                            echo "NO_HIT" >>access.list
-                                            echo "NO_HIT" >>"\$name"_genes.list
-                                            echo "NO_HIT" >>"\$name"_virus.list
-                                            echo "NO_HIT" >>evalue.list
-                                            echo "NO_HIT" >>bit.list
-                                            echo "NO_HIT" >>pid.list
-                                            echo "NO_HIT" >>length.list
+                                            echo "NO_HIT" >> access.list
+                                            echo "NO_HIT" >> "\$name"_genes.list
+                                            echo "NO_HIT" >> "\$name"_virus.list
+                                            echo "NO_HIT" >> evalue.list
+                                            echo "NO_HIT" >> bit.list
+                                            echo "NO_HIT" >> pid.list
+                                            echo "NO_HIT" >> length.list
                                             virus="NO"
                                             gene="HIT"
-                                            echo ">pcASVaa\${j}_"\$virus"_"\$gene"" >> new_"\$name"_headers.txt
-                                            j=\$((\$j+1))
+                                            echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                             echo "\$s done."
-                                    fi
-                                    else
-                                        echo "Using RVDB headers."
-                                        if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
-                                            echo "Yep, there was a hit for \$s"
-                                            echo "Extracting the information now:"
-                                            acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
-                                            echo "\$s" >>otu.list
-                                            echo "\$acc" >>access.list
-                                            line="\$(grep -w "\$s" "\$name"_dmd.out)"
-                                            echo "\$line" | awk '{print \$10}' >>evalue.list
-                                            echo "\$line" | awk '{print \$11}' >>bit.list
-                                            echo "\$line" | awk '{print \$12}' >>pid.list
-                                            echo "\$line" | awk '{print \$2}' >>length.list
-                                            echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
-                                            echo "\$gene" | sed 's/_/ /g' >>"\$name"_genes.list
-                                            virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
-                                            echo "\$virus" | sed 's/_/ /g' >>"\$name"_virus.list
-                                            echo ">pcASVaa\${j}_"\$virus"_"\$gene"" >>new_"\$name"_headers.txt
-                                            j=\$((\$j+1))
-                                            echo "\$s done."
-                                        else
-                                            echo "Ugh, there was no hit for \$s .."
-                                            echo "We still love \$s though and we will add it to the final fasta file"
-                                            echo "\$s" >>otu.list
-                                            echo "NO_HIT" >>access.list
-                                            echo "NO_HIT" >>"\$name"_genes.list
-                                            echo "NO_HIT" >>"\$name"_virus.list
-                                            echo "NO_HIT" >>evalue.list
-                                            echo "NO_HIT" >>bit.list
-                                            echo "NO_HIT" >>pid.list
-                                            echo "NO_HIT" >>length.list
-                                            virus="NO"
-                                            gene="HIT"
-                                            echo ">pcASVaa\${j}_\${virus}_\${gene}" >>new_"\$name"_headers.txt
-                                            j=\$((\$j+1))
-                                            echo "\$s done."
-                                        fi
-                                    fi
-                            echo "Done with \$s"
+                               fi
                             done
                             echo "Now editing "\$name" fasta headers"
                             ###### rename_seq.py
-                            ./rename_seq.py ${reads} new_"\$name"_headers.txt "\$name"_wTax.fasta
-                            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_wTax.fasta > "\$name"_tmpssasv.fasta
+                            ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
+                            awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
                             echo "[Sequence header]" > newnames.list
-                            cat new_"\$name"_headers.txt >> newnames.list
+                            cat new_"\$name"_asvnames.txt >> newnames.list
                             touch sequence.list
-                            awk 'BEGIN{RS=">";ORS=""}{print \$2"\\n"}' \${name}_tmpssasv.fasta >>sequence.list
+                            echo "     " > sequence.list
+                            grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                             rm "\$name"_tmpssasv.fasta
-                            paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_summary_phyloseqObject.csv
-                            paste -d"\\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                            for x in *phyloseqObject.csv;do
+                            paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                            paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                            for x in *phyloformat.csv;do
                                 echo "\$x"
                                 lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
                                 tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
@@ -3172,16 +3337,134 @@ if (params.DataCheck || params.Analyze) {
                                 cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                 rm tmpcol.list tmp2col.list
                             done
-                            rm evalue.list ; rm sequence.list ; rm bit.list ; rm pid.list ; rm length.list seqids.lst otu.list ;
-                            rm "\$name"_virus.list
-                            rm "\$name"_genes.list
-                            rm newnames.list
-                            rm access.list
-                            echo "Taxonomy inferred for: ${reads} "
-                            rm *headers.list
+                            rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                             """
                         }
+                    } else if (params.headers == "RVDB") {
+
+                      process pcASV_AminoAcid_Taxonomy_Inference {
+
+                          label 'high_cpus'
+
+                          tag "${mtag}"
+
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Taxonomy/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{csv,tsv}'
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Taxonomy/DiamondOutput", mode: "copy", overwrite: true, pattern: '*dmd.{out}'
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Taxonomy", mode: "copy", overwrite: true, pattern: '*.{fasta}'
+
+                          input:
+                              tuple nid, file(asvs) from pcASV_aaDiamond_ch
+
+                          output:
+                              file("*.fasta") into ( pcASV_labeledAA )
+                              tuple file("*phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
+                              tuple nid, file("*_summary_for_plot.csv") into taxplot4
+                              file("*_quick_Taxbreakdown.csv") into tax_table_pcasvaa
+
+                          script:
+                              mtag="ID=" + nid
+                              """
+                              cp ${params.vampdir}/bin/rename_seq.py .
+                              virdb=${params.dbdir}/${params.dbname}
+                              grep ">" \${virdb} > headers.list
+                              headers="headers.list"
+                              name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                              diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              echo "Preparing lists to generate summary .csv's"
+                              echo "[Best hit accession number]" > access.list
+                              echo "[e-value]" > evalue.list
+                              echo "[Bitscore]" > bit.list
+                              echo "[Percent ID (aa)]" > pid.list
+                              echo "[Organism ID]" > "\$name"_virus.list
+                              echo "[Gene]" > "\$name"_genes.list
+                              echo "[pcASV#]" > otu.list
+                              echo "[Sequence length]" > length.list
+                              grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
+                              if [[ ${params.lsa} == "T" ]]
+                              then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
+                                    echo "[Classification]" > classfication.list
+                              else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                              fi
+                              echo "extracting genes and names"
+                              touch new_"\$name"_asvnames.txt
+                              for s in \$(cat seqids.lst);do
+                                  echo "Using RVDB headers."
+                                  if [[ "\$(grep -wc "\$s" "\$name"_dmd.out)" -eq 1 ]];then
+                                      echo "Yep, there was a hit for \$s"
+                                      echo "Extracting the information now:"
+                                      acc=\$(grep -w "\$s" "\$name"_dmd.out | awk '{print \$3}' | awk -F "|" '{print \$3}')
+                                      echo "\$s" >> otu.list
+                                      echo "\$acc" >> access.list
+                                      line="\$(grep -w "\$s" "\$name"_dmd.out)"
+                                      echo "\$line" | awk '{print \$10}' >> evalue.list
+                                      echo "\$line" | awk '{print \$11}' >> bit.list
+                                      echo "\$line" | awk '{print \$12}' >> pid.list
+                                      echo "\$line" | awk '{print \$2}' >> length.list
+                                      echo "Extracting virus and gene ID for \$s now"
+                                      gene=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$1 }' | sed 's/ /_/g') &&
+                                      echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
+                                      virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
+                                      echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
+                                      echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                      if [[ ${params.lca} == "T" ]]
+                                      then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                              lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                              echo "\$lcla" >> classfication.list
+                                      fi
+                                      echo "\$s done."
+                                  else
+                                      echo "Ugh, there was no hit for \$s .."
+                                      echo "We still love \$s though and we will add it to the final fasta file"
+                                      echo "\$s" >> otu.list
+                                      echo "NO_HIT" >> access.list
+                                      echo "NO_HIT" >> "\$name"_genes.list
+                                      echo "NO_HIT" >> "\$name"_virus.list
+                                      echo "NO_HIT" >> evalue.list
+                                      echo "NO_HIT" >> bit.list
+                                      echo "NO_HIT" >> pid.list
+                                      echo "NO_HIT" >> length.list
+                                      virus="NO"
+                                      gene="HIT"
+                                      echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
+                                      if [[ ${params.lca} == "T" ]]
+                                      then    echo "N/A" >> classfication.list
+                                      fi
+                                      echo "\$s done."
+                                  fi
+                              echo "Done with \$s"
+                              done
+                              echo "Now editing "\$name" fasta headers"
+                              ###### rename_seq.py
+                              ./rename_seq.py ${asvs} new_"\$name"_asvnames.txt "\$name"_TaxonomyLabels.fasta
+                              awk 'BEGIN {RS=">";FS="\\n";OFS=""} NR>1 {print ">"\$1; \$1=""; print}' "\$name"_TaxonomyLabels.fasta >"\$name"_tmpssasv.fasta
+                              echo "[Sequence header]" > newnames.list
+                              cat new_"\$name"_asvnames.txt >> newnames.list
+                              touch sequence.list
+                              echo "     " > sequence.list
+                              grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
+                              rm "\$name"_tmpssasv.fasta
+                              if [[ ${params.lca} == "T" ]]
+                              then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                                    paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                              else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
+                                    paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                              fi
+                              if [[ ${params.lca} == "T" ]]
+                              then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
+                              fi
+                              for x in *phyloformat.csv;do
+                                        echo "\$x"
+                                        lin=\$(( \$(wc -l \$x | awk '{print \$1}')-1))
+                                        tail -"\$lin" \$x | awk -F "," '{print \$2}' > tmpcol.list;
+                                        sed 's/ /_/g' tmpcol.list > tmp2col.list;
+                                        cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
+                                        rm tmpcol.list tmp2col.list
+                              done
+                              rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
+                              """
                     }
+                }
+            }
 
                 if (!params.skipPhylogeny) {
 
