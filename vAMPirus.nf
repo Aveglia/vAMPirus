@@ -2495,30 +2495,31 @@ if (params.DataCheck || params.Analyze) {
                             pre=\$(echo ${prot} | awk -F "_noTax" '{print \$1}' )
                             mafft --thread ${task.cpus} --maxiterate 15000 --auto ${prot} >\${pre}_ALN.fasta
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
-
+                            o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
+                            mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                             # Protein_ModelTest
-                            modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
+                            modeltest-ng -i \${pre}_Aligned_informativeonly.fasta -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
 
                             # Protein_Phylogeny
                             if [ "${params.iqCustomaa}" != "" ];then
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomaa}
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomaa}
 
                             elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
 
                             elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                                mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.fasta.log | head -1 | awk '{print \$6}')
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
 
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s\${pre}_Aligned_informativeonly.fasta.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
                             else
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                     }
@@ -3130,30 +3131,31 @@ if (params.DataCheck || params.Analyze) {
                             pre=\$( echo ${reads} | awk -F "_noTax" '{print \$1}' )
                             mafft --maxiterate 5000 --auto ${reads} >\${pre}_ALN.fasta
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
-
+                            o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
+                            mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                             # pcASV_Nucleotide_ModelTest
-                            modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_noTaxonomy_mt -d nt -s 203 --disable-checkpoint
+                            modeltest-ng -i \${pre}_Aligned_informativeonly.fasta -p ${task.cpus} -o \${pre}_noTaxonomy_mt -d nt -s 203 --disable-checkpoint
 
                             # pcASV_Nucleotide_Phylogeny
                             if [ "${params.iqCustomnt}" != "" ];then
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq --redo -T auto ${params.iqCustomnt}
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq --redo -T auto ${params.iqCustomnt}
 
                             elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m \${mod} --redo-nt auto -b ${params.boots}
+                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m \${mod} --redo-nt auto -b ${params.boots}
 
                             elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                                mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -b ${params.boots}
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -b ${params.boots}
 
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
                             else
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                     }
@@ -3491,30 +3493,31 @@ if (params.DataCheck || params.Analyze) {
                             pre=\$( echo ${prot} | awk -F ".fasta" '{print \$1}' )
                             mafft --maxiterate 5000 --auto ${prot} >\${pre}_ALN.fasta
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
-
+                            o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
+                            mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                             # pcASV_Protein_ModelTest
-                            modeltest-ng -i \${pre}_aln.fasta -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
+                            modeltest-ng -i \${pre}_Aligned_informativeonly.fasta -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
 
                             # pcASV_Protein_Phylogeny
                             if [ "${params.iqCustomaa}" != "" ];then
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomaa}
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomaa}
 
                             elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo  -nt auto -b ${params.boots}
+                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo  -nt auto -b ${params.boots}
 
                             elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                                mod=\$(tail -12 \${pre}_aln.fasta.log | head -1 | awk '{print \$6}')
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
 
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
                             else
-                                iqtree -s \${pre}_aln.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                     }
