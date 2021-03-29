@@ -202,7 +202,7 @@ then    mkdir "$mypwd"/Databases
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/U-RVDBv21.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
-        sed "s|DATABASEANNOT|${dir}/RVDBannot|g" tmp2.config | sed "s|LCAT|T|g" > tmp3.config
+        sed "s|DATABASEANNOT|${dir}/RVDBannot|g" tmp2.config | sed "s|LCAT|T|g" | sed 's/HEAD/RVDB/g' > tmp3.config
         rm tmp1.config
         rm tmp2.config
         cat tmp3.config > "$mypwd"/vampirus.config
@@ -225,7 +225,7 @@ then    mkdir "$mypwd"/Databases
         rm viral.*.protein.faa
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/complete_virus_refseq_prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
-        sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
+        sed "s|DATABASEDIR|${dir}|g" tmp1.config | sed 's/HEAD/RefSeq/g' > tmp2.config
         rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
@@ -239,7 +239,7 @@ then    mkdir "$mypwd"/Databases
         gunzip NCBI_nr_proteindb.faa.gz
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/NCBI_nr_proteindb.faa/g' "$mypwd"/vampirus.config > tmp1.config
-        sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
+        sed "s|DATABASEDIR|${dir}|g" tmp1.config | sed 's/HEAD/RefSeq/g' > tmp2.config
         rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
@@ -284,11 +284,11 @@ then
       echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck" >> STARTUP_HELP.txt
       echo "    " >> STARTUP_HELP.txt
       echo "Next, test the analysis pipeline:" >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
       echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
       echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
       echo "Ok, if everything went well (green text was spit out by Nextflow), now you can move on to the fun. First, you should review the help docs and the vampirus.config in the vAMPirus directory." >> STARTUP_HELP.txt
@@ -308,11 +308,11 @@ then
       echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING Analyze PIPELINE WITH YOUR DATA" >> STARTUP_HELP.txt
       echo "Then you can run the analysis using the -with-conda Nextflow option, here is a launch command to run the complete analysis and statistical tests:" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
       echo "OR same command using -profile option of Nextflow ..." >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats run" >> STARTUP_HELP.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
       echo "   " >> STARTUP_HELP.txt
       echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
 fi

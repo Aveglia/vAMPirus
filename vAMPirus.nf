@@ -57,6 +57,12 @@ def helpMessage() {
                     --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
 
+            --Minimum Entropy Decomposition arguments--
+
+                    --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
+
+                    --amino_med                     Set this option to perform Minimum Entropy Decomposition on AminoType sequences, see manual for more information. You will need to set a value for --aminoC to perform this analysis
+
             --Skip options--
 
                     --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
@@ -65,13 +71,19 @@ def helpMessage() {
 
                     --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
 
-                    --skipPrimerRemoval             Set this option to skup Skip primer removal process
+                    --skipPrimerRemoval             Set this option to skip primer removal process
+
+                    --skipMerging                   Set this option to skip read merging
 
                     --skipAminoTyping               Set this option to skip AminoTyping processes
 
                     --skipTaxonomy                  Set this option to skip taxonomy assignment processes
 
                     --skipPhylogeny                 Set this option to skip phylogeny processes
+
+                    --skipEMBOSS                    Set this option to skip EMBOSS processes
+
+                    --skipReport                    Set this option to skip html report generation
 
       **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
@@ -140,6 +152,11 @@ def helpMessage() {
 
                     --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
+           --Minimum Entropy Decomposition--
+
+                    --asvC                          Number of high entropy positions to use for ASV MED analysis and generate "Groups"
+
+                    --aminoC                        Number of high entropy positions to use for AminoType MED analysis and generate "Groups"
 
            --Counts table generation--
 
@@ -158,7 +175,11 @@ def helpMessage() {
 
                     --dbdir                        Path to Directory where database is being stored
 
-                    --refseq                       Set "--refseq T" to toggle use of RefSeq header format; default is "F" to use Reverence Viral DataBase (RVDB) header
+                    --headers                      Set taxonomy database header format -> headers= "RefSeq" to toggle use of RefSeq header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
+
+                    --dbanno                       Path to directory hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using.
+
+                    --lca                          Set --lca T if you would like to add taxonomic classification to taxonomy results - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
 
                     --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
 
@@ -205,186 +226,208 @@ def fullHelpMessage() {
                                                         THIS IS A LONGER HELP WITH USAGE EXAMPLES vAMPirus v${workflow.manifest.version}
     ==============================================================================================================================================================================================
 
-        Steps:
-            1- Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases
+              Steps:
+                  1- Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases
 
-            2- Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see STARTUP_HELP.txt for test commands and other examples)
+                  2- Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see STARTUP_HELP.txt for test commands and other examples)
 
-            3. Edit parameters in vampirus.config file
+                  3. Edit parameters in vampirus.config file
 
-            4. Launch the DataCheck pipeline to get summary information about your dataset
+                  4. Launch the DataCheck pipeline to get summary information about your dataset
 
-            5. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length)
+                  5. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length)
 
-            6. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
+                  6. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
 
-            7. Explore results directories and produced final reports
+                  7. Explore results directories and produced final reports
 
 
-        Usage:
+              Usage:
 
-                nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV]
+                      nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV]
 
 
-        --Help options--
+              --Help options--
 
-                --help                          Print help information
+                      --help                          Print help information
 
-                --fullHelp                      Print even more help information
+                      --fullHelp                      Print even more help information
 
 
-        --Mandatory arguments (choose one)--
+              --Mandatory arguments (choose one)--
 
-                --Analyze                       Run absolutely everything
+                      --Analyze                       Run absolutely everything
 
-                --DataCheck                     Assess how data performs with during processing and clustering
+                      --DataCheck                     Assess how data performs with during processing and clustering
 
 
-        --ASV clustering arguments--
+              --ASV clustering arguments--
 
-                --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
+                      --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
-                --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
+                      --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
 
-        --Skip options--
+              --Minimum Entropy Decomposition arguments--
 
-                --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
+                      --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
 
-                --skipFastQC                    Set this option to skiip FastQC steps in the pipeline
+                      --amino_med                     Set this option to perform Minimum Entropy Decomposition on AminoType sequences, see manual for more information. You will need to set a value for --aminoC to perform this analysis
 
-                --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
+              --Skip options--
 
-                --skipPrimerRemoval             Set this option to skup Skip primer removal process
+                      --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
 
-                --skipAminoTyping               Set this option to skip AminoTyping processes
+                      --skipFastQC                    Set this option to skiip FastQC steps in the pipeline
 
-                --skipTaxonomy                  Set this option to skip taxonomy assignment processes
+                      --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
 
-                --skipPhylogeny                 Set this option to skip phylogeny processes
+                      --skipPrimerRemoval             Set this option to skip primer removal process
 
-  **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
+                      --skipMerging                   Set this option to skip read merging
 
-       --Project/analysis information--
+                      --skipAminoTyping               Set this option to skip AminoTyping processes
 
-                --projtag                       Set project name to be used as a prefix for output files
+                      --skipTaxonomy                  Set this option to skip taxonomy assignment processes
 
-                --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
+                      --skipPhylogeny                 Set this option to skip phylogeny processes
 
-                --reads                         Path to directory containing read libraries, must have *R{1,2}* in the library names
+                      --skipEMBOSS                    Set this option to skip EMBOSS processes
 
-                --workingdir                    Path to working directory where Nextflow will put all Nextflow and vAMPirus generated output files
+                      --skipReport                    Set this option to skip html report generation
 
-                --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
+          **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
-        --Merged read length filtering--
+             --Project/analysis information--
 
-                --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
+                      --projtag                       Set project name to be used as a prefix for output files
 
-                --maxLen                        Maximum merged read length - reads with length equal to the specified max read length will be used to identifying unique sequences and  subsequent Amplicon Sequence Variant (ASV) analysis
+                      --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
 
-                --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
+                      --reads                         Path to directory containing read libraries, must have *R{1,2}* in the library names
 
+                      --workingdir                    Path to working directory where Nextflow will put all Nextflow and vAMPirus generated output files
 
-        --Primer removal--
+                      --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
-            General primer removal parameters
 
-                --primerLength                  Use this option to set the max primer length to restrict bbduk.sh primer trimming to the first x number of bases
+              --Merged read length filtering--
 
-                --maxkmer                       Maximum kmer length for bbduk.sh to use for primer detection and removal (must be shorter than your primer length; default = 13)
+                      --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
 
-                --minkmer                       Minimum kmer length for primer removal (default = 3)
+                      --maxLen                        Maximum merged read length - reads with length equal to the specified max read length will be used to identifying unique sequences and  subsequent Amplicon Sequence Variant (ASV) analysis
 
-                --minilen                       Minimum read length after adapter and primer removal (default = 200)
+                      --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
 
-            Single primer set removal-
 
-                --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
+              --Primer removal--
 
-                --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
+                  General primer removal parameters
 
-                --rev                           Reverse primer sequence for reads to be detected and removed from reads (must specify forward sequence if providing reverse)
+                      --primerLength                  Use this option to set the max primer length to restrict bbduk.sh primer trimming to the first x number of bases
 
-            Multiple primer set removal-
+                      --maxkmer                       Maximum kmer length for bbduk.sh to use for primer detection and removal (must be shorter than your primer length; default = 13)
 
-                --multi                         Use this option to signal multiple primer sequence removal within the specified pipeline
+                      --minkmer                       Minimum kmer length for primer removal (default = 3)
 
-                --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
+                      --minilen                       Minimum read length after adapter and primer removal (default = 200)
 
+                  Single primer set removal-
 
-        --Amplicon Sequence Variant (ASV) genration and clustering--
+                      --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
 
-                --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
+                      --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
 
-                --minSize                       Minimum size or representation for sequence to be considered in ASV generation
+                      --rev                           Reverse primer sequence for reads to be detected and removed from reads (must specify forward sequence if providing reverse)
 
-                --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
+                  Multiple primer set removal-
 
-                --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide-based clustering of ASVs with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+                      --multi                         Use this option to signal multiple primer sequence removal within the specified pipeline
 
-                --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for protein-based ASV clustering to generate pcASVs[ Example: --clusterAAID .97 ]
+                      --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
 
-                --clusterAAIDlist               With --pcASV set, use this option to perform protein-based ASV clustering to generate pcASVs with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
-                --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
+              --Amplicon Sequence Variant (ASV) genration and clustering--
 
+                      --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
-       --Counts table generation--
+                      --minSize                       Minimum size or representation for sequence to be considered in ASV generation
 
-                --asvcountID                    Similarity ID to use for ASV counts
+                      --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
 
-                --ProtCountID                   Minimum amino acid sequence similarity for hit to count
+                      --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
 
-                --ProtCountsLength              Minimum alignment length for hit to count
+                      --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for protein-based ASV clustering to generation pcASVs  [ Example: --clusterAAID .97 ]
 
-                --ProtCountsBit                 Minimum bitscore for hit to be counted
+                      --clusterAAIDlist               With --pcASV set, use this option to perform protein-based ASV clustering to generate pcASVs with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
+                      --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
-        --Taxonomy inference parameters--
+             --Minimum Entropy Decomposition--
 
-                --dbname                       Specify name of database to use for analysis
+                      --asvC                          Number of high entropy positions to use for ASV MED analysis and generate "Groups"
 
-                --dbdir                        Path to Directory where database is being stored
+                      --aminoC                        Number of high entropy positions to use for AminoType MED analysis and generate "Groups"
 
-                --refseq                       Set "--refseq T" to toggle use of RefSeq header format; default is "F" to use Reverence Viral DataBase (RVDB) header
+             --Counts table generation--
 
-                --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
+                      --asvcountID                    Similarity ID to use for ASV counts
 
-                --minID                        Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+                      --ProtCountID                   Minimum amino acid sequence similarity for hit to count
 
-                --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+                      --ProtCountsLength              Minimum alignment length for hit to count
 
+                      --ProtCountsBit                 Minimum bitscore for hit to be counted
 
-        --Phylogeny analysis parameters--
 
-          Setting customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D") - might be easier to set in the vampirus.config file at lines 108/109
+              --Taxonomy inference parameters--
 
-                --iqCustomnt                   Use option to set custom options to use in all IQTREE analyses with nuceoltide sequences
+                      --dbname                       Specify name of database to use for analysis
 
-                --iqCustomaa                   Use option to set custom options to use in all IQTREE analyses with amino acid sequences
+                      --dbdir                        Path to Directory where database is being stored
 
-          These options below you can set at the command, for example, to set to use model from ModelTest-NG with parametric bootstrapping --ModelTnt --ModelTaa --parametric
+                      --headers                      Set taxonomy database header format -> headers= "RefSeq" to toggle use of RefSeq header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
 
-                --ModelTnt=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with nuceoltide sequences (Default is IQ-TREE will do automatic model testing with ModelFinder Plus)
+                      --dbanno                       Path to directory hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using.
 
-                --ModelTaa=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with amino acid sequences
+                      --lca                          Set --lca T if you would like to add taxonomic classification to taxonomy results - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
 
-                --parametric                   Set to use parametric bootstrapping in IQTREE analyses
+                      --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
 
-                --nonparametric                Set to use parametric bootstrapping in IQTREE analyses
+                      --minID                        Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
 
-                --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
+                      --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
 
 
-          --Statistics options--
+              --Phylogeny analysis parameters--
 
-                --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
+                Setting customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D") - might be easier to set in the vampirus.config file at lines 108/109
 
-                --minimumCounts                Minimum number of hit counts for a sample to have to be included in the downstream statistical analyses and report generation
+                      --iqCustomnt                   Use option to set custom options to use in all IQTREE analyses with nuceoltide sequences
 
-                --trymax                       Maximum number of iterations performed by metaMDS
+                      --iqCustomaa                   Use option to set custom options to use in all IQTREE analyses with amino acid sequences
+
+                These options below you can set at the command, for example, to set to use model from ModelTest-NG with parametric bootstrapping --ModelTnt --ModelTaa --parametric
+
+                      --ModelTnt=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with nuceoltide sequences (Default is IQ-TREE will do automatic model testing with ModelFinder Plus)
+
+                      --ModelTaa=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with amino acid sequences
+
+                      --parametric                   Set to use parametric bootstrapping in IQTREE analyses
+
+                      --nonparametric                Set to use parametric bootstrapping in IQTREE analyses
+
+                      --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
+
+
+                --Statistics options--
+
+                      --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
+
+                      --minimumCounts                Minimum number of hit counts for a sample to have to be included in the downstream statistical analyses and report generation
+
+                      --trymax                       Maximum number of iterations performed by metaMDS
 
 
         |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -414,7 +457,7 @@ def fullHelpMessage() {
 
         Example 4. Launching the vAMPirus Analyze pipeline with singularity with ASV and AminoType generation with all accesory analyses (taxonomy assignment, EMBOSS, IQTREE, statistics)
 
-            nextflow run vAMPirus.nf -c vampirus.config -profile singularity --Analyze --stats run
+            nextflow run vAMPirus.nf -c vampirus.config -profile singularity --Analyze --stats
 
         Example 5. Launching the vAMPirus Analyze pipeline with conda to perform multiple primer removal and protein-based clustering of ASVs, but skip most of the extra analyses
 
@@ -422,7 +465,11 @@ def fullHelpMessage() {
 
         Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV-related results
 
-            nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run
+            nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats
+
+        Example 7. Launching vAMPirus Analyze pipeline with conda to perform ASV analyses with Minimum Entropy Decomposition to form "Groups"
+
+            nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats --asvMED --asvC 24
 
 
         Resuming analyses =>
