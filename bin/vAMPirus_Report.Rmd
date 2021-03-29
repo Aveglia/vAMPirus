@@ -225,7 +225,7 @@ raredata <- as.data.frame(rrarefy(data5[,2:cols], sample=minreads))
 <br>
 <br>
 
-### Shannon diversty
+### Shannon diversity
 
 <br>
 ```{r diversity_analysis, echo=FALSE}
@@ -307,7 +307,7 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-### Simpson diversty
+### Simpson diversity
 
 <br>
 ```{r diversity_analysis2, echo=FALSE}
