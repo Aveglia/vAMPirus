@@ -202,7 +202,7 @@ then    mkdir "$mypwd"/Databases
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/U-RVDBv21.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
-        sed "s|DATABASEANNOT|${dir}/RVDBannot|g" tmp2.config > tmp3.config
+        sed "s|DATABASEANNOT|${dir}/RVDBannot|g" tmp2.config | sed "s|LCAT|T|g" > tmp3.config
         rm tmp1.config
         rm tmp2.config
         cat tmp3.config > "$mypwd"/vampirus.config
@@ -251,6 +251,8 @@ then    mkdir "$mypwd"/Databases
         echo "Database installation: We want 'em all! Might take a little while....'"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
+        curl -o viral.1.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.protein.faa.gz
+        curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.protein.faa.gz
         curl -o U-RVDBv19.0-prot.fasta.bz2 https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
         sed "s|DATABASEDIR|${dir}|g" "$mypwd"/vampirus.config > tmp1.config
         cat tmp1.config > "$mypwd"/vampirus.config
