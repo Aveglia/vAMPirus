@@ -3665,7 +3665,7 @@ if (params.DataCheck || params.Analyze) {
                 */
 
                 report_asv = Channel.create()
-                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroups, asvgroupcounts, asv_group_rep_tree, tax_table_asv).flatten().buffer(size:8).dump(tag:'asv').into(report_asv)
+                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv).flatten().buffer(size:8).dump(tag:'asv').into(report_asv)
 
                 if (params.ncASV) {
                     report_ncasv = Channel.create()
