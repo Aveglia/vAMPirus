@@ -3658,18 +3658,24 @@ if (params.DataCheck || params.Analyze) {
                 taxplot1 -> ${params.projtag}_ASV_summary_for_plot.csv
                 asv_heatmap -> ${params.projtag}_ASV_PercentID.matrix
                 nucl_phyl_plot -> ${params.projtag}_ASV_iq.treefile
+                file("*_ASV_Grouping.csv") into asvgroupscsv
+                "${params.projtag}_ASV_Grouping_counts.csv") into asvgroupcounts
+                *_quick_Taxbreakdown.csv") into tax_table_asv
+                \\${params.projtag}_ASV_Group_Reps_iq.treefile
                 */
+
                 report_asv = Channel.create()
-                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv).flatten().buffer(size:4).into(report_asv)
+                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroups, asvgroupcounts, asv_group_rep_tree, tax_table_asv).flatten().buffer(size:8).dump(tag:'asv').into(report_asv)
 
                 if (params.ncASV) {
                     report_ncasv = Channel.create()
-                    notu_counts_plots.mix(taxplot_ncasv, notu_heatmap, nucl_phyl_plot_ncasv).groupTuple(by:0, size:4).into(report_ncasv)
+                    notu_counts_plots.mix(taxplot_ncasv, notu_heatmap, nucl_phyl_plot_ncasv, tax_table_ncasv).groupTuple(by:0, size:5).dump(tag:'ncasv').into(report_ncasv)
                     /*
                     notu_counts_plots -> ${params.projtag}_ncASV${id}_counts.csv
                     taxplot1a -> ${params.projtag}_ncASV${id}_summary_for_plot.csv
                     notu_heatmap -> ${params.projtag}_ncASV${id}_PercentID.matrix
                     nucl_phyl_plot -> ${params.projtag}_ncASV${id}_iq.treefile
+                                      ${params.projtag}_ncASV${id}_quick_Taxbreakdown.csv
                     */
                 } else {
                     report_ncasv = Channel.empty()
@@ -3677,20 +3683,22 @@ if (params.DataCheck || params.Analyze) {
 
                 if (params.pcASV) {
                     report_pcasv_aa = Channel.create()
-                    potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot).groupTuple(by:0, size:4).into(report_pcasv_aa)
+                    potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot, tax_table_pcasvaa).groupTuple(by:0, size:5).dump(tag:'pcasv1').into(report_pcasv_aa)
                     /*Report_pcASV_AminoAcid
                     potu_Acounts -> ${params.projtag}_pcASV${id}_noTaxonomy_counts.csv
                     taxplot4 -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_summary_for_plot.csv
                     potu_aa_heatmap -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_PercentID.matrix
                     potu_Atree_plot -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_iq.treefile
+                    tax_table_pcasvaa -> ${params.projtag}_aminoacid_pcASV${id}_quick_Taxbreakdown.csv
                     */
                     report_pcasv_nucl = Channel.create()
-                    potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot).groupTuple(by:0, size:4).into(report_pcasv_nucl)
+                    potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot, tax_table_pcasvnt).groupTuple(by:0, size:5).dump(tag:'pcasv2').into(report_pcasv_nucl)
                     /*Report_pcASV_Nucleotide
                     potu_Ncounts_for_report -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_counts.csv
                     taxplot3 -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_summary_for_plot.csv
                     potu_nucl_heatmap -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_PercentID.matrix
                     potu_Ntree_plot -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_iq.treefile
+                    tax_table_pcasvnt -> ${params.projtag}_nucleotide_pcASV${id}_quick_Taxbreakdown.csv
                     */
                 } else {
                      report_pcasv_aa = Channel.empty()
@@ -3699,20 +3707,24 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipAminoTyping) {
                     report_aminotypes = Channel.create()
-                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot).flatten().buffer(size:4).into(report_aminotypes)
+                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino).flatten().buffer(size:8).dump(tag:'amino').into(report_aminotypes)
                     /*
                     Report_AminoTypes
                     aminocounts_plot -> ${params.projtag}_AminoType_counts.csv
                     taxplot2 -> ${params.projtag}_AminoTypes_summary_for_plot.csv
                     aminotype_heatmap -> ${params.projtag}_AminoTypes_PercentID.matrix
                     amino_rax_plot -> ${params.projtag}_AminoTypes_iq.treefile
+                    atygroupscsv  -> *_AminoType_Grouping.csv
+                    amino_group_rep_tree -> ${params.projtag}_AminoType_Group_Reps_iq.treefile
+                                         params.projtag}_AminoType_Grouping_counts.csv") into amino_groupcounts
+                    *_quick_Taxbreakdown.csv") into tax_table_amino
                     */
                 } else {
                     report_aminotypes = Channel.empty()
                 }
 
                 report_all_ch = Channel.create()
-                report_asv.mix(report_ncasv, report_pcasv_aa, report_pcasv_nucl, report_aminotypes).map{it.flatten()}.into(report_all_ch)
+                report_asv.mix(report_ncasv, report_pcasv_aa, report_pcasv_nucl, report_aminotypes).map{it.flatten()}.dump(tag:'report').into(report_all_ch)
 
                 process Report {
 
