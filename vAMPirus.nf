@@ -1485,6 +1485,7 @@ if (params.DataCheck || params.Analyze) {
                       then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                             echo "[Classification]" > classfication.list
                       else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                            echo "[Classification]" > classfication.list
                       fi
                       echo "extracting genes and names"
                       touch new_"\$name"_asvnames.txt
@@ -1813,6 +1814,7 @@ if (params.DataCheck || params.Analyze) {
                           then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                                 echo "[Classification]" > classfication.list
                           else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                                echo "[Classification]" > classfication.list
                           fi
                           echo "extracting genes and names"
                           touch new_"\$name"_asvnames.txt
@@ -2122,7 +2124,6 @@ if (params.DataCheck || params.Analyze) {
 
               input:
                 file(counts) from asvcount_med
-                file(tree) from asvphy_med
                 file(map) from asvgroupscsv
 
               output:
@@ -2433,6 +2434,7 @@ if (params.DataCheck || params.Analyze) {
                               then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                                     echo "[Classification]" > classfication.list
                               else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                                    echo "[Classification]" > classfication.list
                               fi
                               echo "extracting genes and names"
                               touch new_"\$name"_asvnames.txt
@@ -3010,6 +3012,7 @@ if (params.DataCheck || params.Analyze) {
                               then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                                     echo "[Classification]" > classfication.list
                               else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                                    echo "[Classification]" > classfication.list
                               fi
                               echo "extracting genes and names"
                               touch new_"\$name"_asvnames.txt
@@ -3425,6 +3428,7 @@ if (params.DataCheck || params.Analyze) {
                               then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                                     echo "[Classification]" > classfication.list
                               else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
+                                    echo "[Classification]" > classfication.list
                               fi
                               echo "extracting genes and names"
                               touch new_"\$name"_asvnames.txt
