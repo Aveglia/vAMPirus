@@ -1344,7 +1344,7 @@ if (params.DataCheck || params.Analyze) {
 
               if (params.headers == "RefSeq") {
 
-                process ncASV_Taxonomy_Inference { /////// editttt
+                process ncASV_Taxonomy_Inference_RefSeq { /////// editttt
 
                     label 'high_cpus'
 
@@ -1444,7 +1444,7 @@ if (params.DataCheck || params.Analyze) {
                       }
             } else if (params.headers == "RVDB") {
 
-              process ncASV_Taxonomy_Inference { /////// editttt
+              process ncASV_Taxonomy_Inference_RVDB { /////// editttt
 
                   label 'high_cpus'
 
@@ -1678,7 +1678,7 @@ if (params.DataCheck || params.Analyze) {
 
           if (params.headers == "RefSeq") {
 
-                process ASV_Taxonomy_Inference { /////// editttt
+                process ASV_Taxonomy_Inference_RefSeq { /////// editttt
 
                     label 'high_cpus'
 
@@ -1775,7 +1775,7 @@ if (params.DataCheck || params.Analyze) {
                       }
                 } else if (params.headers == "RVDB") {
 
-                  process ASV_Taxonomy_Inference { /////// editttt
+                  process ASV_Taxonomy_Inference_RVDB { /////// editttt
 
                       label 'high_cpus'
 
@@ -2298,7 +2298,7 @@ if (params.DataCheck || params.Analyze) {
 
                   if (params.headers == "RefSeq") {
 
-                    process AminoType_Taxonomy_Inference {
+                    process AminoType_Taxonomy_Inference_RefSeq {
 
                         label 'high_cpus'
 
@@ -2395,7 +2395,7 @@ if (params.DataCheck || params.Analyze) {
                         }
                     } else if (params.headers == "RVDB") {
 
-                      process AminoType_Taxonomy_Inference {
+                      process AminoType_Taxonomy_Inference_RVDB {
 
                           label 'high_cpus'
 
@@ -2865,7 +2865,7 @@ if (params.DataCheck || params.Analyze) {
 
                   if (params.headers == "RefSeq") {
 
-                    process pcASV_Nucleotide_Taxonomy_Inference {
+                    process pcASV_Nucleotide_Taxonomy_Inference_RefSeq {
 
                         label 'high_cpus'
 
@@ -2967,7 +2967,7 @@ if (params.DataCheck || params.Analyze) {
                         }
                     } else if (params.headers == "RVDB") {
 
-                      process pcASV_Nucleotide_Taxonomy_Inference {
+                      process pcASV_Nucleotide_Taxonomy_Inference_RVDB {
 
                           label 'high_cpus'
 
@@ -3282,7 +3282,7 @@ if (params.DataCheck || params.Analyze) {
 
                   if (params.headers == "RefSeq") {
 
-                    process pcASV_AminoAcid_Taxonomy_Inference {
+                    process pcASV_AminoAcid_Taxonomy_Inference_RefSeq {
 
                         label 'high_cpus'
 
@@ -3383,7 +3383,7 @@ if (params.DataCheck || params.Analyze) {
                         }
                     } else if (params.headers == "RVDB") {
 
-                      process pcASV_AminoAcid_Taxonomy_Inference {
+                      process pcASV_AminoAcid_Taxonomy_Inference_RVDB {
 
                           label 'high_cpus'
 
