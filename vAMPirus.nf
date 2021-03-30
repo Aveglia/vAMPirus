@@ -1315,7 +1315,7 @@ if (params.DataCheck || params.Analyze) {
         if (params.ncASV) {
 
             reads_vsearch5_ch
-    	       .into{ asv_file_for_ncasvs; nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch }
+    	       .into{ asv_file_for_ncasvs; nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch; asv_for_med }
 
             process NucleotideBased_ASV_clustering {
 
@@ -2023,7 +2023,6 @@ if (params.DataCheck || params.Analyze) {
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true
 
                 input:
-
                   file(asvs) from asv_for_med
 
                 output:
