@@ -1481,7 +1481,7 @@ if (params.DataCheck || params.Analyze) {
                       echo "[ncASV#]" > otu.list
                       echo "[Sequence length]" > length.list
                       grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
-                      if [[ ${params.lsa} == "T" ]]
+                      if [[ ${params.lca} == "T" ]]
                       then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                             echo "[Classification]" > classfication.list
                       else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
@@ -1810,7 +1810,7 @@ if (params.DataCheck || params.Analyze) {
                           echo "[ASV#]" > otu.list
                           echo "[Sequence length]" > length.list
                           grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
-                          if [[ ${params.lsa} == "T" ]]
+                          if [[ ${params.lca} == "T" ]]
                           then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                                 echo "[Classification]" > classfication.list
                           else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
@@ -2054,7 +2054,7 @@ if (params.DataCheck || params.Analyze) {
                             grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
                             seqtk subseq ../../${asvs} asv.list > Group"\${j}"_sequences.fasta
                             for z in \$( cat asv.list)
-                            do      echo ""\$z",Group"\$gid","\$uni"" >> ${params.projtag}_ASV_Grouping.csv
+                            do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_ASV_Grouping.csv
 
                             done
                             rm asv.list
@@ -2430,7 +2430,7 @@ if (params.DataCheck || params.Analyze) {
                               echo "[AminoType#]" > otu.list
                               echo "[Sequence length]" > length.list
                               grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
-                              if [[ ${params.lsa} == "T" ]]
+                              if [[ ${params.lca} == "T" ]]
                               then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                                     echo "[Classification]" > classfication.list
                               else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
@@ -3008,7 +3008,7 @@ if (params.DataCheck || params.Analyze) {
                               echo "[pcASV#]" > otu.list
                               echo "[Sequence length]" > length.list
                               grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
-                              if [[ ${params.lsa} == "T" ]]
+                              if [[ ${params.lca} == "T" ]]
                               then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                                     echo "[Classification]" > classfication.list
                               else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
@@ -3424,7 +3424,7 @@ if (params.DataCheck || params.Analyze) {
                               echo "[pcASV#]" > otu.list
                               echo "[Sequence length]" > length.list
                               grep ">" ${asvs} | awk -F ">" '{print \$2}' > seqids.lst
-                              if [[ ${params.lsa} == "T" ]]
+                              if [[ ${params.lca} == "T" ]]
                               then  grep -w "LCA" ${params.dbanno}/*.txt > lcainfo.list
                                     echo "[Classification]" > classfication.list
                               else  echo "skipped" >> \${name}_quick_Taxbreakdown.csv
