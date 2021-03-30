@@ -2550,17 +2550,17 @@ if (params.DataCheck || params.Analyze) {
                                 iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
 
                             elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.fasta.log | head -1 | awk '{print \$6}')
+                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
                                 iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
 
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s\${pre}_Aligned_informativeonly.fasta.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s\${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
                             else
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                     }
