@@ -1547,11 +1547,9 @@ if (params.DataCheck || params.Analyze) {
                       if [[ ${params.lca} == "T" ]]
                       then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                             paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                            paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                       else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                             paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                      fi
-                      if [[ ${params.lca} == "T" ]]
-                      then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                       fi
                       for x in *phyloformat.csv;do
                                 echo "\$x"
@@ -1877,11 +1875,9 @@ if (params.DataCheck || params.Analyze) {
                           if [[ ${params.lca} == "T" ]]
                           then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                 paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                                paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                           else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                 paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                          fi
-                          if [[ ${params.lca} == "T" ]]
-                          then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                           fi
                           for x in *phyloformat.csv;do
                                     echo "\$x"
@@ -2499,11 +2495,9 @@ if (params.DataCheck || params.Analyze) {
                               if [[ ${params.lca} == "T" ]]
                               then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                     paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                                    paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                               else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                     paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                              fi
-                              if [[ ${params.lca} == "T" ]]
-                              then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                               fi
                               for x in *phyloformat.csv;do
                                         echo "\$x"
@@ -3078,11 +3072,9 @@ if (params.DataCheck || params.Analyze) {
                               if [[ ${params.lca} == "T" ]]
                               then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                     paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                                    paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                               else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                     paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                              fi
-                              if [[ ${params.lca} == "T" ]]
-                              then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                               fi
                               for x in *phyloformat.csv;do
                                         echo "\$x"
@@ -3495,11 +3487,9 @@ if (params.DataCheck || params.Analyze) {
                               if [[ ${params.lca} == "T" ]]
                               then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                     paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
+                                    paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                               else  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                     paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                              fi
-                              if [[ ${params.lca} == "T" ]]
-                              then  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
                               fi
                               for x in *phyloformat.csv;do
                                         echo "\$x"
