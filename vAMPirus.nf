@@ -2123,11 +2123,11 @@ if (params.DataCheck || params.Analyze) {
               publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/", mode: "copy", overwrite: true
 
               input:
-                file(counts) from asvcount_med
-                file(map) from asvgroupscsv
+                  file(counts) from asvcount_med
+                  file(map) from asvgroupscsv
 
               output:
-                file("${params.projtag}_ASV_Grouping_counts.csv") into asvgroupcounts
+                  file("${params.projtag}_ASV_Grouping_counts.csv") into asvgroupcounts
 
               script:
                   """
@@ -2652,7 +2652,7 @@ if (params.DataCheck || params.Analyze) {
                           grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
                           seqtk subseq ../../${aminos} asv.list > Group"\${j}"_sequences.fasta
                           for z in \$( cat asv.list)
-                          do      echo ""\$z",Group"\$gid","\$uni"" >> ${params.projtag}_AminoType_Grouping.csv
+                          do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_AminoType_Grouping.csv
 
                           done
                           rm asv.list
@@ -2722,12 +2722,12 @@ if (params.DataCheck || params.Analyze) {
                   publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/", mode: "copy", overwrite: true
 
                   input:
-                    file(counts) from aminocountmed
-                    file(tree) from amino_repphy
-                    file(map) from atygroupscsv
+                      file(counts) from aminocountmed
+                      file(tree) from amino_repphy
+                      file(map) from atygroupscsv
 
                   output:
-                    file("${params.projtag}_AminoType_Grouping_counts.csv") into amino_groupcounts
+                      file("${params.projtag}_AminoType_Grouping_counts.csv") into amino_groupcounts
 
                   script:
                       """
