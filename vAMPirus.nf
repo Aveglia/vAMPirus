@@ -3412,7 +3412,7 @@ if (params.DataCheck || params.Analyze) {
                               grep ">" \${virdb} > headers.list
                               headers="headers.list"
                               name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                              diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                               echo "Preparing lists to generate summary .csv's"
                               echo "[Best hit accession number]" > access.list
                               echo "[e-value]" > evalue.list
