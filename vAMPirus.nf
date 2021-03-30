@@ -1297,7 +1297,7 @@ if (params.DataCheck || params.Analyze) {
                     .collect()
 
             output:
-               file("*.html") into datacheckreport
+                file("*.html") into datacheckreport
 
             script:
                 """
@@ -3635,7 +3635,6 @@ if (params.DataCheck || params.Analyze) {
                             cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
                             rm tmp.names.csv tmp.reads.stats.csv
                             """
-
                     }
                 } else {
 
