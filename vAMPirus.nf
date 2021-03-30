@@ -1508,8 +1508,8 @@ if (params.DataCheck || params.Analyze) {
                               echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                               echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                               if [[ ${params.lca} == "T" ]]
-                              then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
-                                      lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                              then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                      lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                       echo "\$lcla" >> classfication.list
                               fi
                               echo "\$s done."
@@ -1836,8 +1836,8 @@ if (params.DataCheck || params.Analyze) {
                                   echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                                   echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                   if [[ ${params.lca} == "T" ]]
-                                  then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
-                                          lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                  then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                          lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                           echo "\$lcla" >> classfication.list
                                   fi
                                   echo "\$s done."
@@ -2456,8 +2456,8 @@ if (params.DataCheck || params.Analyze) {
                                       echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                                       echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                       if [[ ${params.lca} == "T" ]]
-                                      then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
-                                              lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                      then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                              lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                               echo "\$lcla" >> classfication.list
                                       fi
                                       echo "\$s done."
@@ -3033,8 +3033,8 @@ if (params.DataCheck || params.Analyze) {
                                       echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                                       echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                       if [[ ${params.lca} == "T" ]]
-                                      then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
-                                              lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                      then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                              lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                               echo "\$lcla" >> classfication.list
                                       fi
                                       echo "\$s done."
@@ -3448,8 +3448,8 @@ if (params.DataCheck || params.Analyze) {
                                       echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                                       echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
                                       if [[ ${params.lca} == "T" ]]
-                                      then    group=$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
-                                              lcla=$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                      then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
+                                              lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                               echo "\$lcla" >> classfication.list
                                       fi
                                       echo "\$s done."
