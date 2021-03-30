@@ -1507,7 +1507,7 @@ if (params.DataCheck || params.Analyze) {
                               virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
                               echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                               echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                              if [[ ${params.lca} == "T" ]]
+                              if [[ "${params.lca}" == "T" ]]
                               then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
                                       lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                       echo "\$lcla" >> classfication.list
@@ -1527,7 +1527,7 @@ if (params.DataCheck || params.Analyze) {
                               virus="NO"
                               gene="HIT"
                               echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                              if [[ ${params.lca} == "T" ]]
+                              if [[ "${params.lca}" == "T" ]]
                               then    echo "N/A" >> classfication.list
                               fi
                               echo "\$s done."
@@ -1544,7 +1544,7 @@ if (params.DataCheck || params.Analyze) {
                       echo "     " > sequence.list
                       grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                       rm "\$name"_tmpssasv.fasta
-                      if [[ ${params.lca} == "T" ]]
+                      if [[ "${params.lca}" == "T" ]]
                       then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                             paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
                             paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
@@ -1835,7 +1835,7 @@ if (params.DataCheck || params.Analyze) {
                                   virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
                                   echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                                   echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                  if [[ ${params.lca} == "T" ]]
+                                  if [[ "${params.lca}" == "T" ]]
                                   then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
                                           lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                           echo "\$lcla" >> classfication.list
@@ -1855,7 +1855,7 @@ if (params.DataCheck || params.Analyze) {
                                   virus="NO"
                                   gene="HIT"
                                   echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                  if [[ ${params.lca} == "T" ]]
+                                  if [[ "${params.lca}" == "T" ]]
                                   then    echo "N/A" >> classfication.list
                                   fi
                                   echo "\$s done."
@@ -1872,7 +1872,7 @@ if (params.DataCheck || params.Analyze) {
                           echo "     " > sequence.list
                           grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                           rm "\$name"_tmpssasv.fasta
-                          if [[ ${params.lca} == "T" ]]
+                          if [[ "${params.lca}" == "T" ]]
                           then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                 paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
                                 paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
@@ -2418,7 +2418,7 @@ if (params.DataCheck || params.Analyze) {
                               grep ">" \${virdb} > headers.list
                               headers="headers.list"
                               name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                              diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --more-sensitive -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                               echo "Preparing lists to generate summary .csv's"
                               echo "[Best hit accession number]" > access.list
                               echo "[e-value]" > evalue.list
@@ -2455,7 +2455,7 @@ if (params.DataCheck || params.Analyze) {
                                       virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
                                       echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                                       echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                      if [[ ${params.lca} == "T" ]]
+                                      if [[ "${params.lca}" == "T" ]]
                                       then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
                                               lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                               echo "\$lcla" >> classfication.list
@@ -2475,7 +2475,7 @@ if (params.DataCheck || params.Analyze) {
                                       virus="NO"
                                       gene="HIT"
                                       echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                      if [[ ${params.lca} == "T" ]]
+                                      if [[ "${params.lca}" == "T" ]]
                                       then    echo "N/A" >> classfication.list
                                       fi
                                       echo "\$s done."
@@ -2492,7 +2492,7 @@ if (params.DataCheck || params.Analyze) {
                               echo "     " > sequence.list
                               grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                               rm "\$name"_tmpssasv.fasta
-                              if [[ ${params.lca} == "T" ]]
+                              if [[ "${params.lca}" == "T" ]]
                               then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                     paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
                                     paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
@@ -3032,7 +3032,7 @@ if (params.DataCheck || params.Analyze) {
                                       virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
                                       echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                                       echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                      if [[ ${params.lca} == "T" ]]
+                                      if [[ "${params.lca}" == "T" ]]
                                       then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
                                               lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                               echo "\$lcla" >> classfication.list
@@ -3052,7 +3052,7 @@ if (params.DataCheck || params.Analyze) {
                                       virus="NO"
                                       gene="HIT"
                                       echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                      if [[ ${params.lca} == "T" ]]
+                                      if [[ "${params.lca}" == "T" ]]
                                       then    echo "N/A" >> classfication.list
                                       fi
                                       echo "\$s done."
@@ -3069,7 +3069,7 @@ if (params.DataCheck || params.Analyze) {
                               echo "     " > sequence.list
                               grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                               rm "\$name"_tmpssasv.fasta
-                              if [[ ${params.lca} == "T" ]]
+                              if [[ "${params.lca}" == "T" ]]
                               then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                     paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
                                     paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
@@ -3447,7 +3447,7 @@ if (params.DataCheck || params.Analyze) {
                                       virus=\$(grep -w "\$acc" "\$headers" | awk -F "|" '{ print \$6 }' | awk -F "[" '{ print \$2 }' | awk -F "]" '{print \$1}' | sed 's/ /_/g') &&
                                       echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
                                       echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                      if [[ ${params.lca} == "T" ]]
+                                      if [[ "${params.lca}" == "T" ]]
                                       then    group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}'
                                               lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
                                               echo "\$lcla" >> classfication.list
@@ -3467,7 +3467,7 @@ if (params.DataCheck || params.Analyze) {
                                       virus="NO"
                                       gene="HIT"
                                       echo ">\${s}_"\$virus"_"\$gene"" >> new_"\$name"_asvnames.txt
-                                      if [[ ${params.lca} == "T" ]]
+                                      if [[ "${params.lca}" == "T" ]]
                                       then    echo "N/A" >> classfication.list
                                       fi
                                       echo "\$s done."
@@ -3484,7 +3484,7 @@ if (params.DataCheck || params.Analyze) {
                               echo "     " > sequence.list
                               grep -v ">" "\$name"_tmpssasv.fasta >> sequence.list
                               rm "\$name"_tmpssasv.fasta
-                              if [[ ${params.lca} == "T" ]]
+                              if [[ "${params.lca}" == "T" ]]
                               then  paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list classfication.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                     paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
                                     paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list classfication.list >> \${name}_quick_Taxbreakdown.csv
