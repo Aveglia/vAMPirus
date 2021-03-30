@@ -1690,7 +1690,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         file("*.fasta") into tax_labeled_fasta_asv
-                        tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
+                        tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
                         file("*_ASV*_summary_for_plot.csv") into taxplot_asv
 
                     script:
@@ -1787,7 +1787,7 @@ if (params.DataCheck || params.Analyze) {
 
                       output:
                           file("*.fasta") into tax_labeled_fasta_asv
-                          tuple file("*_phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
+                          tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
                           file("*_ASV*_summary_for_plot.csv") into taxplot_asv
                           file("*_quick_Taxbreakdown.csv") into tax_table_asv
 
@@ -2309,7 +2309,7 @@ if (params.DataCheck || params.Analyze) {
                             file(asvs) from aminotypesBlast
 
                         output:
-                            tuple file("*_phyloseqObject.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AA_diamond
+                            tuple file("*_phyloformat.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AA_diamond
                             file("*_summary_for_plot.csv") into taxplot2
                             file("*TaxonomyLabels.fasta") into tax_labeled_fasta2
 
@@ -2406,7 +2406,7 @@ if (params.DataCheck || params.Analyze) {
                               file(asvs) from aminotypesBlast
 
                           output:
-                              tuple file("*_phyloseqObject.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AA_diamond
+                              tuple file("*_phyloformat.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AA_diamond
                               file("*_summary_for_plot.csv") into taxplot2
                               file("*TaxonomyLabels.fasta") into tax_labeled_fasta2
                               file("*_quick_Taxbreakdown.csv") into tax_table_amino
@@ -2880,7 +2880,7 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             file("*.fasta") into ( pcASV_labeled )
-                            tuple file("*_phyloseqObject.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
+                            tuple file("*_phyloformat.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
                             tuple nid, file("*_summary_for_plot.csv") into taxplot3
 
                         script:
@@ -2982,7 +2982,7 @@ if (params.DataCheck || params.Analyze) {
 
                           output:
                               file("*.fasta") into ( pcASV_labeled )
-                              tuple file("*_phyloseqObject.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
+                              tuple file("*_phyloformat.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
                               tuple nid, file("*_summary_for_plot.csv") into taxplot3
                               file("*_quick_Taxbreakdown.csv") into tax_table_pcasvnt
 
@@ -3297,7 +3297,7 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             file("*.fasta") into ( pcASV_labeledAA )
-                            tuple file("*phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
+                            tuple file("*phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
                             tuple nid, file("*_summary_for_plot.csv") into taxplot4
 
                         script:
@@ -3398,7 +3398,7 @@ if (params.DataCheck || params.Analyze) {
 
                           output:
                               file("*.fasta") into ( pcASV_labeledAA )
-                              tuple file("*phyloseqObject.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
+                              tuple file("*phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
                               tuple nid, file("*_summary_for_plot.csv") into taxplot4
                               file("*_quick_Taxbreakdown.csv") into tax_table_pcasvaa
 
