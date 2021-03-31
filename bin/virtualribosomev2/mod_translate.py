@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# Script was modified form original to use python3
+
 #    Copyright 2002,2003,2004,2005 Rasmus Wernersson, Technical University of Denmark
 #
 #    This file is part of VirtualRibosome.
