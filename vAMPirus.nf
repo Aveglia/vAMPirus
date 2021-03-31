@@ -2128,7 +2128,7 @@ if (params.DataCheck || params.Analyze) {
                   file(map) from asvgroupscsv
 
               output:
-                  file("${params.projtag}_ASV_Grouping_counts.csv") into asvgroupcounts
+                  file("${params.projtag}_ASV_Groupingcounts.csv") into asvgroupcounts
 
               script:
                   """
@@ -2138,7 +2138,7 @@ if (params.DataCheck || params.Analyze) {
                   do    group=\$(grep -w \$x ${map} | awk -F "," '{print \$2}')
                         echo "\$group" >> group.list
                   done
-                  paste -d',' group.list ${counts} > ${params.projtag}_ASV_Grouping_counts.csv
+                  paste -d',' group.list ${counts} > ${params.projtag}_ASV_Groupingcounts.csv
                   """
               }
             }
@@ -2729,7 +2729,7 @@ if (params.DataCheck || params.Analyze) {
                       file(map) from atygroupscsv
 
                   output:
-                      file("${params.projtag}_AminoType_Grouping_counts.csv") into amino_groupcounts
+                      file("${params.projtag}_AminoType_Groupingcounts.csv") into amino_groupcounts
 
                   script:
                       """
@@ -2739,7 +2739,7 @@ if (params.DataCheck || params.Analyze) {
                       do    group=\$(grep -w \$x ${map} | awk -F "," '{print \$2}')
                             echo "\$group" >> group.list
                       done
-                      paste -d',' group.list ${counts} > ${params.projtag}_AminoType_Grouping_counts.csv
+                      paste -d',' group.list ${counts} > ${params.projtag}_AminoType_Groupingcounts.csv
                       """
                   }
             }
@@ -3662,7 +3662,7 @@ if (params.DataCheck || params.Analyze) {
                 asv_heatmap -> ${params.projtag}_ASV_PercentID.matrix
                 nucl_phyl_plot -> ${params.projtag}_ASV_iq.treefile
                 file("*_ASV_Grouping.csv") into asvgroupscsv
-                "${params.projtag}_ASV_Grouping_counts.csv") into asvgroupcounts
+                "${params.projtag}_ASV_Groupingcounts.csv") into asvgroupcounts
                 *_quick_Taxbreakdown.csv") into tax_table_asv
                 \\${params.projtag}_ASV_Group_Reps_iq.treefile
                 */
@@ -3719,7 +3719,7 @@ if (params.DataCheck || params.Analyze) {
                     amino_rax_plot -> ${params.projtag}_AminoTypes_iq.treefile
                     atygroupscsv  -> *_AminoType_Grouping.csv
                     amino_group_rep_tree -> ${params.projtag}_AminoType_Group_Reps_iq.treefile
-                                         params.projtag}_AminoType_Grouping_counts.csv") into amino_groupcounts
+                                         params.projtag}_AminoType_Groupingcounts.csv") into amino_groupcounts
                     *_quick_Taxbreakdown.csv") into tax_table_amino
                     */
                 } else {
