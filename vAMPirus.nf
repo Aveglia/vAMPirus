@@ -1360,6 +1360,7 @@ if (params.DataCheck || params.Analyze) {
                         file("*.fasta") into tax_labeled_fasta_ncasv
                         tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_ncasv
                         tuple nid, file("*ncASV*summary_for_plot.csv") into taxplot_ncasv
+                        tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_ncasv
 
                     script:
                         mtag="ID=" + nid
@@ -1693,6 +1694,7 @@ if (params.DataCheck || params.Analyze) {
                         file("*.fasta") into tax_labeled_fasta_asv
                         tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
                         file("*_ASV*_summary_for_plot.csv") into taxplot_asv
+                        file("*_quick_Taxbreakdown.csv") into tax_table_asv
 
                     script:
                         """
@@ -2312,6 +2314,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple file("*_phyloformat.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AA_diamond
                             file("*_summary_for_plot.csv") into taxplot2
                             file("*TaxonomyLabels.fasta") into tax_labeled_fasta2
+                            file("*_quick_Taxbreakdown.csv") into tax_table_amino
 
                         script:
                             """
@@ -2883,6 +2886,7 @@ if (params.DataCheck || params.Analyze) {
                             file("*.fasta") into ( pcASV_labeled )
                             tuple file("*_phyloformat.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
                             tuple nid, file("*_summary_for_plot.csv") into taxplot3
+                            tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_pcasvnt
 
                         script:
                             mtag="ID=" + nid
@@ -2985,7 +2989,7 @@ if (params.DataCheck || params.Analyze) {
                               file("*.fasta") into ( pcASV_labeled )
                               tuple file("*_phyloformat.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
                               tuple nid, file("*_summary_for_plot.csv") into taxplot3
-                              file("*_quick_Taxbreakdown.csv") into tax_table_pcasvnt
+                              tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_pcasvnt
 
                           script:
                               mtag="ID=" + nid
@@ -3301,6 +3305,7 @@ if (params.DataCheck || params.Analyze) {
                             file("*.fasta") into ( pcASV_labeledAA )
                             tuple file("*phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
                             tuple nid, file("*_summary_for_plot.csv") into taxplot4
+                            tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_pcasvaa
 
                         script:
                             mtag="ID=" + nid
@@ -3402,7 +3407,7 @@ if (params.DataCheck || params.Analyze) {
                               file("*.fasta") into ( pcASV_labeledAA )
                               tuple file("*phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
                               tuple nid, file("*_summary_for_plot.csv") into taxplot4
-                              file("*_quick_Taxbreakdown.csv") into tax_table_pcasvaa
+                              tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_pcasvaa
 
                           script:
                               mtag="ID=" + nid
