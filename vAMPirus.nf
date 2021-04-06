@@ -755,7 +755,7 @@ if (params.DataCheck || params.Analyze) {
 
             script:
                 """
-                vsearch --fastq_mergepairs ${reads[0]} --reverse ${reads[1]} --threads ${task.cpus} --fastqout ${sample_id}_mergedclean.fastq --fastqout_notmerged_fwd ${sample_id}_notmerged_fwd.fastq --fastqout_notmerged_rev ${sample_id}_notmerged_rev.fastq --fastq_maxee ${params.maxEE} --relabel ${sample_id}.
+                vsearch --fastq_mergepairs ${reads[0]} --reverse ${reads[1]} --threads ${task.cpus} --fastqout ${sample_id}_mergedclean.fastq --fastqout_notmerged_fwd ${sample_id}_notmerged_fwd.fastq --fastqout_notmerged_rev ${sample_id}_notmerged_rev.fastq  --fastq_maxdiffs ${params.diffs} --fastq_maxns ${params.maxn} --fastq_allowmergestagger --fastq_maxee ${params.maxEE} --relabel ${sample_id}.
                 echo ${sample_id} > ${sample_id}.name
                 """
 
