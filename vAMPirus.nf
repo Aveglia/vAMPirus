@@ -2645,7 +2645,7 @@ if (params.DataCheck || params.Analyze) {
                   #Decomposition
                   oligotype ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                   #generatemaps
-                  cd ./${params.projtag}_asvMED_${params.asvC}/OLIGO-REPRESENTATIVES/
+                  cd ./${params.projtag}_AminoTypeMED_${params.aminoC}/OLIGO-REPRESENTATIVES/
                   echo "AminoType,Group,IDPattern"
                   j=1
                   for x in *_unique;
