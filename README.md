@@ -197,11 +197,11 @@ OR
 
 ### Analyze test =>
 
-      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats run`
+      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats`
 
 OR
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats run`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats`
 
 
 # Running vAMPirus
@@ -209,6 +209,7 @@ OR
 If you done the setup and confirmed installation success with the test commands, you are good to get going with your own data. Before getting started edit the configuration file with the parameters and other options you plan to use.
 
 Here are some example vAMPirus launch commands:
+
 ### DataCheck pipeline =>
 
 Example 1. Launching the vAMPirus DataCheck pipeline using conda
@@ -245,7 +246,7 @@ If an analysis is interrupted, you can use Nextflows "-resume" option that will 
 
 For example if the analysis launched with the command from Example 6 above was interrupted, all you would need to do is add the "-resume" to the end of the command like so:
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run -resume`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats -resume`
 
 
 # Who to cite:
