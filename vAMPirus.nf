@@ -2074,49 +2074,52 @@ if (params.DataCheck || params.Analyze) {
                     """
               }
 
-              process ASV_MED_Reps_phylogeny {
+              if (!params.skipPhylogeny) {
 
-              label 'low_cpus'
+                process ASV_MED_Reps_phylogeny {
 
-              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
-              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+                label 'low_cpus'
 
-              input:
-                file(reps) from groupreps
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
+                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
 
-              output:
-                file("*_ASV_Group_Reps*") into align_results_asvmed
-                file("*iq.treefile") into asv_group_rep_tree
+                input:
+                  file(reps) from groupreps
 
-              script:
-                  """
-                  # Protein_ModelTest
-                  modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_ASV_Group_Reps_mt -d aa -s 203 --disable-checkpoint
+                output:
+                  file("*_ASV_Group_Reps*") into align_results_asvmed
+                  file("*iq.treefile") into asv_group_rep_tree
 
-                  # Protein_Phylogeny
-                  if [ "${params.iqCustomaa}" != "" ];then
-                      iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
+                script:
+                    """
+                    # Protein_ModelTest
+                    modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_ASV_Group_Reps_mt -d aa -s 203 --disable-checkpoint
 
-                  elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
-                      mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                      iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                    # Protein_Phylogeny
+                    if [ "${params.iqCustomaa}" != "" ];then
+                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
 
-                  elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                      mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                      iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                    elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
+                        mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
 
-                  elif [ "${params.nonparametric}" != "false" ];then
-                      iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
+                    elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
+                        mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
-                  elif [ "${params.parametric}" != "false" ];then
-                      iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                    elif [ "${params.nonparametric}" != "false" ];then
+                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
 
-                  else
-                      iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                  fi
-                  """
+                    elif [ "${params.parametric}" != "false" ];then
+                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+
+                    else
+                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                    fi
+                    """
+                }
               }
-
+              
               process Adding_ASV_MED_Info {
 
               label 'low_cpus'
@@ -2616,107 +2619,109 @@ if (params.DataCheck || params.Analyze) {
                 }
             }
 
-            if (params.aminoMED) {
+              if (params.aminoMED) {
 
-                  process AminoType_Minimum_Entropy_Decomposition {
+                    process AminoType_Minimum_Entropy_Decomposition {
 
-                  label 'low_cpus'
+                    label 'low_cpus'
 
-                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED", mode: "copy", overwrite: true
 
-                  input:
-                    file(aminos) from aminos_for_med
+                    input:
+                      file(aminos) from aminos_for_med
 
-                  output:
-                    file("*_AminoType_Grouping.csv") into atygroupscsv
-                    file("${params.projtag}_AminoType_group_reps_aligned.fasta") into atygroupreps
+                    output:
+                      file("*_AminoType_Grouping.csv") into atygroupscsv
+                      file("${params.projtag}_AminoType_group_reps_aligned.fasta") into atygroupreps
 
-                  script:
-                  """
-                  #alignment
-                  mafft --thread ${task.cpus} --maxiterate 15000 --auto ${aminos} > ${params.projtag}_AminoTypes_mafftAlign.fasta
-                  #trimming
-                  trimal -in ${params.projtag}_AminoTypes_mafftAlign.fasta -out ${params.projtag}_AminoTypes_mafftAligned.fasta  -keepheader -fasta -automated1
-                  rm ${params.projtag}_AminoTypes_mafftAlign.fasta
-                  o-trim-uninformative-columns-from-alignment ${params.projtag}_AminoTypes_mafftAligned.fasta
-                  mv ${params.projtag}_AminoTypes_mafftAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
-                  #entopy analysis
-                  entropy-analysis ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
-                  #Decomposition
-                  oligotype ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
-                  #generatemaps
-                  cd ./${params.projtag}_AminoTypeMED_${params.aminoC}/OLIGO-REPRESENTATIVES/
-                  echo "AminoType,Group,IDPattern"
-                  j=1
-                  for x in *_unique;
-                  do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
-                          uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
-                          grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
-                          seqtk subseq ../../${aminos} asv.list > Group"\${j}"_sequences.fasta
-                          for z in \$( cat asv.list)
-                          do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_AminoType_Grouping.csv
+                    script:
+                    """
+                    #alignment
+                    mafft --thread ${task.cpus} --maxiterate 15000 --auto ${aminos} > ${params.projtag}_AminoTypes_mafftAlign.fasta
+                    #trimming
+                    trimal -in ${params.projtag}_AminoTypes_mafftAlign.fasta -out ${params.projtag}_AminoTypes_mafftAligned.fasta  -keepheader -fasta -automated1
+                    rm ${params.projtag}_AminoTypes_mafftAlign.fasta
+                    o-trim-uninformative-columns-from-alignment ${params.projtag}_AminoTypes_mafftAligned.fasta
+                    mv ${params.projtag}_AminoTypes_mafftAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
+                    #entopy analysis
+                    entropy-analysis ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
+                    #Decomposition
+                    oligotype ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                    #generatemaps
+                    cd ./${params.projtag}_AminoTypeMED_${params.aminoC}/OLIGO-REPRESENTATIVES/
+                    echo "AminoType,Group,IDPattern"
+                    j=1
+                    for x in *_unique;
+                    do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
+                            uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
+                            grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
+                            seqtk subseq ../../${aminos} asv.list > Group"\${j}"_sequences.fasta
+                            for z in \$( cat asv.list)
+                            do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_AminoType_Grouping.csv
 
-                          done
-                          rm asv.list
-                          echo ">Group\${j}" >> ${params.projtag}_AminoType_group_reps_aligned.fasta
-                          echo "\$uni" > group.list
-                          seqtk subseq ../OLIGO-REPRESENTATIVES.fasta group.list > group.fasta
-                          tail -1 group.fasta >> ${params.projtag}_AminoType_group_reps_aligned.fasta
-                          mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
-                          mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
-                          rm "\$gid"*.cPickle
-                          j=\$((\$j+1))
-                  done
-                  mv ${params.projtag}_AminoType_Grouping.csv ../../
-                  mv ${params.projtag}_AminoType_group_reps_aligned.fasta ../../
-                  cd ..
+                            done
+                            rm asv.list
+                            echo ">Group\${j}" >> ${params.projtag}_AminoType_group_reps_aligned.fasta
+                            echo "\$uni" > group.list
+                            seqtk subseq ../OLIGO-REPRESENTATIVES.fasta group.list > group.fasta
+                            tail -1 group.fasta >> ${params.projtag}_AminoType_group_reps_aligned.fasta
+                            mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
+                            mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
+                            rm "\$gid"*.cPickle
+                            j=\$((\$j+1))
+                    done
+                    mv ${params.projtag}_AminoType_Grouping.csv ../../
+                    mv ${params.projtag}_AminoType_group_reps_aligned.fasta ../../
+                    cd ..
 
-                  """
+                    """
+                    }
                   }
+                  if (!params.skipPhylogeny) {
 
-                  process AminoType_MED_Reps_phylogeny {
+                    process AminoType_MED_Reps_phylogeny {
 
-                  label 'low_cpus'
+                    label 'low_cpus'
 
-                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
-                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
-                  input:
-                    file(reps) from atygroupreps
+                    input:
+                      file(reps) from atygroupreps
 
-                  output:
-                    file("*_AminoType_Group_Reps*") into align_results_aminmed
-                    file("*iq.treefile") into amino_group_rep_tree
+                    output:
+                      file("*_AminoType_Group_Reps*") into align_results_aminmed
+                      file("*iq.treefile") into amino_group_rep_tree
 
-                  script:
-                      """
-                      # Protein_ModelTest
-                      modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_AminoType_Group_Reps_mt -d aa -s 203 --disable-checkpoint
+                    script:
+                        """
+                        # Protein_ModelTest
+                        modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_AminoType_Group_Reps_mt -d aa -s 203 --disable-checkpoint
 
-                      # Protein_Phylogeny
-                      if [ "${params.iqCustomaa}" != "" ];then
-                          iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
+                        # Protein_Phylogeny
+                        if [ "${params.iqCustomaa}" != "" ];then
+                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
 
-                      elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
-                          mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                          iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                        elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
+                            mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
 
-                      elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                          mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                          iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                        elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
+                            mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
-                      elif [ "${params.nonparametric}" != "false" ];then
-                          iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
+                        elif [ "${params.nonparametric}" != "false" ];then
+                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
 
-                      elif [ "${params.parametric}" != "false" ];then
-                          iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                        elif [ "${params.parametric}" != "false" ];then
+                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
-                      else
-                          iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                      fi
-                      """
+                        else
+                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                        fi
+                        """
+                    }
                   }
-
                   process Adding_AminoType_MED_Info {
 
                   label 'low_cpus'
