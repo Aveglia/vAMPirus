@@ -2119,7 +2119,6 @@ if (params.DataCheck || params.Analyze) {
                     """
                 }
               }
-              
               process Adding_ASV_MED_Info {
 
               label 'low_cpus'
