@@ -10,7 +10,7 @@ channels:
 dependencies:
   - python=3.6
   - blast=2.11.0
-  - diamond=2.0.9
+  - diamond=2.0.11
   - fastqc=0.11.9
   - fastp=0.20.1
   - clustalo=1.2.4
