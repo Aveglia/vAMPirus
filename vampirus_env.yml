@@ -16,7 +16,6 @@ dependencies:
   - clustalo=1.2.4
   - iqtree=2.0.3
   - modeltest-ng=0.1.6
-  - mafft=7.464
   - vsearch=2.14.2
   - biopython=1.76
   - bbmap=38.90

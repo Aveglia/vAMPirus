@@ -262,7 +262,7 @@ echo "--------------------------------------------------------------------------
 cd "$mypwd"
 echo "Ok, everything downloaded. To test installation, check out the STARTUP_HELP.txt file within "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
 chmod a+x "$mypwd"/bin/virtualribosomev2/*
-
+chmod a+x "$mypwd"/bin/muscle5.0.1278_linux64
 if [[ $(ls "$mypwd"| grep -wc "STARTUP_HELP.txt") -eq 0 ]]
 then
       touch STARTUP_HELP.txt
