@@ -25,15 +25,18 @@ vampirus_startup.sh -h [-d 1|2|3|4] [-s]
 
         [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
 
+        [ -t ]                       Set this option to download NCBI taxonomy files needed for DIAMOND to assign taxonomic classification to sequences
+
 "
 
 }
 
-while getopts "hsd:" OPTION; do
+while getopts "hstd:" OPTION; do
      case $OPTION in
          h) usage; exit;;
          d) DATABASE=${OPTARG};;
          s) CONDA="no";;
+         t) TAX="yes";;
      esac
 done
 shift $((OPTIND-1))      # required, to "eat" the options that have been processed
@@ -189,8 +192,8 @@ then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
         echo "Database installation: RVDB version 21.0 (latest as of 2021-02)"
-        curl -o U-RVDBv21.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot.fasta.bz2
-        bunzip2 U-RVDBv21.0-prot.fasta.bz2
+        curl -o U-RVDBv21.0-prot.fasta.xz  https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot.fasta.xz
+        xz -d U-RVDBv21.0-prot.fasta.xz
         curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
         unzip U-RVDBv21.0-prot-hmm-txt.zip
         mv annot ./RVDBannot
@@ -257,12 +260,24 @@ elif [[ $DATABASE != "" ]]
 then    echo "Error: Database download signaled but not given a value between 1-4"
         exit 1
 fi
+
+if [[ "$TAX" == "yes"  ]]
+then  mkdir "$mypwd"/Databases/NCBItaxonomy
+      cd "$mypwd"/Databases/NCBItaxonomy
+      curl -o prot.accession2taxid.FULL.gz ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.FULL.gz
+      gunzip prot.accession2taxid.FULL.gz
+      curl -o taxdmp.zip ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdmp.zip
+      unzip taxdmp.zip
+fi
+
 echo "-------------------------------------------------------------------------------- Database loop done"
 
 cd "$mypwd"
 echo "Ok, everything downloaded. To test installation, check out the STARTUP_HELP.txt file within "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
 chmod a+x "$mypwd"/bin/virtualribosomev2/*
 chmod a+x "$mypwd"/bin/muscle5.0.1278_linux64
+
+
 if [[ $(ls "$mypwd"| grep -wc "STARTUP_HELP.txt") -eq 0 ]]
 then
       touch STARTUP_HELP.txt

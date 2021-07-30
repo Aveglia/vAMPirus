@@ -566,7 +566,10 @@ if (params.DataCheck || params.Analyze) {
                             cp ${params.vampdir}/Databases/${params.dbname}* ${params.dbdir}/
                             if [ ! -e ${params.dbdir}/${params.dbname}.dmnd ];then
                                 echo "It needs to be built upp, doing it now"
-                                diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname}
+                                if [[ ${ncbitax} == "true" ]]
+                                then    diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname} --taxonmap ${params.dbdir}/NCBItaxonomy/prot.accession2taxid.FULL --taxonnodes ${params.dbdir}/NCBItaxonomy/nodes.dmp --taxonnames ${params.dbdir}/NCBItaxonomy/names.dmp
+                                else    diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname}
+                                fi
                                 export virdb=${params.dbdir}/${params.dbname}
                             else
                                 echo "Database looks to be present and built."
