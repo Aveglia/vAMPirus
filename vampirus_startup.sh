@@ -18,14 +18,13 @@ vampirus_startup.sh -h [-d 1|2|3|4] [-s]
         [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
                                                     1 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
-                                                          NOTE: need to use RVDB for sequence classification
                                                     2 - Download only NCBIs Viral protein RefSeq database
                                                     3 - Download only the complete NCBI NR protein database
                                                     4 - Download all three databases
 
         [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
 
-        [ -t ]                       Set this option to download NCBI taxonomy files needed for DIAMOND to assign taxonomic classification to sequences
+        [ -t ]                       Set this option to download NCBI taxonomy files needed for DIAMOND to assign taxonomic classification to sequences (works with NCBI type databases only, see manual for more information)
 
 "
 
@@ -196,11 +195,11 @@ then    mkdir "$mypwd"/Databases
         xz -d U-RVDBv21.0-prot.fasta.xz
         curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
         unzip U-RVDBv21.0-prot-hmm-txt.zip
-        mv annot ./RVDBannot
+        mv annot ./RVDBannot/
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/U-RVDBv21.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
-        sed "s|DATABASEANNOT|${dir}/RVDBannot|g" tmp2.config | sed "s|LCAT|T|g" | sed 's/HEAD/RVDB/g' > tmp3.config
+        sed "s|DATABASEANNOT|${dir}/RVDBannot|g" tmp2.config | sed "s|LCAT|T|g" | sed 's/TYPE/RVDB/g' > tmp3.config
         rm tmp1.config
         rm tmp2.config
         cat tmp3.config > "$mypwd"/vampirus.config
@@ -221,9 +220,12 @@ then    mkdir "$mypwd"/Databases
         gunzip viral.3.protein.faa.gz
         cat viral.3.protein.faa >> complete_virus_refseq_prot.fasta
         rm viral.*.protein.faa
+        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
+        unzip U-RVDBv21.0-prot-hmm-txt.zip
+        mv annot ./RVDBannot
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/complete_virus_refseq_prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
-        sed "s|DATABASEDIR|${dir}|g" tmp1.config | sed 's/HEAD/RefSeq/g' > tmp2.config
+        sed "s|DATABASEDIR|${dir}|g" tmp1.config | sed "s|DATABASEANNOT|${dir}/RVDBannot|g" | sed 's/TYPE/NCBI/g' > tmp2.config
         rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
@@ -235,9 +237,12 @@ then    mkdir "$mypwd"/Databases
         echo "Database installation: NCBI NR protein database (should be the most up to date at time of running this script)"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         gunzip NCBI_nr_proteindb.faa.gz
+        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
+        unzip U-RVDBv21.0-prot-hmm-txt.zip
+        mv annot ./RVDBannot
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/NCBI_nr_proteindb.faa/g' "$mypwd"/vampirus.config > tmp1.config
-        sed "s|DATABASEDIR|${dir}|g" tmp1.config | sed 's/HEAD/RefSeq/g' > tmp2.config
+        sed "s|DATABASEDIR|${dir}|g" tmp1.config | sed "s|DATABASEANNOT|${dir}/RVDBannot|g" | sed 's/TYPE/NCBI/g' > tmp2.config
         rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
