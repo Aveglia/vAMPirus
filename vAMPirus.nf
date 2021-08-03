@@ -516,7 +516,6 @@ if (params.readsTest) {
         .fromFilePairs("${params.reads}", checkIfExists: true)
         .into{ reads_ch; reads_qc_ch; reads_processing }
 }
-
 if (params.clusterNuclIDlist == "") {
     a=params.clusterNuclID
     slist=[a]
@@ -526,7 +525,6 @@ if (params.clusterNuclIDlist == "") {
     slist=msize.split(',').collect{it as int}
     nnuc=slist.size()
 }
-
 if (params.clusterAAIDlist == "") {
     b=params.clusterAAID
     slist2=[b]
@@ -2915,8 +2913,6 @@ if (params.DataCheck || params.Analyze) {
                           """
                 }
             }
-        }
-
         }
 
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
