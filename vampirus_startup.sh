@@ -270,6 +270,7 @@ if [[ "$TAX" == "yes"  ]]
 then  mkdir "$mypwd"/Databases/NCBItaxonomy
       cd "$mypwd"/Databases/NCBItaxonomy
       curl -o prot.accession2taxid.FULL.gz ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.FULL.gz
+      echo "Gunzipping accession2tax map, might take a moment.."
       gunzip prot.accession2taxid.FULL.gz
       curl -o taxdmp.zip ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdmp.zip
       unzip taxdmp.zip
