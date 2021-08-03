@@ -2787,11 +2787,11 @@ if (params.DataCheck || params.Analyze) {
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED", mode: "copy", overwrite: true
 
                     input:
-                      file(aminos) from aminos_for_med
+                        file(aminos) from aminos_for_med
 
                     output:
-                      file("*_AminoType_Grouping.csv") into atygroupscsv
-                      file("${params.projtag}_AminoType_group_reps_aligned.fasta") into atygroupreps
+                        file("*_AminoType_Grouping.csv") into atygroupscsv
+                        file("${params.projtag}_AminoType_group_reps_aligned.fasta") into atygroupreps
 
                     script:
                     """
@@ -2843,10 +2843,10 @@ if (params.DataCheck || params.Analyze) {
 
                     """
                     }
-                  }
+
                   if (!params.skipPhylogeny) {
 
-                    process AminoType_MED_Reps_phylogeny {
+                      process AminoType_MED_Reps_phylogeny {
 
                         label 'low_cpus'
 
@@ -2889,7 +2889,6 @@ if (params.DataCheck || params.Analyze) {
                             """
                         }
 
-
                   process Adding_AminoType_MED_Info {
 
                       label 'low_cpus'
@@ -2916,6 +2915,8 @@ if (params.DataCheck || params.Analyze) {
                           """
                 }
             }
+
+        }
 
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
 
