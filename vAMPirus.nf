@@ -539,7 +539,7 @@ if (params.clusterAAIDlist == "") {
 
 if (params.DataCheck || params.Analyze) {
 
-    println("\n\tRunning vAMPirus Analyze pipeline - This might take a while, check out Nextflow tower (tower.nf) to remotely monitor the run.\n")
+    println("\n\tRunning vAMPirus - This might take a while depending on the mode and dataset size, check out Nextflow tower (tower.nf) to remotely monitor the run.\n")
 
     if (!params.skipTaxonomy) {
 
@@ -691,7 +691,7 @@ if (params.DataCheck || params.Analyze) {
                         RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
                         bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
                         bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
-        		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+        		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
                         """
                     } else if ( params.multi && params.primers ) {
                         """
@@ -844,12 +844,6 @@ if (params.DataCheck || params.Analyze) {
 
         script:
             """
-            #bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_preFilt_preClean_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_preFilt_preClean_qualityScore_hist.txt gchist=${params.projtag}_all_merged_preFilt_preClean_gcContent_hist.txt aqhist=${params.projtag}_all_merged_preFilt_preClean_averageQuality_hist.txt lhist=${params.projtag}_all_merged_preFilt__preClean_length_hist.txt gcbins=auto
-            #fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
-            #reformat.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_preFilt_clean.fasta t=${task.cpus}
-            #bbduk.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
-            #bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postFilt_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_postFilt_qualityScore_hist.txt gchist=${params.projtag}_all_merged_postFilt_gcContent_hist.txt aqhist=${params.projtag}_all_merged_postFilt_averageQuaulity_hist.txt lhist=${params.projtag}_all_merged_postFilt_length_hist.txt gcbins=auto
-
             # from DC
             bbduk.sh in=${reads} bhist=${params.projtag}_all_merged_preFilt_preClean_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_preFilt_preClean_qualityScore_hist.txt gchist=${params.projtag}_all_merged_preFilt_preClean_gcContent_hist.txt aqhist=${params.projtag}_all_merged_preFilt_preClean_averageQuality_hist.txt lhist=${params.projtag}_all_merged_preFilt_preClean_length_hist.txt gcbins=auto
             for x in *preFilt*hist.txt;do
@@ -936,32 +930,32 @@ if (params.DataCheck || params.Analyze) {
 
         process NucleotideBased_ASV_clustering_DC {
 
-        label 'norm_cpus'
+            label 'norm_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Nucleotide", mode: "copy", overwrite: true, pattern: '*{.csv}'
+            publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Nucleotide", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
-        input:
-            file(fasta) from reads_vsearch5_ch
+            input:
+                file(fasta) from reads_vsearch5_ch
 
-        output:
-            file("number_per_percentage_nucl.csv") into number_per_percent_nucl_plot
+            output:
+                file("number_per_percentage_nucl.csv") into number_per_percent_nucl_plot
 
-        script:
-        if (params.datacheckntIDlist) {
-            """
-            for id in `echo ${params.datacheckntIDlist} | tr "," "\\n"`;do
-                vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
-            done
-            for x in *ncASV*.fasta;do
-                id=\$( echo \$x | awk -F "_ncASV" '{print \$2}' | awk -F ".fasta" '{print \$1}')
-                numb=\$( grep -c ">" \$x )
-                echo "\${id},\${numb}" >> number_per_percentage_nucl.csv
-            done
-            yo=\$(grep -c ">" ${fasta})
-	          echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
-            """
+            script:
+            if (params.datacheckntIDlist) {
+                """
+                for id in `echo ${params.datacheckntIDlist} | tr "," "\\n"`;do
+                    vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
+                done
+                for x in *ncASV*.fasta;do
+                    id=\$( echo \$x | awk -F "_ncASV" '{print \$2}' | awk -F ".fasta" '{print \$1}')
+                    numb=\$( grep -c ">" \$x )
+                    echo "\${id},\${numb}" >> number_per_percentage_nucl.csv
+                done
+                yo=\$(grep -c ">" ${fasta})
+    	          echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
+                """
+                }
             }
-        }
 
        process Translation_For_ProteinBased_Clustering_DC {
 
@@ -2855,72 +2849,73 @@ if (params.DataCheck || params.Analyze) {
 
                     process AminoType_MED_Reps_phylogeny {
 
-                    label 'low_cpus'
+                        label 'low_cpus'
 
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
-                    input:
-                      file(reps) from atygroupreps
+                        input:
+                          file(reps) from atygroupreps
 
-                    output:
-                      file("*_AminoType_Group_Reps*") into align_results_aminmed
-                      file("*iq.treefile") into amino_group_rep_tree
+                        output:
+                          file("*_AminoType_Group_Reps*") into align_results_aminmed
+                          file("*iq.treefile") into amino_group_rep_tree
 
-                    script:
-                        """
-                        # Protein_ModelTest
-                        modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_AminoType_Group_Reps_mt -d aa -s 203 --disable-checkpoint
+                        script:
+                            """
+                            # Protein_ModelTest
+                            modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_AminoType_Group_Reps_mt -d aa -s 203 --disable-checkpoint
 
-                        # Protein_Phylogeny
-                        if [ "${params.iqCustomaa}" != "" ];then
-                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
+                            # Protein_Phylogeny
+                            if [ "${params.iqCustomaa}" != "" ];then
+                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
 
-                        elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
-                            mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                            elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
+                                mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
 
-                        elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                            mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                            elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
+                                mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
-                        elif [ "${params.nonparametric}" != "false" ];then
-                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
+                            elif [ "${params.nonparametric}" != "false" ];then
+                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
 
-                        elif [ "${params.parametric}" != "false" ];then
-                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                            elif [ "${params.parametric}" != "false" ];then
+                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
 
-                        else
-                            iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                        fi
-                        """
-                    }
-                  }
+                            else
+                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                            fi
+                            """
+                        }
+
+
                   process Adding_AminoType_MED_Info {
 
-                  label 'low_cpus'
+                      label 'low_cpus'
 
-                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/", mode: "copy", overwrite: true
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/", mode: "copy", overwrite: true
 
-                  input:
-                      file(counts) from aminocountmed
-                      file(tree) from amino_repphy
-                      file(map) from atygroupscsv
+                      input:
+                          file(counts) from aminocountmed
+                          file(tree) from amino_repphy
+                          file(map) from atygroupscsv
 
-                  output:
-                      file("${params.projtag}_AminoType_Groupingcounts.csv") into amino_groupcounts
+                      output:
+                          file("${params.projtag}_AminoType_Groupingcounts.csv") into amino_groupcounts
 
-                  script:
-                      """
-                      awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
-                      echo "GroupID" >> group.list
-                      for x in \$(cat amino.list);
-                      do    group=\$(grep -w \$x ${map} | awk -F "," '{print \$2}')
-                            echo "\$group" >> group.list
-                      done
-                      paste -d',' group.list ${counts} > ${params.projtag}_AminoType_Groupingcounts.csv
-                      """
-                  }
+                      script:
+                          """
+                          awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
+                          echo "GroupID" >> group.list
+                          for x in \$(cat amino.list);
+                          do    group=\$(grep -w \$x ${map} | awk -F "," '{print \$2}')
+                                echo "\$group" >> group.list
+                          done
+                          paste -d',' group.list ${counts} > ${params.projtag}_AminoType_Groupingcounts.csv
+                          """
+                }
             }
 
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
@@ -4044,6 +4039,8 @@ if (params.DataCheck || params.Analyze) {
                 }
 
             }
+
+        }
 
 } else {
     println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
