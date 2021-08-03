@@ -175,7 +175,7 @@ def helpMessage() {
 
                     --dbdir                        Path to Directory where database is being stored
 
-                    --headers                      Set taxonomy database header format -> headers= "RefSeq" to toggle use of RefSeq header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
+                    --headers                      Set taxonomy database header format -> headers= "NCBI" to toggle use of NCBI header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
 
                     --dbanno                       Path to directory hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using.
 
@@ -387,7 +387,7 @@ def fullHelpMessage() {
 
                       --dbdir                        Path to Directory where database is being stored
 
-                      --headers                      Set taxonomy database header format -> headers= "RefSeq" to toggle use of RefSeq header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
+                      --headers                      Set taxonomy database header format -> headers= "NCBI" to toggle use of NCBI header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
 
                       --dbanno                       Path to directory hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using.
 
@@ -1350,7 +1350,7 @@ if (params.DataCheck || params.Analyze) {
 
               if (params.dbtype == "NCBI") {
 
-                process ncASV_Taxonomy_Inference_RefSeq { /////// editttt
+                process ncASV_Taxonomy_Inference_NCBI { /////// editttt
 
                     label 'high_cpus'
 
@@ -1737,7 +1737,7 @@ if (params.DataCheck || params.Analyze) {
 
           if (params.dbtype == "NCBI") {
 
-                process ASV_Taxonomy_Inference_RefSeq { /////// editttt
+                process ASV_Taxonomy_Inference_NCBI { /////// editttt
 
                     label 'high_cpus'
 
@@ -2153,7 +2153,13 @@ if (params.DataCheck || params.Analyze) {
                     #entopy analysis
                     entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
                     #Decomposition
-                    oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                    if [[ \$(echo ${params.asvC} | grep -c ",") -eq 1 ]]
+                    then
+                          tag=$(echo ${params.asvC} | sed 's/,/_/g')
+                          oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                    else
+                          oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                    fi
                     #generatemaps
                     cd ./${params.projtag}_asvMED_${params.asvC}/OLIGO-REPRESENTATIVES/
                     echo "ASV,GroupID,IDPattern"
@@ -2411,7 +2417,7 @@ if (params.DataCheck || params.Analyze) {
 
                   if (params.dbtype == "NCBI") {
 
-                    process AminoType_Taxonomy_Inference_RefSeq {
+                    process AminoType_Taxonomy_Inference_NCBI {
 
                         label 'high_cpus'
 
@@ -2808,7 +2814,13 @@ if (params.DataCheck || params.Analyze) {
                     #entopy analysis
                     entropy-analysis ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
                     #Decomposition
-                    oligotype ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                    if [[ \$(echo ${params.aminoC} | grep -c ",") -eq 1 ]]
+                    then
+                          tag=$(echo ${params.aminoC} | sed 's/,/_/g')
+                          oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                    else
+                          oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                    fi
                     #generatemaps
                     cd ./${params.projtag}_AminoTypeMED_${params.aminoC}/OLIGO-REPRESENTATIVES/
                     echo "AminoType,Group,IDPattern"
@@ -3036,7 +3048,7 @@ if (params.DataCheck || params.Analyze) {
 
                   if (params.dbtype == "NCBI") {
 
-                    process pcASV_Nucleotide_Taxonomy_Inference_RefSeq {
+                    process pcASV_Nucleotide_Taxonomy_Inference_NCBI {
 
                         label 'high_cpus'
 
@@ -3507,7 +3519,7 @@ if (params.DataCheck || params.Analyze) {
 
                   if (params.dbtype == "NCBI") {
 
-                    process pcASV_AminoAcid_Taxonomy_Inference_RefSeq {
+                    process pcASV_AminoAcid_Taxonomy_Inference_NCBI {
 
                         label 'high_cpus'
 
