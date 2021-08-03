@@ -2705,7 +2705,7 @@ if (params.DataCheck || params.Analyze) {
                             """
                             # Protein_Alignment
                             pre=\$(echo ${prot} | awk -F "_noTax" '{print \$1}' )
-                            if [[ $(grep -c ">" ${prot}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
+                            if [[ \$(grep -c ">" ${prot}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
                             ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${prot} -out \${pre}_ALN.fasta -thread ${task.cpus} -quiet
                             #mafft --thread ${task.cpus} --maxiterate 15000 --auto ${prot} >\${pre}_ALN.fasta
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
@@ -3403,7 +3403,7 @@ if (params.DataCheck || params.Analyze) {
                             mtag="ID=" + nid
                             """
                             pre=\$( echo ${prots} | awk -F "_noTax" '{print \$1}' )
-                            if [[ $(grep -c ">" ${prots}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
+                            if [[ \$(grep -c ">" ${prots}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
                             ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${prots} -out \${pre}_ALN.fasta -thread ${task.cpus} -quiet
                             #mafft --maxiterate 5000 --auto ${reads} >\${pre}_ALN.fasta
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
@@ -3817,7 +3817,7 @@ if (params.DataCheck || params.Analyze) {
                             mtag="ID=" + nid
                             """
                             pre=\$( echo ${prot} | awk -F ".fasta" '{print \$1}' )
-                            if [[ $(grep -c ">" ${prots}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
+                            if [[ \$(grep -c ">" ${prots}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
                             ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${prots} -out \${pre}_ALN.fasta -thread ${task.cpus} -quiet
                             #mafft --maxiterate 5000 --auto ${prot} >\${pre}_ALN.fasta
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
