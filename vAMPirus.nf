@@ -2917,6 +2917,8 @@ if (params.DataCheck || params.Analyze) {
             }
         }
 
+        }
+
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
 
                 process Translation_For_pcASV_Generation {
