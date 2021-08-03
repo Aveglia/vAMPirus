@@ -2155,7 +2155,7 @@ if (params.DataCheck || params.Analyze) {
                     #Decomposition
                     if [[ \$(echo ${params.asvC} | grep -c ",") -eq 1 ]]
                     then
-                          tag=$(echo ${params.asvC} | sed 's/,/_/g')
+                          tag=\$(echo ${params.asvC} | sed 's/,/_/g')
                           oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                     else
                           oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
@@ -2816,7 +2816,7 @@ if (params.DataCheck || params.Analyze) {
                     #Decomposition
                     if [[ \$(echo ${params.aminoC} | grep -c ",") -eq 1 ]]
                     then
-                          tag=$(echo ${params.aminoC} | sed 's/,/_/g')
+                          tag=\$(echo ${params.aminoC} | sed 's/,/_/g')
                           oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                     else
                           oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
