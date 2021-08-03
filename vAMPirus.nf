@@ -1191,7 +1191,7 @@ if (params.DataCheck || params.Analyze) {
           script:
             """
             #alignment
-            if [[ $(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
+            if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
             ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -thread ${task.cpus} -quiet
             #mafft --thread ${task.cpus} --maxiterate 15000 --auto ${aminos} > ${params.projtag}_AminoTypes_muscleAlign.fasta
             #trimming
@@ -2803,7 +2803,7 @@ if (params.DataCheck || params.Analyze) {
                     script:
                     """
                     #alignment
-                    if [[ $(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
+                    if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
                     ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -thread ${task.cpus} -quiet
                     #mafft --thread ${task.cpus} --maxiterate 15000 --auto ${aminos} > ${params.projtag}_AminoTypes_mafftAlign.fasta
                     #trimming
