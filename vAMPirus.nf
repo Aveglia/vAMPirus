@@ -1184,7 +1184,6 @@ if (params.DataCheck || params.Analyze) {
             #alignment
             if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
             ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
-            #muscle --thread ${task.cpus} --maxiterate 15000 --auto ${aminos} > ${params.projtag}_AminoTypes_muscleAlign.fasta
             #trimming
             trimal -in ${params.projtag}_AminoTypes_muscleAlign.fasta -out ${params.projtag}_AminoTypes_muscleAligned.fasta  -keepheader -fasta -automated1
             rm ${params.projtag}_AminoTypes_muscleAlign.fasta
@@ -1692,7 +1691,6 @@ if (params.DataCheck || params.Analyze) {
                               """
                               pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
                               ${tools}/muscle5.0.1278_linux64 -in ${asvs} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
-                              #muscle --thread ${task.cpus} --maxiterate 15000 --auto ${asvs} >\${pre}_ALN.fasta
                               trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
                               o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
                               mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
@@ -2089,7 +2087,6 @@ if (params.DataCheck || params.Analyze) {
                           """
                           pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
                           ${tools}/muscle5.0.1278_linux64 -in ${asvs} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
-                          #muscle --thread ${task.cpus} --maxiterate 15000 --auto ${asvs} >\${pre}_ALN.fasta
                           trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
                           o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
                           mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
@@ -2135,7 +2132,6 @@ if (params.DataCheck || params.Analyze) {
                     """
                     #alignment
                     ${tools}/muscle5.0.1278_linux64 -in ${asvs} -out ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
-                    #muscle --thread ${task.cpus} --maxiterate 15000 --auto ${asvs} > ${params.projtag}_ASVs_muscleAlign.fasta
                     #trimming
                     trimal -in ${params.projtag}_ASVs_muscleAlign.fasta -out ${params.projtag}_ASVs_muscleAligned.fasta  -keepheader -fasta -automated1
                     rm ${params.projtag}_ASVs_muscleAlign.fasta
@@ -2698,7 +2694,6 @@ if (params.DataCheck || params.Analyze) {
                             pre=\$(echo ${prot} | awk -F "_noTax" '{print \$1}' )
                             if [[ \$(grep -c ">" ${prot}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
                             ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${prot} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
-                            #muscle --thread ${task.cpus} --maxiterate 15000 --auto ${prot} >\${pre}_ALN.fasta
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
                             o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
                             mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
@@ -2796,7 +2791,6 @@ if (params.DataCheck || params.Analyze) {
                     #alignment
                     if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
                     ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
-                    #muscle --thread ${task.cpus} --maxiterate 15000 --auto ${aminos} > ${params.projtag}_AminoTypes_muscleAlign.fasta
                     #trimming
                     trimal -in ${params.projtag}_AminoTypes_muscleAlign.fasta -out ${params.projtag}_AminoTypes_muscleAligned.fasta  -keepheader -fasta -automated1
                     rm ${params.projtag}_AminoTypes_muscleAlign.fasta
@@ -3394,10 +3388,9 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$( echo ${prots} | awk -F "_noTax" '{print \$1}' )
-                            if [[ \$(grep -c ">" ${prots}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
-                            ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${prots} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
-                            #muscle --maxiterate 5000 --auto ${reads} >\${pre}_ALN.fasta
+                            pre=\$( echo ${prot} | awk -F "_noTax" '{print \$1}' )
+                            if [[ \$(grep -c ">" ${prot}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
+                            ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${prot} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
                             o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
                             mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
@@ -3809,9 +3802,8 @@ if (params.DataCheck || params.Analyze) {
                             mtag="ID=" + nid
                             """
                             pre=\$( echo ${prot} | awk -F ".fasta" '{print \$1}' )
-                            if [[ \$(grep -c ">" ${prots}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
-                            ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${prots} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
-                            #muscle --maxiterate 5000 --auto ${prot} >\${pre}_ALN.fasta
+                            if [[ \$(grep -c ">" ${prot}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
+                            ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${prot} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
                             trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
                             o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
                             mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
