@@ -46,7 +46,7 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 
 ## Changes in version 2.0.0
 
-1. Added Minimum Entropy Decomposition analysis using the oligotyping program produced by the Meren Lab. This allows for sequence clustering based on sequence positions of interest (biologically meaningful) or top positions with the highest Shannon's Entropy (read more here: https://merenlab.org/software/oligotyping/ ; and below)
+1. Added Minimum Entropy Decomposition analysis using the oligotyping program produced by the Meren Lab. This allows for sequence clustering based on sequence positions of interest (biologically meaningful) or top positions with the highest Shannon's Entropy (read more here: https://merenlab.org/software/oligotyping/ ; and below).
 
 2. Added more useful taxonomic classification of sequences leveraging the RVDB annotation database and/or NCBI taxonomy files (read more below)
 
@@ -96,7 +96,7 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 1. Clone vAMPirus from github   
 
-2. Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases
+2. Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases (NOTE: You will need to have the xz program installed before running startup script when downloading the RVDB database)
 
 3. Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see STARTUP_HELP.txt for test commands and other examples)
 
@@ -119,7 +119,7 @@ All you will need to do is set up the subsystem with whatever flavor of Linux yo
 
 Search for Linux in the Microsoft store -> https://www.microsoft.com/en-us/search?q=linux
 
-It should be noted that vAMPirus was developed on Centos7/8.
+It should be noted that vAMPirus has been mainly tested on Centos7/8.
 
 Here are some brief instructions for setting up Ubuntu 20.04 LTS on Windows 10 sourced from https://ubuntu.com/tutorials/ubuntu-on-windows#1-overview
 
@@ -193,7 +193,7 @@ Once you have have your Conda ready, you can execute the vAMPirus startup script
 
 If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment and use Singularity with the vAMPirus Docker image to run your analyses.
 
-You can try to run directly on your system, but there may be errors caused by differences between Apply and GNU versions of tools like "sort".
+You can try to run directly on your system, but there may be errors caused by differences between Apple and GNU versions of tools like "sort".
 
 vAMPirus was developed on a Centos7/8 operating system so we will go through how to set up a Centos7 Vagrant virtual environment with Virtual Box.
 
@@ -224,7 +224,7 @@ Once done with the full installation, execute:
 
 (Information from  https://treehouse.github.io/installation-guides/mac/homebrew)
 
-Now we should be good to use Homebrew to install Vagrant and VirtualBox to set up the VPN.
+Now we should be good to use Homebrew to install Vagrant and VirtualBox to set up the VM.
 
 
 #### Install Vagrant and Virtual Box
@@ -255,7 +255,7 @@ Virtual Box (WILL CAUSE ERROR IF ORACLE NOT GIVEN PERMISSION TO INSTALL DEPENDEN
 
 NOTE=> In this part of the setup, you might get an error saying Oracle was denied permission to install programs. You will need to go to System Preferences->Security and Privacy->General and allow Oracle permission to download programs and then rerun the above command.
 
-Alright, if you notice no errors during installation, you should be good to go and create the Centos 7 environment
+Alright, if you notice no errors during installation, you should be good to go and create the Centos7 environment
 
 
 #### Building and starting your virtual environment
@@ -292,7 +292,8 @@ We will make our own that looks like this:
            yum -y install epel-release
            yum -y install htop
            yum -y install nano
-           #git clone https://github.com/Aveglia/vAMPirus.git
+           yum -y install xz
+           git clone https://github.com/Aveglia/vAMPirus.git
            yum -y install singularity
               SHELL
       end
@@ -328,7 +329,7 @@ You should now be in your fresh Centos7 virtual environment and if you ls you wi
 
 You can now follow the normal directions for setting up vAMPirus with singularity.
 
-But here is the quick overview of recommended next steps:
+But here is the quick overview of recommended next steps (without database/taxonomy install):
 
     cd ./vAMPirus; bash vampirus_startup.sh -s
 
@@ -426,27 +427,29 @@ You can also use the startup script to install different databases to use for vA
 To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option.
 If we look at the script usage:
 
-    General execution:
+General execution:
 
-    vampirus_startup.sh -h [-d 1|2|3|4] [-s]
+vampirus_startup.sh -h [-d 1|2|3|4] [-s] [-t]
 
-        Command line options:
+    Command line options:
 
-            [ -h ]                       	Print help information
+        [ -h ]                       	Print help information
 
-            [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
+        [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
-                                                        1 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
-                                                        2 - Download only NCBIs Viral protein RefSeq database
-                                                        3 - Download only the complete NCBI NR protein database
-                                                        4 - Download all three databases
+                                                    1 - Download only the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                    2 - Download only NCBIs Viral protein RefSeq database
+                                                    3 - Download only the complete NCBI NR protein database
+                                                    4 - Download all three databases
 
-            [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
+        [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
+
+        [ -t ]                       Set this option to download NCBI taxonomy files needed for DIAMOND to assign taxonomic classification to sequences (works with NCBI type databases only, see manual for more information)
 
 
-For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, and check/install conda, run:
+For example, if you would like to install Nextflow, download NCBIs Viral Protein RefSeq database, the NCBI taxonomy files to use DIAMOND taxonomy assignment feature, and check/install conda, run:
 
-    bash vampirus_startup.sh -d 2
+    bash vampirus_startup.sh -d 2 -t
 
 and if we wanted to do the same thing as above but skip the Conda check/installation, run:
 
