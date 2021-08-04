@@ -2009,7 +2009,7 @@ if (params.DataCheck || params.Analyze) {
 
             script:
                 """
-                name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
+                name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}' | sed 's/ASVs/ASV/g')
                 vsearch --usearch_global ${merged} --db ${asvs} --id .${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
                 cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                 sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
