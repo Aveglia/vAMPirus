@@ -990,11 +990,13 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 
 ```{r med_rarefaction, echo=FALSE, cache=FALSE}
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
 ##Rarefaction curves
 rarefaction <- rarecurve(meddata5[,2:cols])
 
 ##rarefied dataset
 raredata <- as.data.frame(rrarefy(meddata5[,2:cols], sample=minreads))
+}
 ```
 
 <br>
@@ -1013,77 +1015,79 @@ raredata <- as.data.frame(rrarefy(meddata5[,2:cols], sample=minreads))
 
 <br>
 ```{r med_diversity_analysis, echo=FALSE}
-metadata <- meddata5[,(cols+1):meddata5dim[2]]
-metadata$sample <- meddata5$sample
-index <-diversity(raredata, index= "shannon")
-shannondata5 <- as.data.frame(index)
-shannondata5$sample<- meddata5$sample
-shannondata5_2 <- merge(shannondata5, metadata, by="sample")
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
+    metadata <- meddata5[,(cols+1):meddata5dim[2]]
+    metadata$sample <- meddata5$sample
+    index <-diversity(raredata, index= "shannon")
+    shannondata5 <- as.data.frame(index)
+    shannondata5$sample<- meddata5$sample
+    shannondata5_2 <- merge(shannondata5, metadata, by="sample")
 
-#shannonplot <- ggplot(shannondata5_2, aes(x=treatment,color=treatment,y=index))+
-#  geom_boxplot()+
-#  geom_point()+
-#  theme_classic()+
-#  labs(y="Index",x="Treatment")+
-#  theme(axis.text=element_text(size=12))+
-#  theme(legend.position = "none")
+    #shannonplot <- ggplot(shannondata5_2, aes(x=treatment,color=treatment,y=index))+
+    #  geom_boxplot()+
+    #  geom_point()+
+    #  theme_classic()+
+    #  labs(y="Index",x="Treatment")+
+    #  theme(axis.text=element_text(size=12))+
+    #  theme(legend.position = "none")
 
-#sh<-ggplotly(shannonplot)
-#sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
-#sh
+    #sh<-ggplotly(shannonplot)
+    #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
+    #sh
 
-sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
-#sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
-sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
-sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
-sh
+    sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+    #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
+    sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
+    sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
+    sh
 
-if (params$stats == "true" ) {
-    shannonaov <- aov(index ~ treatment, data= shannondata5_2)
-    st <- shapiro.test(resid(shannonaov))
-    bt <- bartlett.test(index ~ treatment, data= shannondata5_2)
+    if (params$stats == "true" ) {
+        shannonaov <- aov(index ~ treatment, data= shannondata5_2)
+        st <- shapiro.test(resid(shannonaov))
+        bt <- bartlett.test(index ~ treatment, data= shannondata5_2)
 
-    if (st$p.value > .05 && bt$p.value > .05) {
-      print("Shapiro Test of normality - data is normal p-value > 0.05")
-      print(shapiro.test(resid(shannonaov)))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
-      print(bartlett.test(index ~ treatment, data= shannondata5_2))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("ANOVA Results")
-      print(summary(shannonaov))
-      writeLines("\n--------------------------------------------------------------\n")
-      #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
-      print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
-      print(TukeyHSD(shannonaov))
-      writeLines("\n--------------------------------------------------------------\n")
+        if (st$p.value > .05 && bt$p.value > .05) {
+          print("Shapiro Test of normality - data is normal p-value > 0.05")
+          print(shapiro.test(resid(shannonaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= shannondata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA Results")
+          print(summary(shannonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+          #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+          print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+          print(TukeyHSD(shannonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        } else {
+          print("Shapiro Test of normality - data is normal if p-value > 0.05")
+          print(shapiro.test(resid(shannonaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= shannondata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Data either not normal or variance not homogenous")
+          print("Kruskal-Wallis Test - test significant if p <.05")
+          #Kruskal-Wallis test - significant p <.05
+          mykt <- kruskal.test(index ~ treatment, data= shannondata5_2)
+          print(mykt)
+          writeLines("\n--------------------------------------------------------------\n")
+          if (mykt$p.value < .05) {
+            #Pairwise comparison
+            print("Wilcox.test - pairwise comparison")
+            print(pairwise.wilcox.test(shannondata5_2$index, shannondata5_2$treatment, p.adjust.method = "BH"))
+          } else {
+            print("Data not significant. Skipping pairwise comparison")
+          }
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+          print(summary(shannonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        }
     } else {
-      print("Shapiro Test of normality - data is normal if p-value > 0.05")
-      print(shapiro.test(resid(shannonaov)))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
-      print(bartlett.test(index ~ treatment, data= shannondata5_2))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Data either not normal or variance not homogenous")
-      print("Kruskal-Wallis Test - test significant if p <.05")
-      #Kruskal-Wallis test - significant p <.05
-      mykt <- kruskal.test(index ~ treatment, data= shannondata5_2)
-      print(mykt)
-      writeLines("\n--------------------------------------------------------------\n")
-      if (mykt$p.value < .05) {
-        #Pairwise comparison
-        print("Wilcox.test - pairwise comparison")
-        print(pairwise.wilcox.test(shannondata5_2$index, shannondata5_2$treatment, p.adjust.method = "BH"))
-      } else {
-        print("Data not significant. Skipping pairwise comparison")
-      }
-      writeLines("\n--------------------------------------------------------------\n")
-      print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
-      print(summary(shannonaov))
-      writeLines("\n--------------------------------------------------------------\n")
+        print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
     }
-} else {
-    print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
 }
 ```
 <br>
@@ -1095,75 +1099,77 @@ if (params$stats == "true" ) {
 
 <br>
 ```{r med_diversity_analysis2, echo=FALSE}
-index <- diversity(raredata, index= "simpson")
-simpsondata5 <- as.data.frame(index)
-simpsondata5$sample<- meddata5$sample
-simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
+    index <- diversity(raredata, index= "simpson")
+    simpsondata5 <- as.data.frame(index)
+    simpsondata5$sample<- meddata5$sample
+    simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
 
-#simpsonplot <- ggplot(simpsondata5_2, aes(x=treatment,color=treatment,y=index))+
-#  geom_boxplot()+
-#  geom_point()+
-#  theme_classic()+
-#  labs(y="Index",x="Treatment")+
-#  theme(axis.text=element_text(size=12))+
-#  theme(legend.position = "none")
+    #simpsonplot <- ggplot(simpsondata5_2, aes(x=treatment,color=treatment,y=index))+
+    #  geom_boxplot()+
+    #  geom_point()+
+    #  theme_classic()+
+    #  labs(y="Index",x="Treatment")+
+    #  theme(axis.text=element_text(size=12))+
+    #  theme(legend.position = "none")
 
-#s<-ggplotly(simpsonplot)
-#s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
-#s
+    #s<-ggplotly(simpsonplot)
+    #s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
+    #s
 
-s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
-#s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
-s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
-s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
-s
+    s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+    #s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
+    s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
+    s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
+    s
 
-if (params$stats == "true" ) {
-    simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
-    st <- shapiro.test(resid(simpsonaov))
-    bt <- bartlett.test(index ~ treatment, data= simpsondata5_2)
+    if (params$stats == "true" ) {
+        simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
+        st <- shapiro.test(resid(simpsonaov))
+        bt <- bartlett.test(index ~ treatment, data= simpsondata5_2)
 
-    if (st$p.value > .05 && bt$p.value > .05) {
-      print("Shapiro Test of normality - data is normal p-value > 0.05")
-      print(shapiro.test(resid(simpsonaov)))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
-      print(bartlett.test(index ~ treatment, data= simpsondata5_2))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("ANOVA Results")
-      print(summary(simpsonaov))
-      writeLines("\n--------------------------------------------------------------\n")
-      #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
-      print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
-      print(TukeyHSD(simpsonaov))
-      writeLines("\n--------------------------------------------------------------\n")
+        if (st$p.value > .05 && bt$p.value > .05) {
+          print("Shapiro Test of normality - data is normal p-value > 0.05")
+          print(shapiro.test(resid(simpsonaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA Results")
+          print(summary(simpsonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+          #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+          print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+          print(TukeyHSD(simpsonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        } else {
+          print("Shapiro Test of normality - data is normal if p-value > 0.05")
+          print(shapiro.test(resid(simpsonaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Data either not normal or variance not homogenous")
+          print("Kruskal-Wallis Test - test significant if p <.05")
+          #Kruskal-Wallis test - significant p <.05
+          mykt <- kruskal.test(index ~ treatment, data= simpsondata5_2)
+          print(mykt)
+          writeLines("\n--------------------------------------------------------------\n")
+          if (mykt$p.value < .05) {
+            #Pairwise comparison
+            print("Wilcox.test - pairwise comparison")
+            print(pairwise.wilcox.test(simpsondata5_2$index, simpsondata5_2$treatment, p.adjust.method = "BH"))
+          } else {
+            print("Data not significant. Skipping pairwise comparison")
+          }
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+          print(summary(simpsonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        }
     } else {
-      print("Shapiro Test of normality - data is normal if p-value > 0.05")
-      print(shapiro.test(resid(simpsonaov)))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
-      print(bartlett.test(index ~ treatment, data= simpsondata5_2))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Data either not normal or variance not homogenous")
-      print("Kruskal-Wallis Test - test significant if p <.05")
-      #Kruskal-Wallis test - significant p <.05
-      mykt <- kruskal.test(index ~ treatment, data= simpsondata5_2)
-      print(mykt)
-      writeLines("\n--------------------------------------------------------------\n")
-      if (mykt$p.value < .05) {
-        #Pairwise comparison
-        print("Wilcox.test - pairwise comparison")
-        print(pairwise.wilcox.test(simpsondata5_2$index, simpsondata5_2$treatment, p.adjust.method = "BH"))
-      } else {
-        print("Data not significant. Skipping pairwise comparison")
-      }
-      writeLines("\n--------------------------------------------------------------\n")
-      print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
-      print(summary(simpsonaov))
-      writeLines("\n--------------------------------------------------------------\n")
+        print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
     }
-} else {
-    print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
 }
 ```
 <br>
@@ -1175,72 +1181,74 @@ if (params$stats == "true" ) {
 
 <br>
 ```{r med_diversity_analysis3, echo=FALSE}
-mind5<-min(meddata5$sum)
-index <- rarefy(meddata5[,2:cols], sample=mind5)
-rarerichnessdata5 <- as.data.frame(index)
-rarerichnessdata5$sample <-meddata5$sample
-richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
+    mind5<-min(meddata5$sum)
+    index <- rarefy(meddata5[,2:cols], sample=mind5)
+    rarerichnessdata5 <- as.data.frame(index)
+    rarerichnessdata5$sample <-meddata5$sample
+    richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
 
-#richnessplot <- ggplot(richdata5_2, aes(x=treatment,color=treatment,y=index))+
-#  geom_boxplot()+
-#  geom_point()+
-#  theme_classic()+
-#  labs(y="Richness",x="Treatment")+
-#  theme(axis.text=element_text(size=12))+
-#  theme(legend.position = "none")
+    #richnessplot <- ggplot(richdata5_2, aes(x=treatment,color=treatment,y=index))+
+    #  geom_boxplot()+
+    #  geom_point()+
+    #  theme_classic()+
+    #  labs(y="Richness",x="Treatment")+
+    #  theme(axis.text=element_text(size=12))+
+    #  theme(legend.position = "none")
 
-ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
-#ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
-ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
-ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
-ri
+    ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+    #ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
+    ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
+    ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
+    ri
 
-if (params$stats == "true" ) {
-    richaov <- aov(index ~ treatment, data= richdata5_2)
-    st <- shapiro.test(resid(richaov))
-    bt <- bartlett.test(index ~ treatment, data= richdata5_2)
+    if (params$stats == "true" ) {
+        richaov <- aov(index ~ treatment, data= richdata5_2)
+        st <- shapiro.test(resid(richaov))
+        bt <- bartlett.test(index ~ treatment, data= richdata5_2)
 
-    if (st$p.value > .05 && bt$p.value > .05) {
-      print("Shapiro Test of normality - data is normal p-value > 0.05")
-      print(shapiro.test(resid(richaov)))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
-      print(bartlett.test(index ~ treatment, data= richdata5_2))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("ANOVA Results")
-      print(summary(richaov))
-      #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
-      print(TukeyHSD(richaov))
-      writeLines("\n--------------------------------------------------------------\n")
+        if (st$p.value > .05 && bt$p.value > .05) {
+          print("Shapiro Test of normality - data is normal p-value > 0.05")
+          print(shapiro.test(resid(richaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= richdata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA Results")
+          print(summary(richaov))
+          #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+          print(TukeyHSD(richaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        } else {
+          print("Shapiro Test of normality - data is normal if p-value > 0.05")
+          print(shapiro.test(resid(richaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= richdata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Data either not normal or variance not homogenous")
+          print("Kruskal-Wallis Test - test significant if p <.05")
+          #Kruskal-Wallis test - significant p <.05
+          mykt <- kruskal.test(index ~ treatment, data= richdata5_2)
+          print(mykt)
+          writeLines("\n--------------------------------------------------------------\n")
+          if (mykt$p.value < .05) {
+            #Pairwise comparison
+            print("Wilcox.test - pairwise comparison")
+            print(pairwise.wilcox.test(richdata5_2$index, richdata5_2$treatment, p.adjust.method = "BH"))
+          } else {
+            print("Data not significant. Skipping pairwise comparison")
+          }
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+          print(summary(richaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        }
     } else {
-      print("Shapiro Test of normality - data is normal if p-value > 0.05")
-      print(shapiro.test(resid(richaov)))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
-      print(bartlett.test(index ~ treatment, data= richdata5_2))
-      writeLines("\n--------------------------------------------------------------\n")
-      print("Data either not normal or variance not homogenous")
-      print("Kruskal-Wallis Test - test significant if p <.05")
-      #Kruskal-Wallis test - significant p <.05
-      mykt <- kruskal.test(index ~ treatment, data= richdata5_2)
-      print(mykt)
-      writeLines("\n--------------------------------------------------------------\n")
-      if (mykt$p.value < .05) {
-        #Pairwise comparison
-        print("Wilcox.test - pairwise comparison")
-        print(pairwise.wilcox.test(richdata5_2$index, richdata5_2$treatment, p.adjust.method = "BH"))
-      } else {
-        print("Data not significant. Skipping pairwise comparison")
-      }
-      writeLines("\n--------------------------------------------------------------\n")
-      print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
-      print(summary(richaov))
-      writeLines("\n--------------------------------------------------------------\n")
+        print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
     }
-} else {
-    print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
 }
 ```
 <br>
@@ -1252,39 +1260,41 @@ if (params$stats == "true" ) {
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Distance To Centroid</h2></div>
 <br>
 ```{r med_distance, echo=FALSE}
-##Distance
-intermediate <- raredata
-bray.distance <- vegdist(sqrt(intermediate), method="bray")
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
+    ##Distance
+    intermediate <- raredata
+    bray.distance <- vegdist(sqrt(intermediate), method="bray")
 
-##Dispersion
-disper <- betadisper(bray.distance, group = metadata$treatment, type="centroid")
-df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
-df$sample <- meddata5$sample
-df2 <- merge(df, metadata, by="sample")
+    ##Dispersion
+    disper <- betadisper(bray.distance, group = metadata$treatment, type="centroid")
+    df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
+    df$sample <- meddata5$sample
+    df2 <- merge(df, metadata, by="sample")
 
-#p<- ggplot(data=df2,aes(x=treatment,y=Distance_to_centroid,colour=treatment))+
-#  geom_boxplot(outlier.alpha = 0)+
-#  theme_classic()+
-#  geom_point(position=position_dodge(width=0.75))+
-#  labs(y="Distance",x="Treatment")+
-#  theme(axis.text=element_text(size=12))+
-#  theme(legend.position = "none")
+    #p<- ggplot(data=df2,aes(x=treatment,y=Distance_to_centroid,colour=treatment))+
+    #  geom_boxplot(outlier.alpha = 0)+
+    #  theme_classic()+
+    #  geom_point(position=position_dodge(width=0.75))+
+    #  labs(y="Distance",x="Treatment")+
+    #  theme(axis.text=element_text(size=12))+
+    #  theme(legend.position = "none")
 
-#cen <- ggplotly(p)
-#cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
-#cen
+    #cen <- ggplotly(p)
+    #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
+    #cen
 
-cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
-#cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
-cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
-cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
-cen
+    cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+    #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
+    cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
+    cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
+    cen
 
-if (params$stats == "true" ) {
-    adn <- adonis(bray.distance~meddata5$treatment)
-    adn
-} else {
-    print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
+    if (params$stats == "true" ) {
+        adn <- adonis(bray.distance~meddata5$treatment)
+        adn
+    } else {
+        print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
+    }
 }
 ```
 <br>
@@ -1301,38 +1311,40 @@ if (params$stats == "true" ) {
 
 <br>
 ```{r med_nmds2d, echo=FALSE}
-##NMDS
-datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
+    ##NMDS
+    datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 
-MDS <- metaMDS(sqrt(datax),
-               distance = "bray",autotransform = FALSE,
-               k = 2,
-               maxit = 999,
-               trymax = params$try,
-               wascores = TRUE)
+    MDS <- metaMDS(sqrt(datax),
+                   distance = "bray",autotransform = FALSE,
+                   k = 2,
+                   maxit = 999,
+                   trymax = params$try,
+                   wascores = TRUE)
 
-if (MDS$converged == "TRUE") {
+    if (MDS$converged == "TRUE") {
 
-data.scores <- as.data.frame(scores(MDS))
-data.scores$sample <- meddata5$sample
-data.scores.2 <- merge(data.scores, metadata, by="sample")
+    data.scores <- as.data.frame(scores(MDS))
+    data.scores$sample <- meddata5$sample
+    data.scores.2 <- merge(data.scores, metadata, by="sample")
 
-p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
-  geom_point(size=2)+
-  theme_classic()+
-  theme(legend.title = element_blank())
+    p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
+      geom_point(size=2)+
+      theme_classic()+
+      theme(legend.title = element_blank())
 
-#fff <- ggplotly(p)
-#fff <- fff %>% layout(legend=list(y=.5))
-#fff
+    #fff <- ggplotly(p)
+    #fff <- fff %>% layout(legend=list(y=.5))
+    #fff
 
-fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
-fff <- fff %>% layout(legend=list(y=.5))
-fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
-fff
+    fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
+    fff <- fff %>% layout(legend=list(y=.5))
+    fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
+    fff
 
-} else {
-  print("No Convergence")
+    } else {
+      print("No Convergence")
+    }
 }
 ```
 
@@ -1346,29 +1358,31 @@ fff
 <br>
 
 ```{r med_nmds3d, echo=FALSE}
-MDS3 <- metaMDS(sqrt(datax),
-               distance = "bray",autotransform = FALSE,
-               k = 3,
-               maxit = 999,
-               trymax = params$try,
-               wascores = TRUE)
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
+    MDS3 <- metaMDS(sqrt(datax),
+                   distance = "bray",autotransform = FALSE,
+                   k = 3,
+                   maxit = 999,
+                   trymax = params$try,
+                   wascores = TRUE)
 
-if (MDS3$converged == "TRUE") {
+    if (MDS3$converged == "TRUE") {
 
-data.scores3 <- as.data.frame(scores(MDS3))
-data.scores3$sample <- meddata5$sample
-data.scores.3 <- merge(data.scores3, metadata, by="sample")
-p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
-        color=~treatment, colors=mycol,
-        mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
-        marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
-        )
-p3d <- p3d %>% layout(legend=list(y=.5))
-p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
-p3d
+    data.scores3 <- as.data.frame(scores(MDS3))
+    data.scores3$sample <- meddata5$sample
+    data.scores.3 <- merge(data.scores3, metadata, by="sample")
+    p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
+            color=~treatment, colors=mycol,
+            mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
+            marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
+            )
+    p3d <- p3d %>% layout(legend=list(y=.5))
+    p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
+    p3d
 
-} else {
-  print("No Convergence")
+    } else {
+      print("No Convergence")
+    }
 }
 ```
 
@@ -1383,28 +1397,30 @@ p3d
 <br>
 
 ```{r med_tree, echo=FALSE}
-if (params$skipPhylogeny == "true") {
-    # file fore here
-    writeLines("\n--------------------------------------------------------------\n")
-    cat(readLines(list.files(pattern="tree.txt")) , sep = '\n')
-    writeLines("\n--------------------------------------------------------------\n")
-} else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASVs" || params$type == "AminoType")) {
-    #tree=read.newick("vAMPrun_otu.55.raxml.support")
-    tree=read.tree("grouptree.txt")
-    p1 <- ggtree(tree)
-    id <- tree$tip.label
-    dat <- tibble::tibble(id = id)
-    #cdat <- tibble::tibble(dcolor = c(1:247))
-    metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
+    if (params$skipPhylogeny == "true") {
+        # file fore here
+        writeLines("\n--------------------------------------------------------------\n")
+        cat(readLines(list.files(pattern="tree.txt")) , sep = '\n')
+        writeLines("\n--------------------------------------------------------------\n")
+    } else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASVs" || params$type == "AminoType")) {
+        #tree=read.newick("vAMPrun_otu.55.raxml.support")
+        tree=read.tree("grouptree.txt")
+        p1 <- ggtree(tree)
+        id <- tree$tip.label
+        dat <- tibble::tibble(id = id)
+        #cdat <- tibble::tibble(dcolor = c(1:247))
+        metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
 
-    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color=label))
-    ggplotly(p2, tooltip = "label")
+        p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color=label))
+        ggplotly(p2, tooltip = "label")
 
-    treelist=read.csv("tree_group.csv")
-    metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
-    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
-    ggplotly(p2, tooltip = "label")
+        treelist=read.csv("tree_group.csv")
+        metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
+        p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
+        ggplotly(p2, tooltip = "label")
 
+    }
 }
 ```
 
