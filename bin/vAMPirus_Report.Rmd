@@ -815,7 +815,11 @@ if [[ $(ls | grep -wc "asv_medfile.csv") -eq 1 ]];then
     grep -w "$x" asv_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
   paste -d "," *.col > asv_medtable.csv
+  rm *.col
+else
+    echo "Not MED"
 fi
+
 if [[ $(ls | grep -wc "amino_medfile.csv") -eq 1 ]];then
   awk -F "," '{print $2}' amino_medfile.csv | sort | awk -F "Group" '{print $2}' | sort -n | uniq > group.list
   for x in $(cat group.list);do
@@ -824,8 +828,10 @@ if [[ $(ls | grep -wc "amino_medfile.csv") -eq 1 ]];then
     grep -w "$gr" amino_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
   paste -d "," *.col > amino_medtable.csv
+  rm *.col
+else
+      echo "Not MED"
 fi
-rm *.col
 ```
 
 ```{r med_table, echo=FALSE}
