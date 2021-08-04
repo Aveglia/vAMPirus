@@ -1368,8 +1368,8 @@ if (params.DataCheck || params.Analyze) {
                         headers="headers.list"
                         name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                         if [[ ${params.ncbitax} == "true" ]]
-                        then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                        else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                        then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                        else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                         fi
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" > access.list
@@ -1515,7 +1515,7 @@ if (params.DataCheck || params.Analyze) {
                       grep ">" \${virdb} > headers.list
                       headers="headers.list"
                       name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                      diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                      diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                       echo "Preparing lists to generate summary .csv's"
                       echo "[Best hit accession number]" > access.list
                       echo "[e-value]" > evalue.list
@@ -1752,8 +1752,8 @@ if (params.DataCheck || params.Analyze) {
                         headers="headers.list"
                         name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                         if [[ ${params.ncbitax} == "true" ]]
-                        then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                        else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                        then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                        else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                         fi
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" > access.list
@@ -1896,7 +1896,7 @@ if (params.DataCheck || params.Analyze) {
                           grep ">" \${virdb} > headers.list
                           headers="headers.list"
                           name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                          diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                          diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                           echo "Preparing lists to generate summary .csv's"
                           echo "[Best hit accession number]" > access.list
                           echo "[e-value]" > evalue.list
@@ -2432,8 +2432,8 @@ if (params.DataCheck || params.Analyze) {
                             headers="headers.list"
                             name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                             if [[ ${params.ncbitax} == "true" ]]
-                            then   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                            else   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                            then   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                            else   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             fi
                             echo "Preparing lists to generate summary .csv's"
                             echo "[Best hit accession number]" > access.list
@@ -2576,7 +2576,7 @@ if (params.DataCheck || params.Analyze) {
                               grep ">" \${virdb} > headers.list
                               headers="headers.list"
                               name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                               echo "Preparing lists to generate summary .csv's"
                               echo "[Best hit accession number]" > access.list
                               echo "[e-value]" > evalue.list
@@ -2749,7 +2749,7 @@ if (params.DataCheck || params.Analyze) {
                         """
                         set +e
                         diamond makedb --in ${fasta} --db ${fasta}
-                        diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --${sensitivity} -o ${params.projtag}_protCounts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1 --max-hsps 1
+                        diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --${params.sensitivity} -o ${params.projtag}_protCounts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1 --max-hsps 1
                         echo "OTU_ID" >tmp.col1.txt
                         echo "Generating sample id list"
                         grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
@@ -3069,8 +3069,8 @@ if (params.DataCheck || params.Analyze) {
                             headers="headers.list"
                             name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                             if [[ ${params.ncbitax} == "true" ]]
-                            then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                            else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                            then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                            else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             fi
                             echo "Preparing lists to generate summary .csv's"
                             echo "[Best hit accession number]" > access.list
@@ -3218,7 +3218,7 @@ if (params.DataCheck || params.Analyze) {
                               grep ">" \${virdb} > headers.list
                               headers="headers.list"
                               name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                              diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                               echo "Preparing lists to generate summary .csv's"
                               echo "[Best hit accession number]" > access.list
                               echo "[e-value]" > evalue.list
@@ -3539,8 +3539,8 @@ if (params.DataCheck || params.Analyze) {
                             headers="headers.list"
                             name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                             if [[ ${params.ncbitax} == "true" ]]
-                            then   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                            else   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                            then   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                            else   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             fi
                             echo "Preparing lists to generate summary .csv's"
                             echo "[Best hit accession number]" > access.list
@@ -3687,7 +3687,7 @@ if (params.DataCheck || params.Analyze) {
                               grep ">" \${virdb} > headers.list
                               headers="headers.list"
                               name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                               echo "Preparing lists to generate summary .csv's"
                               echo "[Best hit accession number]" > access.list
                               echo "[e-value]" > evalue.list
@@ -3867,7 +3867,7 @@ if (params.DataCheck || params.Analyze) {
                         set +e
                         potu="\$( echo ${fasta} | awk -F "_" '{print \$3}')"
                         diamond makedb --in ${fasta} --db ${fasta}
-                        diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --${sensitivity} -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1 --max-hsps 1
+                        diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --${params.sensitivity} -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1 --max-hsps 1
                         echo "OTU_ID" >tmp.col1.txt
                         echo "Generating sample id list"
                         grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
