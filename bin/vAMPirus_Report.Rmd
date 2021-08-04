@@ -1397,30 +1397,28 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 
 ```{r med_tree, echo=FALSE}
-if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
-    if (params$skipPhylogeny == "true") {
-        # file fore here
-        writeLines("\n--------------------------------------------------------------\n")
-        cat(readLines(list.files(pattern="tree.txt")) , sep = '\n')
-        writeLines("\n--------------------------------------------------------------\n")
-    } else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASVs" || params$type == "AminoType")) {
-        #tree=read.newick("vAMPrun_otu.55.raxml.support")
-        tree=read.tree("grouptree.txt")
-        p1 <- ggtree(tree)
-        id <- tree$tip.label
-        dat <- tibble::tibble(id = id)
-        #cdat <- tibble::tibble(dcolor = c(1:247))
-        metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
+if (params$skipPhylogeny == "true") {
+    # file fore here
+    writeLines("\n--------------------------------------------------------------\n")
+    cat(readLines(list.files(pattern="tree.txt")) , sep = '\n')
+    writeLines("\n--------------------------------------------------------------\n")
+} else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASVs" || params$type == "AminoType")) {
+    #tree=read.newick("vAMPrun_otu.55.raxml.support")
+    tree=read.tree("grouptree.txt")
+    p1 <- ggtree(tree)
+    id <- tree$tip.label
+    dat <- tibble::tibble(id = id)
+    #cdat <- tibble::tibble(dcolor = c(1:247))
+    metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
 
-        p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color=label))
-        ggplotly(p2, tooltip = "label")
+    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color=label))
+    ggplotly(p2, tooltip = "label")
 
-        treelist=read.csv("tree_group.csv")
-        metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
-        p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
-        ggplotly(p2, tooltip = "label")
+    treelist=read.csv("tree_group.csv")
+    metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
+    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
+    ggplotly(p2, tooltip = "label")
 
-    }
 }
 ```
 
