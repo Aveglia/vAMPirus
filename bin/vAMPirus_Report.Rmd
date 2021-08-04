@@ -80,7 +80,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 <br>
 <br>
 
- 
+
 ### Total number of reads before and after adapter removal
 
 ```{r readstats_plot, echo=FALSE}
@@ -138,12 +138,12 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 <br>
 <br>
 ```{bash load_datasets_bash, include=FALSE}
-if [ `ls *_ASV_Grouping.csv | wc -l` -ge 1 ];then 
+if [ `ls *_ASV_Grouping.csv | wc -l` -ge 1 ];then
   cat *_ASV_Grouping.csv >asv_medfile.csv
   mv *_ASV_Groupingcounts.csv asv_groupcounts.csv
   cat asv_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
   mv *_ASV_Group_Reps_iq.treefile grouptree.txt
-elif [ `ls *_AminoType_Grouping.csv | wc -l` -ge 1 ];then 
+elif [ `ls *_AminoType_Grouping.csv | wc -l` -ge 1 ];then
   cat *_AminoType_Grouping.csv >amino_medfile.csv
   mv *_AminoType_Groupingcounts.csv amino_groupcounts.csv
   cat amino_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
@@ -151,12 +151,12 @@ elif [ `ls *_AminoType_Grouping.csv | wc -l` -ge 1 ];then
 fi
 cat *_counts.csv >counts.csv
 cat *_PercentID.matrix >matrix.txt
-if [ `ls -1 *_PercentID.matrix | wc -l` -ge 1 ];then 
+if [ `ls -1 *_PercentID.matrix | wc -l` -ge 1 ];then
   cat *_summary_for_plot.csv >sum.csv
 else
   echo "Taxonomy analysis was skipped" >tax.txt
 fi  
-if [ `ls -1 *_iq.treefile | wc -l` -ge 1 ];then 
+if [ `ls -1 *_iq.treefile | wc -l` -ge 1 ];then
   cat *_iq.treefile >tree.txt
 else
   echo "Phylogeny analysis was skipped" >tree.txt
@@ -770,8 +770,8 @@ if (params$skipPhylogeny == "true") {
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
     p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color = id))
     ggplotly(p2, tooltip = "label")
-    
-    
+
+
     #newcolumn=c()
     #testlist=read.csv("tree_group.csv")
     #mlist=metat$label
@@ -779,13 +779,13 @@ if (params$skipPhylogeny == "true") {
     #  a=grep(paste("\\b",name,"\\b", sep=""), t(testlist))
     #  newcolumn=c(newcolumn,t(testlist)[a-1])
     #}
-    if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASVs" || params$type == "AminoType")) {
+    if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")) {
       treelist=read.csv("tree_group.csv")
       metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
       p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
       ggplotly(p2, tooltip = "label")
     }
-    
+
 }
 
 #mylist <- c(1,2,3,4)
@@ -838,8 +838,8 @@ if (params$asvMED == "true" && params$type == "ASV"){
     writeLines("\n--------------------------------------------------------------\n")
 
 }
-  
-if (params$aminoMED == "true" && params$type == "AminoTypes"){
+
+if (params$aminoMED == "true" && params$type == "AminoType"){
   writeLines("\n--------------------------------------------------------------\n")
   #med_group=read.csv("amino_medfile.csv", header = F)
   #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
@@ -862,12 +862,12 @@ if (params$aminoMED == "true" && params$type == "AminoTypes"){
 
 <br>
 <br>
-  
+
 ```{r med_plot, echo=FALSE}
 if (params$asvMED == "true" && params$type == "ASV"){
-  #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv") 
+  #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv")
   medgroup=read.csv("asv_groupcounts.csv")
-  meddata <- medgroup %>% select(-2) 
+  meddata <- medgroup %>% select(-2)
   meddata2 <- aggregate(.~GroupID, meddata, sum)
   meddata3 <-as.data.frame(t(meddata2))
   meddata3$sample <- row.names(meddata3)
@@ -881,7 +881,7 @@ if (params$asvMED == "true" && params$type == "ASV"){
   samples <- read.csv(sample_metadata, header = TRUE)
   ##Combining data and metadata
   meddata4 <- merge(meddata3, samples, by="sample")
-  #if "meddata4" removed it does not work 
+  #if "meddata4" removed it does not work
   #meddata4
   dim_meddata4 <- dim(meddata4)
   dim_samples <- dim(samples)
@@ -903,7 +903,7 @@ if (params$asvMED == "true" && params$type == "ASV"){
      #can cause errors
   meddata5dim <-dim(meddata5)
   minreads<-min(meddata5$sum)
-  
+
   dataz <- decostand(meddata5[,2:cols],method="total") #method 'total' normalizes data to sum up to 1
   dataz$sample <- meddata5$sample
   metadata <- meddata5[,(cols+1):meddata5dim[2]]
@@ -917,10 +917,10 @@ if (params$asvMED == "true" && params$type == "ASV"){
   ddd <- ddd %>% config(toImageButtonOptions=list(format='svg',filename='Relative_abundance', height= 500, width= 800, scale= 1))
   ddd
 }
-if (params$aminoMED == "true" && params$type == "AminoTypes"){
-  #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv") 
+if (params$aminoMED == "true" && params$type == "AminoType"){
+  #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv")
   medgroup=read.csv("amino_groupcounts.csv")
-  meddata <- medgroup %>% select(-2) 
+  meddata <- medgroup %>% select(-2)
   meddata2 <- aggregate(.~GroupID, meddata, sum)
   meddata3 <-as.data.frame(t(meddata2))
   meddata3$sample <- row.names(meddata3)
@@ -934,7 +934,7 @@ if (params$aminoMED == "true" && params$type == "AminoTypes"){
   samples <- read.csv(sample_metadata, header = TRUE)
   ##Combining data and metadata
   meddata4 <- merge(meddata3, samples, by="sample")
-  #if "meddata4" removed it does not work 
+  #if "meddata4" removed it does not work
   #meddata4
   dim_meddata4 <- dim(meddata4)
   dim_samples <- dim(samples)
@@ -956,7 +956,7 @@ if (params$aminoMED == "true" && params$type == "AminoTypes"){
      #can cause errors
   meddata5dim <-dim(meddata5)
   minreads<-min(meddata5$sum)
-  
+
   dataz <- decostand(meddata5[,2:cols],method="total") #method 'total' normalizes data to sum up to 1
   dataz$sample <- meddata5$sample
   metadata <- meddata5[,(cols+1):meddata5dim[2]]
@@ -1389,16 +1389,16 @@ if (params$skipPhylogeny == "true") {
     id <- tree$tip.label
     dat <- tibble::tibble(id = id)
     #cdat <- tibble::tibble(dcolor = c(1:247))
-    metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id')) 
-    
+    metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
+
     p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color=label))
     ggplotly(p2, tooltip = "label")
-    
+
     treelist=read.csv("tree_group.csv")
     metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
     p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
     ggplotly(p2, tooltip = "label")
-  
+
 }
 ```
 

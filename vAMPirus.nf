@@ -4012,6 +4012,7 @@ if (params.DataCheck || params.Analyze) {
                     script:
                         """
                         name=\$( ls *summary_for_plot.csv | awk -F "_summary_for_plot.csv" '{print \$1}')
+                        type=\$( ls *_counts.csv | awk -F "${params.projtag}" '{print \$2}' | awk -F "_" '{print \$2}'  )
                         cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
                         cp ${params.vampdir}/example_data/conf/vamplogo.png .
                         Rscript -e "rmarkdown::render('vAMPirus_Report.Rmd',output_file='\${name}_Report.html')" \${name} \
@@ -4023,7 +4024,10 @@ if (params.DataCheck || params.Analyze) {
                         ${params.trymax} \
                         ${params.stats} \
                         ${params.metadata} \
-                        ${params.minimumCounts}
+                        ${params.minimumCounts} \
+                        ${params.asvMED} \
+                        ${params.aminoMED} \
+                        \$type
                         """
                 }
 
