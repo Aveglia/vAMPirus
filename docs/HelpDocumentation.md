@@ -460,26 +460,32 @@ NOTE -> if you end up installing Miniconda3 using the script you should close an
 
 ### Databases
 
-It should be noted, that any protein database can be used, but it needs to be in fasta format and the headers for reference sequences need to match
-one of two patterns:
+Any protein database can be used while running vAMPirus, however, it needs to be in fasta format and the headers for reference sequences need to match one of two patterns:
 
-RVDB format (default) -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein [Marine RNA virus BC-4]"
+RVDB format -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein [Marine RNA virus BC-4]"
 
 NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003 [Zymoseptoria brevis]"
 
-During Taxonomy Inference, vAMPirus infers results by extracting the information stored in the reference sequence headers. If the database sequence headers do not match these
-patterns, you are bound to see errors in the naming of files created during the Taxonomy Inference phase of vAMPirus.
+To set/inform vAMPirus of which header format for the reference database is being used, you can edit the vampirus.config file at lime 112 "dbtype="NCBI"" for NCBI header format or "dbtype="RVDB"" for RVDB format.
 
-The default is that vAMPirus assumes that the database headers are in RVDB format, to change this assumption, you would need to edit the configuration file at line 78 where "refseq=F". You could also signal the use of RefSeq format headers within the launch command with adding "--refseq T".
+An example of custom headers in RVDB format if you plan to use a custom database:
 
-An example of custom headers if you plan to use a custom database:
+    `>acc|Custom|VP100000.1|Custom|VP100000|capsid protein [T4 Phage isolate 1]`
+     AMINOACIDSEQUENCE
+    `>acc|Custom|VP100000.2|Custom|VP100000|capsid protein [T4 Phage isolate 2]`
+     AMINOACIDSEQUENCE
+    `>acc|Custom|VP2000.1|Custom|VP2000| capsid protein [T7 phage isolate]`
+       AMINOACIDSEQUENCE
 
-  `>acc|Custom|VP100000.1|Custom|VP100000|capsid protein [T4 Phage isolate 1]`
-   AMINOACIDSEQUENCE
-  `>acc|Custom|VP100000.2|Custom|VP100000|capsid protein [T4 Phage isolate 2]`
-   AMINOACIDSEQUENCE
-  `>acc|Custom|VP2000.1|Custom|VP2000| capsid protein [T7 phage isolate]`
-   AMINOACIDSEQUENCE
+Or in NCBI format the same sequences would be:
+
+    `>VP100000.1 capsid protein [T4 Phage isolate 1]`
+     AMINOACIDSEQUENCE
+    `>VP100000.1 capsid protein [T4 Phage isolate 2]`
+     AMINOACIDSEQUENCE
+    `>VP2000.1 capsid protein [T7 phage isolate]`
+     AMINOACIDSEQUENCE
+
 
 ### Using Singularity
 
