@@ -69,9 +69,9 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 } else {
     if (params$skipAdapterRemoval == "false") {
         reads_stats=read.csv("final_reads_stats.csv")
-        paged_table(reads_stats,options = list(rows.print = 20))
+        #paged_table(reads_stats,options = list(rows.print = 20))
         knitr::kable(reads_stats, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
-  kable_styling(font_size = 12, full_width = T)
+  kable_styling(font_size = 12, full_width = F)
     } else {
         writeLines("\n--------------------------------------------------------------\n")
         cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
@@ -805,6 +805,8 @@ This tree is a maximum likelihood tree made with IQTREE2 and the parameters you 
 <br>
 <br>
 
+if ("params$asvMED" == "true" || "params$aminoMED" == "true") { 
+
 # MED
 
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Tables</h2></div>
@@ -858,7 +860,9 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
   read.csv("amino_medtable.csv")
   writeLines("\n--------------------------------------------------------------\n")
   med_group=read.csv("amino_medtable.csv", header = F)
-  paged_table(med_group,options = list(rows.print = 20))
+  #paged_table(med_group,options = list(rows.print = 20))
+  knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
+  kable_styling(font_size = 12, full_width = F)
   writeLines("\n--------------------------------------------------------------\n")
 }
 ```  
@@ -1428,6 +1432,8 @@ if (params$skipPhylogeny == "true") {
 
 }
 ```
+
+}
 
 <br>
 <br>
