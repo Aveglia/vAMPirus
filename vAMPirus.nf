@@ -1156,9 +1156,11 @@ if (params.DataCheck || params.Analyze) {
                     echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_ASV_entropy_breakdown.csv
             done
             rm above*
-            mv ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY ./tmp.fasta
-            echo "Base_position  Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
-            cat tmp.fasta >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
+            mv ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY ./tmp2.tsv
+            cat tmp2.tsv | tr "\\t" "," > tmp.csv
+            rm tmp2.tsv
+            echo "Base_position,Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
+            cat tmp.csv >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
             rm tmp.fasta
 
           """
@@ -1239,9 +1241,11 @@ if (params.DataCheck || params.Analyze) {
             done
             rm above*
             mv ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY ./tmp.fasta
-            echo "Base_position  Shannons_Entropy" >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
-            cat tmp.fasta >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
-            rm tmp.fasta
+            cat tmp2.tsv | tr "\t" "," > tmp.csv
+            rm tmp2.tsv
+            echo "Base_position,Shannons_Entropy" >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
+            cat tmp.csv >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
+            rm tmp.csv
             """
         }
 
