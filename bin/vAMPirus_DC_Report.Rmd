@@ -405,7 +405,7 @@ NOTE: The "1" represents the number of AminoTypes which are unique amino acid se
 <br>
 
 ```{r med_asv, echo=FALSE}
-med_asv=read.delim(paste(params$projtag, sep="","_ASVs_Aligned_informativeonly.fasta-ENTROPY"), sep = "\t", header=TRUE)
+med_asv=read.delim(paste(params$projtag, sep="","_ASVs_Aligned_informativeonly.fasta-ENTROPY"), sep = ",", header=TRUE)
 
 mplot=plot_ly(med_asv, x=med_asv$Base_position, y=med_asv$Shannons_Entropy, type="bar", name="Entropy", opacity = .8, line=list(color='#088da5'),
               hovertemplate = paste('Base position: %{x}','<br>Entropy: %{y}','<extra></extra>'))
@@ -431,7 +431,7 @@ paged_table(med_asv_csv, options = list(rows.print = 10))
 <br>
 
 ```{r med_amino, echo=FALSE}
-med_amino=read.delim(paste(params$projtag, sep="","_AminoTypes_Aligned_informativeonly.fasta-ENTROPY"), sep = "\t", header=TRUE)
+med_amino=read.delim(paste(params$projtag, sep="","_AminoTypes_Aligned_informativeonly.fasta-ENTROPY"), sep = ",", header=TRUE)
 
 mplot=plot_ly(med_amino, x=med_amino$Base_position, y=med_amino$Shannons_Entropy, type="bar", name="Entropy", opacity = .8, line=list(color='#088da5'),
               hovertemplate = paste('Base position: %{x}','<br>Entropy: %{y}','<extra></extra>'))
@@ -457,8 +457,8 @@ paged_table(med_amino_csv, options = list(rows.print = 10))
 <br>
 
 ```{r med_comparison, echo=FALSE}
-med_asv=read.delim(paste(params$projtag, sep="","_ASVs_Aligned_informativeonly.fasta-ENTROPY"), sep = "\t", header=TRUE)
-med_amino=read.delim(paste(params$projtag, sep="","_AminoTypes_Aligned_informativeonly.fasta-ENTROPY"), sep = "\t", header=TRUE)
+med_asv=read.delim(paste(params$projtag, sep="","_ASVs_Aligned_informativeonly.fasta-ENTROPY"), sep = ",", header=TRUE)
+med_amino=read.delim(paste(params$projtag, sep="","_AminoTypes_Aligned_informativeonly.fasta-ENTROPY"), sep = ",", header=TRUE)
 
 mplotbox <- plot_ly(med_asv, y=med_asv$Shannons_Entropy, type="box", boxmean='sd', boxpoints="outlier", jitter=0.1, pointpos=0, name="ASVs")
 mplotbox<- mplotbox %>% add_trace(med_amino, y=med_amino$Shannons_Entropy, type="box", boxmean='sd', boxpoints="outliers", jitter=0.1, pointpos=0, name="AminoTypes")
