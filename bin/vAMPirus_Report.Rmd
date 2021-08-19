@@ -157,7 +157,7 @@ if [ `ls -1 *_PercentID.matrix | wc -l` -ge 1 ];then
   cat *_summary_for_plot.csv >sum.csv
 else
   echo "Taxonomy analysis was skipped" >tax.txt
-fi  
+fi
 if [ `ls -1 *_iq.treefile | wc -l` -ge 1 ];then
   cat *_iq.treefile >tree.txt
 else
@@ -805,7 +805,7 @@ This tree is a maximum likelihood tree made with IQTREE2 and the parameters you 
 <br>
 <br>
 
-if ("params$asvMED" == "true" || "params$aminoMED" == "true") { 
+if ("params$asvMED" == "true" || "params$aminoMED" == "true") {
 
 # MED
 
@@ -815,9 +815,9 @@ if ("params$asvMED" == "true" || "params$aminoMED" == "true") {
 <br>
 
 ```{bash bash_med_table, include=FALSE}
-if [[ $(ls | grep -wc "asv_medfile.csv") -eq 1 ]];then    
+if [[ $(ls | grep -wc "asv_medfile.csv") -eq 1 ]];then
   awk -F "," '{print $2}' asv_medfile.csv | sort | uniq | sort -g >group.list
-  for x in $(cat group.list);do    
+  for x in $(cat group.list);do
     echo "${x}" >> ${x}.col
     grep -w "$x" asv_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
@@ -844,10 +844,12 @@ fi
 ```{r med_table, echo=FALSE}
 if (params$asvMED == "true" && params$type == "ASV"){
     writeLines("\n--------------------------------------------------------------\n")
-    #med_group=read.csv("asv_medfile.csv", header = F)
+    med_group=read.csv("asv_medfile.csv", header = F)
     # change name of sequence to med peak or something
-    #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
-    #paged_table(med_group,options = list(rows.print = 20))
+    colnames(med_group) <- c("SequenceID", "Group", "Sequence")
+    paged_table(med_group,options = list(rows.print = 20))
+    #knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
+    #kable_styling(font_size = 12, full_width = F)
     writeLines("\n--------------------------------------------------------------\n")
 
 }
@@ -860,12 +862,12 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
   read.csv("amino_medtable.csv")
   writeLines("\n--------------------------------------------------------------\n")
   med_group=read.csv("amino_medtable.csv", header = F)
-  #paged_table(med_group,options = list(rows.print = 20))
-  knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
-  kable_styling(font_size = 12, full_width = F)
+  paged_table(med_group,options = list(rows.print = 20))
+  #knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
+  #kable_styling(font_size = 12, full_width = F)
   writeLines("\n--------------------------------------------------------------\n")
 }
-```  
+```
 
 <br>
 <br>
