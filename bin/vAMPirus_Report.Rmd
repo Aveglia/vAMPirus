@@ -843,29 +843,23 @@ fi
 
 ```{r med_table, echo=FALSE}
 if (params$asvMED == "true" && params$type == "ASV"){
-    #writeLines("\n--------------------------------------------------------------\n")
     med_group=read.csv("asv_medfile.csv", header = F)
     # change name of sequence to med peak or something
     colnames(med_group) <- c("SequenceID", "Group", "Sequence")
-    paged_table(med_group,options = list(rows.print = 20))
+    #paged_table(med_group,options = list(rows.print = 20))
     knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
     kable_styling(font_size = 12, full_width = F)
-    #writeLines("\n--------------------------------------------------------------\n")
-
 }
 
 if (params$aminoMED == "true" && params$type == "AminoType"){
-  writeLines("\n--------------------------------------------------------------\n")
   #med_group=read.csv("amino_medfile.csv", header = F)
   #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
   #paged_table(med_group,options = list(rows.print = 20))
   read.csv("amino_medtable.csv")
-  writeLines("\n--------------------------------------------------------------\n")
   med_group=read.csv("amino_medtable.csv", header = F)
-  paged_table(med_group,options = list(rows.print = 20))
+  #paged_table(med_group,options = list(rows.print = 20))
   knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
   kable_styling(font_size = 12, full_width = F)
-  writeLines("\n--------------------------------------------------------------\n")
 }
 ```
 
