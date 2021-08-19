@@ -2144,9 +2144,9 @@ if (params.DataCheck || params.Analyze) {
                     #entopy analysis
                     entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
                     #Decomposition
-                    if [[ \$(echo ${params.asvC} | grep -c ",") -eq 1  || "${params.asvSingle}" == "true"]]
+                    if [[ \$(echo ${params.asvC} | grep -c ",") -eq 1 || "${params.asvSingle}" == "true" ]]
                     then
-                          if [[ "${params.asvSingle}" == "true"]]
+                          if [[ "${params.asvSingle}" == "true" ]]
                           then  tag="${params.asvC}"
                           else  tag=\$(echo ${params.asvC} | sed 's/,/_/g')
                           fi
