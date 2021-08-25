@@ -7,7 +7,7 @@ Viruses are the most abundant biological entities on the planet and with advance
 
 The vAMPirus program contains two different pipelines:
 
-1. DataCheck pipeline: provides the user an interactive html report file containing information regarding sequencing success per sample as well as a preliminary look into the clustering behavior of the data which can be leveraged by the user to inform future analyses
+1. DataCheck pipeline: provides the user an interactive html report file containing information regarding sequencing success per sample as well as a preliminary look into the clustering behavior of the data which can be leveraged by the user to inform analyses
 
 ![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_datacheckUPDATED.png)
 
@@ -72,7 +72,7 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 # Getting started with vAMPirus
 
-## Order of operations
+## General order of operations
 
 1. Clone vAMPirus from github   
 
@@ -84,7 +84,7 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 5. Launch the DataCheck pipeline to get summary information about your dataset (e.g. sequencing success, read quality information, clustering behavior of ASV or AminoTypes)
 
-6. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length)
+6. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length, Shannon entropy analysis results)
 
 7. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
 
@@ -143,7 +143,7 @@ Next we will install Java to be able to run Nextflow -
 
     sudo apt -y install openjdk-8-jre
 
-Now you have everything you need to get started as described in the * [Installing vAMPirus](#Installing-vAMPirus) section. However, here are some quick commands to install and set up Conda.
+Now you have everything you need to get started as described in the * [Installing vAMPirus](#Installing-vAMPirus) section. However, here are some quick commands to install and set up Miniconda.
 
 NOTE=> Windows WSL currently can not run Singularity so you will have to install and run vAMPirus with Conda.
 
@@ -166,7 +166,7 @@ You can check/confirm you have conda ready to go ->
 
     conda init
 
-Once you have have your Conda ready, you can execute the vAMPirus startup script to install Nextflow and build the vAMPirus conda environment.
+Once you have your Conda ready, you can execute the vAMPirus startup script to install Nextflow and build the vAMPirus conda environment.
 
 
 ## MacOS users
@@ -385,7 +385,7 @@ You will also need to decide if you plan to use a container engine like Docker (
 The startup script provided in the vAMPirus program directory will install Conda for you if you tell it to (see below), however, you will need to install Docker or Singularity separately before running vAMPirus.
 
 
-## Setting up vAMPirus dependencies and checking installation
+### Setting up vAMPirus dependencies and checking installation
 
 
 To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
@@ -404,8 +404,9 @@ You can also use the startup script to install different databases to use for vA
 2. The proteic version of the Reference Viral DataBase (RVDB) (See https://f1000research.com/articles/8-530)
 3. The complete NCBI NR protein database
 
-To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option.
-If we look at the script usage:
+To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option and you can download the NCBI taxonomy files with the option "-t" (See below).
+
+If we take a look at the vampirus_startup.sh script usage:
 
 General execution:
 
@@ -437,7 +438,7 @@ and if we wanted to do the same thing as above but skip the Conda check/installa
 
 NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed.
 
-**NEW in version 2.0.0 -> the startup script will automatically download annotation information from RVDB to infer Least Common Ancestor information for hits during taxonomy assignment. You can also use "-t" to download NCBI taxonomy files to infer taxonomy using the DIAMOND taxonomy classification feature.
+**NEW in version 2.0.0 -> the startup script will automatically download annotation information from RVDB to infer Lowest Common Ancestor (LCA) information for hits during taxonomy assignment. You can also use "-t" to download NCBI taxonomy files to infer taxonomy using the DIAMOND taxonomy classification feature.
 
 
 ### Databases
@@ -1278,14 +1279,14 @@ Block 3 -
         // Classification settings - if planning on inferring LCA from RVDB annotation files OR using NCBI taxonomy files, confirm options below are accurate.
             // Path to directory RVDB hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using RVDB LCA.
                 dbanno="DATABASEANNOT"
-            // Set lca="T" if you would like to add "Least Common Ancestor" classifications to taxonomy results using information provided by RVDB annotation files (works when using NCBI or RVDB databases) - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
+            // Set lca="T" if you would like to add "Lowest Common Ancestor" classifications to taxonomy results using information provided by RVDB annotation files (works when using NCBI or RVDB databases) - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
                 lca="LCAT"
             // DIAMOND taxonomy inference using NCBI taxmap files (can be downloaded using the startup script using the option -t); set to "true" for this to run (ONLY WORKS WITH dbtype="NCBI")
                 ncbitax="false"
 
 The third block of options is regarding the two different methods thats could be used to get putative taxonomic classifications for your sequences:
 
-1. Grabbing "Least Common Ancestor" (LCA) information from the annotation files associated with the Reference Virus DataBase (RVDB; https://rvdb-prot.pasteur.fr/).
+1. Grabbing "Lowest Common Ancestor" (LCA) information from the annotation files associated with the Reference Virus DataBase (RVDB; https://rvdb-prot.pasteur.fr/).
 
 By default, these annotation files are downloaded when you use the startup script to download any of the possible three databases. The "dbanno" variable refers to the path to the annotation files, if using the startup script, this will automatically be edited.
 
