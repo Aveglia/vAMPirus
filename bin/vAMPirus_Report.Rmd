@@ -847,7 +847,7 @@ if (params$asvMED == "true" && params$type == "ASV"){
     # change name of sequence to med peak or something
     colnames(med_group) <- c("SequenceID", "Group", "Sequence")
     #paged_table(med_group,options = list(rows.print = 20))
-    knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
+    knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: ASV MED Table") %>%
     kable_styling(font_size = 12, full_width = F)
 }
 
@@ -858,7 +858,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
   read.csv("amino_medtable.csv")
   med_group=read.csv("amino_medtable.csv", header = F)
   #paged_table(med_group,options = list(rows.print = 20))
-  knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
+  knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: Aminotype MED Table") %>%
   kable_styling(font_size = 12, full_width = F)
 }
 ```
@@ -1044,7 +1044,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
     sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
-    print(sh)
+    show(sh)
 
     if (params$stats == "true" ) {
         shannonaov <- aov(index ~ treatment, data= shannondata5_2)
