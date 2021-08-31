@@ -1044,7 +1044,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
     sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
-    sh
+    print(sh)
 
     if (params$stats == "true" ) {
         shannonaov <- aov(index ~ treatment, data= shannondata5_2)
@@ -1407,7 +1407,7 @@ if (params$skipPhylogeny == "true") {
     writeLines("\n--------------------------------------------------------------\n")
     cat(readLines(list.files(pattern="tree.txt")) , sep = '\n')
     writeLines("\n--------------------------------------------------------------\n")
-} else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASVs" || params$type == "AminoType")) {
+} else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     #tree=read.newick("vAMPrun_otu.55.raxml.support")
     tree=read.tree("grouptree.txt")
     p1 <- ggtree(tree)
