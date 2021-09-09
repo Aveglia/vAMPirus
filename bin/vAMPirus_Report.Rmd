@@ -281,6 +281,9 @@ sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis
 sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
 sh
 
+```
+
+```{r diversity_analysis_sha, echo=FALSE}
 if (params$stats == "true" ) {
     shannonaov <- aov(index ~ treatment, data= shannondata5_2)
     st <- shapiro.test(resid(shannonaov))
