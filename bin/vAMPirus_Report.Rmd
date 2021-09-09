@@ -281,9 +281,6 @@ sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis
 sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
 sh
 
-```
-
-```{r diversity_analysis_sha, echo=FALSE}
 if (params$stats == "true" ) {
     shannonaov <- aov(index ~ treatment, data= shannondata5_2)
     st <- shapiro.test(resid(shannonaov))
@@ -1031,24 +1028,16 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     shannondata5$sample<- meddata5$sample
     shannondata5_2 <- merge(shannondata5, metadata, by="sample")
 
-    #shannonplot <- ggplot(shannondata5_2, aes(x=treatment,color=treatment,y=index))+
-    #  geom_boxplot()+
-    #  geom_point()+
-    #  theme_classic()+
-    #  labs(y="Index",x="Treatment")+
-    #  theme(axis.text=element_text(size=12))+
-    #  theme(legend.position = "none")
-
-    #sh<-ggplotly(shannonplot)
-    #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
-    #sh
-
     sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
     #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
     sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
-    show(sh)
+    sh
+}
+```
 
+```{r med_diversity_analysis_sha, echo=FALSE}
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     if (params$stats == "true" ) {
         shannonaov <- aov(index ~ treatment, data= shannondata5_2)
         st <- shapiro.test(resid(shannonaov))
