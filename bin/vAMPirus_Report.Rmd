@@ -1159,7 +1159,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-MED Distance To Centroid</h2></div>
 <br>
-```{r med_distance, echo=FALSE}
+```{r med_distance2a, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     ##Distance
     intermediate <- raredata
@@ -1176,7 +1176,10 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
     cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
     cen
-
+}
+```
+```{r med_distance2b, echo=FALSE}
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     if (params$stats == "true" ) {
         adn <- adonis(bray.distance~meddata5$treatment)
         adn
