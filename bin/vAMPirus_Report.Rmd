@@ -232,7 +232,7 @@ minreads<-min(data5$sum)
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Rarefaction</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Rarefaction Curves</h2></div>
 ```{r rarefaction, echo=FALSE, cache=FALSE}
 ##Rarefaction curves
 rarefaction <- rarecurve(data5[,2:cols])
@@ -262,18 +262,6 @@ index <-diversity(raredata, index= "shannon")
 shannondata5 <- as.data.frame(index)
 shannondata5$sample<- data5$sample
 shannondata5_2 <- merge(shannondata5, metadata, by="sample")
-
-#shannonplot <- ggplot(shannondata5_2, aes(x=treatment,color=treatment,y=index))+
-#  geom_boxplot()+
-#  geom_point()+
-#  theme_classic()+
-#  labs(y="Index",x="Treatment")+
-#  theme(axis.text=element_text(size=12))+
-#  theme(legend.position = "none")
-
-#sh<-ggplotly(shannonplot)
-#sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
-#sh
 
 sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
@@ -343,18 +331,6 @@ simpsondata5 <- as.data.frame(index)
 simpsondata5$sample<- data5$sample
 simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
 
-#simpsonplot <- ggplot(simpsondata5_2, aes(x=treatment,color=treatment,y=index))+
-#  geom_boxplot()+
-#  geom_point()+
-#  theme_classic()+
-#  labs(y="Index",x="Treatment")+
-#  theme(axis.text=element_text(size=12))+
-#  theme(legend.position = "none")
-
-#s<-ggplotly(simpsonplot)
-#s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
-#s
-
 s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
 s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
@@ -414,7 +390,7 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-### Species Richness
+### Richness
 
 <br>
 ```{r diversity_analysis3, echo=FALSE}
@@ -423,14 +399,6 @@ index <- rarefy(data5[,2:cols], sample=mind5)
 rarerichnessdata5 <- as.data.frame(index)
 rarerichnessdata5$sample <-data5$sample
 richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
-
-#richnessplot <- ggplot(richdata5_2, aes(x=treatment,color=treatment,y=index))+
-#  geom_boxplot()+
-#  geom_point()+
-#  theme_classic()+
-#  labs(y="Richness",x="Treatment")+
-#  theme(axis.text=element_text(size=12))+
-#  theme(legend.position = "none")
 
 ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
@@ -505,18 +473,6 @@ df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
 df$sample <- data5$sample
 df2 <- merge(df, metadata, by="sample")
 
-#p<- ggplot(data=df2,aes(x=treatment,y=Distance_to_centroid,colour=treatment))+
-#  geom_boxplot(outlier.alpha = 0)+
-#  theme_classic()+
-#  geom_point(position=position_dodge(width=0.75))+
-#  labs(y="Distance",x="Treatment")+
-#  theme(axis.text=element_text(size=12))+
-#  theme(legend.position = "none")
-
-#cen <- ggplotly(p)
-#cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
-#cen
-
 cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
 #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
 cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
@@ -564,10 +520,6 @@ p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
   geom_point(size=2)+
   theme_classic()+
   theme(legend.title = element_blank())
-
-#fff <- ggplotly(p)
-#fff <- fff %>% layout(legend=list(y=.5))
-#fff
 
 fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
 fff <- fff %>% layout(legend=list(y=.5))
@@ -631,21 +583,6 @@ datay <- merge(dataz, metadata, by="sample")
 datalong <- datay %>%
   tidyr::gather(first:last, key=hit, value=reads)
 
-##Barplot
-## add better colors
-#spec_bar <- ggplot(datalong, aes(x=forcats::fct_reorder(timepoint, as.numeric(as.character(timepoint))),
-#    y=reads, fill=hit))+ #Consider sqrt-transforming data
-#    geom_bar(aes(), stat="identity", position="fill")+
-#    #coord_polar("y", start=0)+
-#    theme_classic()+
-#    facet_wrap(colony~treatment, nrow=2)+
-#    #coord_flip()+
-#    labs(x="Timepoint") #+ theme(legend.position = "none")
-#spec_bar <- ggplot(datalong, aes(x=sample,y=reads,fill=hit))+geom_bar(aes(), stat="identity", position="fill")+
-#  theme(axis.text.x=element_text(angle=90))
-#ggplotly(spec_bar)
-#,'#00b300','#00b3b3','#0059b3','#6600ff','#b800e6','#ff3333','#ff8000','#ffff00','#bf8040','#42bcf5','#b428f5','#2e8d7e','#664e7e','#a4c700','#1aa3ff'
-
 ddd <- plot_ly(datalong, x=~sample, y=~reads, color=~hit, colors=mycol)
 ddd <- ddd %>% layout(type='bar',barmode = 'stack')
 ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
@@ -666,14 +603,6 @@ ddd
 datalong <- datalong %>%
   filter(reads>0)
 
-#asv_bar <- ggplot(datalong, aes(x=reorder(hit,reads), y=reads, fill=treatment))+
-#  geom_bar(stat="identity")+
-#  scale_fill_manual(values=c('#088da5','#e19336'))+ #colors not working
-#  coord_flip()+
-#  theme_classic()+
-#  theme(axis.title.y = element_blank())+
-#  theme(legend.title = element_blank())
-
 asp2 <- plot_ly(datalong, y=~hit, x=~reads, color=~treatment, colors=mycol,text = ~paste("Sample: ", sample), opacity=.9)
 asp2 <- asp2 %>% layout(type='bar', barmode = 'group')
 asp2 <- asp2 %>% layout(yaxis = list(title = '', categoryorder = "total ascending"), legend = list(x=10,y=.5))
@@ -687,7 +616,7 @@ asp2
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pairwise Percent-ID Heatmap</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pairwise Percent Similarity Heatmap</h2></div>
 
 <br>
 <br>
@@ -721,7 +650,7 @@ heat
 <br>
 
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Taxonomy Result Visualization</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Taxonomy Results Visualization</h2></div>
 
 <br>
 <br>
@@ -782,22 +711,9 @@ if (params$skipPhylogeny == "true") {
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
     p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color = id))
     ggplotly(p2, tooltip = "label")
-
-    #newcolumn=c()
-    #testlist=read.csv("tree_group.csv")
-    #mlist=metat$label
-    #for (name in mlist) {
-    #  a=grep(paste("\\b",name,"\\b", sep=""), t(testlist))
-    #  newcolumn=c(newcolumn,t(testlist)[a-1])
-    #}
-
 }
-
-#mylist <- c(1,2,3,4)
-#newelem <- 5
-#mylist <- c(mylist, newelem)
 ```
-This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL.
+This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL. If you ran the MED analysis, the colors of the nodes correspond to the MED group they were assigned to.
 
 <br>
 <br>
@@ -805,11 +721,9 @@ This tree is a maximum likelihood tree made with IQTREE2 and the parameters you 
 <br>
 <br>
 
-if ("params$asvMED" == "true" || "params$aminoMED" == "true") {
+# Post Minimum Entropy Decomposition (MED) Analyses
 
-# MED
-
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Tables</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group Breakdown Table</h2></div>
 
 <br>
 <br>
@@ -869,7 +783,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Groupcounts</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-MED Relative Abundance Plot</h2></div>
 
 <br>
 <br>
@@ -989,7 +903,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Rarefaction</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-Med Rarefaction Curves</h2></div>
 
 <br>
 <br>
@@ -1011,15 +925,15 @@ raredata <- as.data.frame(rrarefy(meddata5[,2:cols], sample=minreads))
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Diversity Analyses Plots</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-MED Diversity Analyses Plots</h2></div>
 
 <br>
 <br>
 
-### Shannon diversity
+### Post-MED Shannon diversity
 
 <br>
-```{r med_diversity_analysis, echo=FALSE}
+```{r med_diversity_analysis1a, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     metadata <- meddata5[,(cols+1):meddata5dim[2]]
     metadata$sample <- meddata5$sample
@@ -1036,7 +950,8 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 }
 ```
 
-```{r med_diversity_analysis_sha, echo=FALSE}
+```{r med_diversity_analysis1b, echo=FALSE}
+#divided because error
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     if (params$stats == "true" ) {
         shannonaov <- aov(index ~ treatment, data= shannondata5_2)
@@ -1092,34 +1007,26 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-### Simpson diversity
+### Post-MED Simpson diversity
 
 <br>
-```{r med_diversity_analysis2, echo=FALSE}
+```{r med_diversity_analysis2a, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     index <- diversity(raredata, index= "simpson")
     simpsondata5 <- as.data.frame(index)
     simpsondata5$sample<- meddata5$sample
     simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
 
-    #simpsonplot <- ggplot(simpsondata5_2, aes(x=treatment,color=treatment,y=index))+
-    #  geom_boxplot()+
-    #  geom_point()+
-    #  theme_classic()+
-    #  labs(y="Index",x="Treatment")+
-    #  theme(axis.text=element_text(size=12))+
-    #  theme(legend.position = "none")
-
-    #s<-ggplotly(simpsonplot)
-    #s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
-    #s
-
     s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
     #s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
     s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
     s
+}
+```
 
+```{r med_diversity_analysis2b, echo=FALSE}
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     if (params$stats == "true" ) {
         simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
         st <- shapiro.test(resid(simpsonaov))
@@ -1174,10 +1081,10 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-### Species Richness
+### Post-MED Richness
 
 <br>
-```{r med_diversity_analysis3, echo=FALSE}
+```{r med_diversity_analysis3a, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     mind5<-min(meddata5$sum)
     index <- rarefy(meddata5[,2:cols], sample=mind5)
@@ -1185,20 +1092,16 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     rarerichnessdata5$sample <-meddata5$sample
     richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
 
-    #richnessplot <- ggplot(richdata5_2, aes(x=treatment,color=treatment,y=index))+
-    #  geom_boxplot()+
-    #  geom_point()+
-    #  theme_classic()+
-    #  labs(y="Richness",x="Treatment")+
-    #  theme(axis.text=element_text(size=12))+
-    #  theme(legend.position = "none")
-
     ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
     #ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
     ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
     ri
+}
+```
 
+```{r med_diversity_analysis3b, echo=FALSE}
+if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     if (params$stats == "true" ) {
         richaov <- aov(index ~ treatment, data= richdata5_2)
         st <- shapiro.test(resid(richaov))
@@ -1254,7 +1157,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Distance To Centroid</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-MED Distance To Centroid</h2></div>
 <br>
 ```{r med_distance, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
@@ -1267,18 +1170,6 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
     df$sample <- meddata5$sample
     df2 <- merge(df, metadata, by="sample")
-
-    #p<- ggplot(data=df2,aes(x=treatment,y=Distance_to_centroid,colour=treatment))+
-    #  geom_boxplot(outlier.alpha = 0)+
-    #  theme_classic()+
-    #  geom_point(position=position_dodge(width=0.75))+
-    #  labs(y="Distance",x="Treatment")+
-    #  theme(axis.text=element_text(size=12))+
-    #  theme(legend.position = "none")
-
-    #cen <- ggplotly(p)
-    #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
-    #cen
 
     cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
     #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
@@ -1304,7 +1195,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 
 <br>
 
-### 2D NMDS
+### Post-MED 2D NMDS
 
 <br>
 ```{r med_nmds2d, echo=FALSE}
@@ -1350,7 +1241,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-### 3D NMDS
+### Post-MED 3D NMDS
 
 <br>
 
@@ -1388,7 +1279,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Phylogenetic Tree</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group Representatives Phylogenetic Tree</h2></div>
 
 <br>
 <br>
@@ -1420,9 +1311,7 @@ if (params$skipPhylogeny == "true") {
 
 }
 ```
-
-}
-
+This tree is a maximum likelihood tree made with the representative sequences from the MED groups formed in the oligotyping analysis using IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL.
 <br>
 <br>
 <br>
