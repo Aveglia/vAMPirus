@@ -757,10 +757,11 @@ fi
 
 ```{r med_table, echo=FALSE}
 if (params$asvMED == "true" && params$type == "ASV"){
-    med_group=read.csv("asv_medfile.csv", header = F)
+    #med_group=read.csv("asv_medfile.csv", header = F)
+    #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
     # change name of sequence to med peak or something
-    colnames(med_group) <- c("SequenceID", "Group", "Sequence")
     #paged_table(med_group,options = list(rows.print = 20))
+    med_group=read.csv("asv_medtable.csv", header = T)
     knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: ASV MED Table") %>%
     kable_styling(font_size = 12, full_width = F)
 }
@@ -769,9 +770,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
   #med_group=read.csv("amino_medfile.csv", header = F)
   #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
   #paged_table(med_group,options = list(rows.print = 20))
-  read.csv("amino_medtable.csv")
-  med_group=read.csv("amino_medtable.csv", header = F)
-  #paged_table(med_group,options = list(rows.print = 20))
+  med_group=read.csv("amino_medtable.csv", header = T)
   knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: Aminotype MED Table") %>%
   kable_styling(font_size = 12, full_width = F)
 }
