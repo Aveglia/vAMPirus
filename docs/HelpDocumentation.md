@@ -537,7 +537,7 @@ Analyze test =>
 
 OR
 
-      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats
+      nextflow run vAMPirus.nf -c /path/to/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --asvMED --aminoMED --stats
 
 
 ### Resuming test analyses if you ran into an error
@@ -1105,7 +1105,7 @@ In vAMPirus v2, we added the ability for the user to use the oligotyping program
 
 The MED algorithm provides an alternative way of clustering marker gene sequences using "information theory-guided decomposition" - "By employing Shannon entropy, MED uses only the information-rich nucleotide positions across reads and iteratively partitions large datasets while omitting stochastic variation." -Eren et al. 2015
 
-When you run the DataCheck pipeline with your dataset, the report will include a figure and table that breakdown the Shannon Entropy analysis results for both ASVs and AminoTypes. The figure visualizes entropy values per sequence position revealing positions or regions of high entropy. The table beneath the figure breaks down the number of positions with entropy values above "0.x". Generally, you would want to decompose sequences using all high extropy positions (>0.1). Although, if you know the positions on your sequence that have the potential to contain biologically or ecologically meaningful mutations, you can specify decomposition based on these positions.
+When you run the DataCheck pipeline with your dataset, the report will include a figure and table that breakdown the Shannon Entropy analysis results for both ASVs and AminoTypes. The figure visualizes entropy values per sequence position revealing positions or regions of high entropy. The table beneath the figure breaks down the number of positions with entropy values above "0.x". Although, if you know the positions on your sequence that have the potential to contain biologically or ecologically meaningful mutations, you can specify decomposition based on these positions.
 
 If you decide to use MED, vAMPirus will run all the same analyses that would be done with the ASV or AminoType sequences (e.g. diversity analyses, statistics) and be appended results to the ASV or AminoType report. The ASV or AminoType sequence nodes on the phylogenetic tree will also be colored based on which MED group they were assigned to.
 
@@ -1188,7 +1188,7 @@ By default IQTREE will determine the best model to use with ModelFinder Plus.
 
 ### Bootstrapping
 
-IQ-TREE is capable of performing parametric or non-parametric bootstrapping. You can specify which one using "--parametric" or "--nonparametric" and to set how many boostraps to perform, you would use "--boots #ofbootstraps" or edit lime 114 in the vampirus.config file.
+IQ-TREE is capable of performing parametric or non-parametric bootstrapping. You can specify which one using "--parametric" or "--nonparametric" and to set how many bootstraps to perform, you would use "--boots #ofbootstraps" or edit lime 114 in the vampirus.config file.
 
 Here is an example for creating a tree using the model determined by ModelTest-NG, non-parametric bootstrapping and 500 bootstraps:
 
@@ -1236,7 +1236,7 @@ AminoType IQTREE command ->
 
 ## Taxonomy Inference
 
-vAMPirus uses DIAMOND blastx/blastp and the provided protein database to infer taxonomy of amplicons to ASVs/cASVs/AminoTypes. There are summary files generated, one in the formated to process with phyloseq and the other as a .tsv with information in a different arrangement. Results are also visualized as a donut graph in the final reports.
+vAMPirus uses DIAMOND blastx/blastp and the provided protein database to infer taxonomy of amplicons to ASVs/cASVs/AminoTypes. There are summary files generated, one in the format compatable with phyloseq and the other as a .tsv with information in a different arrangement. Results are also visualized as a donut graph in the final reports.
 
 First, lets take a look at the taxonomy section of the configuration file:
 
@@ -1328,17 +1328,17 @@ NOTE=> Be sure that there is more than 1 sample in each treatment category or th
 
 There are several files created throughout the vAMPirus pipeline that are stored and organized in directories within the specified results/output directory (ex. ${working_directory}/results; lime 27 in the configuration file). We will go through the structure of the output directory and where to find which files here:
 
-## Pipeline performance information - ${working_directory}/results/PipelinePerformance/
+## Pipeline performance information - ${working_directory}/${outdir}/PipelinePerformance/
 
 Nextflow produces a couple files that breakdown how and what parts of the vAMPirus pipeline was ran. The first file is a report that contains information on how the pipeline performed along with other pipeline performance-related information like how much memory or CPUs were used during certain processes. You can use this information to alter how many resources you would request for a given task in the pipeline. For example, the counts table generation process may take a long time with the current amount of resources requested, you can see this in the report then edit the resources requested at lines 144-183 in the vAMPirus configuration file. The second file produced by Nextflow is just the visualization of the workflow and analyses ran as a flowchart.
 
-## Output of "--DataCheck" - ${working_directory}/results/DataCheck
+## Output of "--DataCheck" - ${working_directory}/${outdir}/DataCheck
 
 The DataCheck performed by vAMPirus includes "ReadProcessing", "Clustering", and "Report" generation. Here again is the launch command to run the DataCheck mode:
 
         `nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --DataCheck`
 
-### ReadProcessing - ${working_directory}/results/DataCheck/ReadProcessing
+### ReadProcessing - ${working_directory}/${outdir}/ReadProcessing
 
 Within the ReadProcessing directory you will find all files related to each step of read processing:
 
@@ -1358,7 +1358,7 @@ Similar to the adapter removal directory, here you have the clean read libraries
 
 There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report.
 
-### Clustering - ${working_directory}/results/DataCheck/Clustering
+### Clustering - ${working_directory}/${outdir}/DataCheck/Clustering
 
 As the name would suggest, the files within this directory are related to the clustering process of "--DataCheck". There isn't too much in here, but here is the breakdown anyway:
 
@@ -1368,13 +1368,13 @@ In this directory, there is the fasta file with the generated ASV sequences and 
 
 2. Nucleotide - ${working_directory}/results/DataCheck/Clustering/Nucleotide
 
-This directory stores a .csv file that shows the number of clusters or ncASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
+This directory stores a .csv file that shows the number of clusters or ncASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report. In this directory you will also find Shannon Entropy analysis results files.
 
 3. Aminoacid - ${working_directory}/results/DataCheck/Clustering/Aminoacid
 
-Similar to Nucleotide, the Aminoacid directory contained the .csv that shows the number of clusters or pcASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
+Similar to Nucleotide, the Aminoacid directory contained the .csv that shows the number of clusters or pcASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report. In this directory you will also find Shannon Entropy analysis results files.
 
-### Report - ${working_directory}/results/DataCheck/Report
+### Report - ${working_directory}/${outdir}/DataCheck/Report
 
 In this directory, you will find a .html DataCheck report that can be opened in any browser. The report contains the following information and it meant to allow the user to tailor their vAMPirus pipeline run to their data (i.e. maximum read length, clustering percentage, etc.):
 
@@ -1393,15 +1393,15 @@ In this section of the report, vAMPirus is showing the number of nucleotide- and
 NOTE: Most, if not all, plots in vAMPirus reports are interactive meaning you can select and zoom on certain parts of the plot or you can use the legend to remove certain samples.
 
 
-## Output of "--Analyze" - ${working_directory}/results/Analyze
+## Output of "--Analyze" - ${working_directory}/${outdir}/Analyze
 
 Depending on which optional arguments you add to your analyses (e.g. --pcASV, --ncASV, skip options), you will have different files produced, here we will go through the output of the full analysis stemming from this launch command:
 
         nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats
 
-### ReadProcessing - ${working_directory}/results/Analyze/ReadProcessing
+### ReadProcessing - ${working_directory}/${outdir}/ReadProcessing
 
-Very similar to the "ReadProcessing" directory created in DataCheck, you will find the following:
+Contains the same files produced during DataCheck run (analyses will not be redone)
 
 1. FastQC - ${working_directory}/results/Analyze/ReadProcessing/FastQC
 
@@ -1419,33 +1419,33 @@ Similar to the adapter removal directory, here you have the clean read libraries
 
 There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report if ran before Analyze.
 
-### Clustering - ${working_directory}/results/Analyze/Clustering
+### Clustering - ${working_directory}/${outdir}/Analyze/Clustering
 
 The clustering directory will contain all files produced for whichever clustering technique you specified (with the launch command above, all are specified):
 
-1. ASVs - ${working_directory}/results/Analyze/Clustering/ASVsIn this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits.
+1. ASVs -- ${working_directory}/results/Analyze/Clustering/ASVs -- In this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits. In this directory, if --asvMED was set to run, you will be a MED/ directory containing all output files from oligotyping analyses.
 
-2. AminoTypes - ${working_directory}/results/Analyze/Clustering/AminoTypesThe AminoTypes directory has a few different subdirectories, in the main directory, however, is the fasta file with the AminoTypes used in all subsequent analyses. The first subdirectory is called "Translation" which includes the raw ASV translation file along with a report spit out by VirtualRibosome. The next subdirectory is "Problematic", where any translations that were below the given "--minAA" length will be reported, if none were deemed "problematic" then the directory will be empty. All problematic amino acid sequence AND their corresponding ASVs are stored in fasta files for you to review. The final subdirectory is "SummaryFiles" where you can find a "map" of sorts to track which ASVs contributed to which AminoTypes and a .gc file containing information on length of translated sequences.
+2. AminoTypes -- ${working_directory}/results/Analyze/Clustering/AminoTypes -- The AminoTypes directory has a few different subdirectories, in the main directory, however, is the fasta file with the AminoTypes used in all subsequent analyses. The first subdirectory is called "Translation" which includes the raw ASV translation file along with a report spit out by VirtualRibosome. The next subdirectory is "Problematic", where any translations that were below the given "--minAA" length will be reported, if none were deemed "problematic" then the directory will be empty. All problematic amino acid sequence AND their corresponding ASVs are stored in fasta files for you to review. The final subdirectory is "SummaryFiles" where you can find a "map" of sorts to track which ASVs contributed to which AminoTypes and a .gc file containing information on length of translated sequences. In this directory, if --aminoMED was set to run, you will be a MED/ directory containing all output files from oligotyping analyses.
 
-3. ncASV - ${working_directory}/results/Analyze/Clustering/ncASVIn this directory, you will find the fasta files corresponding to the clustering percentage(s) you specified for the run.
+3. ncASV -- ${working_directory}/results/Analyze/Clustering/ncASV -- In this directory, you will find the fasta files corresponding to the clustering percentage(s) you specified for the run.
 
-4. pcASV - ${working_directory}/results/Analyze/Clustering/pcASVLooking in this directory, you probably notice some similar subdirectories. The pcASV directory also contains the Summary, Problematic, and Translation subsirectories we saw in the AminoType directory. The other important files in this directory is the nucleotide and amino acid versions of the pcASVs generated for whichever clustering percentage(s) specified.An important note for when creating pcASVs is that the subsequent analyses (phylogenies, taxonomy assignment, etc.) are run on both nucloetide and amino acid pcASV fastas. To create these files, vAMPirus translates the ASVs, checks for problematic sequences, then clusters the translated sequences by the given percentage(s). After clustering, vAMPirus will go pcASV by pcASV extracting the nucleotide sequences of the ASVs that clustered within a given pcASV. The extracted nucleotide sequences are then used to generate a consensus nucleotide sequence(s) per pcASV.        
+4. pcASV -- ${working_directory}/results/Analyze/Clustering/pcASV -- Looking in this directory, you probably notice some similar subdirectories. The pcASV directory also contains the Summary, Problematic, and Translation subsirectories we saw in the AminoType directory. The other important files in this directory is the nucleotide and amino acid versions of the pcASVs generated for whichever clustering percentage(s) specified.An important note for when creating pcASVs is that the subsequent analyses (phylogenies, taxonomy assignment, etc.) are run on both nucloetide and amino acid pcASV fastas. To create these files, vAMPirus translates the ASVs, checks for problematic sequences, then clusters the translated sequences by the given percentage(s). After clustering, vAMPirus will go pcASV by pcASV extracting the nucleotide sequences of the ASVs that clustered within a given pcASV. The extracted nucleotide sequences are then used to generate a consensus nucleotide sequence(s) per pcASV.        
 
-### Analyses - ${working_directory}/results/Analyze/Analyses
+### Analyses - ${working_directory}/${outdir}/Analyze/Analyses
 
 For each clustering technique (i.e. ASVs, AminoTypes, ncASVs and pcASVs) performed in a given run, resulting taxonomic unit fastas will go through the following analyses (unless skip options are used):
 
-1. Counts - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/CountsThe Counts directory is where you can find the counts tables as .csv files (and .biome as well for nucleotide counts tables).
+1. Counts -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Counts -- The Counts directory is where you can find the counts tables as .csv files (and .biome as well for nucleotide counts tables).
 
-2. Phylogeny - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/PhylogenyUnless told otherwise, vAMPirus will produce phylogenetic trees for all taxonomic unit fastas using IQ-TREE. The options for this analysis was discussed in a previous section of the docs. In the phylogeny output directory, you will find three subdirectories: (i) ./Alignment - contains trimmed MAFFT alignment used for tree, (ii) ./ModelTest - contains output files from substitution model prediction with ModelTest-NG, and (iii) ./IQ-TREE - where you can find all output files from IQ-TREE with the file of (usual) interest is the ".treefile".
+2. Phylogeny -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Phylogeny -- Unless told otherwise, vAMPirus will produce phylogenetic trees for all taxonomic unit fastas using IQ-TREE. The options for this analysis was discussed in a previous section of the docs. In the phylogeny output directory, you will find three subdirectories: (i) ./Alignment - contains trimmed MAFFT alignment used for tree, (ii) ./ModelTest - contains output files from substitution model prediction with ModelTest-NG, and (iii) ./IQ-TREE - where you can find all output files from IQ-TREE with the file of (usual) interest is the ".treefile".
 
-3.  Taxonomy - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/TaxonomyvAMPirus uses DIAMOND blastp/x and the supplied PROTEIN database for taxonomy assignment of sequences. In the Taxonomy directory, you will find (i) a subdirectory called "DIAMONDOutput" which contains the original output file produced by DIAMOND, (ii) a fasta file that has taxonomy assignments within the sequence headers, and (iii) three different summary files (one being a phyloseq object with taxonomic information, a tab-separated summary file for review by the user and a summary table looking at abundance of specific hits).
+3.  Taxonomy -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Taxonomy -- vAMPirus uses DIAMOND blastp/x and the supplied PROTEIN database for taxonomy assignment of sequences. In the Taxonomy directory, you will find (i) a subdirectory called "DIAMONDOutput" which contains the original output file produced by DIAMOND, (ii) a fasta file that has taxonomy assignments within the sequence headers, and (iii) three different summary files (one being a phyloseq object with taxonomic information, a tab-separated summary file for review by the user and a summary table looking at abundance of specific hits).
 
-4. Matrix - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/MatrixThe Matric directory is where you can find all Percent Identity matrices for produced ASV/cASV/AmintoType fastas.
+4. Matrix -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Matrix -- The Matric directory is where you can find all Percent Identity matrices for produced ASV/cASV/AmintoType fastas.
 
-5. EMBOSS - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/EMBOSSSeveral different protein physiochemical properties for all amino acid sequences are assessed using EMBOSS scripts (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/groups.html). There are four different subdirectories within EMBOSS, these include (i) ./ProteinProperties - contains files and plots regarding multiple different physiochemical properties (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/pepstats.html), (ii) ./IsoelectricPoint - contains a text file and a .svg image with plots showing the isoelectric point of protein (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/iep.html), (iii) ./HydrophobicMoment - information related to hydrophobic moments of amino acid sequences (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/hmoment.html), and (iv) ./2dStructure - information about 2D structure of proteins (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/protein_2d_structure_group.html).
+5. EMBOSS -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/EMBOSS -- Several different protein physiochemical properties for all amino acid sequences are assessed using EMBOSS scripts (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/groups.html). There are four different subdirectories within EMBOSS, these include (i) ./ProteinProperties - contains files and plots regarding multiple different physiochemical properties (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/pepstats.html), (ii) ./IsoelectricPoint - contains a text file and a .svg image with plots showing the isoelectric point of protein (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/iep.html), (iii) ./HydrophobicMoment - information related to hydrophobic moments of amino acid sequences (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/hmoment.html), and (iv) ./2dStructure - information about 2D structure of proteins (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/protein_2d_structure_group.html).
 
-### FinalReport - ${working_directory}/results/Analyze/FinalReport
+### FinalReport - ${working_directory}/${outdir}/Analyze/FinalReports
 
 vAMPirus produces final reports for all taxonomic unit fastas produced in the run. These reports contain the following information:
 
@@ -1461,7 +1461,7 @@ This is a plot that looks at number of reads per sample, similar to what is seen
 
 4. Diversity analyses box Plots
 
-The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Species Richness.
+The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Richness.
 
 Stats tests included with "--stats":
 
@@ -1478,15 +1478,17 @@ Stats tests included with "--stats":
 
 6. NMDS plots (2D and 3D)
 
-7. Relative ASV/cASV abundance per sample bar chart
+7. Relative sequence abundance per sample bar chart
 
-8. Absolute ASV/cASV abundance per treatment bar chart
+8. Absolute sequence abundance per treatment bar chart
 
 9. Pairwise percent ID heatmap
 
 10. Taxonomy results visualized in a donut plot
 
 11. Visualized phylogenetic tree
+
+12. Post-Minimum Entropy Decomposition Analyses (combination of above)
 
 
 # All of the options
