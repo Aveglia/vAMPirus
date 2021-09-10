@@ -71,7 +71,8 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
         reads_stats=read.csv("final_reads_stats.csv")
         #paged_table(reads_stats,options = list(rows.print = 20))
         knitr::kable(reads_stats, digits = 2, align = 'c', booktabs = TRUE, caption = "Table 1: Read summary stats") %>%
-  kable_styling(font_size = 12, full_width = F)
+        kable_styling(font_size = 12, full_width = F)%>% 
+        scroll_box(width = "100%", height = "100%")
     } else {
         writeLines("\n--------------------------------------------------------------\n")
         cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
@@ -763,7 +764,8 @@ if (params$asvMED == "true" && params$type == "ASV"){
     #paged_table(med_group,options = list(rows.print = 20))
     med_group=read.csv("asv_medtable.csv", header = T)
     knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: ASV MED Table") %>%
-    kable_styling(font_size = 12, full_width = F)
+    kable_styling(font_size = 12, full_width = F)%>% 
+    scroll_box(width = "100%", height = "100%")
 }
 
 if (params$aminoMED == "true" && params$type == "AminoType"){
@@ -772,7 +774,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
   #paged_table(med_group,options = list(rows.print = 20))
   med_group=read.csv("amino_medtable.csv", header = T)
   knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: Aminotype MED Table") %>%
-  kable_styling(font_size = 12, full_width = F)%>% 
+  kable_styling(font_size = 12, full_width = F) %>% 
   scroll_box(width = "100%", height = "100%")
 }
 ```
