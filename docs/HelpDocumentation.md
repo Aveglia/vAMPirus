@@ -412,7 +412,7 @@ General execution:
 
 vampirus_startup.sh -h [-d 1|2|3|4] [-s] [-t]
 
-    Command lime options:
+    Command line options:
 
         [ -h ]                       	Print help information
 
@@ -449,7 +449,7 @@ RVDB format -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein 
 
 NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003 [Zymoseptoria brevis]"
 
-To set/inform vAMPirus of which header format for the reference database is being used, you can edit the vampirus.config file at lime 112 "dbtype="NCBI"" for NCBI header format or "dbtype="RVDB"" for RVDB format.
+To set/inform vAMPirus of which header format for the reference database is being used, you can edit the vampirus.config file at line 122 "dbtype="NCBI"" for NCBI header format or "dbtype="RVDB"" for RVDB format.
 
 An example of custom headers in RVDB format if you plan to use a custom database:
 
@@ -636,7 +636,7 @@ Nextflow deployment of vAMPirus relies on the use of the configuration file (vam
 
 Furthermore, the configuration file contains analysis-specific parameters AND resource-specific Nextflow launching parameters. A benefit of Nextflow integration, is that you can run the vAMPirus workflow on a large HPC just as easily as you could on your local machine.
 
-If you look at lime 151 and greater in the vampirus.config file, you will see resource-specific parameters that you can alter before any run. Nexflow is capable of submitting jobs automatically using slurm and PBS, check out the Nextflow docs to learn more (https://www.nextflow.io/docs/latest/executor.html)!
+If you look at line 233 and greater in the vampirus.config file, you will see resource-specific parameters that you can alter before any run. Nexflow is capable of submitting jobs automatically using slurm and PBS, check out the Nextflow docs to learn more (https://www.nextflow.io/docs/latest/executor.html)!
 
 ### Setting parameter values
 
@@ -672,15 +672,15 @@ Instead of editing the configuration file directly, you could set parameters wit
 
                 nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclID .95
 
-Here we use the "--Analyze" option that tells vAMPirus that we are ready to analyze some data. Then the "--ncASV" argument with the "--clisterNuclID .95" tells vAMPirus we would like to cluster our ASVs based on 95% nucleotide similarity. The default ID value is stored at lime 51 in the vampirus.config file (currently 85%), but as soon as you specify and provide a value in the command, the value within the config file is ignored.
+Here we use the "--Analyze" option that tells vAMPirus that we are ready to analyze some data. Then the "--ncASV" argument with the "--clisterNuclID .95" tells vAMPirus we would like to cluster our ASVs based on 95% nucleotide similarity. The default ID value is stored at line 66 in the vampirus.config file (currently 85%), but as soon as you specify and provide a value in the command, the value within the config file is ignored.
 
 NOTE: Nextflow also has options in the launch command. To tell them apart, Nextflow options uses a single dash (e.g. -with-conda or -profile) while vAMPirus options are always with a double dash (e.g. --Analyze)
 
-### Setting computing resource parameters - Edit in lines 151-171 in vampirus.config
+### Setting computing resource parameters - Edit in lines 241-261 in vampirus.config
 
 Each process within the vAMPirus workflow is tagged with either "low_cpus", "norm_cpus", or "high_cpus" (see below) which let's Nextflow know the amount of cpus and memory required for each process, which will then be used for when Nextflow submits a given job or task. Nexflow actively assesses the amount of available resources on your machine and will submit tasks only when the proper amount of resources can be requested.
 
-From lime 203-217 in the vAMPirus.config file is where you can edit these values for whichever machine you plan to run the workflow on.
+From line 241-261 in the vAMPirus.config file is where you can edit these values for whichever machine you plan to run the workflow on.
 
         process {
             withLabel: low_cpus {
@@ -763,7 +763,7 @@ This launch command will run all aspects of the vAMPirus workflow on your data a
 
 ### Sequencing reads
 
-Input can be raw or processed compressed or non-compressed fastq files with names containing "\_R1" or "\_R2". You can specify the directory containing your reads in lime 25 of the vampirus.config file.
+Input can be raw or processed compressed or non-compressed fastq files with names containing "\_R1" or "\_R2". You can specify the directory containing your reads in line 20 of the vampirus.config file.
 
 NOTE: Sample names are extracted from read library names by using the string to the left of the "\_R" in the filename automatically.
 
@@ -1326,7 +1326,7 @@ NOTE=> Be sure that there is more than 1 sample in each treatment category or th
 
 # vAMPirus output
 
-There are several files created throughout the vAMPirus pipeline that are stored and organized in directories within the specified results/output directory (ex. ${working_directory}/results; lime 27 in the configuration file). We will go through the structure of the output directory and where to find which files here:
+There are several files created throughout the vAMPirus pipeline that are stored and organized in directories within the specified results/output directory (ex. ${working_directory}/results; line 24 in the configuration file). We will go through the structure of the output directory and where to find which files here:
 
 ## Pipeline performance information - ${working_directory}/${outdir}/PipelinePerformance/
 

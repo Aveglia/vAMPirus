@@ -756,7 +756,7 @@ if (params.DataCheck || params.Analyze) {
 
             script:
                 """
-                vsearch --fastq_mergepairs ${reads[0]} --reverse ${reads[1]} --threads ${task.cpus} --fastqout ${sample_id}_mergedclean.fastq --fastqout_notmerged_fwd ${sample_id}_notmerged_fwd.fastq --fastqout_notmerged_rev ${sample_id}_notmerged_rev.fastq  --fastq_maxdiffs ${params.diffs} --fastq_maxns ${params.maxn} --fastq_allowmergestagger --fastq_maxee ${params.maxEE} --relabel ${sample_id}.
+                vsearch --fastq_mergepairs ${reads[0]} --reverse ${reads[1]} --threads ${task.cpus} --fastqout ${sample_id}_mergedclean.fastq --fastqout_notmerged_fwd ${sample_id}_notmerged_fwd.fastq --fastqout_notmerged_rev ${sample_id}_notmerged_rev.fastq  --fastq_maxdiffs ${params.diffs} --fastq_maxns ${params.maxn} --fastq_allowmergestagger --fastq_maxee ${params.maxEE} --fastq_minovlen ${params.minoverlap} --relabel ${sample_id}.
                 echo ${sample_id} > ${sample_id}.name
                 """
 
@@ -914,7 +914,8 @@ if (params.DataCheck || params.Analyze) {
             file(fasta) from reads_vsearch4_ch
 
         output:
-            file("*ASVs.fasta") into ( reads_vsearch5_ch, asv_med, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck )
+            file("*ASVs.fasta") into asvforfilt
+
 
         script:
             """
@@ -923,6 +924,93 @@ if (params.DataCheck || params.Analyze) {
     }
 
     // UNTIL HERE DEFAULT
+    if (params.filter) {
+
+        process Filtering {
+
+            label 'norm_cpus'
+
+            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/FilterCont", mode: "copy", overwrite: true, pattern: '*.fasta'
+
+            input:
+                file(asv) from asvforfilt
+
+            output:
+                file("*ASV.fasta") into ( reads_vsearch5_ch, asv_med, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck )
+
+            script:
+                """
+                cp ${params.vampdir}/bin/rename_seq.py .
+
+                #create and rename  filter database
+                grep ">" ${params.filtDB} | awk -F ">" '{print \$2}' >> filt.head
+                j=1
+                for y in \$( cat filt.head );do
+                    echo ">Filt"\$j"" >> filt.headers
+                    j=\$(( \${j}+1 ))
+                done
+                ./rename_seq.py ${params.filtDB} filt.headers filterdatabaserenamed.fasta
+                cat filterdatabase.fasta >> combodatabase.fasta
+                paste -d',' filt.head filt.headers > filtername_map.csv
+                rm filterdatabaserenamed.fasta
+
+                #create and rename keep database
+                grep ">" ${params.keepDB} | awk -F ">" '{print \$2}' >> keep.head
+                d=1
+                for y in \$( cat keep.head );do
+                    echo ">keep"\$d"" >> keep.headers
+                    d=\$(( \${d}+1 ))
+                done
+                ./rename_seq.py ${params.keepDB} keep.headers keepdatabaserenamed.fasta
+                cat keepdatabaserenamed.fasta >> combodatabase.fasta
+                paste -d',' keep.head keep.headers > keepername_map.csv
+                rm filterdatabaserenamed.fasta
+                #index database
+                diamond makedb --in combodatabase.fasta --db combodatabase.fasta
+                #run diamond_db
+                diamond blastx -q ${asv} -d combodatabase.fasta -p ${task.cpus} --id ${params.filtminID} -l ${params.filtminaln} -e ${params.filtevalue} --${params.filtsensitivity} -o ${params.projtag}_diamondfilter.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident --max-target-seqs 1 --max-hsps 1
+                #get asvs
+                grep ">" ${asv} | awk -F ">" '{print \$2}' > asv.list
+                for x in $(cat asv.list)
+                do  #check for a hit
+                    if [[ \$(grep -c "\$x" ${params.projtag}_diamondfilter.out) -eq 1 ]]
+                    then    #check if hit is to filter
+                            hit=\$(grep "\$x" ${params.projtag}_diamondfilter.out | awk '{print \$3}')
+                            if [[ \$(grep -c "\$hit" filt.headers) -eq 1 ]]
+                            then    echo "\$x,\$hit >> filtered_asvs_summary.csv
+                            elif [[ \$(grep -c "\$hit" keep.headers) -eq 1 ]]
+                            then    echo "\$x" >> kep.list
+                            fi
+                    else    echo \$x >> nohit.list
+                    fi
+                done
+                if [[ ${params.keepnohit} == "true" ]]
+                then    echo nohit.list >> kep.list
+                        cat kep.list | sort > keep.list
+                        seqtk subseq ${asv} keep.list > kept.fasta
+                        u=1
+                        for y in \$( cat keep.list );do
+                            echo ">ASV"\$u"" >> asvrename.list
+                            u=\$(( \${u}+1 ))
+                        done
+                        ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
+                else
+                        cat kep.list | sort > keep.list
+                        seqtk subseq ${asv} keep.list > kept.fasta
+                        u=1
+                        for y in \$( cat keep.list );do
+                            echo ">ASV"\$u"" >> asvrename.list
+                            u=\$(( \${u}+1 ))
+                        done
+                        ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
+                fi
+                """
+        }
+
+    } else {
+        asvforfilt
+            .into{ reads_vsearch5_ch, asv_med, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck }
+    }
 
     if (params.DataCheck) {
 
@@ -1367,12 +1455,18 @@ if (params.DataCheck || params.Analyze) {
                         """
                         cp ${params.vampdir}/bin/rename_seq.py .
                         virdb=${params.dbdir}/${params.dbname}
+                        if [[ ${params.measurement} == "bitscore"]]
+                        then    measure="--min-score ${params.bitscore}"
+                        elif    [[ ${params.measurement} == "evalue"]]
+                        then    measure="-e ${params.evalue}"
+                        else    measure="--min-score ${params.bitscore}"
+                        fi
                         grep ">" \${virdb} > headers.list
                         headers="headers.list"
                         name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                         if [[ ${params.ncbitax} == "true" ]]
-                        then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                        else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                        then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                        else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                         fi
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" > access.list
@@ -1515,10 +1609,16 @@ if (params.DataCheck || params.Analyze) {
                       """
                       cp ${params.vampdir}/bin/rename_seq.py .
                       virdb=${params.dbdir}/${params.dbname}
+                      if [[ ${params.measurement} == "bitscore"]]
+                      then    measure="--min-score ${params.bitscore}"
+                      elif    [[ ${params.measurement} == "evalue"]]
+                      then    measure="-e ${params.evalue}"
+                      else    measure="--min-score ${params.bitscore}"
+                      fi
                       grep ">" \${virdb} > headers.list
                       headers="headers.list"
                       name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                      diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                      diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                       echo "Preparing lists to generate summary .csv's"
                       echo "[Best hit accession number]" > access.list
                       echo "[e-value]" > evalue.list
@@ -1750,12 +1850,18 @@ if (params.DataCheck || params.Analyze) {
                         """
                         cp ${params.vampdir}/bin/rename_seq.py .
                         virdb=${params.dbdir}/${params.dbname}
+                        if [[ ${params.measurement} == "bitscore"]]
+                        then    measure="--min-score ${params.bitscore}"
+                        elif    [[ ${params.measurement} == "evalue"]]
+                        then    measure="-e ${params.evalue}"
+                        else    measure="--min-score ${params.bitscore}"
+                        fi
                         grep ">" \${virdb} > headers.list
                         headers="headers.list"
                         name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                         if [[ ${params.ncbitax} == "true" ]]
-                        then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                        else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                        then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                        else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                         fi
                         echo "Preparing lists to generate summary .csv's"
                         echo "[Best hit accession number]" > access.list
@@ -1896,9 +2002,15 @@ if (params.DataCheck || params.Analyze) {
                           cp ${params.vampdir}/bin/rename_seq.py .
                           virdb=${params.dbdir}/${params.dbname}
                           grep ">" \${virdb} > headers.list
+                          if [[ ${params.measurement} == "bitscore"]]
+                          then    measure="--min-score ${params.bitscore}"
+                          elif    [[ ${params.measurement} == "evalue"]]
+                          then    measure="-e ${params.evalue}"
+                          else    measure="--min-score ${params.bitscore}"
+                          fi
                           headers="headers.list"
                           name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                          diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                          diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                           echo "Preparing lists to generate summary .csv's"
                           echo "[Best hit accession number]" > access.list
                           echo "[e-value]" > evalue.list
@@ -2431,12 +2543,18 @@ if (params.DataCheck || params.Analyze) {
                             """
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
+                            if [[ ${params.measurement} == "bitscore"]]
+                            then    measure="--min-score ${params.bitscore}"
+                            elif    [[ ${params.measurement} == "evalue"]]
+                            then    measure="-e ${params.evalue}"
+                            else    measure="--min-score ${params.bitscore}"
+                            fi
                             grep ">" \${virdb} > headers.list
                             headers="headers.list"
                             name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                             if [[ ${params.ncbitax} == "true" ]]
-                            then   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                            else   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                            then   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                            else   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             fi
                             echo "Preparing lists to generate summary .csv's"
                             echo "[Best hit accession number]" > access.list
@@ -2576,10 +2694,16 @@ if (params.DataCheck || params.Analyze) {
                               """
                               cp ${params.vampdir}/bin/rename_seq.py .
                               virdb=${params.dbdir}/${params.dbname}
+                              if [[ ${params.measurement} == "bitscore"]]
+                              then    measure="--min-score ${params.bitscore}"
+                              elif    [[ ${params.measurement} == "evalue"]]
+                              then    measure="-e ${params.evalue}"
+                              else    measure="--min-score ${params.bitscore}"
+                              fi
                               grep ">" \${virdb} > headers.list
                               headers="headers.list"
                               name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                               echo "Preparing lists to generate summary .csv's"
                               echo "[Best hit accession number]" > access.list
                               echo "[e-value]" > evalue.list
@@ -3070,12 +3194,18 @@ if (params.DataCheck || params.Analyze) {
                             set +e
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
+                            if [[ ${params.measurement} == "bitscore"]]
+                            then    measure="--min-score ${params.bitscore}"
+                            elif    [[ ${params.measurement} == "evalue"]]
+                            then    measure="-e ${params.evalue}"
+                            else    measure="--min-score ${params.bitscore}"
+                            fi
                             grep ">" \${virdb} > headers.list
                             headers="headers.list"
                             name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                             if [[ ${params.ncbitax} == "true" ]]
-                            then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                            else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                            then   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                            else   diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             fi
                             echo "Preparing lists to generate summary .csv's"
                             echo "[Best hit accession number]" > access.list
@@ -3220,10 +3350,16 @@ if (params.DataCheck || params.Analyze) {
                               set +e
                               cp ${params.vampdir}/bin/rename_seq.py .
                               virdb=${params.dbdir}/${params.dbname}
+                              if [[ ${params.measurement} == "bitscore"]]
+                              then    measure="--min-score ${params.bitscore}"
+                              elif    [[ ${params.measurement} == "evalue"]]
+                              then    measure="-e ${params.evalue}"
+                              else    measure="--min-score ${params.bitscore}"
+                              fi
                               grep ">" \${virdb} > headers.list
                               headers="headers.list"
                               name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                              diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              diamond blastx -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                               echo "Preparing lists to generate summary .csv's"
                               echo "[Best hit accession number]" > access.list
                               echo "[e-value]" > evalue.list
@@ -3539,12 +3675,18 @@ if (params.DataCheck || params.Analyze) {
                             """
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
+                            if [[ ${params.measurement} == "bitscore"]]
+                            then    measure="--min-score ${params.bitscore}"
+                            elif    [[ ${params.measurement} == "evalue"]]
+                            then    measure="-e ${params.evalue}"
+                            else    measure="--min-score ${params.bitscore}"
+                            fi
                             grep ">" \${virdb} > headers.list
                             headers="headers.list"
                             name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
                             if [[ ${params.ncbitax} == "true" ]]
-                            then   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
-                            else   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                            then   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop staxids sskingdoms skingdoms sphylums --max-target-seqs 1 --max-hsps 1
+                            else   diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                             fi
                             echo "Preparing lists to generate summary .csv's"
                             echo "[Best hit accession number]" > access.list
@@ -3688,10 +3830,16 @@ if (params.DataCheck || params.Analyze) {
                               """
                               cp ${params.vampdir}/bin/rename_seq.py .
                               virdb=${params.dbdir}/${params.dbname}
+                              if [[ ${params.measurement} == "bitscore"]]
+                              then    measure="--min-score ${params.bitscore}"
+                              elif    [[ ${params.measurement} == "evalue"]]
+                              then    measure="-e ${params.evalue}"
+                              else    measure="--min-score ${params.bitscore}"
+                              fi
                               grep ">" \${virdb} > headers.list
                               headers="headers.list"
                               name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}')
-                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} --min-score ${params.bitscore} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
+                              diamond blastp -q ${asvs} -d \${virdb} -p ${task.cpus} --id ${params.minID} -l ${params.minaln} \${measure} --${params.sensitivity} -o "\$name"_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1
                               echo "Preparing lists to generate summary .csv's"
                               echo "[Best hit accession number]" > access.list
                               echo "[e-value]" > evalue.list
