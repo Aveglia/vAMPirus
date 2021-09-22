@@ -930,7 +930,7 @@ if (params.DataCheck || params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/FilterCont", mode: "copy", overwrite: true, pattern: '*.fasta'
+            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/FilterCont", mode: "copy", overwrite: true
 
             input:
                 file(asv) from asvforfilt
@@ -1009,7 +1009,7 @@ if (params.DataCheck || params.Analyze) {
 
     } else {
         asvforfilt
-            .into{ reads_vsearch5_ch, asv_med, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck }
+            .into{ reads_vsearch5_ch; asv_med; nucl2aa; asvsforAminotyping; asvfastaforcounts; asvaminocheck }
     }
 
     if (params.DataCheck) {
