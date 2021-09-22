@@ -36,7 +36,6 @@ library(tidyverse)
 library(scales)
 library(cowplot)
 library(dplyr)
-library(ggtree)
 library(plotly)
 #library(BiocParallel)
 library(knitr)
@@ -450,6 +449,9 @@ mplot
 med_amino_csv=read.csv(paste(params$projtag, sep="", "_AminoType_entropy_breakdown.csv"), header=TRUE)
 paged_table(med_amino_csv, options = list(rows.print = 10))
 ```
+<br>
+<br>
+<br>
 <br>
 <br>
 <br>
