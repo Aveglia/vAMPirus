@@ -971,7 +971,7 @@ if (params.DataCheck || params.Analyze) {
                 diamond blastx -q ${asv} -d combodatabase.fasta -p ${task.cpus} --id ${params.filtminID} -l ${params.filtminaln} -e ${params.filtevalue} --${params.filtsensitivity} -o ${params.projtag}_diamondfilter.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident --max-target-seqs 1 --max-hsps 1
                 #get asvs
                 grep ">" ${asv} | awk -F ">" '{print \$2}' > asv.list
-                for x in $(cat asv.list)
+                for x in \$(cat asv.list)
                 do  #check for a hit
                     if [[ \$(grep -c "\$x" ${params.projtag}_diamondfilter.out) -eq 1 ]]
                     then    #check if hit is to filter
