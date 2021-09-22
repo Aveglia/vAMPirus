@@ -950,7 +950,7 @@ if (params.DataCheck || params.Analyze) {
                     j=\$(( \${j}+1 ))
                 done
                 ./rename_seq.py ${params.filtDB} filt.headers filterdatabaserenamed.fasta
-                cat filterdatabase.fasta >> combodatabase.fasta
+                cat filterdatabaserenamed.fasta >> combodatabase.fasta
                 paste -d',' filt.head filt.headers > filtername_map.csv
                 rm filterdatabaserenamed.fasta
 
