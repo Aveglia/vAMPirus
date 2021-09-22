@@ -1234,8 +1234,35 @@ if (params.DataCheck || params.Analyze) {
                     if [[ \$(echo ""\$x" > 1.0"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.0-.list
                     fi
+                    if [[ \$(echo ""\$x" > 1.1"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.1-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.2"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.2-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.3"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.3-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.4"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.4-.list
+                    fi
                     if [[ \$(echo ""\$x" > 1.5"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.5-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.6"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.6-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.7"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.7-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.8"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.8-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.9"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.9-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 2.0"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-2.0-.list
                     fi
             done
             echo "Entropy,Peaks_above" >> ${params.projtag}_ASV_entropy_breakdown.csv
@@ -1318,8 +1345,34 @@ if (params.DataCheck || params.Analyze) {
                     if [[ \$(echo ""\$x" > 1.0"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.0-.list
                     fi
+                    if [[ \$(echo ""\$x" > 1.1"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.1-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.2"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.2-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.3"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.3-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.4"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.4-.list
                     if [[ \$(echo ""\$x" > 1.5"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.5-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.6"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.6-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.7"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.7-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.8"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.8-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 1.9"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-1.9-.list
+                    fi
+                    if [[ \$(echo ""\$x" > 2.0"|bc -l) -eq 1 ]];
+                    then    echo dope >> above-2.0-.list
                     fi
             done
             echo "Entropy,Peaks_above" >> ${params.projtag}_AminoType_entropy_breakdown.csv
