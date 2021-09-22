@@ -1356,6 +1356,7 @@ if (params.DataCheck || params.Analyze) {
                     fi
                     if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.4-.list
+                    fi
                     if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.5-.list
                     fi
