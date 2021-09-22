@@ -1201,67 +1201,67 @@ if (params.DataCheck || params.Analyze) {
             awk '{print \$2}' ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
             for x in \$(cat tmp_value.list)
             do      echo "\$x"
-                    if [[ \$(echo ""\$x" > 0.0"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.0-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.1"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.1-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.2"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.2-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.3"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.3-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.4"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.4-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.5"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.5-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.6"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.6-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.7"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.7-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.8"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.8-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.9"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.9-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.0"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.0-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.1"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.1-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.2"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.2-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.3"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.3-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.4"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.4-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.5"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.5-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.6"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.6-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.7"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.7-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.8"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.8-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.9"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.9-.list
                     fi
-                    if [[ \$(echo ""\$x" > 2.0"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
                     then    echo dope >> above-2.0-.list
                     fi
             done
@@ -1312,66 +1312,66 @@ if (params.DataCheck || params.Analyze) {
             awk '{print \$2}' ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
             for x in \$(cat tmp_value.list)
             do      echo "\$x"
-                    if [[ \$(echo ""\$x" > 0.0"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.0-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.1"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.1-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.2"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.2-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.3"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.3-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.4"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.4-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.5"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.5-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.6"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.6-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.7"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.7-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.8"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.8-.list
                     fi
-                    if [[ \$(echo ""\$x" > 0.9"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
                     then    echo dope >> above-0.9-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.0"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.0-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.1"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.1-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.2"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.2-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.3"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.3-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.4"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.4-.list
-                    if [[ \$(echo ""\$x" > 1.5"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.5-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.6"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.6-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.7"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.7-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.8"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.8-.list
                     fi
-                    if [[ \$(echo ""\$x" > 1.9"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
                     then    echo dope >> above-1.9-.list
                     fi
-                    if [[ \$(echo ""\$x" > 2.0"|bc -l) -eq 1 ]];
+                    if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
                     then    echo dope >> above-2.0-.list
                     fi
             done
