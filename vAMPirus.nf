@@ -1509,9 +1509,9 @@ if (params.DataCheck || params.Analyze) {
                         """
                         cp ${params.vampdir}/bin/rename_seq.py .
                         virdb=${params.dbdir}/${params.dbname}
-                        if [[ ${params.measurement} == "bitscore"]]
+                        if [[ ${params.measurement} == "bitscore" ]]
                         then    measure="--min-score ${params.bitscore}"
-                        elif    [[ ${params.measurement} == "evalue"]]
+                        elif    [[ ${params.measurement} == "evalue" ]]
                         then    measure="-e ${params.evalue}"
                         else    measure="--min-score ${params.bitscore}"
                         fi
@@ -1663,9 +1663,9 @@ if (params.DataCheck || params.Analyze) {
                       """
                       cp ${params.vampdir}/bin/rename_seq.py .
                       virdb=${params.dbdir}/${params.dbname}
-                      if [[ ${params.measurement} == "bitscore"]]
+                      if [[ ${params.measurement} == "bitscore" ]]
                       then    measure="--min-score ${params.bitscore}"
-                      elif    [[ ${params.measurement} == "evalue"]]
+                      elif    [[ ${params.measurement} == "evalue" ]]
                       then    measure="-e ${params.evalue}"
                       else    measure="--min-score ${params.bitscore}"
                       fi
@@ -1904,9 +1904,9 @@ if (params.DataCheck || params.Analyze) {
                         """
                         cp ${params.vampdir}/bin/rename_seq.py .
                         virdb=${params.dbdir}/${params.dbname}
-                        if [[ ${params.measurement} == "bitscore"]]
+                        if [[ ${params.measurement} == "bitscore" ]]
                         then    measure="--min-score ${params.bitscore}"
-                        elif    [[ ${params.measurement} == "evalue"]]
+                        elif    [[ ${params.measurement} == "evalue" ]]
                         then    measure="-e ${params.evalue}"
                         else    measure="--min-score ${params.bitscore}"
                         fi
@@ -2056,9 +2056,9 @@ if (params.DataCheck || params.Analyze) {
                           cp ${params.vampdir}/bin/rename_seq.py .
                           virdb=${params.dbdir}/${params.dbname}
                           grep ">" \${virdb} > headers.list
-                          if [[ ${params.measurement} == "bitscore"]]
+                          if [[ ${params.measurement} == "bitscore" ]]
                           then    measure="--min-score ${params.bitscore}"
-                          elif    [[ ${params.measurement} == "evalue"]]
+                          elif    [[ ${params.measurement} == "evalue" ]]
                           then    measure="-e ${params.evalue}"
                           else    measure="--min-score ${params.bitscore}"
                           fi
@@ -2597,9 +2597,9 @@ if (params.DataCheck || params.Analyze) {
                             """
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
-                            if [[ ${params.measurement} == "bitscore"]]
+                            if [[ ${params.measurement} == "bitscore" ]]
                             then    measure="--min-score ${params.bitscore}"
-                            elif    [[ ${params.measurement} == "evalue"]]
+                            elif    [[ ${params.measurement} == "evalue" ]]
                             then    measure="-e ${params.evalue}"
                             else    measure="--min-score ${params.bitscore}"
                             fi
@@ -2748,9 +2748,9 @@ if (params.DataCheck || params.Analyze) {
                               """
                               cp ${params.vampdir}/bin/rename_seq.py .
                               virdb=${params.dbdir}/${params.dbname}
-                              if [[ ${params.measurement} == "bitscore"]]
+                              if [[ ${params.measurement} == "bitscore" ]]
                               then    measure="--min-score ${params.bitscore}"
-                              elif    [[ ${params.measurement} == "evalue"]]
+                              elif    [[ ${params.measurement} == "evalue" ]]
                               then    measure="-e ${params.evalue}"
                               else    measure="--min-score ${params.bitscore}"
                               fi
@@ -3248,9 +3248,9 @@ if (params.DataCheck || params.Analyze) {
                             set +e
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
-                            if [[ ${params.measurement} == "bitscore"]]
+                            if [[ ${params.measurement} == "bitscore" ]]
                             then    measure="--min-score ${params.bitscore}"
-                            elif    [[ ${params.measurement} == "evalue"]]
+                            elif    [[ ${params.measurement} == "evalue" ]]
                             then    measure="-e ${params.evalue}"
                             else    measure="--min-score ${params.bitscore}"
                             fi
@@ -3404,9 +3404,9 @@ if (params.DataCheck || params.Analyze) {
                               set +e
                               cp ${params.vampdir}/bin/rename_seq.py .
                               virdb=${params.dbdir}/${params.dbname}
-                              if [[ ${params.measurement} == "bitscore"]]
+                              if [[ ${params.measurement} == "bitscore" ]]
                               then    measure="--min-score ${params.bitscore}"
-                              elif    [[ ${params.measurement} == "evalue"]]
+                              elif    [[ ${params.measurement} == "evalue" ]]
                               then    measure="-e ${params.evalue}"
                               else    measure="--min-score ${params.bitscore}"
                               fi
@@ -3729,9 +3729,9 @@ if (params.DataCheck || params.Analyze) {
                             """
                             cp ${params.vampdir}/bin/rename_seq.py .
                             virdb=${params.dbdir}/${params.dbname}
-                            if [[ ${params.measurement} == "bitscore"]]
+                            if [[ ${params.measurement} == "bitscore" ]]
                             then    measure="--min-score ${params.bitscore}"
-                            elif    [[ ${params.measurement} == "evalue"]]
+                            elif    [[ ${params.measurement} == "evalue" ]]
                             then    measure="-e ${params.evalue}"
                             else    measure="--min-score ${params.bitscore}"
                             fi
@@ -3884,9 +3884,9 @@ if (params.DataCheck || params.Analyze) {
                               """
                               cp ${params.vampdir}/bin/rename_seq.py .
                               virdb=${params.dbdir}/${params.dbname}
-                              if [[ ${params.measurement} == "bitscore"]]
+                              if [[ ${params.measurement} == "bitscore" ]]
                               then    measure="--min-score ${params.bitscore}"
-                              elif    [[ ${params.measurement} == "evalue"]]
+                              elif    [[ ${params.measurement} == "evalue" ]]
                               then    measure="-e ${params.evalue}"
                               else    measure="--min-score ${params.bitscore}"
                               fi
