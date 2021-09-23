@@ -976,7 +976,7 @@ if (params.DataCheck || params.Analyze) {
                     then    #check if hit is to filter
                             hit=\$(grep "\$x" ${params.projtag}_diamondfilter.out | awk '{print \$3}')
                             if [[ \$(grep -c "\$hit" filt.headers) -eq 1 ]]
-                            then    echo "\$x,\$hit >> filtered_asvs_summary.csv
+                            then    echo "\$x,\$hit" >> filtered_asvs_summary.csv
                             elif [[ \$(grep -c "\$hit" keep.headers) -eq 1 ]]
                             then    echo "\$x" >> kep.list
                             fi
@@ -989,7 +989,7 @@ if (params.DataCheck || params.Analyze) {
                         seqtk subseq ${asv} keep.list > kept.fasta
                         u=1
                         for y in \$( cat keep.list );do
-                            echo ">ASV\${u} >> asvrename.list
+                            echo ">ASV\${u}" >> asvrename.list
                             u=\$(( \${u}+1 ))
                         done
                         ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
