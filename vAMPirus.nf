@@ -943,7 +943,7 @@ if (params.DataCheck || params.Analyze) {
                 cp ${params.vampdir}/bin/rename_seq.py .
 
                 #create and rename  filter database
-                grep ">" ${params.filtDB} | awk -F ">" '{print \$2}' >> filt.head
+                grep ">" ${params.filtDB} | sed 's/ //g' | awk -F ">" '{print \$2}' >> filt.head
                 j=1
                 for y in \$( cat filt.head );do
                     echo ">Filt"\$j"" >> filt.headers
@@ -955,7 +955,7 @@ if (params.DataCheck || params.Analyze) {
                 rm filterdatabaserenamed.fasta
 
                 #create and rename keep database
-                grep ">" ${params.keepDB} | awk -F ">" '{print \$2}' >> keep.head
+                grep ">" ${params.keepDB} | sed 's/ //g' | awk -F ">" '{print \$2}' >> keep.head
                 d=1
                 for y in \$( cat keep.head );do
                     echo ">keep"\$d"" >> keep.headers
