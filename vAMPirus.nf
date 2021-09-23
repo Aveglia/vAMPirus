@@ -926,7 +926,7 @@ if (params.DataCheck || params.Analyze) {
     // UNTIL HERE DEFAULT
     if (params.filter) {
 
-        process Filtering {
+        process ASV_Filtering {
 
             label 'norm_cpus'
 
