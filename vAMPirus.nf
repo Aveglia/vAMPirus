@@ -952,8 +952,7 @@ if (params.DataCheck || params.Analyze) {
                 ./rename_seq.py ${params.filtDB} filt.headers filterdatabaserenamed.fasta
                 cat filterdatabaserenamed.fasta >> combodatabase.fasta
                 paste -d',' filt.head filt.headers > filtername_map.csv
-                rm filterdatabaserenamed.fasta
-
+                
                 #create and rename keep database
                 grep ">" ${params.keepDB} | sed 's/ //g' | awk -F ">" '{print \$2}' >> keep.head
                 d=1
