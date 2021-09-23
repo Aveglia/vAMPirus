@@ -1301,7 +1301,7 @@ if (params.DataCheck || params.Analyze) {
             """
             #alignment
             if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
-            ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
+            ${tools}/muscle5.0.1278_linux64 -\${algo} ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
             #trimming
             trimal -in ${params.projtag}_AminoTypes_muscleAlign.fasta -out ${params.projtag}_AminoTypes_muscleAligned.fasta  -keepheader -fasta -automated1
             rm ${params.projtag}_AminoTypes_muscleAlign.fasta
