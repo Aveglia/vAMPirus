@@ -930,14 +930,15 @@ if (params.DataCheck || params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/FilterCont", mode: "copy", overwrite: true
+            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ASVFiltering", mode: "copy", overwrite: true
 
             input:
                 file(asv) from asvforfilt
 
             output:
                 file("*ASV.fasta") into ( reads_vsearch5_ch, asv_med, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck )
-
+                file("*.csv") into ( nothing )
+                file("*diamondfilter.out") into ( noth)
             script:
                 """
                 cp ${params.vampdir}/bin/rename_seq.py .
@@ -1003,6 +1004,7 @@ if (params.DataCheck || params.Analyze) {
                         done
                         ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
                 fi
+                paste -d',' keep.list asvrename.list > ASV_rename_map.csv
                 """
         }
 
