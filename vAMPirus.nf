@@ -952,7 +952,7 @@ if (params.DataCheck || params.Analyze) {
                 ./rename_seq.py ${params.filtDB} filt.headers filterdatabaserenamed.fasta
                 cat filterdatabaserenamed.fasta >> combodatabase.fasta
                 paste -d',' filt.head filt.headers > filtername_map.csv
-                
+
                 #create and rename keep database
                 grep ">" ${params.keepDB} | sed 's/ //g' | awk -F ">" '{print \$2}' >> keep.head
                 d=1
@@ -984,12 +984,12 @@ if (params.DataCheck || params.Analyze) {
                     fi
                 done
                 if [[ ${params.keepnohit} == "true" ]]
-                then    echo nohit.list >> kep.list
-                        cat kep.list | sort > keep.list
+                then    cat nohit.list >> kep.list
+                        cat kep.list | sort >> keep.list
                         seqtk subseq ${asv} keep.list > kept.fasta
                         u=1
                         for y in \$( cat keep.list );do
-                            echo ">ASV"\$u"" >> asvrename.list
+                            echo ">ASV\${u} >> asvrename.list
                             u=\$(( \${u}+1 ))
                         done
                         ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
@@ -998,7 +998,7 @@ if (params.DataCheck || params.Analyze) {
                         seqtk subseq ${asv} keep.list > kept.fasta
                         u=1
                         for y in \$( cat keep.list );do
-                            echo ">ASV"\$u"" >> asvrename.list
+                            echo ">ASV\${u}" >> asvrename.list
                             u=\$(( \${u}+1 ))
                         done
                         ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
