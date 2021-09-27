@@ -399,7 +399,7 @@ NOTE: The "1" represents the number of AminoTypes which are unique amino acid se
 <br>
 
 
-### ASVs MED
+### ASV Shannon Entropy Analysis (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
 
 <br>
 
@@ -415,7 +415,7 @@ mplot
 ```
 <br>
 
-### ASVs Peaks Range Information
+### ASV Shannon Entropy Peaks Breakdown
 
 <br>
 
@@ -425,7 +425,7 @@ paged_table(med_asv_csv, options = list(rows.print = 10))
 ```
 <br>
 
-### AminoTypes MED
+### AminoTypes Shannon Entropy Analysis (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
 
 <br>
 
@@ -441,7 +441,7 @@ mplot
 ```
 <br>
 
-### AminoTypes Peaks Range Information
+### AminoTypes Shannon Entropy Peaks Breakdown
 
 <br>
 
