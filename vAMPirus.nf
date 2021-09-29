@@ -108,6 +108,12 @@ def helpMessage() {
 
                     --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
 
+                    --diffs                         Maximum number of non-matching nucleotides allowed in overlap region.
+
+                    --maxn                          Maximum number of "N"'s in a sequence - if above the specified value, sequence will be discarded.
+
+                    --minoverlap                    Minimum length of overlap for sequence merging to occur for a pair.
+
 
             --Primer removal--
 
@@ -119,7 +125,7 @@ def helpMessage() {
 
                     --minkmer                       Minimum kmer length for primer removal (default = 3)
 
-                    --minilen                       Minimum read length after adapter and primer removal (default = 200)
+                    --minilen                       Minimum non-merged read length after adapter and primer removal (default = 100)
 
                 Single primer set removal-
 
@@ -140,7 +146,7 @@ def helpMessage() {
 
                     --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
-                    --minSize                       Minimum size or representation for sequence to be considered in ASV generation
+                    --minSize                       Minimum size or representation in the dataset for sequence to be considered in ASV generation
 
                     --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
 
@@ -247,187 +253,192 @@ def fullHelpMessage() {
                       nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV]
 
 
-              --Help options--
+                      --Help options--
 
-                      --help                          Print help information
+                              --help                          Print help information
 
-                      --fullHelp                      Print even more help information
+                              --fullHelp                      Print even more help information
 
 
-              --Mandatory arguments (choose one)--
+                      --Mandatory arguments (choose one)--
 
-                      --Analyze                       Run absolutely everything
+                              --Analyze                       Run absolutely everything
 
-                      --DataCheck                     Assess how data performs with during processing and clustering
+                              --DataCheck                     Assess how data performs with during processing and clustering
 
 
-              --ASV clustering arguments--
+                      --ASV clustering arguments--
 
-                      --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
+                              --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
-                      --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
+                              --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
 
-              --Minimum Entropy Decomposition arguments--
+                      --Minimum Entropy Decomposition arguments--
 
-                      --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
+                              --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
 
-                      --amino_med                     Set this option to perform Minimum Entropy Decomposition on AminoType sequences, see manual for more information. You will need to set a value for --aminoC to perform this analysis
+                              --aminoMED                     Set this option to perform Minimum Entropy Decomposition on AminoType sequences, see manual for more information. You will need to set a value for --aminoC to perform this analysis
 
-              --Skip options--
+                      --Skip options--
 
-                      --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
+                              --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
 
-                      --skipFastQC                    Set this option to skiip FastQC steps in the pipeline
+                              --skipFastQC                    Set this option to skiip FastQC steps in the pipeline
 
-                      --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
+                              --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
 
-                      --skipPrimerRemoval             Set this option to skip primer removal process
+                              --skipPrimerRemoval             Set this option to skip primer removal process
 
-                      --skipMerging                   Set this option to skip read merging
+                              --skipMerging                   Set this option to skip read merging
 
-                      --skipAminoTyping               Set this option to skip AminoTyping processes
+                              --skipAminoTyping               Set this option to skip AminoTyping processes
 
-                      --skipTaxonomy                  Set this option to skip taxonomy assignment processes
+                              --skipTaxonomy                  Set this option to skip taxonomy assignment processes
 
-                      --skipPhylogeny                 Set this option to skip phylogeny processes
+                              --skipPhylogeny                 Set this option to skip phylogeny processes
 
-                      --skipEMBOSS                    Set this option to skip EMBOSS processes
+                              --skipEMBOSS                    Set this option to skip EMBOSS processes
 
-                      --skipReport                    Set this option to skip html report generation
+                              --skipReport                    Set this option to skip html report generation
 
+                **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
-          **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
+                     --Project/analysis information--
 
-             --Project/analysis information--
+                              --projtag                       Set project name to be used as a prefix for output files
 
-                      --projtag                       Set project name to be used as a prefix for output files
+                              --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
 
-                      --metadata                      Set path to metadata spreadsheet file to be used for report generation (must be defined if generating report)
+                              --reads                         Path to directory containing read libraries, must have *R{1,2}* in the library names
 
-                      --reads                         Path to directory containing read libraries, must have *R{1,2}* in the library names
+                              --workingdir                    Path to working directory where Nextflow will put all Nextflow and vAMPirus generated output files
 
-                      --workingdir                    Path to working directory where Nextflow will put all Nextflow and vAMPirus generated output files
+                              --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
-                      --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
+                      --Merged read length filtering--
 
-              --Merged read length filtering--
+                              --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
 
-                      --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
+                              --maxLen                        Maximum merged read length - reads with length equal to the specified max read length will be used to identifying unique sequences and  subsequent Amplicon Sequence Variant (ASV) analysis
 
-                      --maxLen                        Maximum merged read length - reads with length equal to the specified max read length will be used to identifying unique sequences and  subsequent Amplicon Sequence Variant (ASV) analysis
+                              --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
 
-                      --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
+                              --diffs                         Maximum number of non-matching nucleotides allowed in overlap region.
 
+                              --maxn                          Maximum number of "N"'s in a sequence - if above the specified value, sequence will be discarded.
 
-              --Primer removal--
+                              --minoverlap                    Minimum length of overlap for sequence merging to occur for a pair.
 
-                  General primer removal parameters
 
-                      --primerLength                  Use this option to set the max primer length to restrict bbduk.sh primer trimming to the first x number of bases
+                      --Primer removal--
 
-                      --maxkmer                       Maximum kmer length for bbduk.sh to use for primer detection and removal (must be shorter than your primer length; default = 13)
+                          General primer removal parameters
 
-                      --minkmer                       Minimum kmer length for primer removal (default = 3)
+                              --primerLength                  Use this option to set the max primer length to restrict bbduk.sh primer trimming to the first x number of bases
 
-                      --minilen                       Minimum read length after adapter and primer removal (default = 200)
+                              --maxkmer                       Maximum kmer length for bbduk.sh to use for primer detection and removal (must be shorter than your primer length; default = 13)
 
-                  Single primer set removal-
+                              --minkmer                       Minimum kmer length for primer removal (default = 3)
 
-                      --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
+                              --minilen                       Minimum non-merged read length after adapter and primer removal (default = 100)
 
-                      --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
+                          Single primer set removal-
 
-                      --rev                           Reverse primer sequence for reads to be detected and removed from reads (must specify forward sequence if providing reverse)
+                              --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
 
-                  Multiple primer set removal-
+                              --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
 
-                      --multi                         Use this option to signal multiple primer sequence removal within the specified pipeline
+                              --rev                           Reverse primer sequence for reads to be detected and removed from reads (must specify forward sequence if providing reverse)
 
-                      --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
+                          Multiple primer set removal-
 
+                              --multi                         Use this option to signal multiple primer sequence removal within the specified pipeline
 
-              --Amplicon Sequence Variant (ASV) genration and clustering--
+                              --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
 
-                      --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
-                      --minSize                       Minimum size or representation for sequence to be considered in ASV generation
+                      --Amplicon Sequence Variant (ASV) genration and clustering--
 
-                      --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
+                              --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
-                      --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+                              --minSize                       Minimum size or representation in the dataset for sequence to be considered in ASV generation
 
-                      --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for protein-based ASV clustering to generation pcASVs  [ Example: --clusterAAID .97 ]
+                              --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
 
-                      --clusterAAIDlist               With --pcASV set, use this option to perform protein-based ASV clustering to generate pcASVs with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
+                              --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
 
-                      --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
+                              --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for protein-based ASV clustering to generation pcASVs  [ Example: --clusterAAID .97 ]
 
-             --Minimum Entropy Decomposition--
+                              --clusterAAIDlist               With --pcASV set, use this option to perform protein-based ASV clustering to generate pcASVs with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
-                      --asvC                          Number of high entropy positions to use for ASV MED analysis and generate "Groups"
+                              --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
-                      --aminoC                        Number of high entropy positions to use for AminoType MED analysis and generate "Groups"
+                     --Minimum Entropy Decomposition--
 
-             --Counts table generation--
+                              --asvC                          Number of high entropy positions to use for ASV MED analysis and generate "Groups"
 
-                      --asvcountID                    Similarity ID to use for ASV counts
+                              --aminoC                        Number of high entropy positions to use for AminoType MED analysis and generate "Groups"
 
-                      --ProtCountID                   Minimum amino acid sequence similarity for hit to count
+                     --Counts table generation--
 
-                      --ProtCountsLength              Minimum alignment length for hit to count
+                              --asvcountID                    Similarity ID to use for ASV counts
 
-                      --ProtCountsBit                 Minimum bitscore for hit to be counted
+                              --ProtCountID                   Minimum amino acid sequence similarity for hit to count
 
+                              --ProtCountsLength              Minimum alignment length for hit to count
 
-              --Taxonomy inference parameters--
+                              --ProtCountsBit                 Minimum bitscore for hit to be counted
 
-                      --dbname                       Specify name of database to use for analysis
 
-                      --dbdir                        Path to Directory where database is being stored
+                      --Taxonomy inference parameters--
 
-                      --headers                      Set taxonomy database header format -> headers= "NCBI" to toggle use of NCBI header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
+                              --dbname                       Specify name of database to use for analysis
 
-                      --dbanno                       Path to directory hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using.
+                              --dbdir                        Path to Directory where database is being stored
 
-                      --lca                          Set --lca T if you would like to add taxonomic classification to taxonomy results - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
+                              --headers                      Set taxonomy database header format -> headers= "NCBI" to toggle use of NCBI header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
 
-                      --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
+                              --dbanno                       Path to directory hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using.
 
-                      --minID                        Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+                              --lca                          Set --lca T if you would like to add taxonomic classification to taxonomy results - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
 
-                      --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+                              --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
 
+                              --minID                        Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
 
-              --Phylogeny analysis parameters--
+                              --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
 
-                Setting customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D") - might be easier to set in the vampirus.config file at lines 108/109
 
-                      --iqCustomnt                   Use option to set custom options to use in all IQTREE analyses with nuceoltide sequences
+                      --Phylogeny analysis parameters--
 
-                      --iqCustomaa                   Use option to set custom options to use in all IQTREE analyses with amino acid sequences
+                        Setting customs options for IQ-TREE (Example: "-option1 A -option2 B -option3 C -option4 D") - might be easier to set in the vampirus.config file at lines 108/109
 
-                These options below you can set at the command, for example, to set to use model from ModelTest-NG with parametric bootstrapping --ModelTnt --ModelTaa --parametric
+                              --iqCustomnt                   Use option to set custom options to use in all IQTREE analyses with nuceoltide sequences
 
-                      --ModelTnt=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with nuceoltide sequences (Default is IQ-TREE will do automatic model testing with ModelFinder Plus)
+                              --iqCustomaa                   Use option to set custom options to use in all IQTREE analyses with amino acid sequences
 
-                      --ModelTaa=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with amino acid sequences
+                        These options below you can set at the command, for example, to set to use model from ModelTest-NG with parametric bootstrapping --ModelTnt --ModelTaa --parametric
 
-                      --parametric                   Set to use parametric bootstrapping in IQTREE analyses
+                              --ModelTnt=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with nuceoltide sequences (Default is IQ-TREE will do automatic model testing with ModelFinder Plus)
 
-                      --nonparametric                Set to use parametric bootstrapping in IQTREE analyses
+                              --ModelTaa=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with amino acid sequences
 
-                      --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
+                              --parametric                   Set to use parametric bootstrapping in IQTREE analyses
 
+                              --nonparametric                Set to use parametric bootstrapping in IQTREE analyses
 
-                --Statistics options--
+                              --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
 
-                      --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
 
-                      --minimumCounts                Minimum number of hit counts for a sample to have to be included in the downstream statistical analyses and report generation
+                        --Statistics options--
 
-                      --trymax                       Maximum number of iterations performed by metaMDS
+                              --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
+
+                              --minimumCounts                Minimum number of hit counts for a sample to have to be included in the downstream statistical analyses and report generation
+
+                              --trymax                       Maximum number of iterations performed by metaMDS
 
 
         |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -440,9 +451,9 @@ def fullHelpMessage() {
 
         DataCheck pipeline =>
 
-        Example 1. Launching the vAMPirus DataCheck pipeline using conda
+        Example 1. Launching the vAMPirus DataCheck pipeline with MED analyses using conda
 
-            nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck
+            nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --asvMED --aminoMED
 
         Example 2. Launching the vAMPirus DataCheck pipeline using Singularity and multiple primer removal with the path to the fasta file with the primer sequences set in the launch command
 
@@ -1171,226 +1182,239 @@ if (params.DataCheck || params.Analyze) {
                 """
         }
 
-        process ASV_Shannon_Entropy_Analysis {
+         if (params.asvMED) {
 
-          label 'norm_cpus'
+                process ASV_Shannon_Entropy_Analysis {
 
-          publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+                  label 'norm_cpus'
 
-          input:
-              file(asvs) from asv_med
+                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
 
-          output:
+                  input:
+                      file(asvs) from asv_med
 
-              file("*_ASV_entropy_breakdown.csv") into asv_entro_csv
-              file("*Aligned_informativeonly.fasta-ENTROPY") into asv_entropy
-              file("*ASV*") into entrop
+                  output:
 
-          script:
-          """
-            set +e
-            #alignment
-            ${tools}/muscle5.0.1278_linux64 -in ${asvs} -out ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
-            #trimming
-            trimal -in ${params.projtag}_ASVs_muscleAlign.fasta -out ${params.projtag}_ASVs_muscleAligned.fasta  -keepheader -fasta -automated1
-            rm ${params.projtag}_ASVs_muscleAlign.fasta
-            o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_muscleAligned.fasta
-            mv ${params.projtag}_ASVs_muscleAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
-            #entopy analysis
-            entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
-            #summarize entropy peaks
-            awk '{print \$2}' ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
-            for x in \$(cat tmp_value.list)
-            do      echo "\$x"
-                    if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.0-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.1-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.2-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.3-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.4-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.5-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.6-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.7-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.8-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.9-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.0-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.1-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.2-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.3-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.4-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.5-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.6-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.7-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.8-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.9-.list
-                    fi
-                    if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-2.0-.list
-                    fi
-            done
-            echo "Entropy,Peaks_above" >> ${params.projtag}_ASV_entropy_breakdown.csv
-            for z in above*.list;
-            do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
-                    echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_ASV_entropy_breakdown.csv
-            done
-            rm above*
-            mv ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY ./tmp2.tsv
-            cat tmp2.tsv | tr "\\t" "," > tmp.csv
-            rm tmp2.tsv
-            echo "Base_position,Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
-            cat tmp.csv >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
-            rm tmp.csv
+                      file("*_ASV_entropy_breakdown.csv") into asv_entro_csv
+                      file("*Aligned_informativeonly.fasta-ENTROPY") into asv_entropy
+                      file("*ASV*") into entrop
 
-          """
+                  script:
+                  """
+                    set +e
+                    #alignment
+                    ${tools}/muscle5.0.1278_linux64 -in ${asvs} -out ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
+                    #trimming
+                    trimal -in ${params.projtag}_ASVs_muscleAlign.fasta -out ${params.projtag}_ASVs_muscleAligned.fasta  -keepheader -fasta -automated1
+                    rm ${params.projtag}_ASVs_muscleAlign.fasta
+                    o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_muscleAligned.fasta
+                    mv ${params.projtag}_ASVs_muscleAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
+                    #entopy analysis
+                    entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
+                    #summarize entropy peaks
+                    awk '{print \$2}' ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
+                    for x in \$(cat tmp_value.list)
+                    do      echo "\$x"
+                            if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.0-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.1-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.2-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.3-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.4-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.5-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.6-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.7-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.8-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.9-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.0-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.1-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.2-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.3-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.4-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.5-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.6-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.7-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.8-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.9-.list
+                            fi
+                            if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-2.0-.list
+                            fi
+                    done
+                    echo "Entropy,Peaks_above" >> ${params.projtag}_ASV_entropy_breakdown.csv
+                    for z in above*.list;
+                    do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
+                            echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_ASV_entropy_breakdown.csv
+                    done
+                    rm above*
+                    mv ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY ./tmp2.tsv
+                    cat tmp2.tsv | tr "\\t" "," > tmp.csv
+                    rm tmp2.tsv
+                    echo "Base_position,Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
+                    cat tmp.csv >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
+                    rm tmp.csv
 
-        }
+                  """
 
-        process AminoType_Shannon_Entropy_Analysis {
+                }
+            } else {
+                asv_entropy = Channel.empty()
+                asv_entro_csv = Channel.empty()
+            }
 
-          label 'norm_cpus'
+        if (params.aminoMED) {
 
-          publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true, pattern: '*{.csv}'
+                process AminoType_Shannon_Entropy_Analysis {
 
-          input:
-              file(aminos) from amino_med
+                  label 'norm_cpus'
 
-          output:
-              file("*AminoType_entropy_breakdown.csv") into amino_entro_csv
-              file ("*Aligned_informativeonly.fasta-ENTROPY") into amino_entropy
-              file("*AminoTypes*") into aminos
+                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
-          script:
-            """
-            #alignment
-            if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
-            ${tools}/muscle5.0.1278_linux64 -\${algo} ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
-            #trimming
-            trimal -in ${params.projtag}_AminoTypes_muscleAlign.fasta -out ${params.projtag}_AminoTypes_muscleAligned.fasta  -keepheader -fasta -automated1
-            rm ${params.projtag}_AminoTypes_muscleAlign.fasta
-            o-trim-uninformative-columns-from-alignment ${params.projtag}_AminoTypes_muscleAligned.fasta
-            mv ${params.projtag}_AminoTypes_muscleAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
-            #entropy analysis
-            entropy-analysis ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta --amino-acid-sequences
-            #summarize entropy peaks
-            awk '{print \$2}' ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
-            for x in \$(cat tmp_value.list)
-            do      echo "\$x"
-                    if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.0-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.1-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.2-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.3-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.4-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.5-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.6-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.7-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.8-.list
-                    fi
-                    if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-0.9-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.0-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.1-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.2-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.3-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.4-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.5-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.6-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.7-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.8-.list
-                    fi
-                    if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-1.9-.list
-                    fi
-                    if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
-                    then    echo dope >> above-2.0-.list
-                    fi
-            done
-            echo "Entropy,Peaks_above" >> ${params.projtag}_AminoType_entropy_breakdown.csv
-            for z in above*.list;
-            do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
-                    echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_AminoType_entropy_breakdown.csv
-            done
-            rm above*
-            mv ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY ./tmp2.tsv
-            cat tmp2.tsv | tr "\t" "," > tmp.csv
-            rm tmp2.tsv
-            echo "Base_position,Shannons_Entropy" >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
-            cat tmp.csv >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
-            rm tmp.csv
-            """
-        }
+                  input:
+                      file(aminos) from amino_med
+
+                  output:
+                      file("*AminoType_entropy_breakdown.csv") into amino_entro_csv
+                      file ("*Aligned_informativeonly.fasta-ENTROPY") into amino_entropy
+                      file("*AminoTypes*") into aminos
+
+                  script:
+                    """
+                    #alignment
+                    if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
+                    ${tools}/muscle5.0.1278_linux64 -\${algo} ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
+                    #trimming
+                    trimal -in ${params.projtag}_AminoTypes_muscleAlign.fasta -out ${params.projtag}_AminoTypes_muscleAligned.fasta  -keepheader -fasta -automated1
+                    rm ${params.projtag}_AminoTypes_muscleAlign.fasta
+                    o-trim-uninformative-columns-from-alignment ${params.projtag}_AminoTypes_muscleAligned.fasta
+                    mv ${params.projtag}_AminoTypes_muscleAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
+                    #entropy analysis
+                    entropy-analysis ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta --amino-acid-sequences
+                    #summarize entropy peaks
+                    awk '{print \$2}' ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
+                    for x in \$(cat tmp_value.list)
+                    do      echo "\$x"
+                            if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.0-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.1-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.2-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.3-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.4-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.5-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.6-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.7-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.8-.list
+                            fi
+                            if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-0.9-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.0-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.1-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.2-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.3-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.4-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.5-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.6-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.7-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.8-.list
+                            fi
+                            if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-1.9-.list
+                            fi
+                            if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
+                            then    echo dope >> above-2.0-.list
+                            fi
+                    done
+                    echo "Entropy,Peaks_above" >> ${params.projtag}_AminoType_entropy_breakdown.csv
+                    for z in above*.list;
+                    do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
+                            echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_AminoType_entropy_breakdown.csv
+                    done
+                    rm above*
+                    mv ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY ./tmp2.tsv
+                    cat tmp2.tsv | tr "\t" "," > tmp.csv
+                    rm tmp2.tsv
+                    echo "Base_position,Shannons_Entropy" >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
+                    cat tmp.csv >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
+                    rm tmp.csv
+                    """
+                }
+
+            } else {
+                amino_entro_csv = Channel.empty()
+                amino_entropy = Channel.empty()
+            }
 
         if (!params.skipReadProcessing || !params.skipMerging ) {
 
@@ -1449,7 +1473,9 @@ if (params.DataCheck || params.Analyze) {
                 Rscript -e "rmarkdown::render('vAMPirus_DC_Report.Rmd',output_file='${params.projtag}_DataCheck_Report.html')" ${params.projtag} \
                 ${params.skipReadProcessing} \
                 ${params.skipMerging} \
-                ${params.skipAdapterRemoval}
+                ${params.skipAdapterRemoval} \
+                ${params.asvMED} \
+                ${params.aminoMED}
                 """
         }
 

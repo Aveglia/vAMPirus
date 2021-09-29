@@ -28,9 +28,11 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 
 3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for more accurate virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
 
-4. Adding multiple primer pair removal to deal with multiplexed amplicon libraries.
+4. Added multiple primer pair removal to deal with multiplexed amplicon libraries.
 
-5. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
+5. ASV filtering - you can now provide a "filter" and "keep" database to remove certain sequences from the analysis
+
+6. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 
 
 ## Who to cite
@@ -1037,7 +1039,7 @@ Launch command to produce only ASV-related analyses:
 
     nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats --skipAminoTyping
 
-### ASV filtering
+### ASV filtering (experimental)
 
 New to version 2 you can now filter ASVs to remove sequences that belong to taxonomic groups that are not of interest for a given run.
 
@@ -1069,7 +1071,7 @@ Here are the options stored within the configuration file:
 
 ### Clustering options
 
-Now, onto clustering ASVs into clustered ASVs (cASVs). vAMPirus is able to use two different techniques for generating cASVs for the user:
+Dependining on the virus type/marker gene, ASV-level results can be noisy and to combat this vAMPirus has three different approaches to clustering ASV sequences:
 
 
 1. AminoTyping -
@@ -1131,7 +1133,7 @@ Example launch command:
           nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --stats
 
 
-## Minimum Entropy Decomposition (Oligotyping - https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
+## Minimum Entropy Decomposition (experimental) - Oligotyping - https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/
 
 In vAMPirus v2, we added the ability for the user to use the oligotyping program employing the Minimum Entropy Decomposition (MED) algorithm developed by Eren et al. 2015 (read more about MED here - https://www.nature.com/articles/ismej2014195#citeas) to cluster ASV or AminoType sequences.
 
@@ -1140,6 +1142,8 @@ The MED algorithm provides an alternative way of clustering marker gene sequence
 When you run the DataCheck pipeline with your dataset, the report will include a figure and table that breakdown the Shannon Entropy analysis results for both ASVs and AminoTypes. The figure visualizes entropy values per sequence position revealing positions or regions of high entropy. The table beneath the figure breaks down the number of positions with entropy values above "0.x". Although, if you know the positions on your sequence that have the potential to contain biologically or ecologically meaningful mutations, you can specify decomposition based on these positions.
 
 If you decide to use MED, vAMPirus will run all the same analyses that would be done with the ASV or AminoType sequences (e.g. diversity analyses, statistics) and be appended results to the ASV or AminoType report. The ASV or AminoType sequence nodes on the phylogenetic tree will also be colored based on which MED group they were assigned to.
+
+To add MED analysis to either the DataCheck or Analyze run you must add "--asvMED" and/or "--aminoMED" to the launch command (see examples below).
 
 There are two ways to utilize MED within the vAMPirus pipeline:
 
@@ -1268,7 +1272,7 @@ AminoType IQTREE command ->
 
 ## Taxonomy Inference
 
-vAMPirus uses DIAMOND blastx/blastp and the provided protein database to infer taxonomy of amplicons to ASVs/cASVs/AminoTypes. There are summary files generated, one in the format compatable with phyloseq and the other as a .tsv with information in a different arrangement. Results are also visualized as a donut graph in the final reports.
+vAMPirus uses DIAMOND blastx/blastp and the provided protein database to infer taxonomy of amplicons to ASVs/cASVs/AminoTypes. There are summary files generated, one in the format compatible with phyloseq and the other as a .tsv with information in a different arrangement. Results are also visualized as a donut graph in the final reports.
 
 First, lets take a look at the taxonomy section of the configuration file:
 

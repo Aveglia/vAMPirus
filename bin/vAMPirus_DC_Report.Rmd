@@ -8,6 +8,8 @@ params:
   skipReadProcessing: !r commandArgs(trailingOnly=T)[2]
   skipMerging: !r commandArgs(trailingOnly=T)[3]
   skipAdapterRemoval: !r commandArgs(trailingOnly=T)[4]
+  asvMED: !r commandArgs(trailingOnly=T)[5]
+  aminoMED: !r commandArgs(trailingOnly=T)[6]
 ---
 <style>
 .rectangle {
