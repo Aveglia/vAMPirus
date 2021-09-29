@@ -792,8 +792,8 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 
 ```{r med_plot, echo=FALSE}
 if (params$asvMED == "true" && params$type == "ASV"){
-  #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv")
-  medgroup=read.csv("asv_groupcounts.csv")
+  #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv", check.names=FALSE)
+  medgroup=read.csv("asv_groupcounts.csv", check.names=FALSE)
   meddata <- medgroup %>% select(-2)
   meddata2 <- aggregate(.~GroupID, meddata, sum)
   meddata3 <-as.data.frame(t(meddata2))
@@ -806,6 +806,7 @@ if (params$asvMED == "true" && params$type == "ASV"){
   meddata3dim <- dim(meddata3)
   ##Loading metadata
   samples <- read.csv(sample_metadata, header = TRUE)
+  #samples <- read.csv("rna_virus_meta.csv", header = TRUE)
   ##Combining data and metadata
   meddata4 <- merge(meddata3, samples, by="sample")
   #if "meddata4" removed it does not work
@@ -846,7 +847,7 @@ if (params$asvMED == "true" && params$type == "ASV"){
 }
 if (params$aminoMED == "true" && params$type == "AminoType"){
   #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv")
-  medgroup=read.csv("amino_groupcounts.csv")
+  medgroup=read.csv("amino_groupcounts.csv",  check.names=FALSE)
   meddata <- medgroup %>% select(-2)
   meddata2 <- aggregate(.~GroupID, meddata, sum)
   meddata3 <-as.data.frame(t(meddata2))
