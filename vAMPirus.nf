@@ -507,12 +507,33 @@ log.info """\
 ================================================================================================================================================
                               vAMPirus v${workflow.manifest.version} - Virus Amplicon Sequencing Analysis Pipeline
 ================================================================================================================================================
-                                        Project name:                ${params.projtag}
-                                        Working directory:           ${params.workingdir}
-                                        Results directory:           ${params.outdir}
-                                        Database directory:          ${params.dbdir}
-                                        Database name:               ${params.dbname}
-                                        Metadata file:               ${params.metadata}
+
+               -------------------------------------------------Project details---------------------------------------------
+                                                     Project name:          ${params.projtag}
+                                                Working directory:          ${params.workingdir}
+                                                Results directory:          ${params.outdir}
+                                                    Metadata file:          ${params.metadata}
+
+               ---------------------------------------------------Run details------------------------------------------------
+                                        Minimum merged read length:          ${params.maxLen}
+                                                     ASV filtering:          ${params.filter}
+                                                Database directory:          ${params.dbdir}
+                                                     Database name:          ${params.dbname}
+                                                     Database type:          ${params.dbtype}
+                                                             ncASV:          ${params.ncASV}
+                                                             pcASV:          ${params.pcASV}
+                                                           ASV MED:          ${params.asvMED}
+                                                     AminoType MED:          ${params.aminoMED}
+                                                       Skip FastQC:          ${params.skipFastQC}
+                                              Skip read processing:          ${params.skidReadProcessing}
+                                              Skip adapter removal:          ${params.skipAdapterRemoval}
+                                               Skip primer removal:          ${params.PrimerRemoval}
+                                                 Skip read merging:          ${params.skipMerging}
+                                                  Skip AminoTyping:          ${params.skipAminoTyping}
+                                                     Skip Taxonomy:          ${params.skipTaxonomy}
+                                                    Skip phylogeny:          ${params.skipPhylogeny}
+                                                       Skip EMBOSS:          ${params.skipEMBOSS}
+                                                      Skip Reports:          ${params.skipReports}
         """.stripIndent()
 
 if (params.readsTest) {
