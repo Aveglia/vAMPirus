@@ -922,7 +922,7 @@ if (params.DataCheck || params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/ChimeraCheck", mode: "copy", overwrite: true
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/Clustering/ASVs/ChimeraCheck", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch3_ch
@@ -940,7 +940,7 @@ if (params.DataCheck || params.Analyze) {
 
         label 'low_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs", mode: "copy", overwrite: true
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/Clustering/ASVs", mode: "copy", overwrite: true
 
         input:
             file(fasta) from reads_vsearch4_ch
@@ -1051,7 +1051,7 @@ if (params.DataCheck || params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Nucleotide", mode: "copy", overwrite: true, pattern: '*{.csv}'
+            publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
             input:
                 file(fasta) from reads_vsearch5_ch
@@ -1080,7 +1080,7 @@ if (params.DataCheck || params.Analyze) {
 
            label 'norm_cpus'
 
-           publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/translation", mode: "copy", overwrite: true
+           publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/translation", mode: "copy", overwrite: true
 
            input:
                 file(fasta) from nucl2aa
@@ -1101,7 +1101,7 @@ if (params.DataCheck || params.Analyze) {
 
             label 'norm_cpus'
 
-            publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid", mode: "copy", overwrite: true, pattern: '*{.csv}'
+            publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
             input:
                 file(fasta) from clustering_aa
@@ -1209,7 +1209,7 @@ if (params.DataCheck || params.Analyze) {
 
                   label 'norm_cpus'
 
-                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
 
                   input:
                       file(asvs) from asv_med
@@ -1327,7 +1327,7 @@ if (params.DataCheck || params.Analyze) {
 
                   label 'norm_cpus'
 
-                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/Clustering/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true, pattern: '*{.csv}'
+                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
                   input:
                       file(aminos) from amino_med
