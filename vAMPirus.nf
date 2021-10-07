@@ -2396,9 +2396,6 @@ if (params.DataCheck || params.Analyze) {
                     cd ..
                     """
                 }
-              } else {
-                  asvgroupscsv = Channel.empty()
-              }
 
               if (!params.skipPhylogeny) {
 
@@ -2469,7 +2466,12 @@ if (params.DataCheck || params.Analyze) {
                   paste -d',' group.list ${counts} > ${params.projtag}_ASV_Groupingcounts.csv
                   """
               }
+            } else {
+                asvgroupscsv = Channel.empty()
+                asv_group_rep_tree = Channel.empty()
+                asvgroupcounts = Channel.empty()
             }
+        }
 
             if (!params.skipAminoTyping) {
 
@@ -3070,9 +3072,6 @@ if (params.DataCheck || params.Analyze) {
                     cd ..
 
                     """
-                    }
-                    } else {
-                        atygroupscsv = Channel.empty()
                     }
 
                   if (!params.skipPhylogeny) {
