@@ -2395,6 +2395,7 @@ if (params.DataCheck || params.Analyze) {
                     mv ${params.projtag}_ASV_group_reps_aligned.fasta ../../
                     cd ..
                     """
+                }
               } else {
                   asvgroupscsv = Channel.empty()
               }
@@ -3047,7 +3048,7 @@ if (params.DataCheck || params.Analyze) {
                     j=1
                     for x in *_unique;
                     do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
-                            uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
+                            uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}'
                             grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
                             seqtk subseq ../../${aminos} asv.list > Group"\${j}"_sequences.fasta
                             for z in \$( cat asv.list)
@@ -3069,8 +3070,9 @@ if (params.DataCheck || params.Analyze) {
                     cd ..
 
                     """
+                    }
                     } else {
-                            atygroupscsv = Channel.empty()
+                        atygroupscsv = Channel.empty()
                     }
 
                   if (!params.skipPhylogeny) {
