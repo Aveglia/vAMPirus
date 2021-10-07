@@ -2471,7 +2471,6 @@ if (params.DataCheck || params.Analyze) {
                 asv_group_rep_tree = Channel.empty()
                 asvgroupcounts = Channel.empty()
             }
-        }
 
             if (!params.skipAminoTyping) {
 
