@@ -2395,6 +2395,8 @@ if (params.DataCheck || params.Analyze) {
                     mv ${params.projtag}_ASV_group_reps_aligned.fasta ../../
                     cd ..
                     """
+              } else {
+                  asvgroupscsv = Channel.empty()
               }
 
               if (!params.skipPhylogeny) {
@@ -3067,6 +3069,8 @@ if (params.DataCheck || params.Analyze) {
                     cd ..
 
                     """
+                    } else {
+                            atygroupscsv = Channel.empty()
                     }
 
                   if (!params.skipPhylogeny) {
