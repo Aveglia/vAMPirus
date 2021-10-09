@@ -49,6 +49,7 @@ library(knitr)
 library(kableExtra)
 library(rmarkdown)
 library(processx)
+library(ape)
 ```
 
 ```{r colors, include=FALSE}
@@ -168,7 +169,7 @@ fi
 ```{r load_datasets, include=FALSE}
 sample_name="counts.csv"
 sample_metadata=params$metadata
-#sample_metadata="uVP_meta.csv"
+#sample_metadata="rna_virus_meta.csv"
 data<- read.csv(sample_name, check.names=FALSE)
 data2 <-as.data.frame(t(data))
 data2$sample <- row.names(data2)
@@ -502,7 +503,7 @@ if (params$stats == "true" ) {
 <br>
 ```{r nmds2d, echo=FALSE}
 ##NMDS
-datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
+datax <- decostand(raredata, method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 
 MDS <- metaMDS(sqrt(datax),
                distance = "bray",autotransform = FALSE,
@@ -528,7 +529,21 @@ fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', 
 fff
 
 } else {
-  print("No Convergence")
+print("NMDS did not converge. Printing PCoA")
+#calculate bray curtis distance
+bcdist <- vegdist(datax, "bray")
+res <- pcoa(bcdist)
+#res$values
+#biplot(res) #to make the boring 2D PCoA
+comp <- as.data.frame(res$vectors)
+comp$sample <- data5$sample
+comp2 <- merge(comp, metadata, by="sample")
+fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                      yaxis = list(title = "PCoA 2"))
+fig <- fig %>% layout(legend=list(y=.5))
+fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PCoA', height= 500, width= 800, scale= 1))
+fig
 }
 ```
 
@@ -564,7 +579,20 @@ p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', 
 p3d
 
 } else {
-  print("No Convergence")
+print("NMDS did not converge. Printing PCoA")
+#calculate bray curtis distance
+bcdist <- vegdist(datax, "bray")
+res <- pcoa(bcdist)
+comp <- as.data.frame(res$vectors)
+comp$sample <- data5$sample
+comp2 <- merge(comp, metadata, by="sample")
+fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, z = ~Axis.3, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                      yaxis = list(title = "PCoA 2"),
+                      zaxis = list(title = "PCoA 3"))
+fig <- fig %>% layout(legend=list(y=.5))
+fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
+fig
 }
 ```
 
@@ -1237,7 +1265,21 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     fff
 
     } else {
-      print("No Convergence")
+      print("NMDS did not converge. Printing PCoA")
+      #calculate bray curtis distance
+      bcdist <- vegdist(datax, "bray")
+      res <- pcoa(bcdist)
+      #res$values
+      #biplot(res) #to make the boring 2D PCoA
+      comp <- as.data.frame(res$vectors)
+      comp$sample <- data5$sample
+      comp2 <- merge(comp, metadata, by="sample")
+      fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+      fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                            yaxis = list(title = "PCoA 2"))
+      fig <- fig %>% layout(legend=list(y=.5))
+      fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
+      fig
     }
 }
 ```
@@ -1275,7 +1317,20 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     p3d
 
     } else {
-      print("No Convergence")
+      print("NMDS did not converge. Printing PCoA")
+      #calculate bray curtis distance
+      bcdist <- vegdist(datax, "bray")
+      res <- pcoa(bcdist)
+      comp <- as.data.frame(res$vectors)
+      comp$sample <- data5$sample
+      comp2 <- merge(comp, metadata, by="sample")
+      fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, z = ~Axis.3, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+      fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                            yaxis = list(title = "PCoA 2"),
+                            zaxis = list(title = "PCoA 3"))
+      fig <- fig %>% layout(legend=list(y=.5))
+      fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
+      fig
     }
 }
 ```
