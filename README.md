@@ -6,7 +6,7 @@
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 
 # Table of contents
-
+* [New in vAMPirus version 2.0.0](#New-in-vAMPirus-version-2.0.0)
 * [Quick intro](#Quick-intro)
   * [Contact/support](#Contact/support)  
 * [Getting started](#Getting-started)
@@ -19,21 +19,39 @@
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
 
+# New in vAMPirus version 2.0.0
+
+1. (EXPERIMENTAL) Added Minimum Entropy Decomposition analysis using the oligotyping program produced by the Meren Lab. This allows for sequence clustering based on sequence positions of interest (biologically meaningful) or top positions with the highest Shannon's Entropy (read more here: https://merenlab.org/software/oligotyping/ ; and below).
+
+2. Added more useful taxonomic classification of sequences leveraging the RVDB annotation database and/or NCBI taxonomy files (read more below).
+
+3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for more accurate virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
+
+4. Added multiple primer pair removal to deal with multiplexed amplicon libraries.
+
+5. ASV filtering - you can now provide a "filter" and "keep" database to remove certain sequences from the analysis
+
+6. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
+
+7. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results
+
+8. PCoA plots added to Analyze  report if NMDS does not converge.
 
 # Quick intro
 
-Viruses are the most abundant biological entities on the planet and with advances in next-generation sequencing technologies, there has been significant effort in deciphering the global virome and its impact in nature (Suttle 2007; Breitbart 2019). A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program that is integrated with the Nextflow workflow manager facilitation easy scalability and standardization of analyses.
+![vAMPirus general workflow](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vAMPirus_generalflow.png)
+
 
 The vAMPirus program contains two different pipelines:
 
 1. DataCheck pipeline: provides the user an interactive html report file containing information regarding sequencing success per sample as well as a preliminary look into the clustering behavior of the data which can be leveraged by the user to inform future analyses
 
-![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_datacheckUPDATED.png)
+![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV2.png)
 
 2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics.
 
 
-![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_analysisUPDATED.png)
+![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV2.png)
 
 
 NOTE => This is a more brief overview of how to install and set up vAMPirus, for more detail see the [manual](https://github.com/Aveglia/vAMPirus/blob/master/docs/HelpDocumentation.md).
