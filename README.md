@@ -66,28 +66,24 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 
 ## Quick order of operations
 
-1. Clone vAMPirus from github
-2. Execute the vampirus_startup.sh script to install dependencies and any databases specified
-3. Test installation with supplied test dataset
-5. Launch the DataCheck pipeline with your dataset and adjust parameters if necessary
-6. Launch the Analyze pipeline with your dataset
+1. Clone vAMPirus from github   
 
-### Dependencies (see Who to cite section)    
+2. Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases (NOTE: You will need to have the xz program installed before running startup script when downloading the RVDB database)
 
-1. Python versions 3.6/2.7
-2. Diamond version 0.9.30
-3. FastQC version 0.11.9
-4. fastp version 0.20.1
-5. Clustal Omega version 1.2.4
-6. IQ-TREE version 2.0.3
-7. ModelTest-NG version 0.1.6
-8. MAFFT version 7.464
-9. vsearch version 2.14.2
-10. BBMap version 38.79
-11. trimAl version 1.4.1
-12. CD-HIT version 4.8.1
-13. EMBOSS version 6.5.7.0
-14. seqtk version 1.3
+3. Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see EXAMPLE_COMMANDS.txt in the vAMPirus directory for test commands and other examples)
+
+4. Edit parameters in vampirus.config file
+
+5. Launch the DataCheck pipeline to get summary information about your dataset (e.g. sequencing success, read quality information, clustering behavior of ASV or AminoTypes)
+
+6. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length, Shannon entropy analysis results)
+
+7. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
+
+8. Explore results directories and produced final reports
+
+
+### Installing dependencies (see Who to cite section)    
 
 If you plan on using Conda to run vAMPirus, all dependencies will be installed as a Conda environment automatically with the vampirus_startup.sh script.
 
@@ -148,10 +144,10 @@ The startup script provided in the vAMPirus program directory will install Conda
 
 
 ### vAMPirus startup script
-
 To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
 
     cd ./vAMPirus; bash vampirus_startup.sh -h
+
 
 >You can make the vampirus_startup.sh scrip an exectuable with -> chmod +x vampirus_startup.sh ; ./vampirus_startup.sh
 
@@ -164,37 +160,41 @@ You can also use the startup script to install different databases to use for vA
 2. The proteic version of the Reference Viral DataBase (RVDB) (See https://f1000research.com/articles/8-530)
 3. The complete NCBI NR protein database
 
-To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option.
+To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option and you can download the NCBI taxonomy files with the option "-t" (See below).
 
-If we look at the script usage:
+If we take a look at the vampirus_startup.sh script usage:
 
-    General execution:
+General execution:
 
-    vampirus_startup.sh -h [-d 1|2|3|4] [-s]
+vampirus_startup.sh -h [-d 1|2|3|4] [-s] [-t]
 
-        Command line options:
+    Command line options:
 
-            [ -h ]                       	Print help information
+        [ -h ]                       	Print help information
 
-            [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
+        [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
-                                                        1 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
-                                                        2 - Download only NCBIs Viral protein RefSeq database
-                                                        3 - Download only the complete NCBI NR protein database
-                                                        4 - Download all three databases
+                                                    1 - Download only the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                    2 - Download only NCBIs Viral protein RefSeq database
+                                                    3 - Download only the complete NCBI NR protein database
+                                                    4 - Download all three databases
 
-            [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
+        [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
+
+        [ -t ]                       Set this option to download NCBI taxonomy files needed for DIAMOND to assign taxonomic classification to sequences (works with NCBI type databases only, see manual for more information)
 
 
-For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, and check/install conda, run:
+For example, if you would like to install Nextflow, download NCBIs Viral Protein RefSeq database, the NCBI taxonomy files to use DIAMOND taxonomy assignment feature, and check/install conda, run:
 
-    bash vampirus_startup.sh -d 1
+    bash vampirus_startup.sh -d 2 -t
 
 and if we wanted to do the same thing as above but skip the Conda check/installation, run:
 
-    bash vampirus_startup.sh -d 1 -s
+    bash vampirus_startup.sh -d 2 -s
 
-NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed. Then move to the vAMPirus directory and run the test commands.
+NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed.
+
+**NEW in version 2.0.0 -> the startup script will automatically download annotation information from RVDB to infer Lowest Common Ancestor (LCA) information for hits during taxonomy assignment. You can also use "-t" to download NCBI taxonomy files to infer taxonomy using the DIAMOND taxonomy classification feature.
 
 
 # Testing vAMPirus installation
@@ -215,11 +215,11 @@ OR
 
 ### Analyze test =>
 
-      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats`
+      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze`
 
 OR
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze`
 
 
 # Running vAMPirus
@@ -230,9 +230,9 @@ Here are some example vAMPirus launch commands:
 
 ### DataCheck pipeline =>
 
-Example 1. Launching the vAMPirus DataCheck pipeline using conda
+Example 1. Launching the vAMPirus DataCheck pipeline using conda and Shannon Entropy Analysis on ASVs
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --asvMED`
 
 Example 2. Launching the vAMPirus DataCheck pipeline using Singularity and multiple primer removal with the path to the fasta file with the primer sequences set in the launch command
 
@@ -247,15 +247,15 @@ Example 3. Launching the vAMPirus DataCheck pipeline with primer removal by glob
 
 Example 4. Launching the vAMPirus Analyze pipeline with singularity with ASV and AminoType generation with all accesory analyses (taxonomy assignment, EMBOSS, IQTREE, statistics)
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity --Analyze --stats run`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity --Analyze --stats`
 
 Example 5. Launching the vAMPirus Analyze pipeline with conda to perform multiple primer removal and protein-based clustering of ASVs, but skip most of the extra analyses
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --pcASV --skipPhylogeny --skipEMBOSS --skipTaxonomy --skipReport`
 
-Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV-related results
+Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV and AminoType-based results with Shannon Entropy Analyses with the nodes on produced phylogenies colored based on taxnomy hit
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats run`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --asvMED --aminoMED --nodeCol TAX --stats`
 
 
 ## Resuming analyses =>
@@ -264,16 +264,16 @@ If an analysis is interrupted, you can use Nextflows "-resume" option that will 
 
 For example if the analysis launched with the command from Example 6 above was interrupted, all you would need to do is add the "-resume" to the end of the command like so:
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --skipAminoTyping --stats -resume`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --asvMED --aminoMED --nodeCol TAX --stats -resume`
 
 
 # Who to cite:
 
 If you do use vAMPirus for your analyses, please cite the following ->
 
-1. vAMPirus - Veglia, A.J., Rivera Vicens, R., Grupstra, C., Howe-Kerr, L., and Correa A.M.S. (2020) vAMPirus: An automated virus amplicon sequencing analysis pipeline. Zenodo. DOI:
+1. vAMPirus - Veglia, A.J., Rivera Vicens, R., Grupstra, C., Howe-Kerr, L., and Correa A.M.S. (2020) vAMPirus: An automated virus amplicon sequencing analysis pipeline. Zenodo. *DOI:*
 
-2. Diamond - Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi:10.1038/nmeth.3176
+2. DIAMOND - Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi:10.1038/nmeth.3176
 
 3. FastQC - Andrews, S. (2010). FastQC:  A Quality Control Tool for High Throughput Sequence Data [Online]. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 
@@ -285,7 +285,7 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 7. ModelTest-NG - Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. (2020). ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. Molecular biology and evolution, 37(1), 291-294.
 
-8. MAFFT - Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7: improvements in performance and usability. Molecular biology and evolution, 30(4), 772-780.
+8. muscle v5 - R.C. Edgar (2021) "MUSCLE v5 enables improved estimates of phylogenetic tree confidence by ensemble bootstrapping" https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full.pdf
 
 9. vsearch - Rognes, T., Flouri, T., Nichols, B., Quince, C., & Mahé, F. (2016). VSEARCH: a versatile open source tool for metagenomics. PeerJ, 4, e2584.
 
@@ -300,3 +300,5 @@ If you do use vAMPirus for your analyses, please cite the following ->
 14. seqtk - Li, H. (2012). seqtk Toolkit for processing sequences in FASTA/Q formats. GitHub, 767, 69.
 
 15. UNOISE algorithm - R.C. Edgar (2016). UNOISE2: improved error-correction for Illumina 16S and ITS amplicon sequencing, https://doi.org/10.1101/081257
+
+16. Oligotyping - A. Murat Eren, Gary G. Borisy, Susan M. Huse, Jessica L. Mark Welch (2014). Oligotyping analysis of the human oral microbiome. Proceedings of the National Academy of Sciences Jul 2014, 111 (28) E2875-E2884; DOI: 10.1073/pnas.1409644111
