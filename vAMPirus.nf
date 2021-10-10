@@ -1551,6 +1551,7 @@ if (params.DataCheck || params.Analyze) {
                         tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_ncasv
                         tuple nid, file("*ncASV*summary_for_plot.csv") into taxplot_ncasv
                         tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_ncasv
+                        tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_ncasv
 
                     script:
                         mtag="ID=" + nid
@@ -1683,6 +1684,7 @@ if (params.DataCheck || params.Analyze) {
                             cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                             rm tmpcol.list tmp2col.list
                         done
+                        awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                         rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                         """
                       }
@@ -1705,6 +1707,7 @@ if (params.DataCheck || params.Analyze) {
                       tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_ncasv
                       tuple nid, file("*ncASV*summary_for_plot.csv") into taxplot_ncasv
                       tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_ncasv
+                      tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_ncasv
 
                   script:
                       mtag="ID=" + nid
@@ -1813,6 +1816,7 @@ if (params.DataCheck || params.Analyze) {
                                 cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                 rm tmpcol.list tmp2col.list
                       done
+                      awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                       rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                       """
                 }
@@ -1947,6 +1951,7 @@ if (params.DataCheck || params.Analyze) {
                         tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
                         file("*_ASV*_summary_for_plot.csv") into taxplot_asv
                         file("*_quick_Taxbreakdown.csv") into tax_table_asv
+                        file ("*_quicker_taxbreakdown.csv") into tax_nodCol_asv
 
                     script:
                         """
@@ -2078,6 +2083,7 @@ if (params.DataCheck || params.Analyze) {
                             cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                             rm tmpcol.list tmp2col.list
                         done
+                        awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                         rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                         """
                       }
@@ -2098,6 +2104,7 @@ if (params.DataCheck || params.Analyze) {
                           tuple file("*_phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_diamond_asv
                           file("*_ASV*_summary_for_plot.csv") into taxplot_asv
                           file("*_quick_Taxbreakdown.csv") into tax_table_asv
+                          file ("*_quicker_taxbreakdown.csv") into tax_nodCol_asv
 
                       script:
                           """
@@ -2205,6 +2212,7 @@ if (params.DataCheck || params.Analyze) {
                                     cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                     rm tmpcol.list tmp2col.list
                           done
+                          awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                           rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                           """
                 }
@@ -2644,6 +2652,7 @@ if (params.DataCheck || params.Analyze) {
                             file("*_summary_for_plot.csv") into taxplot2
                             file("*TaxonomyLabels.fasta") into tax_labeled_fasta2
                             file("*_quick_Taxbreakdown.csv") into tax_table_amino
+                            file ("*_quicker_taxbreakdown.csv") into tax_nodCol_amino
 
                         script:
                             """
@@ -2775,6 +2784,7 @@ if (params.DataCheck || params.Analyze) {
                                 cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                 rm tmpcol.list tmp2col.list
                             done
+                            awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                             rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                             """
                         }
@@ -2795,6 +2805,7 @@ if (params.DataCheck || params.Analyze) {
                               file("*_summary_for_plot.csv") into taxplot2
                               file("*TaxonomyLabels.fasta") into tax_labeled_fasta2
                               file("*_quick_Taxbreakdown.csv") into tax_table_amino
+                              file ("*_quicker_taxbreakdown.csv") into tax_nodCol_amino
 
                           script:
                               """
@@ -2902,6 +2913,7 @@ if (params.DataCheck || params.Analyze) {
                                         cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                         rm tmpcol.list tmp2col.list
                               done
+                              awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                               rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                               """
                     }
@@ -3293,6 +3305,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple file("*_phyloformat.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
                             tuple nid, file("*_summary_for_plot.csv") into taxplot3
                             tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_pcasvnt
+                            tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_pcasvnt
 
                         script:
                             mtag="ID=" + nid
@@ -3426,6 +3439,7 @@ if (params.DataCheck || params.Analyze) {
                                 cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                 rm tmpcol.list tmp2col.list
                             done
+                            awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                             rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                             """
                         }
@@ -3449,6 +3463,7 @@ if (params.DataCheck || params.Analyze) {
                               tuple file("*_phyloformat.csv"), file("*_summaryTable.tsv"), file("*dmd.out") into summary_AAdiamond
                               tuple nid, file("*_summary_for_plot.csv") into taxplot3
                               tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_pcasvnt
+                              tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_pcasvnt
 
                           script:
                               mtag="ID=" + nid
@@ -3558,6 +3573,7 @@ if (params.DataCheck || params.Analyze) {
                                         cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                         rm tmpcol.list tmp2col.list
                               done
+                              awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                               rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                               """
                     }
@@ -3775,6 +3791,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple file("*phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
                             tuple nid, file("*_summary_for_plot.csv") into taxplot4
                             tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_pcasvaa
+                            tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_pcasvaa
 
                         script:
                             mtag="ID=" + nid
@@ -3907,6 +3924,7 @@ if (params.DataCheck || params.Analyze) {
                                 cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                 rm tmpcol.list tmp2col.list
                             done
+                            awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                             rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                             """
                         }
@@ -3930,6 +3948,7 @@ if (params.DataCheck || params.Analyze) {
                               tuple file("*phyloformat.csv"), file("*summaryTable.tsv"), file("*dmd.out") into summary_potuaadiamond
                               tuple nid, file("*_summary_for_plot.csv") into taxplot4
                               tuple nid, file("*_quick_Taxbreakdown.csv") into tax_table_pcasvaa
+                              tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_pcasvaa
 
                           script:
                               mtag="ID=" + nid
@@ -4038,6 +4057,7 @@ if (params.DataCheck || params.Analyze) {
                                         cat tmp2col.list | sort | uniq -c | sort -nr | awk '{print \$2","\$1}' > \${name}_summary_for_plot.csv;
                                         rm tmpcol.list tmp2col.list
                               done
+                              awk -F "," '{print \$1","\$3"("\$2")"}' \${name}_quick_Taxbreakdown.csv >> \${name}_quicker_taxbreakdown.csv
                               rm evalue.list sequence.list bit.list pid.list length.list seqids.lst otu.list *asvnames.txt "\$name"_virus.list "\$name"_genes.list newnames.list access.list headers.list
                               """
                     }
@@ -4197,20 +4217,22 @@ if (params.DataCheck || params.Analyze) {
                 "${params.projtag}_ASV_Groupingcounts.csv") into asvgroupcounts
                 *_quick_Taxbreakdown.csv") into tax_table_asv
                 \\${params.projtag}_ASV_Group_Reps_iq.treefile
+                file ("*_quicker_taxbreakdown.csv") into tax_nodCol_asv
                 */
 
                 report_asv = Channel.create()
-                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv).flatten().buffer(size:8).dump(tag:'asv').into(report_asv)
+                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv, tax_nodCol_asv).flatten().buffer(size:9).dump(tag:'asv').into(report_asv)
 
                 if (params.ncASV) {
                     report_ncasv = Channel.create()
-                    notu_counts_plots.mix(taxplot_ncasv, notu_heatmap, nucl_phyl_plot_ncasv, tax_table_ncasv).groupTuple(by:0, size:5).dump(tag:'ncasv').into(report_ncasv)
+                    notu_counts_plots.mix(taxplot_ncasv, notu_heatmap, nucl_phyl_plot_ncasv, tax_table_ncasv, tax_nodCol_ncasv).groupTuple(by:0, size:6).dump(tag:'ncasv').into(report_ncasv)
                     /*
                     notu_counts_plots -> ${params.projtag}_ncASV${id}_counts.csv
                     taxplot1a -> ${params.projtag}_ncASV${id}_summary_for_plot.csv
                     notu_heatmap -> ${params.projtag}_ncASV${id}_PercentID.matrix
                     nucl_phyl_plot -> ${params.projtag}_ncASV${id}_iq.treefile
                                       ${params.projtag}_ncASV${id}_quick_Taxbreakdown.csv
+                    tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_ncasv
                     */
                 } else {
                     report_ncasv = Channel.empty()
@@ -4218,22 +4240,24 @@ if (params.DataCheck || params.Analyze) {
 
                 if (params.pcASV) {
                     report_pcasv_aa = Channel.create()
-                    potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot, tax_table_pcasvaa).groupTuple(by:0, size:5).dump(tag:'pcasv1').into(report_pcasv_aa)
+                    potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot, tax_table_pcasvaa, tax_nodCol_pcasvaa).groupTuple(by:0, size:6).dump(tag:'pcasv1').into(report_pcasv_aa)
                     /*Report_pcASV_AminoAcid
                     potu_Acounts -> ${params.projtag}_pcASV${id}_noTaxonomy_counts.csv
                     taxplot4 -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_summary_for_plot.csv
                     potu_aa_heatmap -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_PercentID.matrix
                     potu_Atree_plot -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_iq.treefile
                     tax_table_pcasvaa -> ${params.projtag}_aminoacid_pcASV${id}_quick_Taxbreakdown.csv
+                    tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_pcasvaa
                     */
                     report_pcasv_nucl = Channel.create()
-                    potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot, tax_table_pcasvnt).groupTuple(by:0, size:5).dump(tag:'pcasv2').into(report_pcasv_nucl)
+                    potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot, tax_table_pcasvnt, tax_nodCol_pcasvnt).groupTuple(by:0, size:6).dump(tag:'pcasv2').into(report_pcasv_nucl)
                     /*Report_pcASV_Nucleotide
                     potu_Ncounts_for_report -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_counts.csv
                     taxplot3 -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_summary_for_plot.csv
                     potu_nucl_heatmap -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_PercentID.matrix
                     potu_Ntree_plot -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_iq.treefile
                     tax_table_pcasvnt -> ${params.projtag}_nucleotide_pcASV${id}_quick_Taxbreakdown.csv
+                    tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_pcasvnt
                     */
                 } else {
                      report_pcasv_aa = Channel.empty()
@@ -4242,7 +4266,7 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipAminoTyping) {
                     report_aminotypes = Channel.create()
-                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino).flatten().buffer(size:8).dump(tag:'amino').into(report_aminotypes)
+                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino, tax_nodCol_amino).flatten().buffer(size:9).dump(tag:'amino').into(report_aminotypes)
                     /*
                     Report_AminoTypes
                     aminocounts_plot -> ${params.projtag}_AminoType_counts.csv
@@ -4253,6 +4277,7 @@ if (params.DataCheck || params.Analyze) {
                     amino_group_rep_tree -> ${params.projtag}_AminoType_Group_Reps_iq.treefile
                                          params.projtag}_AminoType_Groupingcounts.csv") into amino_groupcounts
                     *_quick_Taxbreakdown.csv") into tax_table_amino
+                    file ("*_quicker_taxbreakdown.csv") into tax_nodCol_amino
                     */
                 } else {
                     report_aminotypes = Channel.empty()
@@ -4292,7 +4317,8 @@ if (params.DataCheck || params.Analyze) {
                         ${params.minimumCounts} \
                         ${params.asvMED} \
                         ${params.aminoMED} \
-                        \$type
+                        \$type \
+                        ${params.nodeCol}
                         """
                 }
 

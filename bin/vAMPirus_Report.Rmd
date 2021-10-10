@@ -17,6 +17,7 @@ params:
     asvMED: !r commandArgs(trailingOnly=T)[11]
     aminoMED: !r commandArgs(trailingOnly=T)[12]
     type: !r commandArgs(trailingOnly=T)[13]
+    nodeCol: !r commandArgs(trailingOnly=T)[14]
 ---
 <style>
 .rectangle {
@@ -721,7 +722,7 @@ if (params$skipPhylogeny == "true") {
     writeLines("\n--------------------------------------------------------------\n")
     cat(readLines(list.files(pattern="tree.txt")) , sep = '\n')
     writeLines("\n--------------------------------------------------------------\n")
-} else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+} else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType") && (params$nodeCol == "MED")) {
     tree=read.tree("tree.txt")
     p1 <- ggtree(tree)
     id <- tree$tip.label
@@ -730,6 +731,14 @@ if (params$skipPhylogeny == "true") {
     treelist=read.csv("tree_group.csv")
     metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
     p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
+    ggplotly(p2, tooltip = "label")
+} else if ((params$skipTaxonomy == "false") && (params$nodeCol == "TAX")) {
+    tree=read.tree("tree.txt")
+    p1 <- ggtree(tree)
+    id <- tree$tip.label
+    dat <- tibble::tibble(id = id)
+    metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
+    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color = id))
     ggplotly(p2, tooltip = "label")
 } else {
     #tree=read.newick("vAMPrun_otu.55.raxml.support")
