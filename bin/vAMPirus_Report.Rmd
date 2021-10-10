@@ -633,7 +633,7 @@ ddd
 datalong <- datalong %>%
   filter(reads>0)
 
-asp2 <- plot_ly(datalong, y=~hit, x=~reads, color=~treatment, colors=mycol,text = ~paste("Sample: ", sample), opacity=.9)
+asp2 <- plot_ly(datalong, y=~hit, x=~reads, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample), opacity=.9)
 asp2 <- asp2 %>% layout(type='bar', barmode = 'group')
 asp2 <- asp2 %>% layout(yaxis = list(title = '', categoryorder = "total ascending"), legend = list(x=10,y=.5))
 asp2 <- asp2 %>% config(toImageButtonOptions=list(format='svg',filename='Most_abundant_hits_per_sample', height= 500, width= 800, scale= 1))
@@ -731,15 +731,23 @@ if (params$skipPhylogeny == "true") {
     treelist=read.csv("tree_group.csv")
     metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
     p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
-    ggplotly(p2, tooltip = "label")
+    gg = ggplotly(p2, tooltip = c("label","GroupID"))
+    gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_MED_colors', height= 500, width= 800, scale= 1))
+    gg       
 } else if ((params$skipTaxonomy == "false") && (params$nodeCol == "TAX")) {
+    taxMap=read.csv("RNA_virus_ASVs_quicker_taxbreakdown.csv", header=T, check.names = F)
     tree=read.tree("tree.txt")
     p1 <- ggtree(tree)
     id <- tree$tip.label
     dat <- tibble::tibble(id = id)
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
-    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color = id))
-    ggplotly(p2, tooltip = "label")
+    colnames(taxMap) <- c("label","tax")
+    taxMap
+    taxDF <- merge(metat, taxMap, by="label")
+    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax))
+    gg = ggplotly(p2, tooltip = c("label","tax"))
+    gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Tax_colors', height= 500, width= 800, scale= 1))
+    gg
 } else {
     #tree=read.newick("vAMPrun_otu.55.raxml.support")
     tree=read.tree("tree.txt")
@@ -748,7 +756,9 @@ if (params$skipPhylogeny == "true") {
     dat <- tibble::tibble(id = id)
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
     p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color = id))
-    ggplotly(p2, tooltip = "label")
+    gg = ggplotly(p2, tooltip = "label")
+    gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_id_colors', height= 500, width= 800, scale= 1))
+    gg
 }
 ```
 This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL. If you ran the MED analysis, the colors of the nodes correspond to the MED group they were assigned to.
