@@ -2368,10 +2368,11 @@ if (params.DataCheck || params.Analyze) {
                     #Decomposition
                     if [[ \$(echo ${params.asvC} | grep -c ",") -eq 1 || "${params.asvSingle}" == "true" ]]
                     then
-                          if [[ "${params.asvSingle}" == "true" ]]
-                          then  tag="${params.asvC}"
-                          else  tag=\$(echo ${params.asvC} | sed 's/,/_/g')
-                          fi
+                          tag=\$(echo ${params.asvC} | sed 's/,/_/g')
+                          oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                    elif [[ "${params.asvSingle}" == "true" ]]
+                    then
+                          tag="${params.asvC}"
                           oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                     else
                           oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
@@ -3048,9 +3049,13 @@ if (params.DataCheck || params.Analyze) {
                     #entopy analysis
                     entropy-analysis ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
                     #Decomposition
-                    if [[ \$(echo ${params.aminoC} | grep -c ",") -eq 1 ]]
+                    if [[ \$(echo ${params.aminoC} | grep -c ",") -gt 0 ]]
                     then
                           tag=\$(echo ${params.aminoC} | sed 's/,/_/g')
+                          oligotype ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                    elif [[ "${params.aminoSingle}" == "true" ]]
+                    then
+                          tag="${params.aminoC}"
                           oligotype ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                     else
                           oligotype ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
