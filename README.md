@@ -23,7 +23,7 @@
 
 1. (EXPERIMENTAL) Added Minimum Entropy Decomposition analysis using the oligotyping program produced by the Meren Lab. This allows for sequence clustering based on sequence positions of interest (biologically meaningful) or top positions with the highest Shannon's Entropy (read more here: https://merenlab.org/software/oligotyping/ ; and below).
 
-2. Added more useful taxonomic classification of sequences leveraging the RVDB annotation database and/or NCBI taxonomy files (read more below).
+2. Added more useful taxonomic classification of sequences leveraging the RVDB annotation database and/or NCBI taxonomy files (see manual for more info).
 
 3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for more accurate virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
 
@@ -230,9 +230,9 @@ Here are some example vAMPirus launch commands:
 
 ### DataCheck pipeline =>
 
-Example 1. Launching the vAMPirus DataCheck pipeline using conda and Shannon Entropy Analysis on ASVs
+Example 1. Launching the vAMPirus DataCheck pipeline using conda and Shannon Entropy Analysis on ASVs and AminoTypes
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --asvMED`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --asvMED --aminoMED`
 
 Example 2. Launching the vAMPirus DataCheck pipeline using Singularity and multiple primer removal with the path to the fasta file with the primer sequences set in the launch command
 
