@@ -735,7 +735,7 @@ if (params$skipPhylogeny == "true") {
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_MED_colors', height= 500, width= 800, scale= 1))
     gg       
 } else if ((params$skipTaxonomy == "false") && (params$nodeCol == "TAX")) {
-    taxMap=read.csv("RNA_virus_ASVs_quicker_taxbreakdown.csv", header=T, check.names = F)
+    taxMap=read.csv("*quicker_taxbreakdown.csv", header=T, check.names = F)
     tree=read.tree("tree.txt")
     p1 <- ggtree(tree)
     id <- tree$tip.label
