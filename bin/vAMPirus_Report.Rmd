@@ -166,7 +166,7 @@ if [ `ls -1 *_iq.treefile | wc -l` -ge 1 ];then
 else
   echo "Phylogeny analysis was skipped" >tree.txt
 fi
-if [ `ls -1 *_quicker_taxbreakdown.csv | wc -l` -ge 1];then
+if [ `ls -1 *_quicker_taxbreakdown.csv | wc -l` -ge 1 ];then
     cat *_quicker_taxbreakdown.csv > quicker_taxbreakdown.csv
 fi
 ```
