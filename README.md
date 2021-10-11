@@ -1,9 +1,11 @@
 ![vAMPirus logo](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vamplogo.png)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4549851.svg)](https://doi.org/10.5281/zenodo.4549851)
+[![Chat on Gitter](https://img.shields.io/gitter/room/vAMPirusCommunity/Help.svg?colorB=26af64&style=popout)](https://gitter.im/vAMPirusCommunity/Help)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
+[![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
 # Table of contents
 * [New in vAMPirus version 2.0.0](#New-in-vAMPirus-version-2.0.0)
@@ -48,7 +50,7 @@ The vAMPirus program contains two different pipelines:
 
 ![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV2.png)
 
-2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics.
+2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. NOTE- stats option has changed on 2/19/21; you only need to add "--stats" to the launch commmand without "run"
 
 
 ![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV2.png)
@@ -115,7 +117,11 @@ For more detail see the [manual](https://github.com/Aveglia/vAMPirus/blob/master
 
 Clone the most recent version of vAMPirus from GitHub using:
 
-  git clone https://github.com/Aveglia/vAMPirus.git
+    git clone https://github.com/Aveglia/vAMPirus.git
+
+OR you can download the most recent stable release vAMPirus v1.0.1 (Capsomere I) by using:
+
+    wget https://github.com/Aveglia/vAMPirus/archive/v1.0.1.tar.gz
 
 
 ## Setting up vAMPirus dependencies
@@ -207,11 +213,11 @@ Launch commands for testing (you do not need to edit anything in the config file
 
 ### DataCheck test =>
 
-      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck`
+      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck
 
 OR
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck`
+      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck
 
 ### Analyze test =>
 
@@ -236,12 +242,11 @@ Example 1. Launching the vAMPirus DataCheck pipeline using conda and Shannon Ent
 
 Example 2. Launching the vAMPirus DataCheck pipeline using Singularity and multiple primer removal with the path to the fasta file with the primer sequences set in the launch command
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity --DataCheck --multi --primers /PATH/TO/PRIMERs.fa`
+      nextflow run vAMPirus.nf -c vampirus.config -profile singularity --DataCheck --multi --primers /PATH/TO/PRIMERs.fa
 
 Example 3. Launching the vAMPirus DataCheck pipeline with primer removal by global trimming of 20 bp from forward reads and 26 bp from reverse reads
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --GlobTrim 20,26`
-
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --GlobTrim 20,26
 
 ### Analyze pipeline =>
 
@@ -251,12 +256,11 @@ Example 4. Launching the vAMPirus Analyze pipeline with singularity with ASV and
 
 Example 5. Launching the vAMPirus Analyze pipeline with conda to perform multiple primer removal and protein-based clustering of ASVs, but skip most of the extra analyses
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --pcASV --skipPhylogeny --skipEMBOSS --skipTaxonomy --skipReport`
+      nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --pcASV --skipPhylogeny --skipEMBOSS --skipTaxonomy --skipReport
 
 Example 6. Launching vAMPirus Analyze pipeline with conda to produce only ASV and AminoType-based results with Shannon Entropy Analyses with the nodes on produced phylogenies colored based on taxnomy hit
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --asvMED --aminoMED --nodeCol TAX --stats`
-
 
 ## Resuming analyses =>
 
@@ -266,12 +270,11 @@ For example if the analysis launched with the command from Example 6 above was i
 
       `nextflow run vAMPirus.nf -c vampirus.config -profile conda --Analyze --asvMED --aminoMED --nodeCol TAX --stats -resume`
 
-
 # Who to cite:
 
 If you do use vAMPirus for your analyses, please cite the following ->
 
-1. vAMPirus - Veglia, A.J., Rivera Vicens, R., Grupstra, C., Howe-Kerr, L., and Correa A.M.S. (2020) vAMPirus: An automated virus amplicon sequencing analysis pipeline. Zenodo. *DOI:*
+1. vAMPirus - Veglia A.J., Rivera Vicéns R.E., Grupstra C.G.B., Howe-Kerr L.I., Correa A.M.S. (2021) vAMPirus: An automated, comprehensive virus amplicon sequencing analysis program (Version v1.0.1). Zenodo. http://doi.org/10.5281/zenodo.4549851
 
 2. DIAMOND - Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi:10.1038/nmeth.3176
 

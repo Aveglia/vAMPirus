@@ -13,7 +13,7 @@ The vAMPirus program contains two different pipelines:
 
 ![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV2.png)
 
-2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics.
+2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. NOTE- stats option has changed on 2/19/21; you only need to add "--stats" to the launch commmand without "run"
 
 ![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV2.png)
 
@@ -1056,6 +1056,7 @@ Here are the options stored within the configuration file:
 
     // ASV filtering parameters - You can set the filtering to run with the command --filter
 
+
         // Path to database containing sequences that if ASVs match to, are then removed prior to any analyses
             filtDB=""
         // Path to database containing sequences that if ASVs match to, are kept for final ASV file to be used in subsequent analyses
@@ -1139,7 +1140,6 @@ Example launch command:
 
           nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --stats
 
-
 ## Minimum Entropy Decomposition (EXPERIMENTAL) - Oligotyping - https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/
 
 In vAMPirus v2, we added the ability for the user to use the oligotyping program employing the Minimum Entropy Decomposition (MED) algorithm developed by Eren et al. 2015 (read more about MED here - https://www.nature.com/articles/ismej2014195#citeas) to cluster ASV or AminoType sequences.
@@ -1186,7 +1186,6 @@ MED related options within the configuration file:
                 aminoC=""
                 aminoSingle=""
 
-
 ## Counts tables and percent ID matrices
 
 vAMPirus generates nucleotide-based counts tables using vsearch and protein-based counts tables using DIAMOND and a custom bash script. Counts tables and percent ID matrices are always produced for each ASV, AminoType and all cASV fasta files produced.
@@ -1208,7 +1207,6 @@ The "--asvcountID" is the percent ID during global alignment that vsearch would 
 
 Protein-based counts file generation has a few more parameters the user can alter: "--ProtCountsBit" is the minimum bitscore for an alignment to be recorded, "--ProtCountID" is the minimum percent amino acid similarity an alignment needs to have to be recorded, and "--ProtCountsLength" is the minimum alignment length for a hit to be recorded.
 
-
 ## Phylogenetic analysis and model testing
 
 Phylogenetic trees are produced automatically for ASVs (unless --ncASV specified), ncASVs, pcASVs and aminotypes using IQ-TREE. All produced sequence fastas are aligned using the MAFFT algorithm then alignments are trimmed automatically using TrimAl.
@@ -1221,7 +1219,6 @@ You can tell vAMPirus to color nodes on produced phylogenies based on taxonomy o
 
 // Color nodes on phylogenetic tree in Analyze report with MED Group information (nodeCol="MED") or taxonomy (nodeCol=TAX) hit. If you would like nodes colored by sequence ID, leave nodeCol="" below.
     nodeCol=""
-
 
 ### Substitution model testing
 
@@ -1711,7 +1708,7 @@ UUsage:
 
   --Statistics options--
 
-        --stats                        Set "--stats run" to signal statstical tests to be performed and included in the final report
+        --stats                        Set "--stats" to signal statstical tests to be performed and included in the final report
 
         --minimumCounts                Minimum number of hit counts for a sample to have to be included in the downstream statistical analyses and report generation
 

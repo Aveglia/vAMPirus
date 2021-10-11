@@ -2967,7 +2967,6 @@ if (params.DataCheck || params.Analyze) {
 
                             elif [ "${params.parametric}" != "false" ];then
                                 iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-
                             else
                                 iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                             fi
