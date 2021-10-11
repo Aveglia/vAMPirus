@@ -4322,7 +4322,7 @@ if (params.DataCheck || params.Analyze) {
                         ${params.minimumCounts} \
                         ${params.asvMED} \
                         ${params.aminoMED} \
-                        \$type \
+                        \${type} \
                         ${params.nodeCol}
                         """
                 }
