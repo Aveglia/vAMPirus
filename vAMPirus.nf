@@ -525,15 +525,15 @@ log.info """\
                                                            ASV MED:          ${params.asvMED}
                                                      AminoType MED:          ${params.aminoMED}
                                                        Skip FastQC:          ${params.skipFastQC}
-                                              Skip read processing:          ${params.skidReadProcessing}
+                                              Skip read processing:          ${params.skipReadProcessing}
                                               Skip adapter removal:          ${params.skipAdapterRemoval}
-                                               Skip primer removal:          ${params.PrimerRemoval}
+                                               Skip primer removal:          ${params.skipPrimerRemoval}
                                                  Skip read merging:          ${params.skipMerging}
                                                   Skip AminoTyping:          ${params.skipAminoTyping}
                                                      Skip Taxonomy:          ${params.skipTaxonomy}
                                                     Skip phylogeny:          ${params.skipPhylogeny}
                                                        Skip EMBOSS:          ${params.skipEMBOSS}
-                                                      Skip Reports:          ${params.skipReports}
+                                                      Skip Reports:          ${params.skipReport}
         """.stripIndent()
 
 if (params.readsTest) {
