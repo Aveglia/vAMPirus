@@ -24,15 +24,18 @@ vampirus_startup.sh -h [-d 1|2|3|4] [-s]
 
         [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
 
+        [ -t ]                       Set this option to download NCBI taxonomy files needed for DIAMOND to assign taxonomic classification to sequences (works with NCBI type databases only, see manual for more information)
+
 "
 
 }
 
-while getopts "hsd:" OPTION; do
+while getopts "hstd:" OPTION; do
      case $OPTION in
          h) usage; exit;;
          d) DATABASE=${OPTARG};;
          s) CONDA="no";;
+         t) TAX="yes";;
      esac
 done
 shift $((OPTIND-1))      # required, to "eat" the options that have been processed
@@ -143,7 +146,7 @@ nextflow_c() {
         case $ans in
             [yY] | [yY][eE][sS])
             echo "Awesome,starting Nextflow installation now ..."
-            curl -s https://get.nextflow.io | bash
+            curl -fsSL get.nextflow.io | bash
             echo "Nextflow installation finished, execultable in "$mypwd""
         ;;
         [nN] | [nN][oO])
@@ -170,11 +173,12 @@ else
       echo "Alright, lets check your system for Conda..."
       conda_c
       echo "Editing path to conda directory in vampirus.config"
-      environment="$(conda env list  | sed 's/*//g' | grep "vAMPirus" | head -1 | awk '{print $2}')"
+      environment="$(conda info -e | awk '$1 == "vAMPirus" {print $2}')"
       sed "s|CONDADIR|${environment}|g" "$mypwd"/vampirus.config > tmp1.config
       cat tmp1.config > "$mypwd"/vampirus.config
       rm tmp1.config
 fi
+
 echo "-------------------------------------------------------------------------------- Conda check/install done"
 
 echo "Now lets check the status of Nextflow on your system..."
@@ -186,15 +190,20 @@ if [[ $DATABASE -eq 1 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
-        echo "Database installation: RVDB version 20.0 (latest as of 2020-09)"
-        curl -o U-RVDBv20.0-prot.fasta.bz2  https://rvdb-prot.pasteur.fr/files/U-RVDBv20.0-prot.fasta.bz2
-        bunzip2 U-RVDBv20.0-prot.fasta.bz2
+        echo "Database installation: RVDB version 21.0 (latest as of 2021-02)"
+        curl -o U-RVDBv21.0-prot.fasta.xz  https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot.fasta.xz
+        xz -d U-RVDBv21.0-prot.fasta.xz
+        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
+        unzip U-RVDBv21.0-prot-hmm-txt.zip
+        mv annot ./RVDBannot/
         echo "Editing confiration file for you now..."
-        sed 's/DATABASENAME/U-RVDBv19.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
+        sed 's/DATABASENAME/U-RVDBv21.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
+        sed "s|DATABASEANNOT|${dir}/RVDBannot|g" tmp2.config | sed 's/TYPE/RVDB/g' > tmp3.config
         rm tmp1.config
-        cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
+        cat tmp3.config > "$mypwd"/vampirus.config
+        rm tmp3.config
         echo "Database downloaded and configuration file edited, you should confirm the path and database name was set correctly in the config file."
 elif [[ $DATABASE -eq 2 ]]
 then    mkdir "$mypwd"/Databases
@@ -202,10 +211,21 @@ then    mkdir "$mypwd"/Databases
         dir="$(pwd)"
         echo "Database installation: Viral RefSeq database version 2.0 (latest as of 2020-07)"
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
+        curl -o viral.1.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.protein.faa.gz
+        curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.protein.faa.gz
+        gunzip viral.1.protein.faa.gz
+        cat viral.1.protein.faa >> complete_virus_refseq_prot.fasta
         gunzip viral.2.protein.faa.gz
+        cat viral.2.protein.faa >> complete_virus_refseq_prot.fasta
+        gunzip viral.3.protein.faa.gz
+        cat viral.3.protein.faa >> complete_virus_refseq_prot.fasta
+        rm viral.*.protein.faa
+        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
+        unzip U-RVDBv21.0-prot-hmm-txt.zip
+        mv annot ./RVDBannot
         echo "Editing confiration file for you now..."
-        sed 's/DATABASENAME/viral.2.protein.faa/g' "$mypwd"/vampirus.config > tmp1.config
-        sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
+        sed 's/DATABASENAME/complete_virus_refseq_prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
+        sed "s|DATABASEDIR|${dir}|g" tmp1.config | sed "s|DATABASEANNOT|${dir}/RVDBannot|g" | sed 's/TYPE/NCBI/g' > tmp2.config
         rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
@@ -217,9 +237,12 @@ then    mkdir "$mypwd"/Databases
         echo "Database installation: NCBI NR protein database (should be the most up to date at time of running this script)"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         gunzip NCBI_nr_proteindb.faa.gz
+        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
+        unzip U-RVDBv21.0-prot-hmm-txt.zip
+        mv annot ./RVDBannot
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/NCBI_nr_proteindb.faa/g' "$mypwd"/vampirus.config > tmp1.config
-        sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
+        sed "s|DATABASEDIR|${dir}|g" tmp1.config | sed "s|DATABASEANNOT|${dir}/RVDBannot|g" | sed 's/TYPE/NCBI/g' > tmp2.config
         rm tmp1.config
         cat tmp2.config > "$mypwd"/vampirus.config
         rm tmp2.config
@@ -231,6 +254,8 @@ then    mkdir "$mypwd"/Databases
         echo "Database installation: We want 'em all! Might take a little while....'"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
+        curl -o viral.1.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.protein.faa.gz
+        curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.protein.faa.gz
         curl -o U-RVDBv19.0-prot.fasta.bz2 https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
         sed "s|DATABASEDIR|${dir}|g" "$mypwd"/vampirus.config > tmp1.config
         cat tmp1.config > "$mypwd"/vampirus.config
@@ -240,60 +265,73 @@ elif [[ $DATABASE != "" ]]
 then    echo "Error: Database download signaled but not given a value between 1-4"
         exit 1
 fi
+
+if [[ "$TAX" == "yes"  ]]
+then  mkdir "$mypwd"/Databases/NCBItaxonomy
+      cd "$mypwd"/Databases/NCBItaxonomy
+      curl -o prot.accession2taxid.FULL.gz ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.FULL.gz
+      echo "Gunzipping accession2tax map, might take a moment.."
+      gunzip prot.accession2taxid.FULL.gz
+      curl -o taxdmp.zip ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdmp.zip
+      unzip taxdmp.zip
+fi
+
 echo "-------------------------------------------------------------------------------- Database loop done"
 
 cd "$mypwd"
-echo "Ok, everything downloaded. To test installation, check out the STARTUP_HELP.txt file within "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
+echo "Ok, everything downloaded. To test installation, check out the EXAMPLE_COMMANDS.txt file within "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
 chmod a+x "$mypwd"/bin/virtualribosomev2/*
+chmod a+x "$mypwd"/bin/muscle5.0.1278_linux64
 
-if [[ $(ls "$mypwd"| grep -wc "STARTUP_HELP.txt") -eq 0 ]]
+
+if [[ $(ls "$mypwd"| grep -wc "EXAMPLE_COMMANDS.txt") -eq 0 ]]
 then
-      touch STARTUP_HELP.txt
-      echo "-------------------------------------------------------------------------------------------------------------------------------- TESTING YOUR INSTALLATION; be sure to run from inside the vAMPirus program directory" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "Ok, everything downloaded. To test installation, run the following commands and check for errors (be sure to run from inside the vAMPirus program directory):" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "Checking DataCheck mode:" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck" >> STARTUP_HELP.txt
-      echo "    " >> STARTUP_HELP.txt
-      echo "Next, test the analysis pipeline:" >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
-      echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "Ok, if everything went well (green text was spit out by Nextflow), now you can move on to the fun. First, you should review the help docs and the vampirus.config in the vAMPirus directory." >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING DataCheck PIPELINE WITH YOUR DATA" >> STARTUP_HELP.txt
+      touch EXAMPLE_COMMANDS.txt
+      echo "-------------------------------------------------------------------------------------------------------------------------------- TESTING YOUR INSTALLATION; be sure to run from inside the vAMPirus program directory" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "Ok, everything downloaded. To test installation, run the following commands and check for errors (be sure to run from inside the vAMPirus program directory):" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "Checking DataCheck mode:" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck" >> EXAMPLE_COMMANDS.txt
+      echo "    " >> EXAMPLE_COMMANDS.txt
+      echo "Next, test the analysis pipeline:" >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats" >> EXAMPLE_COMMANDS.txt
+      echo "--------------------------------------------------------------------------------------------------------------------------------" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "Ok, if everything went well (green text was spit out by Nextflow), now you can move on to the fun. First, you should review the help docs and the vampirus.config in the vAMPirus directory." >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING DataCheck PIPELINE WITH YOUR DATA" >> EXAMPLE_COMMANDS.txt
       echo "If everything looks good, here are a example lanch commands to submit after testing installation and editing the paths to your data and other parameters for the run in the vampirus.config file:"
-      echo "   " >> STARTUP_HELP.txt
-      echo "First, run the DataCheck part of the pipeline using the -with-conda Nextflow option:" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "OR using -profile option of Nextflow ..." >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --DataCheck" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING Analyze PIPELINE WITH YOUR DATA" >> STARTUP_HELP.txt
-      echo "Then you can run the analysis using the -with-conda Nextflow option, here is a launch command to run the complete analysis and statistical tests:" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "OR same command using -profile option of Nextflow ..." >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats" >> STARTUP_HELP.txt
-      echo "   " >> STARTUP_HELP.txt
-      echo "--------------------------------------------------------------------------------------------------------------------------------" >> STARTUP_HELP.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "First, run the DataCheck part of the pipeline using the -with-conda Nextflow option:" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --DataCheck" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "OR using -profile option of Nextflow ..." >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --DataCheck" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "--------------------------------------------------------------------------------------------------------------------------------" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "-------------------------------------------------------------------------------------------------------------------------------- RUNNING Analyze PIPELINE WITH YOUR DATA" >> EXAMPLE_COMMANDS.txt
+      echo "Then you can run the analysis using the -with-conda Nextflow option, here is a launch command to run the complete analysis and statistical tests:" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -with-conda "$environment" --Analyze --ncASV --pcASV --stats" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "OR same command using -profile option of Nextflow ..." >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats" >> EXAMPLE_COMMANDS.txt
+      echo "   " >> EXAMPLE_COMMANDS.txt
+      echo "--------------------------------------------------------------------------------------------------------------------------------" >> EXAMPLE_COMMANDS.txt
 fi
 echo "    "
 echo "Setup script is complete!"
-echo "Check out the STARTUP_HELP.txt file for more information on how to move forward with the analysis."
+echo "Check out the EXAMPLE_COMMANDS.txt file for more information on how to move forward with the analysis."

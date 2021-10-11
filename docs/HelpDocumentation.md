@@ -1,48 +1,44 @@
 ![vAMPirus logo](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vamplogo.png)
 
 
-# Table of contents
-* [Introduction to vAMPirus](#Introduction-to-vAMPirus)
-    * [Contact/support](#Contact/support)
-    * [Who to cite](#Who-to-cite)  
-* [Getting started with vAMPirus](#Getting-started-with-vAMPirus)  
-    * [Order of operations](#Order-of-operations)
-    * [Windows OS users](#Windows-OS-users)
-    * [MacOS users](#MacOS-users)
-        * [Installing and running the VM](#Installing-and-running-the-VM-on-MacOS)
-        * [Install Homebrew](#Install-Homebrew)
-        * [Install Vagrant and Virtual Box](#Install-Vagrant-and-Virtual-Box)
-        * [Building and starting](#Building-and-starting-your-virtual-environment)
-        * [Transferring files](#Transferring-files-to-and-from-VM-with-Vagrant-scp)
-* [Installing vAMPirus](#Installing-vAMPirus)  
-    * [Cloning the repository](#Cloning-the-repository-(skip-if-you-generated-the-Vagrant-virtual-environment))
-    * [Setting up vAMPirus](#Setting-up-vAMPirus-dependencies-and-checking-installation)
-    * [Databases](#Databases)
-* [Running vAMPirus](#Running-vAMpirus)
-    * [Testing vAMPirus installation](#Testing-vAMPirus-installation)
-    * [Containers](#Using-Singularity)
-* [Extra notes](#Things-to-know-before-running-vAMPirus)
-
-
 # Introduction to vAMPirus
 
 Viruses are the most abundant biological entities on the planet and with advances in next-generation sequencing technologies, there has been significant effort in deciphering the global virome and its impact in nature (Suttle 2007; Breitbart 2019). A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program that is integrated with the Nextflow workflow manager facilitation easy scalability and standardization of analyses.
 
+![vAMPirus general workflow](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vAMPirus_generalflow.png)
+
 The vAMPirus program contains two different pipelines:
 
-1. DataCheck pipeline: provides the user an interactive html report file containing information regarding sequencing success per sample as well as a preliminary look into the clustering behavior of the data which can be leveraged by the user to inform future analyses
+1. DataCheck pipeline: provides the user an interactive html report file containing information regarding sequencing success per sample as well as a preliminary look into the clustering behavior of the data which can be leveraged by the user to inform analyses
 
-![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_datacheckUPDATED.png)
+![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV2.png)
 
 2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. NOTE- stats option has changed on 2/19/21; you only need to add "--stats" to the launch commmand without "run"
 
-
-![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vampirusflow_analysisUPDATED.png)
-
+![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV2.png)
 
 ## Contact/support
 
 If you have a feature request or any feedback/questions, feel free to email vAMPirusHelp@gmail.com or you can open an Issue on GitHub.
+
+## Changes in version 2.0.0
+
+1. (EXPERIMENTAL) Added Minimum Entropy Decomposition analysis using the oligotyping program produced by the Meren Lab. This allows for sequence clustering based on sequence positions of interest (biologically meaningful) or top positions with the highest Shannon's Entropy (read more here: https://merenlab.org/software/oligotyping/ ; and below).
+
+2. Added more useful taxonomic classification of sequences leveraging the RVDB annotation database and/or NCBI taxonomy files (read more below).
+
+3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for more accurate virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
+
+4. Added multiple primer pair removal to deal with multiplexed amplicon libraries.
+
+5. ASV filtering - you can now provide a "filter" and "keep" database to remove certain sequences from the analysis
+
+6. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
+
+7. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results
+
+8. PCoA plots added to report if NMDS does not converge.
+
 
 ## Who to cite
 
@@ -50,7 +46,7 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 1. vAMPirus - Veglia, A.J., Rivera Vicens, R., Grupstra, C., Howe-Kerr, L., and Correa A.M.S. (2020) vAMPirus: An automated virus amplicon sequencing analysis pipeline. Zenodo. *DOI:*
 
-2. Diamond - Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi:10.1038/nmeth.3176
+2. DIAMOND - Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi:10.1038/nmeth.3176
 
 3. FastQC - Andrews, S. (2010). FastQC:  A Quality Control Tool for High Throughput Sequence Data [Online]. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 
@@ -62,7 +58,7 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 7. ModelTest-NG - Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. (2020). ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. Molecular biology and evolution, 37(1), 291-294.
 
-8. MAFFT - Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7: improvements in performance and usability. Molecular biology and evolution, 30(4), 772-780.
+8. muscle v5 - R.C. Edgar (2021) "MUSCLE v5 enables improved estimates of phylogenetic tree confidence by ensemble bootstrapping" https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full.pdf
 
 9. vsearch - Rognes, T., Flouri, T., Nichols, B., Quince, C., & Mahé, F. (2016). VSEARCH: a versatile open source tool for metagenomics. PeerJ, 4, e2584.
 
@@ -78,22 +74,24 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 15. UNOISE algorithm - R.C. Edgar (2016). UNOISE2: improved error-correction for Illumina 16S and ITS amplicon sequencing, https://doi.org/10.1101/081257
 
+16. Oligotyping - A. Murat Eren, Gary G. Borisy, Susan M. Huse, Jessica L. Mark Welch (2014). Oligotyping analysis of the human oral microbiome. Proceedings of the National Academy of Sciences Jul 2014, 111 (28) E2875-E2884; DOI: 10.1073/pnas.1409644111
+
 
 # Getting started with vAMPirus
 
-## Order of operations
+## General order of operations
 
 1. Clone vAMPirus from github   
 
-2. Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases
+2. Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases (NOTE: You will need to have the xz program installed before running startup script when downloading the RVDB database)
 
-3. Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see STARTUP_HELP.txt for test commands and other examples)
+3. Test the vAMPirus installation with the provided test dataset (if you have ran the start up script, you can see EXAMPLE_COMMANDS.txt in the vAMPirus directory for test commands and other examples)
 
 4. Edit parameters in vampirus.config file
 
-5. Launch the DataCheck pipeline to get summary information about your dataset
+5. Launch the DataCheck pipeline to get summary information about your dataset (e.g. sequencing success, read quality information, clustering behavior of ASV or AminoTypes)
 
-6. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length)
+6. Change any parameters in vampirus.config file that might aid your analysis (e.g. clustering ID, maximum merged read length, Shannon entropy analysis results)
 
 7. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
 
@@ -108,7 +106,7 @@ All you will need to do is set up the subsystem with whatever flavor of Linux yo
 
 Search for Linux in the Microsoft store -> https://www.microsoft.com/en-us/search?q=linux
 
-It should be noted that vAMPirus was developed on Centos7/8.
+It should be noted that vAMPirus has been mainly tested on Centos7/8.
 
 Here are some brief instructions for setting up Ubuntu 20.04 LTS on Windows 10 sourced from https://ubuntu.com/tutorials/ubuntu-on-windows#1-overview
 
@@ -152,7 +150,7 @@ Next we will install Java to be able to run Nextflow -
 
     sudo apt -y install openjdk-8-jre
 
-Now you have everything you need to get started as described in the * [Installing vAMPirus](#Installing-vAMPirus) section. However, here are some quick commands to install and set up Conda.
+Now you have everything you need to get started as described in the * [Installing vAMPirus](#Installing-vAMPirus) section. However, here are some quick commands to install and set up Miniconda.
 
 NOTE=> Windows WSL currently can not run Singularity so you will have to install and run vAMPirus with Conda.
 
@@ -175,14 +173,14 @@ You can check/confirm you have conda ready to go ->
 
     conda init
 
-Once you have have your Conda ready, you can execute the vAMPirus startup script to install Nextflow and build the vAMPirus conda environment.
+Once you have your Conda ready, you can execute the vAMPirus startup script to install Nextflow and build the vAMPirus conda environment.
 
 
 ## MacOS users
 
 If you plan to run vAMPirus on a Mac computer, it is recommended that you set up a virtual environment and use Singularity with the vAMPirus Docker image to run your analyses.
 
-You can try to run directly on your system, but there may be errors caused by differences between Apply and GNU versions of tools like "sort".
+You can try to run directly on your system, but there may be errors caused by differences between Apple and GNU versions of tools like "sort".
 
 vAMPirus was developed on a Centos7/8 operating system so we will go through how to set up a Centos7 Vagrant virtual environment with Virtual Box.
 
@@ -213,7 +211,7 @@ Once done with the full installation, execute:
 
 (Information from  https://treehouse.github.io/installation-guides/mac/homebrew)
 
-Now we should be good to use Homebrew to install Vagrant and VirtualBox to set up the VPN.
+Now we should be good to use Homebrew to install Vagrant and VirtualBox to set up the VM.
 
 
 #### Install Vagrant and Virtual Box
@@ -244,7 +242,7 @@ Virtual Box (WILL CAUSE ERROR IF ORACLE NOT GIVEN PERMISSION TO INSTALL DEPENDEN
 
 NOTE=> In this part of the setup, you might get an error saying Oracle was denied permission to install programs. You will need to go to System Preferences->Security and Privacy->General and allow Oracle permission to download programs and then rerun the above command.
 
-Alright, if you notice no errors during installation, you should be good to go and create the Centos 7 environment
+Alright, if you notice no errors during installation, you should be good to go and create the Centos7 environment
 
 
 #### Building and starting your virtual environment
@@ -281,6 +279,7 @@ We will make our own that looks like this:
            yum -y install epel-release
            yum -y install htop
            yum -y install nano
+           yum -y install xz
            git clone https://github.com/Aveglia/vAMPirus.git
            yum -y install singularity
               SHELL
@@ -317,7 +316,7 @@ You should now be in your fresh Centos7 virtual environment and if you ls you wi
 
 You can now follow the normal directions for setting up vAMPirus with singularity.
 
-But here is the quick overview of recommended next steps:
+But here is the quick overview of recommended next steps (without database/taxonomy install):
 
     cd ./vAMPirus; bash vampirus_startup.sh -s
 
@@ -327,7 +326,7 @@ After running the above you should now have Nextflow installed. Now, build the S
 
 then test the Analyze pipeline with:
 
-    ./nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats
+    ./nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --asvMED --aminoMED --stats
 
 Please check out http://sourabhbajaj.com/mac-setup/Vagrant/README.html and https://www.vagrantup.com/docs/providers/virtualbox for understanding how to use Vagrant commands like "halt", "suspend" or "reload"
 
@@ -393,7 +392,7 @@ You will also need to decide if you plan to use a container engine like Docker (
 The startup script provided in the vAMPirus program directory will install Conda for you if you tell it to (see below), however, you will need to install Docker or Singularity separately before running vAMPirus.
 
 
-## Setting up vAMPirus dependencies and checking installation
+### Setting up vAMPirus dependencies and checking installation
 
 
 To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
@@ -412,30 +411,33 @@ You can also use the startup script to install different databases to use for vA
 2. The proteic version of the Reference Viral DataBase (RVDB) (See https://f1000research.com/articles/8-530)
 3. The complete NCBI NR protein database
 
-To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option.
-If we look at the script usage:
+To use the vampirus_startup.sh script to download any or all of these databases listed above you just need to use the "-d" option and you can download the NCBI taxonomy files with the option "-t" (See below).
 
-    General execution:
+If we take a look at the vampirus_startup.sh script usage:
 
-    vampirus_startup.sh -h [-d 1|2|3|4] [-s]
+General execution:
 
-        Command line options:
+vampirus_startup.sh -h [-d 1|2|3|4] [-s] [-t]
 
-            [ -h ]                       	Print help information
+    Command line options:
 
-            [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
+        [ -h ]                       	Print help information
 
-                                                        1 - Download the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
-                                                        2 - Download only NCBIs Viral protein RefSeq database
-                                                        3 - Download only the complete NCBI NR protein database
-                                                        4 - Download all three databases
+        [ -d 1|2|3|4 ]                Set this option to create a database directiory within the current working directory and download the following databases for taxonomy assignment:
 
-            [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
+                                                    1 - Download only the proteic version of the Reference Viral DataBase (See the paper for more information on this database: https://f1000research.com/articles/8-530)
+                                                    2 - Download only NCBIs Viral protein RefSeq database
+                                                    3 - Download only the complete NCBI NR protein database
+                                                    4 - Download all three databases
+
+        [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
+
+        [ -t ]                       Set this option to download NCBI taxonomy files needed for DIAMOND to assign taxonomic classification to sequences (works with NCBI type databases only, see manual for more information)
 
 
-For example, if you would like to install Nextflow, download NCBIs Viral protein RefSeq database, and check/install conda, run:
+For example, if you would like to install Nextflow, download NCBIs Viral Protein RefSeq database, the NCBI taxonomy files to use DIAMOND taxonomy assignment feature, and check/install conda, run:
 
-    bash vampirus_startup.sh -d 2
+    bash vampirus_startup.sh -d 2 -t
 
 and if we wanted to do the same thing as above but skip the Conda check/installation, run:
 
@@ -443,29 +445,37 @@ and if we wanted to do the same thing as above but skip the Conda check/installa
 
 NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed.
 
+**NEW in version 2.0.0 -> the startup script will automatically download annotation information from RVDB to infer Lowest Common Ancestor (LCA) information for hits during taxonomy assignment. You can also use "-t" to download NCBI taxonomy files to infer taxonomy using the DIAMOND taxonomy classification feature.
+
 
 ### Databases
 
-It should be noted, that any protein database can be used, but it needs to be in fasta format and the headers for reference sequences need to match
-one of two patterns:
+Any protein database can be used while running vAMPirus, however, it needs to be in fasta format and the headers for reference sequences need to match one of two patterns:
 
-RVDB format (default) -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein [Marine RNA virus BC-4]"
+RVDB format -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein [Marine RNA virus BC-4]"
 
 NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003 [Zymoseptoria brevis]"
 
-During Taxonomy Inference, vAMPirus infers results by extracting the information stored in the reference sequence headers. If the database sequence headers do not match these
-patterns, you are bound to see errors in the naming of files created during the Taxonomy Inference phase of vAMPirus.
+To set/inform vAMPirus of which header format for the reference database is being used, you can edit the vampirus.config file at line 122 "dbtype="NCBI"" for NCBI header format or "dbtype="RVDB"" for RVDB format.
 
-The default is that vAMPirus assumes that the database headers are in RVDB format, to change this assumption, you would need to edit the configuration file at line 78 where "refseq=F". You could also signal the use of RefSeq format headers within the launch command with adding "--refseq T".
+An example of custom headers in RVDB format if you plan to use a custom database:
 
-An example of custom headers if you plan to use a custom database:
+    `>acc|Custom|VP100000.1|Custom|VP100000|capsid protein [T4 Phage isolate 1]`
+     AMINOACIDSEQUENCE
+    `>acc|Custom|VP100000.1|Custom|VP100000|capsid protein [T4 Phage isolate 2]`
+     AMINOACIDSEQUENCE
+    `>acc|Custom|VP2000.1|Custom|VP2000| capsid protein [T7 phage isolate]`
+     AMINOACIDSEQUENCE
 
-  `>acc|Custom|VP100000.1|Custom|VP100000|capsid protein [T4 Phage isolate 1]`
-   AMINOACIDSEQUENCE
-  `>acc|Custom|VP100000.2|Custom|VP100000|capsid protein [T4 Phage isolate 2]`
-   AMINOACIDSEQUENCE
-  `>acc|Custom|VP2000.1|Custom|VP2000| capsid protein [T7 phage isolate]`
-   AMINOACIDSEQUENCE
+Or in NCBI format the same sequences would be:
+
+    `>VP100000.1 capsid protein [T4 Phage isolate 1]`
+     AMINOACIDSEQUENCE
+    `>VP100000.1 capsid protein [T4 Phage isolate 2]`
+     AMINOACIDSEQUENCE
+    `>VP2000.1 capsid protein [T7 phage isolate]`
+     AMINOACIDSEQUENCE
+
 
 ### Using Singularity
 
@@ -506,7 +516,7 @@ Using the yum package manager ->
 
 After running the startup script, you can then test the vAMPirus installation with the supplied test dataset.
 
-The startup script will generate a text file (STARTUP_HELP.txt) that has instructions and example commands to test the installation.
+The startup script will generate a text file (EXAMPLE_COMMANDS.txt) that has instructions and example commands to test the installation.
 
 NOTE => If using Singularity, when you run the test command calling for singularity (-profile singularity) Nextflow will set up the dependencies.
 
@@ -530,11 +540,11 @@ OR
 
 Analyze test =>
 
-      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats
+      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --asvMED --aminoMED --stats
 
 OR
 
-      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats
+      nextflow run vAMPirus.nf -c /path/to/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --asvMED --aminoMED --stats
 
 
 ### Resuming test analyses if you ran into an error
@@ -576,7 +586,7 @@ In the command above, there are five necessary pieces of information needed to s
 
 2. Second, you must tell Nextflow to "run" the vAMPirus program which is described in the "vAMPirus.nf" file. Depending on where you plan to submit this command, you may have to specify the path to the vAMPirus.nf file or you can copy the file to your working directory.
 
-3. Next, we need to tell Nextflow what configuration file we would like to use for the vAMPirus run which is illustrated by the "-c vampirus.config" segment of the command.
+3. Next, we need to tell Nextflow what configuration file we would like to use for the vAMPirus run which is illustrated by the "-c vampirus.config" segment of the command. NOTE: config file can be called "anything".config.
 
 4. The next piece of information Nextflow needs is whether you plan to use the vAMPirus conda environment or the vAMPirus Docker container with singularity.
 
@@ -586,7 +596,7 @@ Now that we have an understanding on how to deploy vAMPirus with Nextflow, let's
 
 ## The Nextflow monitoring screen
 
-When submitting a launch command to start your vAMPirus run, Nextflow will spit out something that looks like this:
+When submitting a launch command to start your vAMPirus run, Nextflow will spit out something that looks like this (example below from older verions):
 
         executor >  local (57)
         [8a/75e048] process > Build_database                                  [100%] 1 of 1 ✔
@@ -607,15 +617,33 @@ When submitting a launch command to start your vAMPirus run, Nextflow will spit 
         [26/1143ba] process > combine_csv_DC                                  [100%] 1 of 1 ✔
         [2e/e5fea3] process > Report_DataCheck                                [100%] 1 of 1 ✔
 
-Nextflow allows for interactive monitoring of submitted workflows, so in this example, we see the left column containing working directories for each process being executed, next to that we see the process name, and the final column on the right contains the status and success of each process. In this example each process has been executed successfully and has been cached. The amazing thing about Nextflow is that say you received an error or decide you would like to change a parameter/add a type of clustering you can use the Nextflow "-resume" option that means you don't re-run already completed processes.
+Nextflow allows for interactive monitoring of submitted workflows, so in this example, we see the left column containing working directories for each process being executed, next to that we see the process name, and the final column on the right contains the status and success of each process. In this example each process has been executed successfully and has been cached.
+
+You can also remotely monitor a run using Nextflow tower (see tower.nf) which will allow you to monitor your run (and even launch new runs) from a portal on your browser.
+
+## The Nextflow "-resume" feature
+
+The amazing thing about Nextflow is that it caches previously run processes done with the same samples. For example, in the case that you received an error during a run or run out of walltime on an HPC, you can just add "-resume" to your Nextflow launch command like so:
+
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda,singularity] --Analyze|DataCheck -resume
+
+Nextflow will then pick up where the previous run left off.
+
+You can even use this feature to change a parameter/add a type of clustering or add Minimum Entropy Decomposition analysis, you would just rerun the same command as above with minor changes:
+
+         nextflow run vAMPirus.nf -c vampirus.config -profile [conda,singularity] --Analyze|DataCheck --ncASV --asvMED -resume
+
+With this command, you will then add nucleotide-level clustering of ASVs and Minimum Entropy Decomposition analyses to your results directory, all without rerunning any processes.
 
 ## Understanding the vAMPirus config file and setting parameters
 
 ### The configuration file (vampirus.config)
 
-Nextflow deployment of vAMPirus relies on the use of the configuration file (vampirus.config) that is found in the vAMPirus program directory. The configuration file is a great way to store parameters/options used in your analyses. It also makes it pretty easy to set and keep track of multiple parameters as well as storing custom default values that you feel work best for your data. You can also have multiple copies of vAMPirus configuration files with different parameters, you would just have to specify the correct file with the "-c" argument shown in the section before.
+Nextflow deployment of vAMPirus relies on the use of the configuration file (vampirus.config - can be renamed to anything as long as its specified in the launch command) that is found in the vAMPirus program directory. The configuration file is a great way to store parameters/options used in your analyses. It also makes it pretty easy to set and keep track of multiple parameters as well as storing custom default values that you feel work best for your data. You can also have multiple copies of vAMPirus configuration files with different parameters, you would just have to specify the correct file with the "-c" argument shown in the section before.
 
-Furthermore, the configuration file contains analysis-specific parameters AND resource-specific Nextflow launching parameters. A benefit of Nextflow integration, is that you can run the vAMPirus workflow on a large HPC just as easily as you could on your local machine. If you look at line 151 and greater in the vampirus.config file, you will see resource-specific parameters that you can alter before any run. Nexflow is capable of submitting jobs automatically using slurm and PBS, check out the Nextflow docs to learn more (https://www.nextflow.io/docs/latest/executor.html)!
+Furthermore, the configuration file contains analysis-specific parameters AND resource-specific Nextflow launching parameters. A benefit of Nextflow integration, is that you can run the vAMPirus workflow on a large HPC just as easily as you could on your local machine.
+
+If you look at line 233 and greater in the vampirus.config file, you will see resource-specific parameters that you can alter before any run. Nexflow is capable of submitting jobs automatically using slurm and PBS, check out the Nextflow docs to learn more (https://www.nextflow.io/docs/latest/executor.html)!
 
 ### Setting parameter values
 
@@ -625,22 +653,20 @@ There are two ways to set parameters with Nextflow and vAMPirus:
 
 Here we have a block from the vampirus.config file that stores information related to your run:
 
-            // Project/analyses- specific information
+            // Project specific information
+
                 // Project name - Name that will be used as a prefix for naming files by vAMPirus
-                     projtag="vAMPrun"
+                     projtag="vAMPirusAnalysis"
                 // Path to metadata spreadsheet file to be used for plot
-                     metadata="/PATH/TO/metadata.csv"
-                // Minimum number of hit counts for a sample to have to be included in the downstream analyses and report generation
-        	         minimumCounts="1000"
-        	    // PATH to current working directory
-                     mypwd="/PATH/TO/working_directory"
-                     email="your_email@web.com"
-                // reads directory
-                     reads="/PATH/TO/reads/R{1,2}_001.fastq.gz"
-                // Directory to store output of vAMPirus analyses
+                     metadata="/PATH/TO/vampirus_meta.csv"
+                // reads directory, must specify the path with "R{1,2}" for reads to be properly read by Nextflow
+                     reads="/PATH/TO/reads/"
+                // PATH to working directory of your choosing, will automatically be set to vAMPirus installation
+                     workingdir="VAMPDIR"
+                // Name of directory created to store output of vAMPirus analyses (Nextflow will create this directory in the working directory)
                      outdir="results"
 
-The first one in the block is the project tag or "projtag" which by default, if unchanged, will use the prefix "vAMPrun". To change this value, and any other parameter value, just edit right in the configuration file so if you wanted to call the run "VirusRun1" you would edit the line to:
+The first one in the block is the project tag or "projtag" which by default, if unchanged, will use the prefix "vAMPirusAnalysis". To change this value, and any other parameter value, just edit right in the configuration file so if you wanted to call the run "VirusRun1" you would edit the line to:
 
             // Project/analyses- specific information
                 // Project name - Name that will be used as a prefix for naming files by vAMPirus
@@ -649,19 +675,19 @@ The first one in the block is the project tag or "projtag" which by default, if 
 
 2. Set the value within the launch command itself:
 
-Instead of editing the configuration file directly, you could set parmeters within the launching command itself. So, for example, if we wanted to run the analysis with nucletide-based clustering of ASVs at 95%        similarity, you would do so like this:
+Instead of editing the configuration file directly, you could set parameters within the launching command itself. So, for example, if we wanted to run the analysis with nucleotide-based clustering of ASVs at 95% similarity, you would do so like this:
 
                 nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --clusterNuclID .95
 
-Here we use the "--Analyze" option that tells vAMPirus that we are ready to analyze soem data. Then the "--ncASV" argument with the "--clisterNuclID .95" tells vAMPirus we would like to cluster our ASVs based on 95% nucleotide similarity. The default ID value is stored at line 51 in the vampirus.config file (currently 85%), but as soon as you specify and provide a value in the command, the default value is overwritten.
+Here we use the "--Analyze" option that tells vAMPirus that we are ready to analyze some data. Then the "--ncASV" argument with the "--clisterNuclID .95" tells vAMPirus we would like to cluster our ASVs based on 95% nucleotide similarity. The default ID value is stored at line 66 in the vampirus.config file (currently 85%), but as soon as you specify and provide a value in the command, the value within the config file is ignored.
 
-NOTE: Nextflow also has options in the launch command. To tell them apart, Nextflow options uses a single dash (e.g. -with-conda) while vAMPirus options are always with a double dash (e.g. --Analyze)
+NOTE: Nextflow also has options in the launch command. To tell them apart, Nextflow options uses a single dash (e.g. -with-conda or -profile) while vAMPirus options are always with a double dash (e.g. --Analyze)
 
-### Setting computing resource parameters - Edit in lines 151-171 in vampirus.config
+### Setting computing resource parameters - Edit in lines 241-261 in vampirus.config
 
 Each process within the vAMPirus workflow is tagged with either "low_cpus", "norm_cpus", or "high_cpus" (see below) which let's Nextflow know the amount of cpus and memory required for each process, which will then be used for when Nextflow submits a given job or task. Nexflow actively assesses the amount of available resources on your machine and will submit tasks only when the proper amount of resources can be requested.
 
-From line 203-217 in the vAMPirus.config file is where you can edit these values for whichever machine you plan to run the workflow on.
+From line 241-261 in the vAMPirus.config file is where you can edit these values for whichever machine you plan to run the workflow on.
 
         process {
             withLabel: low_cpus {
@@ -694,7 +720,7 @@ As stated before, you can launch vAMPirus on either your personal laptop OR a la
 To specify certain parts of the vAMPirus workflow to perform in a given run, you can use skip options to have vAMPirus ignore certain processes. Here are the current skip options you can specify within the launch command:
 
             // Skip options
-                // Skip all Read Processing
+                // Skip all Read Processing steps
                     skipReadProcessing=false
                 // Skip quality control processes only
                     skipFastQC = false
@@ -712,6 +738,8 @@ To specify certain parts of the vAMPirus workflow to perform in a given run, you
                     skipEMBOSS = false
                 // Skip Reports
                     skipReport = false
+                // Skip Merging steps
+                    skipMerging = false
 
 To utilize these skip options, just add it to the launch command like so:
 
@@ -734,7 +762,7 @@ With this launch command, vAMPirus will perform ASV generation and nucleotide-ba
 
 Once you have everything set up and you have edited the parameters of interest in your configuration file you can run the following launch command for a full analysis:
 
-   nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats
+   nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats
 
 This launch command will run all aspects of the vAMPirus workflow on your data and spit out final reports for each clustering %ID and technique.
 
@@ -742,7 +770,7 @@ This launch command will run all aspects of the vAMPirus workflow on your data a
 
 ### Sequencing reads
 
-Input can be raw or processed compressed or non-compressed fastq files with names containing "\_R1" or "\_R2". You can specify the directory containing your reads in line 25 of the vampirus.config file.
+Input can be raw or processed compressed or non-compressed fastq files with names containing "\_R1" or "\_R2". You can specify the directory containing your reads in line 20 of the vampirus.config file.
 
 NOTE: Sample names are extracted from read library names by using the string to the left of the "\_R" in the filename automatically.
 
@@ -781,7 +809,7 @@ Usage example:
 The DataCheck feature of vAMPirus is meant to give the user some information about their data so they can tailor their final analysis appropriately. In DataCheck mode, vAMPirus performs all read processing operations then generates ASVS and performs nucleotide- and protein-based clustering at 24 different clustering percentages ranging from 55-99% ID. vAMPirus then generates an html report that displays and visualizes read processing and clustering stats. It is recommended that before running any dataset through vAMPirus, you run the data through the DataCheck.
 
 
-Here is how Nextflow will display the list of processes vAMPirus will execute during DataCheck (executed with the launch command above):
+Here is how Nextflow will display the list of processes vAMPirus will execute during DataCheck (executed with the launch command above; below is an example from an older version of vAMPirus):
 
                 executor >  local (57)
                 [8a/75e048] process > Build_database                                  [100%] 1 of 1 ✔
@@ -804,6 +832,8 @@ Here is how Nextflow will display the list of processes vAMPirus will execute du
 
 
 Every time you launch vAMPirus with Nextflow, you will see this kind of output that refreshes with the status of the different processes during the run.
+
+**Add "--asvMED" or "aminoMED" to the launch command above to get Shannon Entropy analysis resutls for ASVs and AminoTypes
 
 
 2. "--Analyze"
@@ -901,6 +931,7 @@ Here is what the Nextflow output would look like for this launch command:
 
 You can see that there are a few more processes now compared to the output of the previous launch command which is what we expect since we are asking vAMPirus to do a little bit more work for us :).
 
+
 # Breaking it down: The vAMPirus workflow
 
 ## Read processing
@@ -921,21 +952,21 @@ This is the default action of vAMPirus if no primer sequences are provided, to s
 
             nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --GlobTrim 23,26
 
-The command above is telling vAMPirus to have bbduk.sh remove primers by trimming 23 bases from the forward reads and 26 bases from the reverse reads. The other way to initiate this method of primer removal is to add the same information at line 38 in the configuration file:
+The command above is telling vAMPirus to have bbduk.sh remove primers by trimming 23 bases from the forward reads and 26 bases from the reverse reads. The other way to initiate this method of primer removal is to add the same information at lime 38 in the configuration file:
 
           // Primer Removal parameters
               // If not specifying primer sequences, forward and reverse reads will be trimmed by number of bases specified using --GlobTrim #basesfromforward,#basesfromreverse
                  GlobTrim="23,26"
 
-By adding the information to line 38, vAMPirus will automatically use this method and these parameters for primer removal until told otherwise.
+By adding the information to lime 38, vAMPirus will automatically use this method and these parameters for primer removal until told otherwise.
 
 If you want to change the number of bases without editing the configuration file, all you would need to do is then specify in the launch command with "--GlobTrim 20,27" and vAMPirus will ignore the "23,26" in the configuration file.
 
-NOTE: Specifying global trimming by editing line 38 in the config file or using "--GlobTrim" in the launch command will also override the use of primer sequences for removal if both are specified  
+NOTE: Specifying global trimming by editing lime 38 in the config file or using "--GlobTrim" in the launch command will also override the use of primer sequences for removal if both are specified  
 
 2. Primer removal by specifying primer sequences -
 
-You can tell vAMPirus to have bbduk.sh search for and remove either a single primer paire or multiple.
+You can tell vAMPirus to have bbduk.sh search for and remove either a single primer pair or multiple.
 
 In the case where you are using a single primer pair, similar to the previous method, you could edit the configuration file or specify within the launch command.
 
@@ -952,11 +983,11 @@ The primer sequences could also be stored in the configuration file in lines 43-
                 // Reverse primer sequence
                 rev="REVPRIMER"
 
-If you have multiple primer sequences to be removed, all you need to do is provide a fasta file with your primer sequences and signla multiple primer removal using the "--multi" option like so:
+If you have multiple primer sequences to be removed, all you need to do is provide a fasta file with your primer sequences and signal multiple primer removal using the "--multi" option like so:
 
             nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --multi --primers /path/to/primers.fa
 
-You can set the path to the primer sequence fasta file within the launch command above or you can have it in the configuration file at line 44:
+You can set the path to the primer sequence fasta file within the launch command above or you can have it in the configuration file at lime 44:
 
             // Path to fasta file with primer sequences to remove (need to specify if using --multi option )
                 primers="/PATH/TO/PRIMERS.fasta"
@@ -975,26 +1006,31 @@ There are also a few other options you can change to best match what your data w
 
 ### Read merging and length filtering
 
-Read merging in the vAMPirus workflow is performed by vsearch and afterwards, reads are trimmed to the expected amplicon length (--maxLen) and any reads with lengths below the user specified minimum read length (--minLen). There are three parameters that you can edit to influence this segment of vAMPirus. If we look at lines 26-33:
+Read merging in the vAMPirus workflow is performed by vsearch and afterwards, reads are trimmed to the expected amplicon length (--maxLen) and any reads with lengths below the user specified minimum read length (--minLen) are discarded. There are five parameters that you can edit to influence this segment of vAMPirus. If we look at lines 26-33:
 
-    // Merged read length filtering parameters
-        // Minimum merged read length - reads below the specified maximum read length will be used for counts only
-            minLen="400"
-        // Maximum merged read length - reads with length equal to the specified max read length will be used to generate uniques and ASVs
-            maxLen="422"
-        // Maximum expected error for vsearch merge command
-            maxEE="1"
+        // Merged read length filtering parameters
+
+            // Minimum merged read length - reads with lengths greater than minLen and below the specified maximum read length will be used for counts only
+                minLen="400"
+            // Maximum merged read length - reads with length equal to the specified max read length will be used to generate uniques and ASVs (safe to set at expected amplicon size to start)
+                maxLen="420"
+            // Maximum expected error for vsearch merge command - vsearch discard sequences with more than the speciﬁed number of expected errors
+                maxEE="3"
+            // Maximum number of non-matching nucleotides allowed in overlap region
+                diffs="20"
+            // Maximum number of "N"'s in a sequence - if above the specified value, sequence will be discarded
+                maxn="20"
 
 The user can edit the minimum length (--minLen) for reads to be used for counts table generation, maximum length (--maxLen) for reads used to generate uniques and subsequent ASVs, and the expected error rate (--maxEE) for overlapping region of reads during read merging with vsearch. The values above are default and should be edited before running your data with --Analyze.
 
 This is where the DataCheck report is very useful, you can review the report and see the number of reads that merge per library and you can edit the expected error value to be less stringent if needed. The DataCheck report also contains a read length distribution that you can use to select an ideal maximum/minimum read length.
 
 
-## Amplicon Sequence Variants, AminoTypes and Operational Taxonomic Units
+## Amplicon Sequence Variants, AminoTypes and Clustering
 
 The goal of vAMPirus was to make it easy for the user to analyze their data is many different ways to potentially reveal patterns that would have been missed if limited to one method/pipeline.
 
-A major and sometimes difficult step in analyzing virus amplicon sequence data is deciding the method to use for identifying or defining different viral "species" in the data. To aid this process, vAMPirus has the DataCheck mode discussed above and has several different options for sequence clustering/analysis for the user to decide between.  
+A major, and sometimes difficult, step in analyzing virus amplicon sequence data is deciding the method to use for identifying or defining different viral "species" in the data. To aid this process, vAMPirus has the DataCheck mode discussed above and has several different options for sequence clustering/analysis for the user to decide between.  
 
  vAMPirus relies on vsearch using the UNOISE3 algorithm to generate Amplicon Sequencing Variants (ASVs) from dereplicated amplicon reads. ASVs are always generated by default and there are two parameters that the user can specify either in the launch command or by editing the configuration file at lines 45-49:
 
@@ -1010,14 +1046,47 @@ Launch command to produce only ASV-related analyses:
 
     nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats --skipAminoTyping
 
-Now, onto clustering ASVs into clustered ASVs (cASVs). vAMPirus is able to use two different techniques for generating cASVs for the user:
+### ASV filtering (experimental)
+
+New to version 2 you can now filter ASVs to remove sequences that belong to taxonomic groups that are not of interest for a given run.
+
+A great example of when this feature is useful is Prodinger et al. 2020 (https://www.mdpi.com/2076-2607/8/4/506). In this study they looked to amplify and analyze Mimiviridae polB sequences, however, polB is also found in cellular genomes like bacteria. In this case, Prodinger et al. looked to avoid including any bacterial polB in their final results and thus used a filtering step to remove microbial sequences. The ASV filtering feature can be used to do exactly this type of filtering where you provide paths to a "filter database" containing sequences belonging to non-target groups (e.g. microbial polB) and a "keep database" containing sequences belonging to the target group (e.g. Mimiviridae polB). Any ASVs that match non-target sequences will then be filtered from the ASV file prior to running the DataCheck or Analyze pipeline.
+
+Here are the options stored within the configuration file:
+
+    // ASV filtering parameters - You can set the filtering to run with the command --filter
+
+
+        // Path to database containing sequences that if ASVs match to, are then removed prior to any analyses
+            filtDB=""
+        // Path to database containing sequences that if ASVs match to, are kept for final ASV file to be used in subsequent analyses
+            keepDB=""
+        // Keep any sequences without hits - for yes, set keepnohit to ="true"
+            keepnohit="true"
+
+        //Parameters for diamond command for filtering
+
+                // Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+                    filtminID="80"
+                // Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+                    filtminaln="30"
+                // Set sensitivity parameters for DIAMOND aligner (read more here: https://github.com/bbuchfink/diamond/wiki; default = ultra-sensitive)
+                    filtsensitivity="ultra-sensitive"
+                // Set the max e-value for best hit to be recorded
+                    filtevalue="0.001"
+
+
+
+### Clustering options
+
+Dependining on the virus type/marker gene, ASV-level results can be noisy and to combat this vAMPirus has three different approaches to clustering ASV sequences:
 
 
 1. AminoTyping -
 
 vAMPirus by default, unless the --skipAminoTyping option is set, will generate unique amino acid sequences or  "AminoTypes" from generated ASVs. These AminoTypes, barring any skip options set, will run through all the same analyses as ASVs.
 
-vAMPirus will translate the ASVs with Virtual Ribosome and relies on the user to specify the expected or minimum amino acid sequence length (--minAA) to be used for AminoTyping and pcASV generation (discussed below). For example, if you amplicon size is ~422 bp long, you would expect the amino acid translations to be ~140. Thus, you would either edit the --minAA value to be 140 in the configuration file (line 69) or in the launch command.
+vAMPirus will translate the ASVs with Virtual Ribosome and relies on the user to specify the expected or minimum amino acid sequence length (--minAA) to be used for AminoTyping and pcASV generation (discussed below). For example, if you amplicon size is ~422 bp long, you would expect the amino acid translations to be ~140. Thus, you would either edit the --minAA value to be 140 in the configuration file (lime 69) or in the launch command.
 
 You can make it shorter if you would like, but based on personal observation, a shorter translation is usually the result of stop codons present which would usually be removed from subsequent analyses. If there are any sequences below the minimum amino acid sequence length the problematic sequence(s) and its translation will be stored in a directory for you to review.     
 
@@ -1071,10 +1140,55 @@ Example launch command:
 
           nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --stats
 
+## Minimum Entropy Decomposition (EXPERIMENTAL) - Oligotyping - https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/
+
+In vAMPirus v2, we added the ability for the user to use the oligotyping program employing the Minimum Entropy Decomposition (MED) algorithm developed by Eren et al. 2015 (read more about MED here - https://www.nature.com/articles/ismej2014195#citeas) to cluster ASV or AminoType sequences.
+
+The MED algorithm provides an alternative way of clustering marker gene sequences using "information theory-guided decomposition" - "By employing Shannon entropy, MED uses only the information-rich nucleotide positions across reads and iteratively partitions large datasets while omitting stochastic variation." -Eren et al. 2015
+
+When you run the DataCheck pipeline with your dataset, the report will include a figure and table that breakdown the Shannon Entropy analysis results for both ASVs and AminoTypes. The figure visualizes entropy values per sequence position revealing positions or regions of high entropy. The table beneath the figure breaks down the number of positions with entropy values above "0.x". Although, if you know the positions on your sequence that have the potential to contain biologically or ecologically meaningful mutations, you can specify decomposition based on these positions.
+
+If you decide to use MED, vAMPirus will run all the same analyses that would be done with the ASV or AminoType sequences (e.g. diversity analyses, statistics) and be appended results to the ASV or AminoType report. The ASV or AminoType sequence nodes on the phylogenetic tree will also be colored based on which MED group they were assigned to.
+
+To add MED analysis to either the DataCheck or Analyze run you must add "--asvMED" and/or "--aminoMED" to the launch command (see examples below).
+
+There are two ways to utilize MED within the vAMPirus pipeline:
+
+        (1) Decomposition based on all sequence positions with an entropy value above "0.x" - Useful approach to preliminarily test influence of MED on your sequences
+
+                Example -> Entropy value table from the DataCheck report shows I have 23 ASV sequence positions that have Shannon entropy values above 0.1 and I would like to oligotype using all of these high entropy positions.
+
+                          To use these 23 positions for MED clustering of ASVs, all I need to do is add the options "--asvMED" (signals use of MED on ASV sequences) and "--asvC 23" (specifies the number of high entropy positions to be used for MED - could also be done by editing "asvC="23"" in config file) to the launch command:
+
+                                nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --asvMED --asvC 23
+
+                          After this run completes successfully and you move the ASV report file to a safe area for review, if I wanted to see what happens if just the top 5 high entropy positions were used instead, I can use the "-resume" option and run:
+
+                                nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --asvMED --asvC 5 -resume
+
+
+        (2) Decomposition based on specific sequence positions that may contain biologically/ecologically meaningful differences.
+
+                Example -> I know that amino acid differences at certain positions on my AminoTypes are ecologically meaningful (e.g. correlate with host range) and I would like to perform MED with these positions only.
+
+                           To do this, similar to the example above, I will add "--aminoMED" and "--aminoC" to the launch command:
+
+                                nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --aminoMED --aminoC 2,3,4,25,34,64 -resume
+
+MED related options within the configuration file:
+
+        // Minimum Entropy Decomposition (MED) parameters for clustering (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
+
+            // If you plan to do MED on ASVs using the option "--asvMED" you can set here the number of entropy peak positions or a comma separated list of biologically meaningful positons (e.g. 35,122,21) for oligotyping to take into consideration. vAMPirus will automatically detect a comma separated list of positions, however, if you want to use a single specific position, make "asvSingle="true"".
+                asvC=""
+                asvSingle=""
+            // If you plan to do MED on ASVs using the option "--aminoMED"  you can set here the number of entropy peak positions or a comma separated list of biologically meaningful positons (e.g. 35,122,21) for oligotyping to take into consideration. vAMPirus will automatically detect a comma separated list of positions, however, if you want to use a single specific position, make "aminoSingle="true"".
+                aminoC=""
+                aminoSingle=""
 
 ## Counts tables and percent ID matrices
 
-vAMPirus generate nucleotide-based counts tables using vsearch and protein-based counts tables using DIAMOND and a custom bash script. Counts tables and percent ID matrices are always produced for each ASV, AminoType and all cASV fasta files produced.
+vAMPirus generates nucleotide-based counts tables using vsearch and protein-based counts tables using DIAMOND and a custom bash script. Counts tables and percent ID matrices are always produced for each ASV, AminoType and all cASV fasta files produced.
 
 Here are the parameters you can edit at lines 61-70:
 
@@ -1093,12 +1207,18 @@ The "--asvcountID" is the percent ID during global alignment that vsearch would 
 
 Protein-based counts file generation has a few more parameters the user can alter: "--ProtCountsBit" is the minimum bitscore for an alignment to be recorded, "--ProtCountID" is the minimum percent amino acid similarity an alignment needs to have to be recorded, and "--ProtCountsLength" is the minimum alignment length for a hit to be recorded.
 
-
 ## Phylogenetic analysis and model testing
 
-Phylogenetic trees are produced automatically for ASVs (unless --ncASV specified), ncASVs, pcASVs and AminoTypes using IQ-TREE. All produced sequence fastas are aligned using the MAFFT algorithm then alignments are trimmed automatically using TrimAl.
+Phylogenetic trees are produced automatically for ASVs (unless --ncASV specified), ncASVs, pcASVs and aminotypes using IQ-TREE. All produced sequence fastas are aligned using the MAFFT algorithm then alignments are trimmed automatically using TrimAl.
 
 Post alignment and trimming, there is some flexibility in this process where you can specify a few different aspects of the analysis:
+
+### Coloring nodes on produced trees in the Analyze report
+
+You can tell vAMPirus to color nodes on produced phylogenies based on taxonomy or Minimum Entropy Decomposition Group ID. Edit the option below in the config file.
+
+// Color nodes on phylogenetic tree in Analyze report with MED Group information (nodeCol="MED") or taxonomy (nodeCol=TAX) hit. If you would like nodes colored by sequence ID, leave nodeCol="" below.
+    nodeCol=""
 
 ### Substitution model testing
 
@@ -1115,11 +1235,12 @@ By default IQTREE will determine the best model to use with ModelFinder Plus.
 
 ### Bootstrapping
 
-IQ-TREE is capable of performing parametric or non-parametric bootstrapping. You can specify which one using "--parametric" or "--nonparametric" and to set how many boostraps to perform, you would use "--boots #ofbootstraps" or edit line 114 in the vampirus.config file.
+IQ-TREE is capable of performing parametric or non-parametric bootstrapping. You can specify which one using "--parametric" or "--nonparametric" and to set how many bootstraps to perform, you would use "--boots #ofbootstraps" or edit lime 114 in the vampirus.config file.
 
-Here is an example for creating a tree using the model determined by ModelTest-NG, non-parametric boostrapping and 500 bootstraps:
+Here is an example for creating a tree using the model determined by ModelTest-NG, non-parametric bootstrapping and 500 bootstraps:
 
         nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --ModelTnt --ModelTaa --nonparametric --boots 500
+
 
 ### Custom IQ-TREE command
 
@@ -1160,29 +1281,73 @@ AminoType IQTREE command ->
       iqtree -s aminotype_alighnment.fasta --prefix TestRun --redo -T auto -option1 A -option2 B -option3 C
 
 
-
 ## Taxonomy Inference
 
-vAMPirus uses Diamond blastx/blastp and the provided protein database to assign taxonomy to ASVs/cASVs/AminoTypes. There are summary files generated, one as a phyloseq object and the other as a .tsv with information in a different
- arrangement. Results are also visualized as a donut graph in the final reports. You can adjust the following parameters:
+vAMPirus uses DIAMOND blastx/blastp and the provided protein database to infer taxonomy of amplicons to ASVs/cASVs/AminoTypes. There are summary files generated, one in the format compatible with phyloseq and the other as a .tsv with information in a different arrangement. Results are also visualized as a donut graph in the final reports.
 
-    // Taxonomy inference parameters
-        // Specify name of database to use for analysis
-            dbname="DATABASENAME.FASTA"
-        // Path to Directory where database is being stored
-            dbdir="/PATH/TO/DATABASE/DIRECTORY"
-        // Toggle use of RefSeq header format; default is Reverence Viral DataBase (RVDB)
-            refseq="F"
+First, lets take a look at the taxonomy section of the configuration file:
 
-This was mentioned in an earlier section of the docs, but before running vAMPirus without the "--skipTaxonomy" option set, you should add the name and path of the database you would like to use at lines 74 and 76 in the config file,
- respectively. The database, currently, needs to be protein sequences and be in fasta format. The database can be a custom database but for proper reporting of the results, the headers need to follow either RVDB or RefSeq
- header formats:
+Block 1 -
+
+        // Taxonomy inference parameters
+
+            //Parameters for diamond command
+                // Set minimum bitscore for best hit in taxonomy assignment
+                    bitscore="50"
+                // Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+                    minID="40"
+                // Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+                    minaln="30"
+                // Set sensitivity parameters for DIAMOND aligner (read more here: https://github.com/bbuchfink/diamond/wiki; default = ultra-sensitive)
+                    sensitivity="ultra-sensitive"
+
+The first block of options are related to the DIAMOND command.
+
+Block 2 -
+
+        // Database information
+            // Specify name of database to use for analysis
+                dbname="DATABASENAME"
+            // Path to Directory where database is being stored - vAMPirus will look here to make sure the database with the name provided above is present and built
+                dbdir="DATABASEDIR"
+            // Set database type (NCBI or RVDB). Lets vAMPirus know which sequence header format is being used and must be set to NCBI when using RefSeq or Non-Redundant databases. -> dbtype="NCBI" to toggle use of RefSeq header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers (see manual)
+                dbtype="TYPE"
+
+The second block of options is regarding the database that will be used for the analysis. "dbname" should be the name of the reference fasta file, for example if using the RVDB, dbname would = "U-RVDBv21.0-prot.fasta". The "dbtype" option signals which sequence header format is being used in the reference database. To use the DIAMOND taxonomy assignment feature (see below), you must be using the NCBI style sequence headers.
+
+The database, currently, needs to be protein sequences and be in fasta format. The database can be a custom database but for proper reporting of the results, the headers need to follow either RVDB or NCBI/RefSeq header formats:
 
 1. RVDB format (default) -> ">acc|GENBANK|AYD68780.1|GENBANK|MH171300|structural polyprotein [Marine RNA virus BC-4]"
 
 2. NCBI NR/RefSeq format -> ">KJX92028.1 hypothetical protein TI39_contig5958g00003 [Zymoseptoria brevis]"
 
-NOTE: By default, vAMPirus assumes the headers are in RVDB format, to trigger the use of NCBI RefSeq format, edit the "F" to "T" at line 78 in the config file or add "--refseq T" to the launch command.
+Block 3 -
+
+        // Classification settings - if planning on inferring LCA from RVDB annotation files OR using NCBI taxonomy files, confirm options below are accurate.
+            // Path to directory RVDB hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using RVDB LCA.
+                dbanno="DATABASEANNOT"
+            // Set lca="T" if you would like to add "Lowest Common Ancestor" classifications to taxonomy results using information provided by RVDB annotation files (works when using NCBI or RVDB databases) - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
+                lca="LCAT"
+            // DIAMOND taxonomy inference using NCBI taxmap files (can be downloaded using the startup script using the option -t); set to "true" for this to run (ONLY WORKS WITH dbtype="NCBI")
+                ncbitax="false"
+
+The third block of options is regarding the two different methods thats could be used to get putative taxonomic classifications for your sequences:
+
+1. Grabbing "Lowest Common Ancestor" (LCA) information from the annotation files associated with the Reference Virus DataBase (RVDB; https://rvdb-prot.pasteur.fr/).
+
+By default, these annotation files are downloaded when you use the startup script to download any of the possible three databases. The "dbanno" variable refers to the path to the annotation files, if using the startup script, this will automatically be edited.
+
+The LCA feature works by searching the RVDB annotation files for the accession number of the aligned-to reference sequence so this feature can be used when "dbtype" equals either "NCBI" or "RVDB". Please note, however, that the aligned-to reference sequence might not be found in the annotation files and some sequences may not have the LCA information available within its annotation file. This is a quick way to assign some degree of classification that might help in future binning or figure making.
+
+You can turn on this feature of the pipeline by editing lime 121 in the vampirus.config file making "lca="true"" or you can set this in the launch command like so:
+
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats --lca true
+
+2.  Using the NCBI taxonomy files (https://www.ncbi.nlm.nih.gov/taxonomy ; https://www.ncbi.nlm.nih.gov/books/NBK53758/) and the DIAMOND taxonomy assignment feature.
+
+You can tell vAMPirus to use the DIAMOND taxonomy assignment feature that leverages the taxonomy identifier (TaxId) of aligned-to reference sequences. It will then add putative taxonomic information to your sequences in the *quick_TaxBreakdown.csv file stored in the vAMPirus results directory.
+
+NOTE=> To use the DIAMOND taxonomy feature and the NCBI taxonomy files you must be using the NCBI header format. So, this feature will only be used when "dbtype="NCBI"" and "ncbitax="true"" within the configuration file.
 
 ## EMBOSS Analyses
 
@@ -1208,19 +1373,15 @@ NOTE=> Be sure that there is more than 1 sample in each treatment category or th
 
 # vAMPirus output
 
-There are several files created throughout the vAMPirus pipeline that are stored and organized in directories within the specified results/output directory (ex. ${working_directory}/results; line 27 in the configuration file). We will go through the structure of the output directory and where to find which files here:
+There are several files created throughout the vAMPirus pipeline that are stored and organized in directories within the specified results/output directory (ex. ${working_directory}/results; line 24 in the configuration file). We will go through the structure of the output directory and where to find which files here:
 
-## Pipeline performance information - ${working_directory}/results/PipelinePerformance/
+## Pipeline performance information - ${working_directory}/${outdir}/PipelinePerformance/
 
 Nextflow produces a couple files that breakdown how and what parts of the vAMPirus pipeline was ran. The first file is a report that contains information on how the pipeline performed along with other pipeline performance-related information like how much memory or CPUs were used during certain processes. You can use this information to alter how many resources you would request for a given task in the pipeline. For example, the counts table generation process may take a long time with the current amount of resources requested, you can see this in the report then edit the resources requested at lines 144-183 in the vAMPirus configuration file. The second file produced by Nextflow is just the visualization of the workflow and analyses ran as a flowchart.
 
-## Output of "--DataCheck" - ${working_directory}/results/DataCheck
+## Output of read processing - ${working_directory}/${outdir}/ReadProcessing
 
-The DataCheck performed by vAMPirus includes "ReadProcessing", "Clustering", and "Report" generation. Here again is the launch command to run the DataCheck mode:
-
-        `nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --DataCheck`
-
-### ReadProcessing - ${working_directory}/results/DataCheck/ReadProcessing
+### ReadProcessing - ${working_directory}/${outdir}/ReadProcessing
 
 Within the ReadProcessing directory you will find all files related to each step of read processing:
 
@@ -1240,7 +1401,13 @@ Similar to the adapter removal directory, here you have the clean read libraries
 
 There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report.
 
-### Clustering - ${working_directory}/results/DataCheck/Clustering
+## Output of "--DataCheck" - ${working_directory}/${outdir}/DataCheck
+
+The DataCheck performed by vAMPirus includes "ReadProcessing", "Clustering", and "Report" generation. Here again is the launch command to run the DataCheck mode:
+
+        `nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --DataCheck`
+
+### Clustering - ${working_directory}/${outdir}/DataCheck/Clustering
 
 As the name would suggest, the files within this directory are related to the clustering process of "--DataCheck". There isn't too much in here, but here is the breakdown anyway:
 
@@ -1250,13 +1417,13 @@ In this directory, there is the fasta file with the generated ASV sequences and 
 
 2. Nucleotide - ${working_directory}/results/DataCheck/Clustering/Nucleotide
 
-This directory stores a .csv file that shows the number of clusters or ncASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
+This directory stores a .csv file that shows the number of clusters or ncASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report. In this directory you will also find Shannon Entropy analysis results files.
 
 3. Aminoacid - ${working_directory}/results/DataCheck/Clustering/Aminoacid
 
-Similar to Nucleotide, the Aminoacid directory contained the .csv that shows the number of clusters or pcASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report.
+Similar to Nucleotide, the Aminoacid directory contained the .csv that shows the number of clusters or pcASVs per clustering percentage. The file can be visualized manually or can be reviewed in the DataCheck report. In this directory you will also find Shannon Entropy analysis results files.
 
-### Report - ${working_directory}/results/DataCheck/Report
+### Report - ${working_directory}/${outdir}/DataCheck/Report
 
 In this directory, you will find a .html DataCheck report that can be opened in any browser. The report contains the following information and it meant to allow the user to tailor their vAMPirus pipeline run to their data (i.e. maximum read length, clustering percentage, etc.):
 
@@ -1275,59 +1442,39 @@ In this section of the report, vAMPirus is showing the number of nucleotide- and
 NOTE: Most, if not all, plots in vAMPirus reports are interactive meaning you can select and zoom on certain parts of the plot or you can use the legend to remove certain samples.
 
 
-## Output of "--Analyze" - ${working_directory}/results/Analyze
+## Output of "--Analyze" - ${working_directory}/${outdir}/Analyze
 
 Depending on which optional arguments you add to your analyses (e.g. --pcASV, --ncASV, skip options), you will have different files produced, here we will go through the output of the full analysis stemming from this launch command:
 
         nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --stats
 
-### ReadProcessing - ${working_directory}/results/Analyze/ReadProcessing
-
-Very similar to the "ReadProcessing" directory created in DataCheck, you will find the following:
-
-1. FastQC - ${working_directory}/results/Analyze/ReadProcessing/FastQC
-
-In this directory you will find FastQC html reports for pre-cleaned and post-cleaned individual read libraries.
-
-2. AdapterRemoval - ${working_directory}/results/Analyze/ReadProcessing/AdapterRemoval
-
-Here we have resulting fastq files with adapter sequences removed. Fastp also generates its own reports which can also be found in "./fastpOut".
-
-3. PrimerRemoval - ${working_directory}/results/Analyze/ReadProcessing/PrimerRemoval
-
-Similar to the adapter removal directory, here you have the clean read libraries that have had adapter and primer sequences removed.
-
-4. ReadMerging - ${working_directory}/results/Analyze/ReadProcessing/ReadMerging
-
-There is a little bit more going on in this directory compared to the others. The first major file to pay attention to here is the file \*\_merged_clean_Lengthfiltered.fastq. This is the "final" merged read file that contains all merged reads from each samples and is used to identify unique sequences and then ASVs. "Pre-filtered" and "pre-cleaned" combined merged read files can be found in "./LengthFiltering". If you would like to review or use the separate merged read files per sample, these fastq files are found in the "./Individual" directory. Finally, a fasta file with unique sequences are found in the "./Uniques" directory and the "./Histograms" directory is full of several different sequence property (length, per base quality, etc.) histogram files which can be visualized manually and reviewed in the DataCheck report if ran before Analyze.
-
-### Clustering - ${working_directory}/results/Analyze/Clustering
+### Clustering - ${working_directory}/${outdir}/Analyze/Clustering
 
 The clustering directory will contain all files produced for whichever clustering technique you specified (with the launch command above, all are specified):
 
-1. ASVs - ${working_directory}/results/Analyze/Clustering/ASVsIn this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits.
+1. ASVs -- ${working_directory}/results/Analyze/Clustering/ASVs -- In this directory, there is the fasta file with the generated ASV sequences and there is another directory "./ChimeraCheck" where the pre-chimera filered ASV fasta sits. In this directory, if --asvMED was set to run, you will be a MED/ directory containing all output files from oligotyping analyses.
 
-2. AminoTypes - ${working_directory}/results/Analyze/Clustering/AminoTypesThe AminoTypes directory has a few different subdirectories, in the main directory, however, is the fasta file with the AminoTypes used in all subsequent analyses. The first subdirectory is called "Translation" which includes the raw ASV translation file along with a report spit out by VirtualRibosome. The next subdirectory is "Problematic", where any translations that were below the given "--minAA" length will be reported, if none were deemed "problematic" then the directory will be empty. All problematic amino acid sequence AND their corresponding ASVs are stored in fasta files for you to review. The final subdirectory is "SummaryFiles" where you can find a "map" of sorts to track which ASVs contributed to which AminoTypes and a .gc file containing information on length of translated sequences.
+2. AminoTypes -- ${working_directory}/results/Analyze/Clustering/AminoTypes -- The AminoTypes directory has a few different subdirectories, in the main directory, however, is the fasta file with the AminoTypes used in all subsequent analyses. The first subdirectory is called "Translation" which includes the raw ASV translation file along with a report spit out by VirtualRibosome. The next subdirectory is "Problematic", where any translations that were below the given "--minAA" length will be reported, if none were deemed "problematic" then the directory will be empty. All problematic amino acid sequence AND their corresponding ASVs are stored in fasta files for you to review. The final subdirectory is "SummaryFiles" where you can find a "map" of sorts to track which ASVs contributed to which AminoTypes and a .gc file containing information on length of translated sequences. In this directory, if --aminoMED was set to run, you will be a MED/ directory containing all output files from oligotyping analyses.
 
-3. ncASV - ${working_directory}/results/Analyze/Clustering/ncASVIn this directory, you will find the fasta files corresponding to the clustering percentage(s) you specified for the run.
+3. ncASV -- ${working_directory}/results/Analyze/Clustering/ncASV -- In this directory, you will find the fasta files corresponding to the clustering percentage(s) you specified for the run.
 
-4. pcASV - ${working_directory}/results/Analyze/Clustering/pcASVLooking in this directory, you probably notice some similar subdirectories. The pcASV directory also contains the Summary, Problematic, and Translation subsirectories we saw in the AminoType directory. The other important files in this directory is the nucleotide and amino acid versions of the pcASVs generated for whichever clustering percentage(s) specified.An important note for when creating pcASVs is that the subsequent analyses (phylogenies, taxonomy assignment, etc.) are run on both nucloetide and amino acid pcASV fastas. To create these files, vAMPirus translates the ASVs, checks for problematic sequences, then clusters the translated sequences by the given percentage(s). After clustering, vAMPirus will go pcASV by pcASV extracting the nucleotide sequences of the ASVs that clustered within a given pcASV. The extracted nucleotide sequences are then used to generate a consensus nucleotide sequence(s) per pcASV.        
+4. pcASV -- ${working_directory}/results/Analyze/Clustering/pcASV -- Looking in this directory, you probably notice some similar subdirectories. The pcASV directory also contains the Summary, Problematic, and Translation subsirectories we saw in the AminoType directory. The other important files in this directory is the nucleotide and amino acid versions of the pcASVs generated for whichever clustering percentage(s) specified.An important note for when creating pcASVs is that the subsequent analyses (phylogenies, taxonomy assignment, etc.) are run on both nucloetide and amino acid pcASV fastas. To create these files, vAMPirus translates the ASVs, checks for problematic sequences, then clusters the translated sequences by the given percentage(s). After clustering, vAMPirus will go pcASV by pcASV extracting the nucleotide sequences of the ASVs that clustered within a given pcASV. The extracted nucleotide sequences are then used to generate a consensus nucleotide sequence(s) per pcASV.        
 
-### Analyses - ${working_directory}/results/Analyze/Analyses
+### Analyses - ${working_directory}/${outdir}/Analyze/Analyses
 
 For each clustering technique (i.e. ASVs, AminoTypes, ncASVs and pcASVs) performed in a given run, resulting taxonomic unit fastas will go through the following analyses (unless skip options are used):
 
-1. Counts - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/CountsThe Counts directory is where you can find the counts tables as .csv files (and .biome as well for nucleotide counts tables).
+1. Counts -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Counts -- The Counts directory is where you can find the counts tables as .csv files (and .biome as well for nucleotide counts tables).
 
-2. Phylogeny - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/PhylogenyUnless told otherwise, vAMPirus will produce phylogenetic trees for all taxonomic unit fastas using IQ-TREE. The options for this analysis was discussed in a previous section of the docs. In the phylogeny output directory, you will find three subdirectories: (i) ./Alignment - contains trimmed MAFFT alignment used for tree, (ii) ./ModelTest - contains output files from substitution model prediction with ModelTest-NG, and (iii) ./IQ-TREE - where you can find all output files from IQ-TREE with the file of (usual) interest is the ".treefile".
+2. Phylogeny -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Phylogeny -- Unless told otherwise, vAMPirus will produce phylogenetic trees for all taxonomic unit fastas using IQ-TREE. The options for this analysis was discussed in a previous section of the docs. In the phylogeny output directory, you will find three subdirectories: (i) ./Alignment - contains trimmed MAFFT alignment used for tree, (ii) ./ModelTest - contains output files from substitution model prediction with ModelTest-NG, and (iii) ./IQ-TREE - where you can find all output files from IQ-TREE with the file of (usual) interest is the ".treefile".
 
-3.  Taxonomy - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/TaxonomyvAMPirus uses Diamond blastp/x and the supplied PROTEIN database for taxonomy assignment of sequences. In the Taxonomy directory, you will find (i) a subdirectory called "DiamondOutput" which contains the original output file produced by Diamond, (ii) a fasta file that has taxonomy assignments within the sequence headers, and (iii) three different summary files (one being a phyloseq object with taxonomic information, a tab-separated summary file for review by the user and a summary table looking at abundance of specific hits).
+3. Taxonomy -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Taxonomy -- vAMPirus uses DIAMOND blastp/x and the supplied PROTEIN database for taxonomy assignment of sequences. In the Taxonomy directory, you will find (i) a subdirectory called "DIAMONDOutput" which contains the original output file produced by DIAMOND, (ii) a fasta file that has taxonomy assignments within the sequence headers, and (iii) three different summary files (one being a phyloseq object with taxonomic information, a tab-separated summary file for review by the user and a summary table looking at abundance of specific hits).
 
-4. Matrix - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/MatrixThe Matric directory is where you can find all Percent Identity matrices for produced ASV/cASV/AmintoType fastas.
+4. Matrix -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/Matrix -- The Matric directory is where you can find all Percent Identity matrices for produced ASV/cASV/AmintoType fastas.
 
-5. EMBOSS - ${working_directory}/results/Analyze/Analyses/${clustertechnique}/EMBOSSSeveral different protein physiochemical properties for all amino acid sequences are assessed using EMBOSS scripts (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/groups.html). There are four different subdirectories within EMBOSS, these include (i) ./ProteinProperties - contains files and plots regarding multiple different physiochemical properties (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/pepstats.html), (ii) ./IsoelectricPoint - contains a text file and a .svg image with plots showing the isoelectric point of protein (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/iep.html), (iii) ./HydrophobicMoment - information related to hydrophobic moments of amino acid sequences (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/hmoment.html), and (iv) ./2dStructure - information about 2D structure of proteins (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/protein_2d_structure_group.html).
+5. EMBOSS -- ${working_directory}/results/Analyze/Analyses/${clustertechnique}/EMBOSS -- Several different protein physiochemical properties for all amino acid sequences are assessed using EMBOSS scripts (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/groups.html). There are four different subdirectories within EMBOSS, these include (i) ./ProteinProperties - contains files and plots regarding multiple different physiochemical properties (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/pepstats.html), (ii) ./IsoelectricPoint - contains a text file and a .svg image with plots showing the isoelectric point of protein (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/iep.html), (iii) ./HydrophobicMoment - information related to hydrophobic moments of amino acid sequences (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/hmoment.html), and (iv) ./2dStructure - information about 2D structure of proteins (http://emboss.sourceforge.net/apps/release/6.6/emboss/apps/protein_2d_structure_group.html).
 
-### FinalReport - ${working_directory}/results/Analyze/FinalReport
+### FinalReport - ${working_directory}/${outdir}/Analyze/FinalReports
 
 vAMPirus produces final reports for all taxonomic unit fastas produced in the run. These reports contain the following information:
 
@@ -1343,7 +1490,7 @@ This is a plot that looks at number of reads per sample, similar to what is seen
 
 4. Diversity analyses box Plots
 
-The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Species Richness.
+The plots in order are (i) Shannon Diversity, (ii) Simpson Diversity, (iii) Richness.
 
 Stats tests included with "--stats":
 
@@ -1358,11 +1505,11 @@ Stats tests included with "--stats":
 
 5. Distance to centroid box plot
 
-6. NMDS plots (2D and 3D)
+6. NMDS plots (2D and 3D) -- PCoA (2D and 3D) if NMDS does not converge
 
-7. Relative ASV/cASV abundance per sample bar chart
+7. Relative sequence abundance per sample bar chart
 
-8. Absolute ASV/cASV abundance per treatment bar chart
+8. Absolute sequence abundance per treatment bar chart
 
 9. Pairwise percent ID heatmap
 
@@ -1370,12 +1517,14 @@ Stats tests included with "--stats":
 
 11. Visualized phylogenetic tree
 
+12. Post-Minimum Entropy Decomposition Analyses (combination of above)
+
 
 # All of the options
 
-Usage:
+UUsage:
 
-        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV]
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV] [--asvMED] [--aminoMED] [--stats]
 
 
 --Help options--
@@ -1399,6 +1548,12 @@ Usage:
         --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
 
+--Minimum Entropy Decomposition arguments--
+
+        --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
+
+        --aminoMED                     Set this option to perform Minimum Entropy Decomposition on AminoType sequences, see manual for more information. You will need to set a value for --aminoC to perform this analysis
+
 --Skip options--
 
         --skipReadProcessing            Set this option to skip all read processing steps in the pipeline
@@ -1407,13 +1562,19 @@ Usage:
 
         --skipAdapterRemoval            Set this option to skip adapter removal in the pipeline
 
-        --skipPrimerRemoval             Set this option to skup Skip primer removal process
+        --skipPrimerRemoval             Set this option to skip primer removal process
+
+        --skipMerging                   Set this option to skip read merging
 
         --skipAminoTyping               Set this option to skip AminoTyping processes
 
         --skipTaxonomy                  Set this option to skip taxonomy assignment processes
 
         --skipPhylogeny                 Set this option to skip phylogeny processes
+
+        --skipEMBOSS                    Set this option to skip EMBOSS processes
+
+        --skipReport                    Set this option to skip html report generation
 
 **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
@@ -1438,6 +1599,12 @@ Usage:
 
         --maxEE                         Use this option to set the maximum expected error rate for vsearch merging. Default is 1.
 
+        --diffs                         Maximum number of non-matching nucleotides allowed in overlap region.
+
+        --maxn                          Maximum number of "N"'s in a sequence - if above the specified value, sequence will be discarded.
+
+        --minoverlap                    Minimum length of overlap for sequence merging to occur for a pair.
+
 
 --Primer removal--
 
@@ -1449,7 +1616,7 @@ Usage:
 
         --minkmer                       Minimum kmer length for primer removal (default = 3)
 
-        --minilen                       Minimum read length after adapter and primer removal (default = 200)
+        --minilen                       Minimum non-merged read length after adapter and primer removal (default = 100)
 
     Single primer set removal-
 
@@ -1470,18 +1637,23 @@ Usage:
 
         --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
-        --minSize                       Minimum size or representation for sequence to be considered in ASV generation
+        --minSize                       Minimum size or representation in the dataset for sequence to be considered in ASV generation
 
         --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
 
-        --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide-based clustering of ASVs with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
+        --clusterNuclIDlist             With --ncASV set, use this option to perform nucleotide clustering with a comma separated list of percent similarities [ Example: --clusterNuclIDlist .95,.96,.97,.98 ]
 
-        --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for protein-based ASV clustering to generate pcASVs[ Example: --clusterAAID .97 ]
+        --clusterAAID                   With --pcASV set, use this option to set a single percent similarity for protein-based ASV clustering to generation pcASVs  [ Example: --clusterAAID .97 ]
 
         --clusterAAIDlist               With --pcASV set, use this option to perform protein-based ASV clustering to generate pcASVs with a comma separated list of percent similarities [ Example: --clusterAAIDlist .95,.96,.97,.98 ]
 
         --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
+--Minimum Entropy Decomposition--
+
+        --asvC                          Number of high entropy positions to use for ASV MED analysis and generate "Groups"
+
+        --aminoC                        Number of high entropy positions to use for AminoType MED analysis and generate "Groups"
 
 --Counts table generation--
 
@@ -1500,7 +1672,11 @@ Usage:
 
         --dbdir                        Path to Directory where database is being stored
 
-        --refseq                       Set "--refseq T" to toggle use of RefSeq header format; default is "F" to use Reverence Viral DataBase (RVDB) header
+        --headers                      Set taxonomy database header format -> headers= "NCBI" to toggle use of NCBI header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
+
+        --dbanno                       Path to directory hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using.
+
+        --lca                          Set --lca T if you would like to add taxonomic classification to taxonomy results - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
 
         --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
 
@@ -1539,22 +1715,20 @@ Usage:
         --trymax                       Maximum number of iterations performed by metaMDS
 
 
-
 # Usage examples
 
 Here are some example launch commands:
 
 ## Running the --DataCheck
 
-There is really only one launch command to run for --DataCheck:
 
-`nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --DataCheck`
+`nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --DataCheck [--asvMED] [--aminoMED]`
 
-Just submit this launch command with the correct paths and vAMPirus will run the DataCheck and produce a report for you to review. Parameters like --minAA or --maxLen apply to the --DataCheck.
+Just submit this launch command with the correct paths and vAMPirus will run the DataCheck and produce a report for you to review. Para
 
 ## Running the --Analyze
 
-### Run it all with a list of cluster IDs!
+### Run it all with a list of cluster IDs
 
 `nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --ncASV --pcASV --minLen 400 --maxLen 420 --clusterNuclIDlist .91,.92,.93 --clusterAAIDlist .91,.93,.95,.98`
 

@@ -4,19 +4,12 @@ date: "Generated on: `r Sys.time()`"
 output: html_document
 params:
   interactive: TRUE
-  fastpcsv: !r commandArgs(trailingOnly=T)[2]
-  reads_per_sample_preFilt: !r commandArgs(trailingOnly=T)[3]
-  read_per_sample_postFilt: !r commandArgs(trailingOnly=T)[4]
-  preFilt_baseFrequency: !r commandArgs(trailingOnly=T)[5]  
-  postFilt_baseFrequency: !r commandArgs(trailingOnly=T)[6]
-  preFilt_qualityScore: !r commandArgs(trailingOnly=T)[7]
-  postFilt_qualityScore: !r commandArgs(trailingOnly=T)[8]
-  preFilt_averageQuality: !r commandArgs(trailingOnly=T)[9]
-  postFilt_averageQuaulity: !r commandArgs(trailingOnly=T)[10]
-  preFilt_length: !r commandArgs(trailingOnly=T)[11]
-  postFilt_length: !r commandArgs(trailingOnly=T)[12]
-  number_per_percentage_nucl: !r commandArgs(trailingOnly=T)[13]
-  number_per_percentage_prot: !r commandArgs(trailingOnly=T)[14]
+  projtag: !r commandArgs(trailingOnly=T)[1]
+  skipReadProcessing: !r commandArgs(trailingOnly=T)[2]
+  skipMerging: !r commandArgs(trailingOnly=T)[3]
+  skipAdapterRemoval: !r commandArgs(trailingOnly=T)[4]
+  asvMED: !r commandArgs(trailingOnly=T)[5]
+  aminoMED: !r commandArgs(trailingOnly=T)[6]
 ---
 <style>
 .rectangle {
@@ -45,7 +38,6 @@ library(tidyverse)
 library(scales)
 library(cowplot)
 library(dplyr)
-library(ggtree)
 library(plotly)
 #library(BiocParallel)
 library(knitr)
@@ -66,9 +58,21 @@ NOTE: Plots are interactive and you can use the legend to specify samples/treatm
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pre- and Post-Adapter Removal Read Stats</h2></div>
 <br>
 ```{r readstats, echo=FALSE}
-reads_stats=read.csv(params$fastpcsv)
-#reads_stats=read.csv("final_reads_stats.csv")
-paged_table(reads_stats,options = list(rows.print = 20))
+if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
+    writeLines("\n--------------------------------------------------------------\n")
+    cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+    writeLines("\n--------------------------------------------------------------\n")
+} else {
+    if (params$skipAdapterRemoval == "false") {
+        reads_stats=read.csv("final_reads_stats.csv")
+        paged_table(reads_stats,options = list(rows.print = 10))
+    } else {
+        # file fore here
+        writeLines("\n--------------------------------------------------------------\n")
+        cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+        writeLines("\n--------------------------------------------------------------\n")
+    }
+}
 ```
 <br>
 <br>
@@ -77,13 +81,26 @@ paged_table(reads_stats,options = list(rows.print = 20))
 
 ```{r readstats_plot, echo=FALSE}
 # Plot of reads before and after
-ptotal <- plot_ly(typle="box",marker=list(colors=mycol))
-ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_before, name="Reads before filtering")
-ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_after, name="Reads after filtering")
-#ptotal <- ptotal %>% layout(title=list(text="Number of reads before and after filtering"))
-ptotal <- ptotal %>% layout(legend = list(x=10,y=.5))
-ptotal <- ptotal %>% config(toImageButtonOptions=list(format='svg',filename='reads_pre_post_adaptrem', height= 500, width= 800, scale= 1))
-ptotal
+if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
+    writeLines("\n--------------------------------------------------------------\n")
+    cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+    writeLines("\n--------------------------------------------------------------\n")
+} else {
+    if (params$skipAdapterRemoval == "false") {
+        ptotal <- plot_ly(type="box",marker=list(colors=mycol))
+        ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_before, name="Reads before filtering")
+        ptotal <- ptotal %>% add_boxplot(y=reads_stats$Total_after, name="Reads after filtering")
+        #ptotal <- ptotal %>% layout(title=list(text="Number of reads before and after filtering"))
+        ptotal <- ptotal %>% layout(legend = list(x=10,y=.5))
+        ptotal <- ptotal %>% config(toImageButtonOptions=list(format='svg',filename='reads_pre_post_adaptrem', height= 500, width= 800, scale= 1))
+        ptotal
+    } else {
+        # file fore here
+        writeLines("\n--------------------------------------------------------------\n")
+        cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+        writeLines("\n--------------------------------------------------------------\n")
+    }
+}
 ```
 <br>
 
@@ -91,14 +108,27 @@ ptotal
 
 ```{r readstats_plot2, echo=FALSE}
 # Plot of R1 and R2 before and after
-pr <- plot_ly(y=reads_stats$R1_before_length, type="box", name="R1 length before")
-pr <- pr %>% add_boxplot(y=reads_stats$R1_after_length, name="R1 length after")
-pr <- pr %>% add_boxplot(y=reads_stats$R2_before_length, name="R2 length before")
-pr <- pr %>% add_boxplot(y=reads_stats$R2_after_length, name="R2 length after")
-#pr <- pr %>% layout(title = "R1 and R2 Length")
-pr <- pr %>% layout(legend = list(x=10,y=.5))
-pr <- pr %>% config(toImageButtonOptions=list(format='svg',filename='readLen_pre_post_adaptrem', height= 500, width= 800, scale= 1))
-pr
+if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
+    writeLines("\n--------------------------------------------------------------\n")
+    cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+    writeLines("\n--------------------------------------------------------------\n")
+} else {
+    if (params$skipAdapterRemoval == "false") {
+        pr <- plot_ly(y=reads_stats$R1_before_length, type="box", name="R1 length before")
+        pr <- pr %>% add_boxplot(y=reads_stats$R1_after_length, name="R1 length after")
+        pr <- pr %>% add_boxplot(y=reads_stats$R2_before_length, name="R2 length before")
+        pr <- pr %>% add_boxplot(y=reads_stats$R2_after_length, name="R2 length after")
+        #pr <- pr %>% layout(title = "R1 and R2 Length")
+        pr <- pr %>% layout(legend = list(x=10,y=.5))
+        pr <- pr %>% config(toImageButtonOptions=list(format='svg',filename='readLen_pre_post_adaptrem', height= 500, width= 800, scale= 1))
+        pr
+    } else {
+        # file fore here
+        writeLines("\n--------------------------------------------------------------\n")
+        cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+        writeLines("\n--------------------------------------------------------------\n")
+    }
+}
 ```
 <br>
 <br>
@@ -112,7 +142,7 @@ pr
 <br>
 
 ```{r preFilt_preClean_reads, echo=FALSE}
-prer=read.csv(params$reads_per_sample_preFilt, header=TRUE)
+prer=read.csv("reads_per_sample_preFilt_preClean.csv", header=TRUE)
 prerp <- plot_ly(prer, x = ~reads, y = ~sample, name = "Sample", type = 'scatter',
                mode = "markers", marker = list(color = "#088da5"),
                hovertemplate = paste('Sample: %{y}','<br>Total reads: %{x}','<extra></extra>'))
@@ -128,7 +158,7 @@ prerp
 <br>
 
 ```{r postFilt_postClean_reads, echo=FALSE}
-postr=read.csv(params$read_per_sample_postFilt, header=TRUE)
+postr=read.csv("read_per_sample_postFilt_postClean.csv", header=TRUE)
 postrp <- plot_ly(postr, x = ~reads, y = ~sample, name = "Sample", type = 'scatter',
                mode = "markers", marker = list(color = "#088da5"),
                hovertemplate = paste('Sample: %{y}','<br>Total reads: %{x}','<extra></extra>'))
@@ -144,7 +174,7 @@ postrp
 <br>
 
 ```{r preClean_baseFrequency, echo=FALSE}
-prec=read.csv(params$preFilt_baseFrequency, header=TRUE)
+prec=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_baseFrequency_hist.csv"), header=TRUE)
 #prec=read.csv("PVID_vAMPtest1_all_merged_preFilt_preClean_baseFrequency_hist.csv", header=TRUE)
 precp <- plot_ly(x=c(1:nrow(prec)),y=as.numeric(prec[,2]), type="scatter", mode = "markers", name="A", opacity = .8, markers=list(color='#088da5'))
 precp <- precp %>% add_trace(y=as.numeric(prec[,3]), name="C", opacity = .8, markers=list(color='#e19336'))
@@ -165,7 +195,7 @@ precp
 <br>
 
 ```{r postClean_baseFrequency, echo=FALSE}
-postc=read.csv(params$postFilt_baseFrequency, header=TRUE)
+postc=read.csv(paste(params$projtag,sep="","_all_merged_postFilt_baseFrequency_hist.csv"), header=TRUE)
 #postc=read.csv("PVID_vAMPtest1_all_merged_postFilt_baseFrequency_hist.csv", header=TRUE)
 postcp <- plot_ly(x=c(1:nrow(postc)),y=as.numeric(postc[,2]),type="scatter", mode = "markers", name="A", opacity = .8, markers=list(color='#088da5'))
 postcp <- postcp %>% add_trace(y=as.numeric(postc[,3]), name="C", opacity = .8, markers=list(color='#e19336'))
@@ -185,9 +215,14 @@ postcp
 
 <br>
 
+```{bash preClean_qualityScore_bash, echo=FALSE}
+cat *_all_merged_preFilt_preClean_qualityScore_hist.csv | grep -v "#" >edit_all_merged_preFilt_preClean_qualityScore_hist.csv
+```
 ```{r preClean_qualityScore, echo=FALSE}
-preq=read.csv(params$preFilt_qualityScore, header=TRUE)
-preqp <- plot_ly(x=c(1:nrow(preq)),y=as.numeric(preq[,2]),type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
+#preq=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_qualityScore_hist.csv", header=TRUE))
+preq=read.csv("edit_all_merged_preFilt_preClean_qualityScore_hist.csv",header=F)
+#preqp <- plot_ly(x=c(1:nrow(preq)),y=as.numeric(preq[,2]),type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
+preqp <- plot_ly(preq,x=~V1, y=~V2,type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
 preqp <- preqp %>% layout(xaxis=list(title="Base position"))
 preqp <- preqp %>% layout(yaxis=list(title="Mean quality", range = c(0,41)))
 preqp <- preqp %>% layout(legend = list(x=10,y=.5), hovermode = "x unified")
@@ -201,15 +236,20 @@ preqp
 
 <br>
 
+```{bash postClean_qualityScore_bash, echo=FALSE}
+cat *_all_merged_postFilt_qualityScore_hist.csv | grep -v "#" >edit_all_merged_postFilt_qualityScore_hist.csv
+```
 ```{r postClean_qualityScore, echo=FALSE}
-postq=read.csv(params$postFilt_qualityScore, header=TRUE)
-#postq=read.csv("PVID_vAMPtest1_all_merged_postFilt_qualityScore_hist.csv", header=TRUE)
-postqp <- plot_ly(x=c(1:nrow(postq)),y=as.numeric(postq[,2]),type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
+#podtq=read.csv(paste(params$projtag,sep="","_all_merged_postFilt_qualityScore_hist.csv", header=TRUE))
+postq=read.csv("edit_all_merged_postFilt_qualityScore_hist.csv", header=FALSE)
+#postqp <- plot_ly(x=c(1:nrow(postq)),y=as.numeric(postq[,2]),type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
+postqp <- plot_ly(postq, x=~V1, y=~V2, type="scatter", mode = "lines", name="Reads", opacity = .8, line=list(color='#088da5'))
 postqp <- postqp %>% layout(xaxis=list(title="Base position"))
 postqp <- postqp %>% layout(yaxis=list(title="Mean quality", range = c(0,41)))
 postqp <- postqp %>% layout(legend = list(x=10,y=.5), hovermode = "x unified")
 postqp <- postqp %>% config(toImageButtonOptions=list(format='svg',filename='Qualscore_postfilt', height= 500, width= 800, scale= 1))
 postqp
+
 ```
 
 <br>
@@ -219,11 +259,10 @@ postqp
 <br>
 
 ```{bash gc, echo=FALSE}
-cat *all_merged_preFilt_preClean_gcContent_hist.csv | grep -v "#" >final_gc.csv
-cat *all_merged_preFilt_preClean_gcContent_hist.csv | grep "#" | tr -d "#"
+cat *all_merged_preFilt_preClean_gcContent_hist.csv | grep -v "#" >edit_all_merged_preFilt_preClean_gcContent_hist.csv
 ```
 ```{r gc_plot, echo=FALSE}
-pregc=read.csv("final_gc.csv", header=F)
+pregc=read.csv("edit_all_merged_preFilt_preClean_gcContent_hist.csv", header=F)
 pregcp <- plot_ly(pregc, x=~V1, y=~V2, type="bar", marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('GC content: %{x}','<br>Count: %{y}','<extra></extra>'))
 pregcp <- pregcp %>% layout(yaxis = list(title = "Count"))
@@ -239,11 +278,10 @@ pregcp
 <br>
 
 ```{bash gc2, echo=FALSE}
-cat *all_merged_postFilt_gcContent_hist.csv | grep -v "#" >final_gc2.csv
-cat *all_merged_postFilt_gcContent_hist.csv | grep "#" | tr -d "#"
+cat *all_merged_postFilt_gcContent_hist.csv | grep -v "#" >edit_all_merged_postFilt_gcContent_hist.csv
 ```
 ```{r gc2_plot, echo=FALSE}
-postgc=read.csv("final_gc2.csv", header=F)
+postgc=read.csv("edit_all_merged_postFilt_gcContent_hist.csv", header=F)
 postgcp <- plot_ly(postgc, x=~V1, y=~V2, type="bar", marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('GC content: %{x}','<br>Count: %{y}','<extra></extra>'))
 postgcp <- postgcp %>% layout(yaxis = list(title = "Count"))
@@ -252,16 +290,14 @@ postgcp <- postgcp %>% config(toImageButtonOptions=list(format='svg',filename='G
 postgcp
 ```
 
-
 <br>
 
 ### Number of reads per quality score (pre-filtering)
 
 <br>
 
-
 ```{r pre_averageQuality_hist, echo=FALSE}
-preaq=read.csv(params$preFilt_averageQuality, header=TRUE)
+preaq=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_averageQuality_hist.csv"), header=TRUE)
 #preaq=read.csv("PVID_vAMPtest1_all_merged_preFilt_preClean_averageQuality_hist.csv", header=T)
 preaqp <- plot_ly(preaq, x=preaq[,1], y=preaq[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('Average quality: %{x}','<br>Count: %{y}','<extra></extra>'))
@@ -271,8 +307,6 @@ preaqp <- preaqp %>% config(toImageButtonOptions=list(format='svg',filename='ReQ
 preaqp
 ```
 
-
-
 <br>
 
 ### Number of reads per quality score (post-filtering)
@@ -281,7 +315,8 @@ preaqp
 
 
 ```{r post_averageQuality_hist, echo=FALSE}
-postaq=read.csv(params$postFilt_averageQuaulity, header=TRUE)
+#postaq=read.csv(params$postFilt_averageQuaulity, header=TRUE)
+postaq=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_averageQuality_hist.csv"), header=TRUE)
 #postaq=read.csv("PVID_vAMPtest1_all_merged_postFilt_averageQuaulity_hist.csv", header=T)
 postaqp <- plot_ly(postaq, x=postaq[,1], y=postaq[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('Average quality: %{x}','<br>Count: %{y}','<extra></extra>'))
@@ -300,7 +335,7 @@ postaqp
 
 
 ```{r pre_length_hist, echo=FALSE}
-prelh=read.csv(params$preFilt_length, header=TRUE)
+prelh=read.csv(paste(params$projtag,sep="","_all_merged_preFilt_preClean_length_hist.csv"), header=TRUE)
 #prelh=read.csv("PVID_vAMPtest1_all_merged_preFilt_preClean_length_hist.csv", header=T)
 prelhp <- plot_ly(prelh, x=prelh[,1], y=prelh[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('Read Length: %{x}','<br>Count: %{y}','<extra></extra>'))
@@ -317,7 +352,7 @@ prelhp
 <br>
 
 ```{r post_length_hist, echo=FALSE}
-postlh=read.csv(params$postFilt_length, header=TRUE)
+postlh=read.csv(paste(params$projtag,sep="","_all_merged_postFilt_length_hist.csv"), header=TRUE)
 #postlh=read.csv("PVID_vAMPtest1_all_merged_postFilt_length_hist.csv", header=T)
 postlhp <- plot_ly(postlh, x=postlh[,1], y=postlh[,2], type="bar", marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('Read Length: %{x}','<br>Count: %{y}','<extra></extra>'))
@@ -336,11 +371,11 @@ postlhp
 <br>
 
 ```{r nuc_number, echo=FALSE}
-nn=read.csv(params$number_per_percentage_nucl, header=TRUE)
+nn=read.csv("number_per_percentage_nucl.csv", header=TRUE)
 #nn=read.csv("number_per_percentage_nucl.csv", header=T)
 nnp <- plot_ly(nn, x=nn[,1], y=nn[,2], type="scatter", mode = 'lines+markers', marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of ncASVs: %{y}','<extra></extra>'))
-nnp <- nnp %>% layout(yaxis = list(title = "Number of nOTU"))
+nnp <- nnp %>% layout(yaxis = list(title = "Number of ncASVs"))
 nnp <- nnp %>% layout(xaxis = list(title = "Clustering ID %"))
 nnp <- nnp %>% config(toImageButtonOptions=list(format='svg',filename='NuclClustresults', height= 500, width= 800, scale= 1))
 nnp
@@ -353,16 +388,89 @@ NOTE: The "1" on the x-axis represents number of ASVs identified by vsearch
 <br>
 
 ```{r prot_number, echo=FALSE}
-pn=read.csv(params$number_per_percentage_prot, header=TRUE)
+pn=read.csv("number_per_percentage_prot.csv", header=TRUE)
 #pn=read.csv("number_per_percentage_prot.csv", header=T)
 pnp <- plot_ly(pn, x=pn[,1], y=pn[,2], type="scatter", mode = 'lines+markers', marker=list(color='#088da5', line=list(color = 'black',
                width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of pcASVs: %{y}','<extra></extra>'))
-pnp <- pnp %>% layout(yaxis = list(title = "Number of pOTU"))
+pnp <- pnp %>% layout(yaxis = list(title = "Number of pcASVs"))
 pnp <- pnp %>% layout(xaxis = list(title = "Clustering ID %"))
 pnp <- pnp %>% config(toImageButtonOptions=list(format='svg',filename='Protclustresults', height= 500, width= 800, scale= 1))
 pnp
 ```
 NOTE: The "1" represents the number of AminoTypes which are unique amino acid sequences in your dataset
+<br>
+
+
+### ASV Shannon Entropy Analysis (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
+
+<br>
+
+```{r med_asv, echo=FALSE}
+if (params$asvMED == "true") {
+    med_asv=read.delim(paste(params$projtag, sep="","_ASVs_Aligned_informativeonly.fasta-ENTROPY"), sep = ",", header=TRUE)
+
+    mplot=plot_ly(med_asv, x=med_asv$Base_position, y=med_asv$Shannons_Entropy, type="bar", name="Entropy", opacity = .8, line=list(color='#088da5'),
+                  hovertemplate = paste('Base position: %{x}','<br>Entropy: %{y}','<extra></extra>'))
+    mplot<- mplot %>% layout(xaxis=list(title="Base position"))
+    mplot<- mplot %>% layout(yaxis=list(title="Entropy"))
+    mplot<- mplot %>% config(toImageButtonOptions=list(format='svg',filename='ASV_MED', height= 500, width= 800, scale= 1), displaylogo = FALSE)
+    mplot
+} else {
+    print("ASV Shannon Entropy analyses not signaled to run. To run, add the options --asvMED and -resume to your DataCheck launch command.")
+}
+```
+<br>
+
+### ASV Shannon Entropy Peaks Breakdown
+
+<br>
+
+```{r med_asv_peak, echo=FALSE}
+if (params$asvMED == "true") {
+med_asv_csv=read.csv(paste(params$projtag, sep="", "_ASV_entropy_breakdown.csv"), header=TRUE)
+paged_table(med_asv_csv, options = list(rows.print = 10))
+} else {
+    print("ASV Shannon Entropy analyses not signaled to run. To run, add the options --asvMED and -resume to your DataCheck launch command.")
+}
+```
+<br>
+
+### AminoTypes Shannon Entropy Analysis (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
+
+<br>
+
+```{r med_amino, echo=FALSE}
+if (params$aminoMED == "true") {
+med_amino=read.delim(paste(params$projtag, sep="","_AminoTypes_Aligned_informativeonly.fasta-ENTROPY"), sep = ",", header=TRUE)
+
+mplot=plot_ly(med_amino, x=med_amino$Base_position, y=med_amino$Shannons_Entropy, type="bar", name="Entropy", opacity = .8, line=list(color='#088da5'),
+              hovertemplate = paste('Base position: %{x}','<br>Entropy: %{y}','<extra></extra>'))
+mplot<- mplot %>% layout(xaxis=list(title="Base position"))
+mplot<- mplot %>% layout(yaxis=list(title="Entropy"))
+mplot<- mplot %>% config(toImageButtonOptions=list(format='svg',filename='AminoTypes_MED', height= 500, width= 800, scale= 1), displaylogo = FALSE)
+mplot
+} else {
+    print("AminoType Shannon Entropy analyses not signaled to run. To run, add the options --aminoMED and -resume to your DataCheck launch command.")
+}
+```
+<br>
+
+### AminoTypes Shannon Entropy Peaks Breakdown
+
+<br>
+
+```{r med_amino_peak, echo=FALSE}
+if (params$aminoMED == "true") {
+med_amino_csv=read.csv(paste(params$projtag, sep="", "_AminoType_entropy_breakdown.csv"), header=TRUE)
+paged_table(med_amino_csv, options = list(rows.print = 10))
+} else {
+    print("AminoType Shannon Entropy analyses not signaled to run. To run, add the options --aminoMED and -resume to your DataCheck launch command.")
+}
+```
+<br>
+<br>
+<br>
+<br>
 <br>
 <br>
 <br>
