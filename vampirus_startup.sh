@@ -146,7 +146,7 @@ nextflow_c() {
         case $ans in
             [yY] | [yY][eE][sS])
             echo "Awesome,starting Nextflow installation now ..."
-            curl -s https://get.nextflow.io | bash
+            curl -fsSL get.nextflow.io | bash
             echo "Nextflow installation finished, execultable in "$mypwd""
         ;;
         [nN] | [nN][oO])
