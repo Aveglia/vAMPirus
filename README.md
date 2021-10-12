@@ -119,9 +119,9 @@ Clone the most recent version of vAMPirus from GitHub using:
 
     git clone https://github.com/Aveglia/vAMPirus.git
 
-OR you can download the most recent stable release vAMPirus v1.0.1 (Capsomere I) by using:
+OR you can download the most recent stable release vAMPirus v2.0.0 (Polymerase I) by using:
 
-    wget https://github.com/Aveglia/vAMPirus/archive/v1.0.1.tar.gz
+    wget https://github.com/Aveglia/vAMPirus/archive/refs/tags/v2.0.0.tar.gz
 
 
 ## Setting up vAMPirus dependencies
