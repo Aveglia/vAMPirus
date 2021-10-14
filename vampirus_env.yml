@@ -38,3 +38,4 @@ dependencies:
   - r-biocmanager=1.30.10
   - pip:
     - oligotyping
+    - treecluster
