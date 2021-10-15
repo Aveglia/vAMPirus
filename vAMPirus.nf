@@ -678,7 +678,7 @@ if (params.DataCheck || params.Analyze) {
                     echo ${sample_id}
 
                     fastp -i ${reads[0]} -I ${reads[1]} -o left-${sample_id}.filter.fq -O right-${sample_id}.filter.fq --detect_adapter_for_pe \
-                    --average_qual 25 -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
+                    --average_qual ${params.avQ} -n ${params.nM} -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
                     --report_title ${sample_id}
 
                     bash get_readstats.sh ${sample_id}.fastp.json
@@ -721,7 +721,7 @@ if (params.DataCheck || params.Analyze) {
                         RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
                         bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
                         bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
-        		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+        		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
                         """
                     } else if ( params.multi && params.primers ) {
                         """
@@ -881,11 +881,12 @@ if (params.DataCheck || params.Analyze) {
                 cat \$x | tr "\t" "," > \${pre}.csv
                 rm \$x
             done
-            reformat.sh in=${reads} out=${params.projtag}_preFilt_preclean.fasta t=${task.cpus}
+            bbduk.sh in=${reads} out=${params.projtag}_qtrimmed.fastq t=${task.cpu} qtrim=rl trimq=${params.trimq}
+            reformat.sh in=${params.projtag}_qtrimmed.fastq out=${params.projtag}_preFilt_preclean.fasta t=${task.cpus}
             echo "sample,reads" >> reads_per_sample_preFilt_preClean.csv
             grep ">" ${params.projtag}_preFilt_preclean.fasta | awk -F ">" '{print \$2}' | awk -F "." '{print \$1}' | sort --parallel=${task.cpus} | uniq -c | sort -brg --parallel=${task.cpus} | awk '{print \$2","\$1}' >> reads_per_sample_preFilt_preClean.csv
             rm ${params.projtag}_preFilt_preclean.fasta
-            fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
+            fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n ${params.maxn}
             reformat.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_preFilt_clean.fasta t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postFilt_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_postFilt_qualityScore_hist.txt gchist=${params.projtag}_all_merged_postFilt_gcContent_hist.txt aqhist=${params.projtag}_all_merged_postFilt_averageQuaulity_hist.txt lhist=${params.projtag}_all_merged_postFilt_length_hist.txt gcbins=auto
