@@ -2308,7 +2308,7 @@ if (params.DataCheck || params.Analyze) {
 
                       output:
                           tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results_asv
-                          file("*iq.treefile") into (nucl_phyl_plot_asv, asvphy_med)
+                          file("*iq.treefile") into (nucl_phyl_plot_asv, asvphy_med, asv_treeclust)
 
                       script:
                           """
@@ -2339,6 +2339,39 @@ if (params.DataCheck || params.Analyze) {
                   }
             }
 
+            if (params.asvTClust){
+
+                process ASV_PhyloClustering {
+
+                      label 'norm_cpus'
+
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/
+
+                      input:
+                         file(tree) from asv_treeclust
+
+                      output:
+
+
+                      script:
+                          """
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering.out
+                          #create headless treeclustering.out
+                          tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0/g' > headless.treeout
+                          #summarizing clustering results
+                          awk -F "\t" '{print $2}' | sort | uniq > group.list
+                          g=1
+                          echo "SequenceID,PhyloGroup" > ${params.projtag}_phylogroup.csv
+                          for x in \$(cat group.list)
+                          do    grep "$x" headless.out > tmp.tsv
+                                groupID="phyloGroup\${g}"
+                                awk -F "\t" '{print \$1",'\${groupID}'"}' tmp.tsv >> ${params.projtag}_phylogroup.csv
+                                g=\$((\$g+1))
+                          done
+                          rm tmp.csv
+                }
+
+            }
             if (params.asvMED) {
 
                 process ASV_Minimum_Entropy_Decomposition {
@@ -2937,7 +2970,7 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             tuple file("*_aln.fasta"), file("*_aln.html"), file("*.log"), file("*iq*"), file("*mt*") into alignprot_results
-                            file("*iq.treefile") into (amino_rax_plot, amino_repphy)
+                            file("*iq.treefile") into (amino_rax_plot, amino_repphy, amino_treeclust)
 
                         script:
                             """
@@ -2973,6 +3006,40 @@ if (params.DataCheck || params.Analyze) {
                             fi
                             """
                     }
+                }
+
+                if (params.aminoTClust){
+
+                    process AminoType_PhyloClustering {
+
+                          label 'norm_cpus'
+
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/
+
+                          input:
+                             file(tree) from amino_treeclust
+
+                          output:
+    
+
+                          script:
+                              """
+                              TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering.out
+                              #create headless treeclustering.out
+                              tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
+                              #summarizing clustering results
+                              awk -F "\t" '{print $2}' | sort | uniq > group.list
+                              g=1
+                              echo "SequenceID,PhyloGroup" > ${params.projtag}_phylogroup.csv
+                              for x in \$(cat group.list)
+                              do    grep "$x" headless.out > tmp.tsv
+                                    groupID="phyloGroup\${g}"
+                                    awk -F "\t" '{print \$1",'\${groupID}'"}' tmp.tsv >> ${params.projtag}_phylogroup.csv
+                                    g=\$((\$g+1))
+                              done
+                              rm tmp.csv
+                    }
+
                 }
 
                 process Generate_AminoTypes_Counts_Table {
