@@ -21,11 +21,11 @@ The vAMPirus program contains two different pipelines:
 
 If you have a feature request or any feedback/questions, feel free to email vAMPirusHelp@gmail.com or you can open an Issue on GitHub.
 
-## Changes in version 2.0.0
+## Changes in version 2.0.1
 
-1. (EXPERIMENTAL) Added Minimum Entropy Decomposition analysis using the oligotyping program produced by the Meren Lab. This allows for sequence clustering based on sequence positions of interest (biologically meaningful) or top positions with the highest Shannon's Entropy (read more here: https://merenlab.org/software/oligotyping/ ; and below).
+1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 
-2. Added more useful taxonomic classification of sequences leveraging the RVDB annotation database and/or NCBI taxonomy files (read more below).
+2. Added further taxonomic classification of sequences using the RVDB annotation database and/or NCBI taxonomy files (see manual for more info).
 
 3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for more accurate virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
 
@@ -33,12 +33,13 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 
 5. ASV filtering - you can now provide a "filter" and "keep" database to remove certain sequences from the analysis
 
-6. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
+6. (EXPERIMENTAL) Added Minimum Entropy Decomposition analysis using the oligotyping program produced by the Meren Lab. This allows for sequence clustering based on sequence positions of interest (biologically meaningful) or top positions with the highest Shannon's Entropy (read more here: https://merenlab.org/software/oligotyping/ ; and below).
 
-7. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results
+7. Phylogeny-based clustering ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)
 
-8. PCoA plots added to report if NMDS does not converge.
+8. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results
 
+8. PCoA plots added to Analyze  report if NMDS does not converge.
 
 ## Who to cite
 
@@ -75,6 +76,8 @@ If you do use vAMPirus for your analyses, please cite the following ->
 15. UNOISE algorithm - R.C. Edgar (2016). UNOISE2: improved error-correction for Illumina 16S and ITS amplicon sequencing, https://doi.org/10.1101/081257
 
 16. Oligotyping - A. Murat Eren, Gary G. Borisy, Susan M. Huse, Jessica L. Mark Welch (2014). Oligotyping analysis of the human oral microbiome. Proceedings of the National Academy of Sciences Jul 2014, 111 (28) E2875-E2884; DOI: 10.1073/pnas.1409644111
+
+17. Balaban M, Moshiri N, Mai U, Jia X, Mirarab S (2019). "TreeCluster: Clustering biological sequences using phylogenetic trees." PLoS ONE. 14(8):e0221068. doi:10.1371/journal.pone.0221068
 
 
 # Getting started with vAMPirus
@@ -1079,7 +1082,7 @@ Here are the options stored within the configuration file:
 
 ### Clustering options
 
-Dependining on the virus type/marker gene, ASV-level results can be noisy and to combat this vAMPirus has three different approaches to clustering ASV sequences:
+Depending on the virus type/marker gene, ASV-level results can be noisy and to combat this vAMPirus has three different approaches to clustering ASV sequences:
 
 
 1. AminoTyping -
@@ -1186,9 +1189,36 @@ MED related options within the configuration file:
                 aminoC=""
                 aminoSingle=""
 
+## Phylogeny-based clustering of ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)
+
+New in version 2.0.1, you can now use the program TreeCluster to cluster ASV or AminoType sequences based on phylogenetic relationship.
+
+From the TreeCluster GitHub (https://github.com/niemasd/TreeCluster):
+
+"TreeCluster is a tool that, given a tree T (Newick format) and a distance threshold t, finds the minimum number of clusters of the leaves of T such that some user-specified constraint is met in each cluster. The user can also specify a branch support threshold s such that no pair of leaves in any cluster can be connected by branches with support less than or equal to s. Note that all leaves given a cluster of -1 are singletons, meaning they did not cluster with any other leaves (i.e., each leaf with a cluster of -1 is in its own cluster).
+
+TreeCluster was motivated by Cluster Picker.
+
+The default method is "Max Clade" (see Clustering Methods). There is no explicit default distance threshold, but because Cluster Picker recommends a distance threshold of 0.045 and because the same objective function is optimized by both Cluster Picker and TreeCluster "Max Clade", we currently recommend 0.045 as well."
+
+If you plan to use this form of clustering, be sure to read through the TreeCluster manuscript and help documentation linked above to use the most appropriate command.
+
+To signal the use of phylogeny-based clustering, add "--asvTClust" to cluster ASVs and "--aminoTClust" to cluster aminotypes. You will then need to check and edit the TreeClust command you would like to use in the configuration file:
+
+      // Phylogeny-based ASV/AminoType clustering parameters using the program TreeCluster (https://github.com/niemasd/TreeCluster)
+
+        // Add the "--asvTClust" option to the launch command to run phylogeny-based clustering of ASVs ; Add "--aminoTClust" to launch command for phylogeny-based clustering on AminoTypes
+        // NOTE: you can't use "--skipPhylogeny" when doing this form of sequence clustering
+
+          // TreeCluster command options for ASV clustering (--asvTClust) -- (Example: asvTCopp="-option1 A -option2 B -option3 C -option4 D") - See TreeCluster paper and github page to determine the best options (a good start is what is below)
+              asvTCopp="-t 0.045 -m max_clade -s 0.5"
+
+          // TreeCluster command options for AminoType clustering (--aminoTClust) -- (Example: aminoTCopp"-option1 A -option2 B -option3 C -option4 D") - See TreeCluster paper and github page to determine the best options
+              aminoTCopp="-t 0.045 -m max_clade -s 0.5"
+
 ## Counts tables and percent ID matrices
 
-vAMPirus generates nucleotide-based counts tables using vsearch and protein-based counts tables using DIAMOND and a custom bash script. Counts tables and percent ID matrices are always produced for each ASV, AminoType and all cASV fasta files produced.
+vAMPirus generates nucleotide-based counts tables using vsearch and protein-based counts tables using DIAMOND and a custom bash script. Counts tables, pairwise distance, and percent ID matrices are always produced for each ASV, AminoType and all cASV fasta files produced.
 
 Here are the parameters you can edit at lines 61-70:
 

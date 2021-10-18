@@ -21,7 +21,7 @@
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
 
-# New in vAMPirus version 2.0.0
+# New in vAMPirus version 2.0.1
 
 1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 

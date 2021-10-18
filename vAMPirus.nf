@@ -2293,7 +2293,7 @@ if (params.DataCheck || params.Analyze) {
                 """
             }
 
-            if (!params.skipPhylogeny) { // need to edit paths
+            if (!params.skipPhylogeny) {
 
                 process ASV_Phylogeny {
 
@@ -2345,17 +2345,19 @@ if (params.DataCheck || params.Analyze) {
 
                       label 'norm_cpus'
 
-                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/TreeClustering", mode: "copy", overwrite: true
 
                       input:
                          file(tree) from asv_treeclust
 
                       output:
-
+                          file("*treeclustering*.out") into asvtreeclustering_res
+                          file("*phylogroup.csv") into asv_phylogroupcsv
 
                       script:
                           """
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering.out
+                          reeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
                           #create headless treeclustering.out
                           tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0/g' > headless.treeout
                           #summarizing clustering results
@@ -3014,13 +3016,14 @@ if (params.DataCheck || params.Analyze) {
 
                           label 'norm_cpus'
 
-                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/TreeCluster, mode: "copy", overwrite: true
 
                           input:
                              file(tree) from amino_treeclust
 
                           output:
-    
+                             file("*treeclustering*.out") into aminotreeclustering_res
+                             file("*phylogroup.csv") into amino_phylogroupcsv
 
                           script:
                               """
