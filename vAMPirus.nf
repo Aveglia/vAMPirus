@@ -2379,8 +2379,8 @@ if (params.DataCheck || params.Analyze) {
                           rm group.list group.list
                           awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
                           for z in \$(cat asv.list);
-                          do      grp=$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
-                                  group=$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                          do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
+                                  group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
                                   echo ""\$z","\$group"" >> ${params.projtag}_ASV_phylogroup.csv
                           done
                           awk -F "," '{print \$2}' ${params.projtag}_ASV_phylogroup.csv > groups.list
@@ -3061,8 +3061,8 @@ if (params.DataCheck || params.Analyze) {
                               rm group.list group.list
                               awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
                               for z in \$(cat amino.list);
-                              do      grp=$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
-                                      group=$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                              do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
+                                      group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
                                       echo ""\$z","\$group"" >> ${params.projtag}_amino_phylogroup.csv
                               done
                               awk -F "," '{print \$2}' ${params.projtag}_amino_phylogroup.csv > groups.list
