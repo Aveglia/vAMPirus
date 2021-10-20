@@ -1059,7 +1059,7 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 file("number_per_percentage_nucl.csv") into number_per_percent_nucl_plot
-
+                file("${params.projtag}_ASV_PairwiseDistance.matrix") into asvpdm
             script:
             if (params.datacheckntIDlist) {
                 """
@@ -1073,6 +1073,9 @@ if (params.DataCheck || params.Analyze) {
                 done
                 yo=\$(grep -c ">" ${fasta})
     	          echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
+                clustalo -i ${fasta} --distmat-out=${params.projtag}_distance.matrix --full --force --threads=${task.cpus}
+                cat ${params.projtag}_distance.matrix | tr " " ","  | grep "," >${params.projtag}_ASV_PairwiseDistance.matrix
+                rm ${params.projtag}_distance.matrix
                 """
                 }
             }
@@ -1111,6 +1114,8 @@ if (params.DataCheck || params.Analyze) {
             output:
                 file("number_per_percentage_prot.csv") into number_per_percent_prot_plot
                 file("*aminoacid_pcASV1.0_noTaxonomy.fasta") into amino_med
+                file("${params.projtag}_AminoType_PairwiseDistance.matrix") into aminopdm
+
             script:
             // add awk script to count seqs
                 """
@@ -1201,6 +1206,9 @@ if (params.DataCheck || params.Analyze) {
                 tail -\$(( \${yesirr}-1 )) number_per_percentage_protz.csv > number_per_percentage_prot.csv
                 head -1 number_per_percentage_protz.csv >> number_per_percentage_prot.csv
                 rm number_per_percentage_protz.csv
+                clustalo -i aminoacid_pcASV1.0_noTaxonomy.fasta --distmat-out=${params.projtag}_distance.matrix --full --force --threads=${task.cpus}
+                cat ${params.projtag}_distance.matrix | tr " " ","  | grep "," >${params.projtag}_AminoType_PairwiseDistance.matrix
+                rm ${params.projtag}_distance.matrix
                 """
         }
 
@@ -1473,7 +1481,7 @@ if (params.DataCheck || params.Analyze) {
         }
 
         report_dc_in = Channel.create()
-        fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot, amino_entro_csv, amino_entropy, asv_entro_csv, asv_entropy).into(report_dc_in)
+        fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot, amino_entro_csv, amino_entropy, asv_entro_csv, asv_entropy, asvpdm, aminopdm).into(report_dc_in)
 
         process Report_DataCheck {
 
