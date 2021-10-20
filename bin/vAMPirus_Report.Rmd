@@ -982,7 +982,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 if (params$asvTClust == "true" || params$aminoTClust == "true"){
     index <- diversity(raredata, index= "simpson")
     simpsondata5 <- as.data.frame(index)
-    simpsondata5$sample<- meddata5$sample
+    simpsondata5$sample<- phydata5$sample
     simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
 
     s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
