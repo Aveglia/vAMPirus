@@ -400,10 +400,10 @@ cols <- dim(simmatrix)[2]
 simmatrix$AA <- rownames(simmatrix)
 rval=nrow(simmatrix)
 simmatrix2 <- simmatrix %>%
-  gather(1:rval, key=sequence, value=similarity)
-x=reorder(simmatrix2$AA,simmatrix2$similarity)
-y=reorder(simmatrix2$sequence,simmatrix2$similarity)
-similaritymatrix <- ggplot(simmatrix2, aes(x=x, y=y,fill=similarity))+
+  gather(1:rval, key=sequence, value=Distance)
+x=reorder(simmatrix2$AA,simmatrix2$Distance)
+y=reorder(simmatrix2$sequence,simmatrix2$Distance)
+similaritymatrix <- ggplot(simmatrix2, aes(x=x, y=y,fill=Distance))+
       geom_raster()+
       scale_fill_distiller(palette="Spectral")+
       theme(axis.text.x = element_text(angle = 90))+
@@ -480,10 +480,10 @@ cols <- dim(simmatrix)[2]
 simmatrix$AA <- rownames(simmatrix)
 rval=nrow(simmatrix)
 simmatrix2 <- simmatrix %>%
-  gather(1:rval, key=sequence, value=similarity)
-x=reorder(simmatrix2$AA,simmatrix2$similarity)
-y=reorder(simmatrix2$sequence,simmatrix2$similarity)
-similaritymatrix <- ggplot(simmatrix2, aes(x=x, y=y,fill=similarity))+
+  gather(1:rval, key=sequence, value=Distance)
+x=reorder(simmatrix2$AA,simmatrix2$Distance)
+y=reorder(simmatrix2$sequence,simmatrix2$Distance)
+similaritymatrix <- ggplot(simmatrix2, aes(x=x, y=y,fill=Distance))+
       geom_raster()+
       scale_fill_distiller(palette="Spectral")+
       theme(axis.text.x = element_text(angle = 90))+
