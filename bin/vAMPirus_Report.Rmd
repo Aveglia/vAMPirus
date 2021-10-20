@@ -18,8 +18,6 @@ params:
     aminoMED: !r commandArgs(trailingOnly=T)[12]
     type: !r commandArgs(trailingOnly=T)[13]
     nodeCol: !r commandArgs(trailingOnly=T)[14]
-    asvTClust: !r commandArgs(trailingOnly=T)[15]
-    aminoTClust: !r commandArgs(trailingOnly=T)[16]
 ---
 <style>
 .rectangle {
@@ -774,52 +772,26 @@ This tree is a maximum likelihood tree made with IQTREE2 and the parameters you 
 <br>
 # Post Phylogeny-based Clustering Analyses
 ```{bash bash_phy_table, include=FALSE}
-if [[ $(ls | grep -wc "asv_medfile.csv") -eq 1 ]];then
-  awk -F "," '{print $2}' asv_medfile.csv | sort | uniq | sort -g >group.list
+if [[ $(ls | grep -c "_phylogroup.csv") -eq 1 ]];then
+  awk -F "," '{print $2}' *_phylogroup.csv | sort | uniq | sort -g >group.list
   for x in $(cat group.list);do
     echo "${x}" >> ${x}.col
-    grep -w "$x" asv_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
+    grep -w "$x" *_phylogroup.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
-  paste -d "," *.col > asv_medtable.csv
+  paste -d "," *.col > phylogroup.csv
   rm *.col
+  mv *_phyloGroupingcounts.csv phylogroupcounts.csv
 else
-    echo "Not MED"
-fi
-
-if [[ $(ls | grep -wc "amino_medfile.csv") -eq 1 ]];then
-  awk -F "," '{print $2}' amino_medfile.csv | sort | awk -F "Group" '{print $2}' | sort -n | uniq > group.list
-  for x in $(cat group.list);do
-    gr="Group"${x}""
-    echo "${gr}" > ${x}.col
-    grep -w "$gr" amino_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
-  done
-  paste -d "," *.col > amino_medtable.csv
-  rm *.col
-else
-      echo "Not MED"
+    echo "Not phylogeny based clustering"
 fi
 ```
 
 ```{r PhyloGroup_table, echo=FALSE}
-if (params$asvMED == "true" && params$type == "ASV"){
-    #med_group=read.csv("asv_medfile.csv", header = F)
-    #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
-    # change name of sequence to med peak or something
-    #paged_table(med_group,options = list(rows.print = 20))
-    med_group=read.csv("asv_medtable.csv", header = T)
-    knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: ASV MED Table") %>%
+if (params$asvTClust == "true" || params$aminoTClust == "true"){
+    phylogroup=read.csv("phylogroup.csv", header = T)
+    knitr::kable(phylogroup, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: PhyloGroup Table") %>%
     kable_styling(font_size = 12, full_width = F)%>%
     scroll_box(width = "100%", height = "100%")
-}
-
-if (params$aminoMED == "true" && params$type == "AminoType"){
-  #med_group=read.csv("amino_medfile.csv", header = F)
-  #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
-  #paged_table(med_group,options = list(rows.print = 20))
-  med_group=read.csv("amino_medtable.csv", header = T)
-  knitr::kable(med_group, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: Aminotype MED Table") %>%
-  kable_styling(font_size = 12, full_width = F) %>%
-  scroll_box(width = "100%", height = "100%")
 }
 ```
 
@@ -834,105 +806,52 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 <br>
 
-```{r med_plot, echo=FALSE}
-if (params$asvMED == "true" && params$type == "ASV"){
+```{r phylo_plot, echo=FALSE}
+if (params$asvTClust == "true" || params$aminoTClust == "true"){
   #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv", check.names=FALSE)
-  medgroup=read.csv("asv_groupcounts.csv", check.names=FALSE)
-  meddata <- medgroup %>% select(-2)
-  meddata2 <- aggregate(.~GroupID, meddata, sum)
-  meddata3 <-as.data.frame(t(meddata2))
-  meddata3$sample <- row.names(meddata3)
-  colnames(meddata3)<- as.matrix(meddata3[1,])
-  as.data.frame(meddata3)
-  meddata3 <- meddata3[-1,]
-  meddata3 <- meddata3 %>%
-    rename(sample=GroupID)
-  meddata3dim <- dim(meddata3)
+  phylogroup=read.csv("phylogroupcounts.csv", header = T, check.names=FALSE)
+  phydata <- phylogroup %>% select(-2)
+  phydata2 <- aggregate(.~phyloGroup_ID, phydata, sum)
+  phydata3 <-as.data.frame(t(phydata2))
+  phydata3$sample <- row.names(phydata3)
+  colnames(phydata3)<- as.matrix(phydata3[1,])
+  as.data.frame(phydata3)
+  phydata3 <- phydata3[-1,]
+  phydata3 <- phydata3 %>%
+    rename(sample=phyloGroup_ID)
+  phydata3dim <- dim(phydata3)
   ##Loading metadata
   samples <- read.csv(sample_metadata, header = TRUE)
   #samples <- read.csv("rna_virus_meta.csv", header = TRUE)
   ##Combining data and metadata
-  meddata4 <- merge(meddata3, samples, by="sample")
-  #if "meddata4" removed it does not work
-  #meddata4
-  dim_meddata4 <- dim(meddata4)
+  phydata4 <- merge(phydata3, samples, by="sample")
+  #if "phydata4" removed it does not work
+  #phydata4
+  dim_phydata4 <- dim(phydata4)
   dim_samples <- dim(samples)
-  cols <- dim_meddata4[2]-dim_samples[2]+1
-  first <-colnames(meddata4)[2]
-  last <- colnames(meddata4)[cols]
-  meddata4[,2:cols] <- lapply(meddata4[,2:cols], as.character)
-  meddata4[,2:cols] <- lapply(meddata4[,2:cols], as.numeric)
+  cols <- dim_phydata4[2]-dim_samples[2]+1
+  first <-colnames(phydata4)[2]
+  last <- colnames(phydata4)[cols]
+  phydata4[,2:cols] <- lapply(phydata4[,2:cols], as.character)
+  phydata4[,2:cols] <- lapply(phydata4[,2:cols], as.numeric)
   #Calculate total reads per sample
-  meddata5 <- meddata4%>%
+  phydata5 <- phydata4%>%
     mutate(sum=select(.,2:cols)%>%
              apply(1, sum, na.rm=TRUE))
-  #meddata5
+  #phydata5
   ##Filter samples with low reads
   nfil=params$minimumCounts
   #nfil=1000
-  meddata5 <- meddata5 %>%
+  phydata5 <- phydata5 %>%
     filter(sum>nfil)
      #can cause errors
-  meddata5dim <-dim(meddata5)
-  minreads<-min(meddata5$sum)
+  phydata5dim <-dim(phydata5)
+  minreads<-min(phydata5$sum)
 
-  dataz <- decostand(meddata5[,2:cols],method="total") #method 'total' normalizes data to sum up to 1
-  dataz$sample <- meddata5$sample
-  metadata <- meddata5[,(cols+1):meddata5dim[2]]
-  metadata$sample <- meddata5$sample
-  datay <- merge(dataz, metadata, by="sample")
-  datalong <- datay %>%
-    tidyr::gather(first:last, key=hit, value=reads)
-  ddd <- plot_ly(datalong, x=~sample, y=~reads, color=~hit, colors=mycol, type='bar')
-  ddd <- ddd %>% layout(barmode = 'stack')
-  ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
-  ddd <- ddd %>% config(toImageButtonOptions=list(format='svg',filename='Relative_abundance', height= 500, width= 800, scale= 1))
-  ddd
-}
-if (params$aminoMED == "true" && params$type == "AminoType"){
-  #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv")
-  medgroup=read.csv("amino_groupcounts.csv",  check.names=FALSE)
-  meddata <- medgroup %>% select(-2)
-  meddata2 <- aggregate(.~GroupID, meddata, sum)
-  meddata3 <-as.data.frame(t(meddata2))
-  meddata3$sample <- row.names(meddata3)
-  colnames(meddata3)<- as.matrix(meddata3[1,])
-  as.data.frame(meddata3)
-  meddata3 <- meddata3[-1,]
-  meddata3 <- meddata3 %>%
-    rename(sample=GroupID)
-  meddata3dim <- dim(meddata3)
-  ##Loading metadata
-  samples <- read.csv(sample_metadata, header = TRUE)
-  ##Combining data and metadata
-  meddata4 <- merge(meddata3, samples, by="sample")
-  #if "meddata4" removed it does not work
-  #meddata4
-  dim_meddata4 <- dim(meddata4)
-  dim_samples <- dim(samples)
-  cols <- dim_meddata4[2]-dim_samples[2]+1
-  first <-colnames(meddata4)[2]
-  last <- colnames(meddata4)[cols]
-  meddata4[,2:cols] <- lapply(meddata4[,2:cols], as.character)
-  meddata4[,2:cols] <- lapply(meddata4[,2:cols], as.numeric)
-  #Calculate total reads per sample
-  meddata5 <- meddata4%>%
-    mutate(sum=select(.,2:cols)%>%
-             apply(1, sum, na.rm=TRUE))
-  #meddata5
-  ##Filter samples with low reads
-  nfil=params$minimumCounts
-  #nfil=1000
-  meddata5 <- meddata5 %>%
-    filter(sum>nfil)
-     #can cause errors
-  meddata5dim <-dim(meddata5)
-  minreads<-min(meddata5$sum)
-
-  dataz <- decostand(meddata5[,2:cols],method="total") #method 'total' normalizes data to sum up to 1
-  dataz$sample <- meddata5$sample
-  metadata <- meddata5[,(cols+1):meddata5dim[2]]
-  metadata$sample <- meddata5$sample
+  dataz <- decostand(phydata5[,2:cols],method="total") #method 'total' normalizes data to sum up to 1
+  dataz$sample <- phydata5$sample
+  metadata <- phydata5[,(cols+1):phydata5dim[2]]
+  metadata$sample <- phydata5$sample
   datay <- merge(dataz, metadata, by="sample")
   datalong <- datay %>%
     tidyr::gather(first:last, key=hit, value=reads)
@@ -958,10 +877,10 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 ```{r phy_rarefaction, echo=FALSE, cache=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
 ##Rarefaction curves
-rarefaction <- rarecurve(meddata5[,2:cols])
+rarefaction <- rarecurve(phydata5[,2:cols])
 
 ##rarefied dataset
-raredata <- as.data.frame(rrarefy(meddata5[,2:cols], sample=minreads))
+raredata <- as.data.frame(rrarefy(phydata5[,2:cols], sample=minreads))
 }
 ```
 
