@@ -2240,7 +2240,7 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch_asv
-                file("*_ASV*counts.csv") into (asv_counts_plots, asvcount_med)
+                file("*_ASV*counts.csv") into (asv_counts_plots, asvcount_med, asvcount_phylogr)
 
             script:
                 """
@@ -2357,10 +2357,11 @@ if (params.DataCheck || params.Analyze) {
 
                       input:
                          file(tree) from asv_treeclust
-
+                         file(counts) from asvcount_phylogr
                       output:
                           file("*treeclustering*.out") into asvtreeclustering_res
-                          file("*phylogroup.csv") into asv_phylogroupcsv
+                          file("*ASV_phylogroup.csv") into asv_phylogroupcsv
+                          file("*ASV_phylogroupingcounts.csv") into asv_phylogroupingcsv
 
                       script:
                           """
@@ -2370,20 +2371,26 @@ if (params.DataCheck || params.Analyze) {
                           tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0/g' > headless.treeout
                           #summarizing clustering results
                           awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
-                          g=1
-                          echo "SequenceID,PhyloGroup" > ${params.projtag}_phylogroup.csv
-                          for x in \$(cat group.list)
-                          do    grep "\$x" headless.treeout > tmp.tsv
-                                groupID="phyloGroup\${g}"
-                                awk -F "\\t" '{print \$1",'\${groupID}'"}' tmp.tsv >> ${params.projtag}_phylogroup.csv
-                                g=\$((\$g+1))
+                          echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_ASV_phylogroup.csv
+                          for x in \$(seq "\$(wc -l group.list | awk '{print \$1}')");
+                          do      echo "phyloGroup"\$x"" >> grup.list
                           done
-                          rm tmp.tsv
+                          paste -d "," grup.list group.list > groups.csv
+                          rm group.list group.list
+                          awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
+                          for z in \$(cat asv.list);
+                          do      grp=$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
+                                  group=$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                                  echo ""\$z","\$group"" >> ${params.projtag}_ASV_phylogroup.csv
+                          done
+                          awk -F "," '{print \$2}' ${params.projtag}_ASV_phylogroup.csv > groups.list
+                          paste -d"," groups.list ${counts} > ${params.projtag}_ASV_phyloGroupingcounts.csv
                           """
                 }
 
             } else {
                 asv_phylogroupcsv = Channel.empty()
+                asv_phylogroupingcsv = Channel.empty()
             }
 
             if (params.asvMED) {
@@ -3032,10 +3039,11 @@ if (params.DataCheck || params.Analyze) {
 
                           input:
                              file(tree) from amino_treeclust
-
+                             file(counts) from amino_countphylo
                           output:
                              file("*treeclustering*.out") into aminotreeclustering_res
-                             file("*phylogroup.csv") into amino_phylogroupcsv
+                             file("${params.projtag}_amino_phylogroup.csv") into amino_phylogroupcsv
+                             file("${params.projtag}_amino_phyloGroupingcounts.csv") into amino_phylogroupingcsv
 
                           script:
                               """
@@ -3045,19 +3053,25 @@ if (params.DataCheck || params.Analyze) {
                               tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
                               #summarizing clustering results
                               awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
-                              g=1
-                              echo "SequenceID,PhyloGroup" > ${params.projtag}_phylogroup.csv
-                              for x in \$(cat group.list)
-                              do    grep "\$x" headless.treeout > tmp.tsv
-                                    groupID="phyloGroup\${g}"
-                                    awk -F "\\t" '{print \$1",'\${groupID}'"}' tmp.tsv >> ${params.projtag}_phylogroup.csv
-                                    g=\$((\$g+1))
+                              echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_amino_phylogroup.csv
+                              for x in \$(seq "\$(wc -l group.list | awk '{print \$1}')");
+                              do      echo "phyloGroup"\$x"" >> grup.list
                               done
-                              rm tmp.tsv
+                              paste -d "," grup.list group.list > groups.csv
+                              rm group.list group.list
+                              awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
+                              for z in \$(cat amino.list);
+                              do      grp=$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
+                                      group=$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                                      echo ""\$z","\$group"" >> ${params.projtag}_amino_phylogroup.csv
+                              done
+                              awk -F "," '{print \$2}' ${params.projtag}_amino_phylogroup.csv > groups.list
+                              paste -d"," groups.list ${counts} > ${params.projtag}_amino_phyloGroupingcounts.csv
                              """
                          }
                 } else {
                     amino_phylogroupcsv = Channel.empty()
+                    amino_phylogroupingcsv = Channel.empty()
                 }
 
 
@@ -3074,7 +3088,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         tuple file("*_AminoType_counts.csv"), file("*dmd.out") into counts_summary
-                        file("*_AminoType_counts.csv") into (aminocounts_plot, aminocountmed)
+                        file("*_AminoType_counts.csv") into (aminocounts_plot, aminocountmed, amino_countphylo)
 
                     script:
                         """
@@ -4312,7 +4326,7 @@ if (params.DataCheck || params.Analyze) {
                 */
 
                 report_asv = Channel.create()
-                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv, tax_nodCol_asv, asv_phylogroupcsv).flatten().buffer(size:10).dump(tag:'asv').into(report_asv)
+                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv, tax_nodCol_asv, asv_phylogroupcsv, asv_phylogroupingcsv).flatten().buffer(size:11).dump(tag:'asv').into(report_asv)
 
                 if (params.ncASV) {
                     report_ncasv = Channel.create()
@@ -4357,7 +4371,7 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipAminoTyping) {
                     report_aminotypes = Channel.create()
-                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino, tax_nodCol_amino, amino_phylogroupcsv).flatten().buffer(size:10).dump(tag:'amino').into(report_aminotypes)
+                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino, tax_nodCol_amino, amino_phylogroupcsv, amino_phylogroupingcsv).flatten().buffer(size:11).dump(tag:'amino').into(report_aminotypes)
                     /*
                     Report_AminoTypes
                     aminocounts_plot -> ${params.projtag}_AminoType_counts.csv
