@@ -36,6 +36,7 @@ dependencies:
   - r-devtools
   - pigz=2.4
   - r-biocmanager
+  - pip
   - pip:
     - oligotyping
     - treecluster
