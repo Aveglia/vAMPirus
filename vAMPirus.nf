@@ -3029,52 +3029,6 @@ if (params.DataCheck || params.Analyze) {
                     }
                 }
 
-                if (params.aminoTClust) {
-
-                    process AminoType_PhyloClustering {
-
-                          label 'norm_cpus'
-
-                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/TreeCluster", mode: "copy", overwrite: true
-
-                          input:
-                             file(tree) from amino_treeclust
-                             file(counts) from amino_countphylo
-                          output:
-                             file("*treeclustering*.out") into aminotreeclustering_res
-                             file("${params.projtag}_amino_phylogroup.csv") into amino_phylogroupcsv
-                             file("${params.projtag}_amino_phyloGroupingcounts.csv") into amino_phylogroupingcsv
-
-                          script:
-                              """
-                              TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering.out
-                              TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
-                              #create headless treeclustering.out
-                              tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
-                              #summarizing clustering results
-                              awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
-                              echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_amino_phylogroup.csv
-                              for x in \$(seq "\$(wc -l group.list | awk '{print \$1}')");
-                              do      echo "phyloGroup"\$x"" >> grup.list
-                              done
-                              paste -d "," grup.list group.list > groups.csv
-                              rm group.list group.list
-                              awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
-                              for z in \$(cat amino.list);
-                              do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
-                                      group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
-                                      echo ""\$z","\$group"" >> ${params.projtag}_amino_phylogroup.csv
-                              done
-                              awk -F "," '{print \$2}' ${params.projtag}_amino_phylogroup.csv > groups.list
-                              paste -d"," groups.list ${counts} > ${params.projtag}_amino_phyloGroupingcounts.csv
-                             """
-                         }
-                } else {
-                    amino_phylogroupcsv = Channel.empty()
-                    amino_phylogroupingcsv = Channel.empty()
-                }
-
-
                 process Generate_AminoTypes_Counts_Table {
 
                     label 'high_cpus'
@@ -3121,6 +3075,51 @@ if (params.DataCheck || params.Analyze) {
                 }
             }
 
+            if (params.aminoTClust) {
+
+                process AminoType_PhyloClustering {
+
+                      label 'norm_cpus'
+
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/TreeCluster", mode: "copy", overwrite: true
+
+                      input:
+                         file(tree) from amino_treeclust
+                         file(counts) from amino_countphylo
+                      output:
+                         file("*treeclustering*.out") into aminotreeclustering_res
+                         file("${params.projtag}_amino_phylogroup.csv") into amino_phylogroupcsv
+                         file("${params.projtag}_amino_phyloGroupingcounts.csv") into amino_phylogroupingcsv
+
+                      script:
+                          """
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering.out
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
+                          #create headless treeclustering.out
+                          tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
+                          #summarizing clustering results
+                          awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
+                          echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_amino_phylogroup.csv
+                          for x in \$(seq "\$(wc -l group.list | awk '{print \$1}')");
+                          do      echo "phyloGroup"\$x"" >> grup.list
+                          done
+                          paste -d "," grup.list group.list > groups.csv
+                          rm group.list group.list
+                          awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
+                          for z in \$(cat amino.list);
+                          do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
+                                  group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                                  echo ""\$z","\$group"" >> ${params.projtag}_amino_phylogroup.csv
+                          done
+                          awk -F "," '{print \$2}' ${params.projtag}_amino_phylogroup.csv > groups.list
+                          paste -d"," groups.list ${counts} > ${params.projtag}_amino_phyloGroupingcounts.csv
+                         """
+                     }
+            } else {
+                amino_phylogroupcsv = Channel.empty()
+                amino_phylogroupingcsv = Channel.empty()
+            }
+            
               if (params.aminoMED) {
 
                     process AminoType_Minimum_Entropy_Decomposition {
