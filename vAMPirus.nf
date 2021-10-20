@@ -2376,7 +2376,7 @@ if (params.DataCheck || params.Analyze) {
                           do      echo "phyloGroup"\$x"" >> grup.list
                           done
                           paste -d "," grup.list group.list > groups.csv
-                          rm group.list group.list
+                          rm grup.list group.list
                           awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
                           for z in \$(cat asv.list);
                           do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
@@ -3104,7 +3104,7 @@ if (params.DataCheck || params.Analyze) {
                           do      echo "phyloGroup"\$x"" >> grup.list
                           done
                           paste -d "," grup.list group.list > groups.csv
-                          rm group.list group.list
+                          rm grup.list group.list
                           awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
                           for z in \$(cat amino.list);
                           do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
@@ -3119,7 +3119,7 @@ if (params.DataCheck || params.Analyze) {
                 amino_phylogroupcsv = Channel.empty()
                 amino_phylogroupingcsv = Channel.empty()
             }
-            
+
               if (params.aminoMED) {
 
                     process AminoType_Minimum_Entropy_Decomposition {
