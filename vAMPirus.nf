@@ -2378,7 +2378,7 @@ if (params.DataCheck || params.Analyze) {
                                 awk -F "\\t" '{print \$1",'\${groupID}'"}' tmp.tsv >> ${params.projtag}_phylogroup.csv
                                 g=\$((\$g+1))
                           done
-                          rm tmp.csv
+                          rm tmp.tsv
                           """
                 }
 
@@ -3053,7 +3053,7 @@ if (params.DataCheck || params.Analyze) {
                                     awk -F "\\t" '{print \$1",'\${groupID}'"}' tmp.tsv >> ${params.projtag}_phylogroup.csv
                                     g=\$((\$g+1))
                               done
-                              rm tmp.csv
+                              rm tmp.tsv
                              """
                          }
                 } else {
