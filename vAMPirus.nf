@@ -2360,8 +2360,8 @@ if (params.DataCheck || params.Analyze) {
                          file(counts) from asvcount_phylogr
                       output:
                           file("*treeclustering*.out") into asvtreeclustering_res
-                          file("*ASV_phylogroup.csv") into asv_phylogroupcsv
-                          file("*ASV_phylogroupingcounts.csv") into asv_phylogroupingcsv
+                          file("${params.projtag}_ASV_phylogroup.csv") into asv_phylogroupcsv
+                          file("${params.projtag}_ASV_phyloGroupingcounts.csv") into asv_phylogroupingcsv
 
                       script:
                           """
