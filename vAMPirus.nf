@@ -2373,7 +2373,7 @@ if (params.DataCheck || params.Analyze) {
                           g=1
                           echo "SequenceID,PhyloGroup" > ${params.projtag}_phylogroup.csv
                           for x in \$(cat group.list)
-                          do    grep "\$x" headless.out > tmp.tsv
+                          do    grep "\$x" headless.treeout > tmp.tsv
                                 groupID="phyloGroup\${g}"
                                 awk -F "\\t" '{print \$1",'\${groupID}'"}' tmp.tsv >> ${params.projtag}_phylogroup.csv
                                 g=\$((\$g+1))
@@ -3048,7 +3048,7 @@ if (params.DataCheck || params.Analyze) {
                               g=1
                               echo "SequenceID,PhyloGroup" > ${params.projtag}_phylogroup.csv
                               for x in \$(cat group.list)
-                              do    grep "\$x" headless.out > tmp.tsv
+                              do    grep "\$x" headless.treeout > tmp.tsv
                                     groupID="phyloGroup\${g}"
                                     awk -F "\\t" '{print \$1",'\${groupID}'"}' tmp.tsv >> ${params.projtag}_phylogroup.csv
                                     g=\$((\$g+1))
