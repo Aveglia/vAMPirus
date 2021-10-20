@@ -508,7 +508,7 @@ if (params$stats == "true" ) {
 
 <br>
 
-### 2D NMDS
+### 2D NMDS or PCoA
 
 <br>
 ```{r nmds2d, echo=FALSE}
@@ -562,7 +562,7 @@ fig
 <br>
 <br>
 
-### 3D NMDS
+### 3D NMDS or PCoA
 
 <br>
 
