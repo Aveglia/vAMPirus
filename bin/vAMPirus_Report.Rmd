@@ -171,6 +171,10 @@ fi
 if [ `ls -1 *_quicker_taxbreakdown.csv | wc -l` -ge 1 ];then
     cat *_quicker_taxbreakdown.csv > quicker_taxbreakdown.csv
 fi
+if [`ls -1 *_phyloGroupingcounts.csv | wc -l` -ge 1 ];then
+    mv *_phyloGroupingcounts.csv phylogroupcounts.csv
+    cp *_phylogroup.csv ./phygroup.csv
+fi
 ```
 ```{r load_datasets, include=FALSE}
 sample_name="counts.csv"
@@ -753,6 +757,20 @@ if (params$skipPhylogeny == "true") {
     gg = ggplotly(p2, tooltip = c("label","tax"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Tax_colors', height= 500, width= 800, scale= 1))
     gg
+} else if (( params$asvTClust == "true") || (params$aminoTClust == "true") && (params$nodeCol == "TC"))
+    taxMap=read.csv("phygroup.csv", header=T, check.names = F)
+    tree=read.tree("tree.txt")
+    p1 <- ggtree(tree)
+    id <- tree$tip.label
+    dat <- tibble::tibble(id = id)
+    metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
+    colnames(taxMap) <- c("label","tax")
+    taxMap
+    taxDF <- merge(metat, taxMap, by="label")
+    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax))
+    gg = ggplotly(p2, tooltip = c("label","tax"))
+    gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Tax_colors', height= 500, width= 800, scale= 1))
+    gg
 } else {
     #tree=read.newick("vAMPrun_otu.55.raxml.support")
     tree=read.tree("tree.txt")
@@ -782,7 +800,6 @@ if [[ $(ls | grep -c "_phylogroup.csv") -eq 1 ]];then
   done
   paste -d "," *.col > phylogroup.csv
   rm *.col
-  mv *_phyloGroupingcounts.csv phylogroupcounts.csv
 else
     echo "Not phylogeny based clustering"
 fi
