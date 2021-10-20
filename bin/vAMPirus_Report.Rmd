@@ -18,6 +18,8 @@ params:
     aminoMED: !r commandArgs(trailingOnly=T)[12]
     type: !r commandArgs(trailingOnly=T)[13]
     nodeCol: !r commandArgs(trailingOnly=T)[14]
+    asvTClust: !r commandArgs(trailingOnly=T)[15]
+    aminoTClust: !r commandArgs(trailingOnly=T)[16]
 ---
 <style>
 .rectangle {
@@ -881,7 +883,6 @@ rarefaction <- rarecurve(phydata5[,2:cols])
 
 ##rarefied dataset
 raredata <- as.data.frame(rrarefy(phydata5[,2:cols], sample=minreads))
-}
 }
 ```
 
