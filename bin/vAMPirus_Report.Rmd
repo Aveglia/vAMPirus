@@ -769,7 +769,7 @@ if (params$skipPhylogeny == "true") {
     taxDF <- merge(metat, taxMap, by="label")
     p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax))
     gg = ggplotly(p2, tooltip = c("label","tax"))
-    gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Tax_colors', height= 500, width= 800, scale= 1))
+    gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Phygroup_colors', height= 500, width= 800, scale= 1))
     gg
 } else {
     #tree=read.newick("vAMPrun_otu.55.raxml.support")
