@@ -1206,7 +1206,7 @@ if (params.DataCheck || params.Analyze) {
                 tail -\$(( \${yesirr}-1 )) number_per_percentage_protz.csv > number_per_percentage_prot.csv
                 head -1 number_per_percentage_protz.csv >> number_per_percentage_prot.csv
                 rm number_per_percentage_protz.csv
-                clustalo -i aminoacid_pcASV1.0_noTaxonomy.fasta --distmat-out=${params.projtag}_distance.matrix --full --force --threads=${task.cpus}
+                clustalo -i *aminoacid_pcASV1.0_noTaxonomy.fasta --distmat-out=${params.projtag}_distance.matrix --full --force --threads=${task.cpus}
                 cat ${params.projtag}_distance.matrix | tr " " ","  | grep "," >${params.projtag}_AminoType_PairwiseDistance.matrix
                 rm ${params.projtag}_distance.matrix
                 """
