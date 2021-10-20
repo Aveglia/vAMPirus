@@ -757,7 +757,7 @@ if (params$skipPhylogeny == "true") {
     gg = ggplotly(p2, tooltip = c("label","tax"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Tax_colors', height= 500, width= 800, scale= 1))
     gg
-} else if (( params$asvTClust == "true") || (params$aminoTClust == "true") && (params$nodeCol == "TC"))
+} else if (( params$asvTClust == "true") || (params$aminoTClust == "true") && (params$nodeCol == "TC")) {
     taxMap=read.csv("phygroup.csv", header=T, check.names = F)
     tree=read.tree("tree.txt")
     p1 <- ggtree(tree)
@@ -783,7 +783,6 @@ if (params$skipPhylogeny == "true") {
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_id_colors', height= 500, width= 800, scale= 1))
     gg
 }
-
 ```
 This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL. If you ran the MED analysis, the colors of the nodes correspond to the MED group they were assigned to.
 
