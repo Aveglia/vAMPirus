@@ -678,7 +678,7 @@ if (params.DataCheck || params.Analyze) {
                     echo ${sample_id}
 
                     fastp -i ${reads[0]} -I ${reads[1]} -o left-${sample_id}.filter.fq -O right-${sample_id}.filter.fq --detect_adapter_for_pe \
-                    --average_qual ${params.avQ} -n ${params.nM} -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
+                    --average_qual ${params.avQ} -n ${params.mN} -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
                     --report_title ${sample_id}
 
                     bash get_readstats.sh ${sample_id}.fastp.json
