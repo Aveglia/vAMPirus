@@ -2369,7 +2369,7 @@ if (params.DataCheck || params.Analyze) {
                           #create headless treeclustering.out
                           tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0/g' > headless.treeout
                           #summarizing clustering results
-                          awk -F "\\t" '{print \$2}' | sort | uniq > group.list
+                          awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
                           g=1
                           echo "SequenceID,PhyloGroup" > ${params.projtag}_phylogroup.csv
                           for x in \$(cat group.list)
@@ -3044,7 +3044,7 @@ if (params.DataCheck || params.Analyze) {
                               #create headless treeclustering.out
                               tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
                               #summarizing clustering results
-                              awk -F "\\t" '{print \$2}' | sort | uniq > group.list
+                              awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
                               g=1
                               echo "SequenceID,PhyloGroup" > ${params.projtag}_phylogroup.csv
                               for x in \$(cat group.list)
