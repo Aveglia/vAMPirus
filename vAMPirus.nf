@@ -2365,7 +2365,7 @@ if (params.DataCheck || params.Analyze) {
                       script:
                           """
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering.out
-                          reeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
                           #create headless treeclustering.out
                           tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0/g' > headless.treeout
                           #summarizing clustering results
@@ -2379,9 +2379,11 @@ if (params.DataCheck || params.Analyze) {
                                 g=\$((\$g+1))
                           done
                           rm tmp.csv
+                          """
                 }
 
             }
+
             if (params.asvMED) {
 
                 process ASV_Minimum_Entropy_Decomposition {
@@ -3018,13 +3020,13 @@ if (params.DataCheck || params.Analyze) {
                     }
                 }
 
-                if (params.aminoTClust){
+                if (params.aminoTClust) {
 
                     process AminoType_PhyloClustering {
 
                           label 'norm_cpus'
 
-                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/TreeCluster, mode: "copy", overwrite: true
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/TreeCluster", mode: "copy", overwrite: true
 
                           input:
                              file(tree) from amino_treeclust
@@ -3036,6 +3038,7 @@ if (params.DataCheck || params.Analyze) {
                           script:
                               """
                               TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering.out
+                              TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
                               #create headless treeclustering.out
                               tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
                               #summarizing clustering results
@@ -3049,9 +3052,10 @@ if (params.DataCheck || params.Analyze) {
                                     g=\$((\$g+1))
                               done
                               rm tmp.csv
-                    }
-
+                             """
+                         }
                 }
+
 
                 process Generate_AminoTypes_Counts_Table {
 
@@ -4304,7 +4308,7 @@ if (params.DataCheck || params.Analyze) {
                 */
 
                 report_asv = Channel.create()
-                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv, tax_nodCol_asv).flatten().buffer(size:9).dump(tag:'asv').into(report_asv)
+                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv, tax_nodCol_asv, asv_phylogroupcsv).flatten().buffer(size:10).dump(tag:'asv').into(report_asv)
 
                 if (params.ncASV) {
                     report_ncasv = Channel.create()
@@ -4349,7 +4353,7 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipAminoTyping) {
                     report_aminotypes = Channel.create()
-                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino, tax_nodCol_amino).flatten().buffer(size:9).dump(tag:'amino').into(report_aminotypes)
+                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino, tax_nodCol_amino, amino_phylogroupcsv).flatten().buffer(size:10).dump(tag:'amino').into(report_aminotypes)
                     /*
                     Report_AminoTypes
                     aminocounts_plot -> ${params.projtag}_AminoType_counts.csv
