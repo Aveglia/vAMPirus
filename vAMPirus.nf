@@ -4422,7 +4422,9 @@ if (params.DataCheck || params.Analyze) {
                         ${params.asvMED} \
                         ${params.aminoMED} \
                         \${type} \
-                        ${params.nodeCol}
+                        ${params.nodeCol} \
+                        ${params.asvTClust} \
+                        ${params.aminoTClust}
                         """
                 }
 
