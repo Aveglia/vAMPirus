@@ -2382,6 +2382,8 @@ if (params.DataCheck || params.Analyze) {
                           """
                 }
 
+            } else {
+                asv_phylogroupcsv = Channel.empty()
             }
 
             if (params.asvMED) {
@@ -3054,6 +3056,8 @@ if (params.DataCheck || params.Analyze) {
                               rm tmp.csv
                              """
                          }
+                } else {
+                    amino_phylogroupcsv = Channel.empty()
                 }
 
 
