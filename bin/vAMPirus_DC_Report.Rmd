@@ -39,11 +39,9 @@ library(scales)
 library(cowplot)
 library(dplyr)
 library(plotly)
-#library(BiocParallel)
 library(knitr)
-library(kableExtra) #install.packages("kableExtra")
+library(kableExtra)
 library(rmarkdown)
-#register(MulticoreParam(4))
 ```
 
 ```{r colors, include=FALSE}
@@ -361,6 +359,12 @@ postlhp <- postlhp %>% layout(xaxis = list(title = "Read Length"))
 postlhp <- postlhp %>% config(toImageButtonOptions=list(format='svg',filename='ReadsperLen_postfilt', height= 500, width= 800, scale= 1))
 postlhp
 ```
+<br>
+```{bash load_datasets_bash, include=FALSE}
+mv *AminoType_PairwiseDistance.matrix ./amino_matrix.txt
+mv *_ASV_PairwiseDistance.matrix ./asv_matrix.txt
+
+```
 
 <br>
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Clustering Statistics</h2></div>
@@ -383,23 +387,34 @@ nnp
 NOTE: The "1" on the x-axis represents number of ASVs identified by vsearch
 <br>
 
-### Number of pcASVs per clustering percentage
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;ASV Pairwise Distance Heatmap</h2></div>
 
 <br>
+<br>
+```{r asvheatmap, echo=FALSE}
+simmatrix<- read.csv("asv_matrix.txt", header=FALSE)
+rownames(simmatrix) <- simmatrix[,1]
+simmatrix <- simmatrix[,-1]
+colnames(simmatrix) <-rownames(simmatrix)
+cols <- dim(simmatrix)[2]
+simmatrix$AA <- rownames(simmatrix)
+rval=nrow(simmatrix)
+simmatrix2 <- simmatrix %>%
+  gather(1:rval, key=sequence, value=similarity)
+x=reorder(simmatrix2$AA,simmatrix2$similarity)
+y=reorder(simmatrix2$sequence,simmatrix2$similarity)
+similaritymatrix <- ggplot(simmatrix2, aes(x=x, y=y,fill=similarity))+
+      geom_raster()+
+      scale_fill_distiller(palette="Spectral")+
+      theme(axis.text.x = element_text(angle = 90))+
+      theme(axis.title.x=element_blank())+
+      theme(axis.title.y=element_blank())
 
-```{r prot_number, echo=FALSE}
-pn=read.csv("number_per_percentage_prot.csv", header=TRUE)
-#pn=read.csv("number_per_percentage_prot.csv", header=T)
-pnp <- plot_ly(pn, x=pn[,1], y=pn[,2], type="scatter", mode = 'lines+markers', marker=list(color='#088da5', line=list(color = 'black',
-               width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of pcASVs: %{y}','<extra></extra>'))
-pnp <- pnp %>% layout(yaxis = list(title = "Number of pcASVs"))
-pnp <- pnp %>% layout(xaxis = list(title = "Clustering ID %"))
-pnp <- pnp %>% config(toImageButtonOptions=list(format='svg',filename='Protclustresults', height= 500, width= 800, scale= 1))
-pnp
+heat <- ggplotly(similaritymatrix)
+heat <- heat %>% config(toImageButtonOptions=list(format='svg',filename='heatmap', height= 500, width= 800, scale= 1))
+heat
 ```
-NOTE: The "1" represents the number of AminoTypes which are unique amino acid sequences in your dataset
 <br>
-
 
 ### ASV Shannon Entropy Analysis (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
 
@@ -433,6 +448,53 @@ paged_table(med_asv_csv, options = list(rows.print = 10))
     print("ASV Shannon Entropy analyses not signaled to run. To run, add the options --asvMED and -resume to your DataCheck launch command.")
 }
 ```
+<br>
+
+### Number of pcASVs per clustering percentage
+
+<br>
+
+```{r prot_number, echo=FALSE}
+pn=read.csv("number_per_percentage_prot.csv", header=TRUE)
+#pn=read.csv("number_per_percentage_prot.csv", header=T)
+pnp <- plot_ly(pn, x=pn[,1], y=pn[,2], type="scatter", mode = 'lines+markers', marker=list(color='#088da5', line=list(color = 'black',
+               width = .1)), hovertemplate = paste('ID%: %{x}','<br>Number of pcASVs: %{y}','<extra></extra>'))
+pnp <- pnp %>% layout(yaxis = list(title = "Number of pcASVs"))
+pnp <- pnp %>% layout(xaxis = list(title = "Clustering ID %"))
+pnp <- pnp %>% config(toImageButtonOptions=list(format='svg',filename='Protclustresults', height= 500, width= 800, scale= 1))
+pnp
+```
+NOTE: The "1" represents the number of AminoTypes which are unique amino acid sequences (AminoTypes) in your dataset
+
+<br>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;AminoType Pairwise Distance Heatmap</h2></div>
+
+<br>
+<br>
+```{r aminoheatmap, echo=FALSE}
+simmatrix<- read.csv("amino_matrix.txt", header=FALSE)
+rownames(simmatrix) <- simmatrix[,1]
+simmatrix <- simmatrix[,-1]
+colnames(simmatrix) <-rownames(simmatrix)
+cols <- dim(simmatrix)[2]
+simmatrix$AA <- rownames(simmatrix)
+rval=nrow(simmatrix)
+simmatrix2 <- simmatrix %>%
+  gather(1:rval, key=sequence, value=similarity)
+x=reorder(simmatrix2$AA,simmatrix2$similarity)
+y=reorder(simmatrix2$sequence,simmatrix2$similarity)
+similaritymatrix <- ggplot(simmatrix2, aes(x=x, y=y,fill=similarity))+
+      geom_raster()+
+      scale_fill_distiller(palette="Spectral")+
+      theme(axis.text.x = element_text(angle = 90))+
+      theme(axis.title.x=element_blank())+
+      theme(axis.title.y=element_blank())
+
+heat <- ggplotly(similaritymatrix)
+heat <- heat %>% config(toImageButtonOptions=list(format='svg',filename='heatmap', height= 500, width= 800, scale= 1))
+heat
+```
+<br>
 <br>
 
 ### AminoTypes Shannon Entropy Analysis (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
