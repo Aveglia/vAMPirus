@@ -2371,22 +2371,36 @@ if (params.DataCheck || params.Analyze) {
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
                           #create headless treeclustering.out
                           tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0/g' > headless.treeout
+                          #extracting singletons
+                          grep -w "0" headless.treeout > single.out
+                          awk -F "\\t" '{print \$1}' single.out > single.list
+                          #assigning groupID to singletons
+                          for x in \$(awk -F "\\t" '{print \$1}' single.out); do echo ""\$x"XX" >> single.groups;done
+
                           #summarizing clustering results
-                          awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
+                          awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0" | sort | uniq > grp.list
+                          cat single.groups >> group.list
+                          cat grp.list >> group.list
                           echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_ASV_phylogroup.csv
+
                           for x in \$(seq "\$(wc -l group.list | awk '{print \$1}')");
                           do      echo "phyloGroup"\$x"" >> grup.list
                           done
                           paste -d "," grup.list group.list > groups.csv
                           rm grup.list group.list
-                          awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
+                          awk -F "," '{print \$1}' ${params.projtag}_ASV_counts.csv | sed '1d' > asv.list
                           for z in \$(cat asv.list);
-                          do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
-                                  group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                          do      if [[ \$(grep -wc "\$z" single.list) -ge 1 ]]
+                                  then
+                                          group=\$(grep -w ""\$z"XX" groups.csv | awk -F "," '{print \$1}')
+                                  else
+                                          grp=\$(grep -w "\$z" headless.treeout | awk -F "\t" '{print \$2}')
+                                          group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                                  fi
                                   echo ""\$z","\$group"" >> ${params.projtag}_ASV_phylogroup.csv
                           done
                           awk -F "," '{print \$2}' ${params.projtag}_ASV_phylogroup.csv > groups.list
-                          paste -d"," groups.list ${counts} > ${params.projtag}_ASV_phyloGroupingcounts.csv
+                          paste -d"," groups.list ${params.projtag}_ASV_counts.csv > ${params.projtag}_ASV_phyloGroupingcounts.csv
                           """
                 }
 
@@ -3096,25 +3110,38 @@ if (params.DataCheck || params.Analyze) {
                       script:
                           """
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering.out
-                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering_verbose.out
                           #create headless treeclustering.out
                           tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
+                          #extracting singletons
+                          grep -w "0" headless.treeout > single.out
+                          awk -F "\\t" '{print \$1}' single.out > single.list
+                          #assigning groupID to singletons
+                          for x in \$(awk -F "\\t" '{print \$1}' single.out); do echo ""\$x"XX" >> single.groups;done
                           #summarizing clustering results
-                          awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
+                          awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0" | sort | uniq > grp.list
+                          cat single.groups >> group.list
+                          cat grp.list >> group.list
                           echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_amino_phylogroup.csv
+
                           for x in \$(seq "\$(wc -l group.list | awk '{print \$1}')");
                           do      echo "phyloGroup"\$x"" >> grup.list
                           done
                           paste -d "," grup.list group.list > groups.csv
                           rm grup.list group.list
-                          awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
-                          for z in \$(cat amino.list);
-                          do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
-                                  group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                          awk -F "," '{print \$1}' ${params.projtag}_amino_counts.csv | sed '1d' > asv.list
+                          for z in \$(cat asv.list);
+                          do      if [[ \$(grep -wc "\$z" single.list) -ge 1 ]]
+                                  then
+                                          group=\$(grep -w ""\$z"XX" groups.csv | awk -F "," '{print \$1}')
+                                  else
+                                          grp=\$(grep -w "\$z" headless.treeout | awk -F "\t" '{print \$2}')
+                                          group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                                  fi
                                   echo ""\$z","\$group"" >> ${params.projtag}_amino_phylogroup.csv
                           done
                           awk -F "," '{print \$2}' ${params.projtag}_amino_phylogroup.csv > groups.list
-                          paste -d"," groups.list ${counts} > ${params.projtag}_amino_phyloGroupingcounts.csv
+                          paste -d"," groups.list ${params.projtag}_amino_counts.csv > ${params.projtag}_amino_phyloGroupingcounts.csv
                          """
                      }
             } else {
