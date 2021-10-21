@@ -293,18 +293,18 @@ then
       echo "   " >> EXAMPLE_COMMANDS.txt
       echo "Checking DataCheck mode:" >> EXAMPLE_COMMANDS.txt
       echo "   " >> EXAMPLE_COMMANDS.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck" >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --DataCheck -resume" >> EXAMPLE_COMMANDS.txt
       echo "   " >> EXAMPLE_COMMANDS.txt
       echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> EXAMPLE_COMMANDS.txt
       echo "   " >> EXAMPLE_COMMANDS.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck" >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --DataCheck -resume" >> EXAMPLE_COMMANDS.txt
       echo "    " >> EXAMPLE_COMMANDS.txt
       echo "Next, test the analysis pipeline:" >> EXAMPLE_COMMANDS.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze --ncASV --pcASV --stats" >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile conda,test --Analyze -resume" >> EXAMPLE_COMMANDS.txt
       echo "   " >> EXAMPLE_COMMANDS.txt
       echo "Or if you plan to run vAMPirus using Singularity, use this test command:" >> EXAMPLE_COMMANDS.txt
       echo "   " >> EXAMPLE_COMMANDS.txt
-      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze --ncASV --pcASV --stats" >> EXAMPLE_COMMANDS.txt
+      echo ""$mypwd"/nextflow run  "$mypwd"/vAMPirus.nf -c  "$mypwd"/vampirus.config -profile singularity,test --Analyze -resume" >> EXAMPLE_COMMANDS.txt
       echo "--------------------------------------------------------------------------------------------------------------------------------" >> EXAMPLE_COMMANDS.txt
       echo "   " >> EXAMPLE_COMMANDS.txt
       echo "Ok, if everything went well (green text was spit out by Nextflow), now you can move on to the fun. First, you should review the help docs and the vampirus.config in the vAMPirus directory." >> EXAMPLE_COMMANDS.txt

@@ -524,6 +524,8 @@ log.info """\
                                                              pcASV:          ${params.pcASV}
                                                            ASV MED:          ${params.asvMED}
                                                      AminoType MED:          ${params.aminoMED}
+                                    Phylogeny-based ASV clustering:          ${params.asvTClust}
+                              Phylogeny-based AminoType clustering:          ${params.aminoTClust}
                                                        Skip FastQC:          ${params.skipFastQC}
                                               Skip read processing:          ${params.skipReadProcessing}
                                               Skip adapter removal:          ${params.skipAdapterRemoval}
@@ -678,7 +680,7 @@ if (params.DataCheck || params.Analyze) {
                     echo ${sample_id}
 
                     fastp -i ${reads[0]} -I ${reads[1]} -o left-${sample_id}.filter.fq -O right-${sample_id}.filter.fq --detect_adapter_for_pe \
-                    --average_qual 25 -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
+                    --average_qual ${params.avQ} -n ${params.mN} -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
                     --report_title ${sample_id}
 
                     bash get_readstats.sh ${sample_id}.fastp.json
@@ -721,7 +723,7 @@ if (params.DataCheck || params.Analyze) {
                         RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
                         bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
                         bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
-        		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+        		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
                         """
                     } else if ( params.multi && params.primers ) {
                         """
@@ -881,11 +883,12 @@ if (params.DataCheck || params.Analyze) {
                 cat \$x | tr "\t" "," > \${pre}.csv
                 rm \$x
             done
-            reformat.sh in=${reads} out=${params.projtag}_preFilt_preclean.fasta t=${task.cpus}
+            bbduk.sh in=${reads} out=${params.projtag}_qtrimmed.fastq t=${task.cpu} qtrim=rl trimq=${params.trimq}
+            reformat.sh in=${params.projtag}_qtrimmed.fastq out=${params.projtag}_preFilt_preclean.fasta t=${task.cpus}
             echo "sample,reads" >> reads_per_sample_preFilt_preClean.csv
             grep ">" ${params.projtag}_preFilt_preclean.fasta | awk -F ">" '{print \$2}' | awk -F "." '{print \$1}' | sort --parallel=${task.cpus} | uniq -c | sort -brg --parallel=${task.cpus} | awk '{print \$2","\$1}' >> reads_per_sample_preFilt_preClean.csv
             rm ${params.projtag}_preFilt_preclean.fasta
-            fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n 1
+            fastp -i ${reads} -o ${params.projtag}_merged_preFilt_clean.fastq -b ${params.maxLen} -l ${params.minLen} --thread ${task.cpus} -n ${params.maxn}
             reformat.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_preFilt_clean.fasta t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_preFilt_clean.fastq out=${params.projtag}_merged_clean_Lengthfiltered.fastq minlength=${params.maxLen} maxlength=${params.maxLen} t=${task.cpus}
             bbduk.sh in=${params.projtag}_merged_clean_Lengthfiltered.fastq bhist=${params.projtag}_all_merged_postFilt_baseFrequency_hist.txt qhist=${params.projtag}_all_merged_postFilt_qualityScore_hist.txt gchist=${params.projtag}_all_merged_postFilt_gcContent_hist.txt aqhist=${params.projtag}_all_merged_postFilt_averageQuaulity_hist.txt lhist=${params.projtag}_all_merged_postFilt_length_hist.txt gcbins=auto
@@ -1058,7 +1061,7 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 file("number_per_percentage_nucl.csv") into number_per_percent_nucl_plot
-
+                file("${params.projtag}_ASV_PairwiseDistance.matrix") into asvpdm
             script:
             if (params.datacheckntIDlist) {
                 """
@@ -1072,6 +1075,9 @@ if (params.DataCheck || params.Analyze) {
                 done
                 yo=\$(grep -c ">" ${fasta})
     	          echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
+                clustalo -i ${fasta} --distmat-out=${params.projtag}_distance.matrix --full --force --threads=${task.cpus}
+                cat ${params.projtag}_distance.matrix | tr " " ","  | grep "," >${params.projtag}_ASV_PairwiseDistance.matrix
+                rm ${params.projtag}_distance.matrix
                 """
                 }
             }
@@ -1110,6 +1116,8 @@ if (params.DataCheck || params.Analyze) {
             output:
                 file("number_per_percentage_prot.csv") into number_per_percent_prot_plot
                 file("*aminoacid_pcASV1.0_noTaxonomy.fasta") into amino_med
+                file("${params.projtag}_AminoType_PairwiseDistance.matrix") into aminopdm
+
             script:
             // add awk script to count seqs
                 """
@@ -1200,6 +1208,9 @@ if (params.DataCheck || params.Analyze) {
                 tail -\$(( \${yesirr}-1 )) number_per_percentage_protz.csv > number_per_percentage_prot.csv
                 head -1 number_per_percentage_protz.csv >> number_per_percentage_prot.csv
                 rm number_per_percentage_protz.csv
+                clustalo -i *aminoacid_pcASV1.0_noTaxonomy.fasta --distmat-out=${params.projtag}_distance.matrix --full --force --threads=${task.cpus}
+                cat ${params.projtag}_distance.matrix | tr " " ","  | grep "," >${params.projtag}_AminoType_PairwiseDistance.matrix
+                rm ${params.projtag}_distance.matrix
                 """
         }
 
@@ -1472,7 +1483,7 @@ if (params.DataCheck || params.Analyze) {
         }
 
         report_dc_in = Channel.create()
-        fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot, amino_entro_csv, amino_entropy, asv_entro_csv, asv_entropy).into(report_dc_in)
+        fastp_csv_dc.mix( reads_per_sample_preFilt, reads_per_sample_postFilt, prefilt_basefreq, postFilt_basefreq, prefilt_qualityscore, postFilt_qualityscore, prefilt_gccontent, postFilt_gccontent, prefilt_averagequality, postFilt_averagequality, prefilt_length, postFilt_length, number_per_percent_nucl_plot, number_per_percent_prot_plot, amino_entro_csv, amino_entropy, asv_entro_csv, asv_entropy, asvpdm, aminopdm).into(report_dc_in)
 
         process Report_DataCheck {
 
@@ -2231,7 +2242,7 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch_asv
-                file("*_ASV*counts.csv") into (asv_counts_plots, asvcount_med)
+                file("*_ASV*counts.csv") into (asv_counts_plots, asvcount_med, asvcount_phylogr)
 
             script:
                 """
@@ -2292,7 +2303,7 @@ if (params.DataCheck || params.Analyze) {
                 """
             }
 
-            if (!params.skipPhylogeny) { // need to edit paths
+            if (!params.skipPhylogeny) {
 
                 process ASV_Phylogeny {
 
@@ -2307,7 +2318,7 @@ if (params.DataCheck || params.Analyze) {
 
                       output:
                           tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results_asv
-                          file("*iq.treefile") into (nucl_phyl_plot_asv, asvphy_med)
+                          file("*iq.treefile") into (nucl_phyl_plot_asv, asvphy_med, asv_treeclust)
 
                       script:
                           """
@@ -2336,6 +2347,52 @@ if (params.DataCheck || params.Analyze) {
                           fi
                           """
                   }
+            }
+
+            if (params.asvTClust){
+
+                process ASV_PhyloClustering {
+
+                      label 'norm_cpus'
+
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/TreeClustering", mode: "copy", overwrite: true
+
+                      input:
+                         file(tree) from asv_treeclust
+                         file(counts) from asvcount_phylogr
+                      output:
+                          file("*treeclustering*.out") into asvtreeclustering_res
+                          file("${params.projtag}_ASV_phylogroup.csv") into asv_phylogroupcsv
+                          file("${params.projtag}_ASV_phyloGroupingcounts.csv") into asv_phylogroupingcsv
+
+                      script:
+                          """
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering.out
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
+                          #create headless treeclustering.out
+                          tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0/g' > headless.treeout
+                          #summarizing clustering results
+                          awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
+                          echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_ASV_phylogroup.csv
+                          for x in \$(seq "\$(wc -l group.list | awk '{print \$1}')");
+                          do      echo "phyloGroup"\$x"" >> grup.list
+                          done
+                          paste -d "," grup.list group.list > groups.csv
+                          rm grup.list group.list
+                          awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
+                          for z in \$(cat asv.list);
+                          do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
+                                  group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                                  echo ""\$z","\$group"" >> ${params.projtag}_ASV_phylogroup.csv
+                          done
+                          awk -F "," '{print \$2}' ${params.projtag}_ASV_phylogroup.csv > groups.list
+                          paste -d"," groups.list ${counts} > ${params.projtag}_ASV_phyloGroupingcounts.csv
+                          """
+                }
+
+            } else {
+                asv_phylogroupcsv = Channel.empty()
+                asv_phylogroupingcsv = Channel.empty()
             }
 
             if (params.asvMED) {
@@ -2936,7 +2993,7 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             tuple file("*_aln.fasta"), file("*_aln.html"), file("*.log"), file("*iq*"), file("*mt*") into alignprot_results
-                            file("*iq.treefile") into (amino_rax_plot, amino_repphy)
+                            file("*iq.treefile") into (amino_rax_plot, amino_repphy, amino_treeclust)
 
                         script:
                             """
@@ -2987,7 +3044,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         tuple file("*_AminoType_counts.csv"), file("*dmd.out") into counts_summary
-                        file("*_AminoType_counts.csv") into (aminocounts_plot, aminocountmed)
+                        file("*_AminoType_counts.csv") into (aminocounts_plot, aminocountmed, amino_countphylo)
 
                     script:
                         """
@@ -3018,6 +3075,51 @@ if (params.DataCheck || params.Analyze) {
                        rm *col.txt
                        """
                 }
+            }
+
+            if (params.aminoTClust) {
+
+                process AminoType_PhyloClustering {
+
+                      label 'norm_cpus'
+
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/TreeCluster", mode: "copy", overwrite: true
+
+                      input:
+                         file(tree) from amino_treeclust
+                         file(counts) from amino_countphylo
+                      output:
+                         file("*treeclustering*.out") into aminotreeclustering_res
+                         file("${params.projtag}_amino_phylogroup.csv") into amino_phylogroupcsv
+                         file("${params.projtag}_amino_phyloGroupingcounts.csv") into amino_phylogroupingcsv
+
+                      script:
+                          """
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering.out
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
+                          #create headless treeclustering.out
+                          tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
+                          #summarizing clustering results
+                          awk -F "\\t" '{print \$2}' headless.treeout | sort | uniq > group.list
+                          echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_amino_phylogroup.csv
+                          for x in \$(seq "\$(wc -l group.list | awk '{print \$1}')");
+                          do      echo "phyloGroup"\$x"" >> grup.list
+                          done
+                          paste -d "," grup.list group.list > groups.csv
+                          rm grup.list group.list
+                          awk -F "," '{print \$1}' ${counts} | sed '1d' > amino.list
+                          for z in \$(cat amino.list);
+                          do      grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
+                                  group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
+                                  echo ""\$z","\$group"" >> ${params.projtag}_amino_phylogroup.csv
+                          done
+                          awk -F "," '{print \$2}' ${params.projtag}_amino_phylogroup.csv > groups.list
+                          paste -d"," groups.list ${counts} > ${params.projtag}_amino_phyloGroupingcounts.csv
+                         """
+                     }
+            } else {
+                amino_phylogroupcsv = Channel.empty()
+                amino_phylogroupingcsv = Channel.empty()
             }
 
               if (params.aminoMED) {
@@ -4225,7 +4327,7 @@ if (params.DataCheck || params.Analyze) {
                 */
 
                 report_asv = Channel.create()
-                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv, tax_nodCol_asv).flatten().buffer(size:9).dump(tag:'asv').into(report_asv)
+                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv, tax_nodCol_asv, asv_phylogroupcsv, asv_phylogroupingcsv).flatten().buffer(size:11).dump(tag:'asv').into(report_asv)
 
                 if (params.ncASV) {
                     report_ncasv = Channel.create()
@@ -4270,7 +4372,7 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipAminoTyping) {
                     report_aminotypes = Channel.create()
-                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino, tax_nodCol_amino).flatten().buffer(size:9).dump(tag:'amino').into(report_aminotypes)
+                    aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino, tax_nodCol_amino, amino_phylogroupcsv, amino_phylogroupingcsv).flatten().buffer(size:11).dump(tag:'amino').into(report_aminotypes)
                     /*
                     Report_AminoTypes
                     aminocounts_plot -> ${params.projtag}_AminoType_counts.csv
@@ -4322,7 +4424,9 @@ if (params.DataCheck || params.Analyze) {
                         ${params.asvMED} \
                         ${params.aminoMED} \
                         \${type} \
-                        ${params.nodeCol}
+                        ${params.nodeCol} \
+                        ${params.asvTClust} \
+                        ${params.aminoTClust}
                         """
                 }
 

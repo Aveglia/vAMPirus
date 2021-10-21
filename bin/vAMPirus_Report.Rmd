@@ -18,6 +18,8 @@ params:
     aminoMED: !r commandArgs(trailingOnly=T)[12]
     type: !r commandArgs(trailingOnly=T)[13]
     nodeCol: !r commandArgs(trailingOnly=T)[14]
+    asvTClust: !r commandArgs(trailingOnly=T)[15]
+    aminoTClust: !r commandArgs(trailingOnly=T)[16]
 ---
 <style>
 .rectangle {
@@ -34,7 +36,7 @@ knitr::opts_chunk$set(echo = TRUE,
       out.width="100%")
 ```
 
-```{r pathways, echo=FALSE}
+```{r logo, echo=FALSE}
 knitr::include_graphics("vamplogo.png")
 ```
 
@@ -61,7 +63,10 @@ mycol=c('#088da5','#73cdc8','#ff6f61','#7cb8df','#88b04b','#00a199','#6B5B95','#
 NOTE: Most plots are interactive and you can use the legend to specify samples/treatment of interest. You can also download an .svg version of each figure within this report.
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 <br>
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pre- and Post-Adapter Removal Read Stats</h2></div>
+<br>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Read Processing Info/Results</h2></div>
+<br>
+# Pre- and Post-Adapter Removal Read Stats
 <br>
 ```{r readstats, echo=FALSE}
 if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
@@ -86,7 +91,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 <br>
 
 
-### Total number of reads before and after adapter removal
+# Total number of reads before and after adapter removal
 
 ```{r readstats_plot, echo=FALSE}
 # Plot of reads before and after
@@ -113,7 +118,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 ```
 <br>
 
-### Forward (R1) and reverse (R2) read length before and after adapter removal
+# Forward (R1) and reverse (R2) read length before and after adapter removal
 
 ```{r readstats_plot2, echo=FALSE}
 # Plot of R1 and R2 before and after
@@ -169,6 +174,10 @@ fi
 if [ `ls -1 *_quicker_taxbreakdown.csv | wc -l` -ge 1 ];then
     cat *_quicker_taxbreakdown.csv > quicker_taxbreakdown.csv
 fi
+if [ `ls -1 *_phyloGroupingcounts.csv | wc -l` -ge 1 ];then
+    mv *_phyloGroupingcounts.csv phylogroupcounts.csv
+    cp *_phylogroup.csv ./phygroup.csv
+fi
 ```
 ```{r load_datasets, include=FALSE}
 sample_name="counts.csv"
@@ -208,7 +217,7 @@ data4 <- data3%>%
 ```
 
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Number of Reads Per Sample</h2></div>
+# Number of Reads Per Sample
 
 ```{r plot, echo=FALSE}
 # sample and count
@@ -258,7 +267,7 @@ raredata <- as.data.frame(rrarefy(data5[,2:cols], sample=minreads))
 <br>
 <br>
 
-### Shannon diversity
+# Shannon diversity
 
 <br>
 ```{r diversity_analysis, echo=FALSE}
@@ -328,7 +337,7 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-### Simpson diversity
+# Simpson diversity
 
 <br>
 ```{r diversity_analysis2, echo=FALSE}
@@ -396,7 +405,7 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-### Richness
+# Richness
 
 <br>
 ```{r diversity_analysis3, echo=FALSE}
@@ -466,7 +475,7 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Distance To Centroid</h2></div>
+# Distance To Centroid
 <br>
 ```{r distance, echo=FALSE}
 ##Distance
@@ -498,11 +507,11 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS Plots</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS or PCoA Plots</h2></div>
 
 <br>
 
-### 2D NMDS
+# 2D NMDS or PCoA
 
 <br>
 ```{r nmds2d, echo=FALSE}
@@ -556,7 +565,7 @@ fig
 <br>
 <br>
 
-### 3D NMDS
+# 3D NMDS or PCoA
 
 <br>
 
@@ -736,7 +745,7 @@ if (params$skipPhylogeny == "true") {
     p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
     gg = ggplotly(p2, tooltip = c("label","GroupID"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_MED_colors', height= 500, width= 800, scale= 1))
-    gg       
+    gg
 } else if ((params$skipTaxonomy == "false") && (params$nodeCol == "TAX")) {
     taxMap=read.csv("quicker_taxbreakdown.csv", header=T, check.names = F)
     tree=read.tree("tree.txt")
@@ -751,6 +760,20 @@ if (params$skipPhylogeny == "true") {
     gg = ggplotly(p2, tooltip = c("label","tax"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Tax_colors', height= 500, width= 800, scale= 1))
     gg
+} else if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType") && (params$nodeCol == "TC")) {
+    taxMap=read.csv("phygroup.csv", header=T, check.names = F)
+    tree=read.tree("tree.txt")
+    p1 <- ggtree(tree)
+    id <- tree$tip.label
+    dat <- tibble::tibble(id = id)
+    metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
+    colnames(taxMap) <- c("label","tax")
+    taxMap
+    taxDF <- merge(metat, taxMap, by="label")
+    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax))
+    gg = ggplotly(p2, tooltip = c("label","tax"))
+    gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Phygroup_colors', height= 500, width= 800, scale= 1))
+    gg
 } else {
     #tree=read.newick("vAMPrun_otu.55.raxml.support")
     tree=read.tree("tree.txt")
@@ -763,19 +786,518 @@ if (params$skipPhylogeny == "true") {
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_id_colors', height= 500, width= 800, scale= 1))
     gg
 }
-
 ```
 This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL. If you ran the MED analysis, the colors of the nodes correspond to the MED group they were assigned to.
 
 <br>
 <br>
 <br>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Phylogeny-based Clustering Results</h2></div>
+# Phylogeny-based Clustering Summary Table
+```{bash bash_phy_table, include=FALSE}
+if [[ $(ls | grep -c "_phylogroup.csv") -eq 1 ]];then
+  awk -F "," '{print $2}' *_phylogroup.csv | sort | uniq | sort -g >group.list
+  for x in $(cat group.list);do
+    echo "${x}" >> ${x}.col
+    grep -w "$x" *_phylogroup.csv | awk -F "," '{print $1}' | sort >> ${x}.col
+  done
+  paste -d "," *.col > phylogroup.csv
+  rm *.col
+else
+    echo "Not phylogeny based clustering"
+fi
+```
+
+```{r phyloGroup_table, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    phylogroup=read.csv("phylogroup.csv", header = T)
+    knitr::kable(phylogroup, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: phyloGroup Table") %>%
+    kable_styling(font_size = 12, full_width = F)%>%
+    scroll_box(width = "100%", height = "100%")
+}
+```
+
+<br>
+<br>
+<br>
 <br>
 <br>
 
-# Post Minimum Entropy Decomposition (MED) Analyses
+# phyloGroup Relative Abundance Plot
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group Breakdown Table</h2></div>
+<br>
+<br>
+
+```{r phylo_plot, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+  #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv", check.names=FALSE)
+  phylogroup=read.csv("phylogroupcounts.csv", header = T, check.names=FALSE)
+  phydata <- phylogroup %>% select(-2)
+  phydata2 <- aggregate(.~phyloGroup_ID, phydata, sum)
+  phydata3 <-as.data.frame(t(phydata2))
+  phydata3$sample <- row.names(phydata3)
+  colnames(phydata3)<- as.matrix(phydata3[1,])
+  as.data.frame(phydata3)
+  phydata3 <- phydata3[-1,]
+  phydata3 <- phydata3 %>%
+    rename(sample=phyloGroup_ID)
+  phydata3dim <- dim(phydata3)
+  ##Loading metadata
+  samples <- read.csv(sample_metadata, header = TRUE)
+  #samples <- read.csv("rna_virus_meta.csv", header = TRUE)
+  ##Combining data and metadata
+  phydata4 <- merge(phydata3, samples, by="sample")
+  #if "phydata4" removed it does not work
+  #phydata4
+  dim_phydata4 <- dim(phydata4)
+  dim_samples <- dim(samples)
+  cols <- dim_phydata4[2]-dim_samples[2]+1
+  first <-colnames(phydata4)[2]
+  last <- colnames(phydata4)[cols]
+  phydata4[,2:cols] <- lapply(phydata4[,2:cols], as.character)
+  phydata4[,2:cols] <- lapply(phydata4[,2:cols], as.numeric)
+  #Calculate total reads per sample
+  phydata5 <- phydata4%>%
+    mutate(sum=select(.,2:cols)%>%
+             apply(1, sum, na.rm=TRUE))
+  #phydata5
+  ##Filter samples with low reads
+  nfil=params$minimumCounts
+  #nfil=1000
+  phydata5 <- phydata5 %>%
+    filter(sum>nfil)
+     #can cause errors
+  phydata5dim <-dim(phydata5)
+  minreads<-min(phydata5$sum)
+
+  dataz <- decostand(phydata5[,2:cols],method="total") #method 'total' normalizes data to sum up to 1
+  dataz$sample <- phydata5$sample
+  metadata <- phydata5[,(cols+1):phydata5dim[2]]
+  metadata$sample <- phydata5$sample
+  datay <- merge(dataz, metadata, by="sample")
+  datalong <- datay %>%
+    tidyr::gather(first:last, key=hit, value=reads)
+  ddd <- plot_ly(datalong, x=~sample, y=~reads, color=~hit, colors=mycol, type='bar')
+  ddd <- ddd %>% layout(barmode = 'stack')
+  ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
+  ddd <- ddd %>% config(toImageButtonOptions=list(format='svg',filename='Relative_abundance', height= 500, width= 800, scale= 1))
+  ddd
+}
+```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+# phyloGroup-based Rarefaction Curves
+
+<br>
+<br>
+
+```{r phy_rarefaction, echo=FALSE, cache=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+##Rarefaction curves
+rarefaction <- rarecurve(phydata5[,2:cols])
+
+##rarefied dataset
+raredata <- as.data.frame(rrarefy(phydata5[,2:cols], sample=minreads))
+}
+```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;phyloGroup-based Diversity Analyses Plots</h2></div>
+
+<br>
+<br>
+
+# phyloGroup-based Shannon diversity
+
+<br>
+```{r phy_diversity_analysis1a, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    metadata <- phydata5[,(cols+1):phydata5dim[2]]
+    metadata$sample <- phydata5$sample
+    index <-diversity(raredata, index= "shannon")
+    shannondata5 <- as.data.frame(index)
+    shannondata5$sample<- phydata5$sample
+    shannondata5_2 <- merge(shannondata5, metadata, by="sample")
+
+    sh <- plot_ly(shannondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+    #sh <- sh %>% layout(title = list(text="Shannon diversty",y=.99))
+    sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
+    sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
+    sh
+}
+```
+
+```{r phy_diversity_analysis1b, echo=FALSE}
+#divided because error
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    if (params$stats == "true" ) {
+        shannonaov <- aov(index ~ treatment, data= shannondata5_2)
+        st <- shapiro.test(resid(shannonaov))
+        bt <- bartlett.test(index ~ treatment, data= shannondata5_2)
+
+        if (st$p.value > .05 && bt$p.value > .05) {
+          print("Shapiro Test of normality - data is normal p-value > 0.05")
+          print(shapiro.test(resid(shannonaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= shannondata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA Results")
+          print(summary(shannonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+          #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+          print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+          print(TukeyHSD(shannonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        } else {
+          print("Shapiro Test of normality - data is normal if p-value > 0.05")
+          print(shapiro.test(resid(shannonaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= shannondata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Data either not normal or variance not homogenous")
+          print("Kruskal-Wallis Test - test significant if p <.05")
+          #Kruskal-Wallis test - significant p <.05
+          mykt <- kruskal.test(index ~ treatment, data= shannondata5_2)
+          print(mykt)
+          writeLines("\n--------------------------------------------------------------\n")
+          if (mykt$p.value < .05) {
+            #Pairwise comparison
+            print("Wilcox.test - pairwise comparison")
+            print(pairwise.wilcox.test(shannondata5_2$index, shannondata5_2$treatment, p.adjust.method = "BH"))
+          } else {
+            print("Data not significant. Skipping pairwise comparison")
+          }
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+          print(summary(shannonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        }
+    } else {
+        print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
+    }
+}
+```
+<br>
+<br>
+<br>
+<br>
+
+# phyloGroup-based Simpson diversity
+
+<br>
+```{r phy_diversity_analysis2a, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    index <- diversity(raredata, index= "simpson")
+    simpsondata5 <- as.data.frame(index)
+    simpsondata5$sample<- phydata5$sample
+    simpsondata5_2 <- merge(simpsondata5, metadata, by="sample")
+
+    s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+    #s <- s %>% layout(title = list(text="Simpson diversty",y=.99))
+    s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
+    s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
+    s
+}
+```
+
+```{r phy_diversity_analysis2b, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    if (params$stats == "true" ) {
+        simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
+        st <- shapiro.test(resid(simpsonaov))
+        bt <- bartlett.test(index ~ treatment, data= simpsondata5_2)
+
+        if (st$p.value > .05 && bt$p.value > .05) {
+          print("Shapiro Test of normality - data is normal p-value > 0.05")
+          print(shapiro.test(resid(simpsonaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA Results")
+          print(summary(simpsonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+          #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+          print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+          print(TukeyHSD(simpsonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        } else {
+          print("Shapiro Test of normality - data is normal if p-value > 0.05")
+          print(shapiro.test(resid(simpsonaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= simpsondata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Data either not normal or variance not homogenous")
+          print("Kruskal-Wallis Test - test significant if p <.05")
+          #Kruskal-Wallis test - significant p <.05
+          mykt <- kruskal.test(index ~ treatment, data= simpsondata5_2)
+          print(mykt)
+          writeLines("\n--------------------------------------------------------------\n")
+          if (mykt$p.value < .05) {
+            #Pairwise comparison
+            print("Wilcox.test - pairwise comparison")
+            print(pairwise.wilcox.test(simpsondata5_2$index, simpsondata5_2$treatment, p.adjust.method = "BH"))
+          } else {
+            print("Data not significant. Skipping pairwise comparison")
+          }
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+          print(summary(simpsonaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        }
+    } else {
+        print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
+    }
+}
+```
+<br>
+<br>
+<br>
+<br>
+
+# phyloGroup-based Richness
+
+<br>
+```{r phy_diversity_analysis3a, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    mind5<-min(phydata5$sum)
+    index <- rarefy(phydata5[,2:cols], sample=mind5)
+    rarerichnessdata5 <- as.data.frame(index)
+    rarerichnessdata5$sample <-phydata5$sample
+    richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
+
+    ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+    #ri <- ri %>% layout(title = list(text="ASV Richness",y=.99))
+    ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
+    ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
+    ri
+}
+```
+
+```{r phylo_diversity_analysis3b, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    if (params$stats == "true" ) {
+        richaov <- aov(index ~ treatment, data= richdata5_2)
+        st <- shapiro.test(resid(richaov))
+        bt <- bartlett.test(index ~ treatment, data= richdata5_2)
+
+        if (st$p.value > .05 && bt$p.value > .05) {
+          print("Shapiro Test of normality - data is normal p-value > 0.05")
+          print(shapiro.test(resid(richaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= richdata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA Results")
+          print(summary(richaov))
+          #Tukey Honest Significant Differences (pairwise comparison) - significant p <.05
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Tukey HSD - Pairwise comparison - significant differences indicated by p-value < 0.05")
+          print(TukeyHSD(richaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        } else {
+          print("Shapiro Test of normality - data is normal if p-value > 0.05")
+          print(shapiro.test(resid(richaov)))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Bartlett Test variance homogeneity - variance is homogeneous if p-value > 0.05")
+          print(bartlett.test(index ~ treatment, data= richdata5_2))
+          writeLines("\n--------------------------------------------------------------\n")
+          print("Data either not normal or variance not homogenous")
+          print("Kruskal-Wallis Test - test significant if p <.05")
+          #Kruskal-Wallis test - significant p <.05
+          mykt <- kruskal.test(index ~ treatment, data= richdata5_2)
+          print(mykt)
+          writeLines("\n--------------------------------------------------------------\n")
+          if (mykt$p.value < .05) {
+            #Pairwise comparison
+            print("Wilcox.test - pairwise comparison")
+            print(pairwise.wilcox.test(richdata5_2$index, richdata5_2$treatment, p.adjust.method = "BH"))
+          } else {
+            print("Data not significant. Skipping pairwise comparison")
+          }
+          writeLines("\n--------------------------------------------------------------\n")
+          print("ANOVA - one or more of the assumptions not met, take with a grain of salt.")
+          print(summary(richaov))
+          writeLines("\n--------------------------------------------------------------\n")
+        }
+    } else {
+        print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
+    }
+}
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+# phyloGroup-based Distance To Centroid
+<br>
+```{r phylo_distance2a, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    ##Distance
+    intermediate <- raredata
+    bray.distance <- vegdist(sqrt(intermediate), method="bray")
+
+    ##Dispersion
+    disper <- betadisper(bray.distance, group = metadata$treatment, type="centroid")
+    df <- data.frame(Distance_to_centroid=disper$distances,Group=disper$group)
+    df$sample <- phydata5$sample
+    df2 <- merge(df, metadata, by="sample")
+
+    cen <- plot_ly(df2, x=~treatment, y=~Distance_to_centroid, color=~treatment, colors=mycol, type="box", boxpoints = "all", pointpos = 0, jitter = 0.5)
+    #cen <- cen %>% layout(title = list(text="Distance to centroid",y=.99))
+    cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
+    cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
+    cen
+}
+```
+```{r phylo_distance2b, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    if (params$stats == "true" ) {
+        adn <- adonis(bray.distance~phydata5$treatment)
+        adn
+    } else {
+        print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
+    }
+}
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;phyloGroup-based NMDS or PCoA Plots</h2></div>
+
+<br>
+
+# phyloGroup-based 2D NMDS or PcOA
+
+<br>
+```{r phylo_nmds2d, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    ##NMDS
+    datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
+
+    MDS <- metaMDS(sqrt(datax),
+                   distance = "bray",autotransform = FALSE,
+                   k = 2,
+                   maxit = 999,
+                   trymax = params$try,
+                   wascores = TRUE)
+
+    if (MDS$converged == "TRUE") {
+
+    data.scores <- as.data.frame(scores(MDS))
+    data.scores$sample <- phydata5$sample
+    data.scores.2 <- merge(data.scores, metadata, by="sample")
+
+    p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
+      geom_point(size=2)+
+      theme_classic()+
+      theme(legend.title = element_blank())
+
+    #fff <- ggplotly(p)
+    #fff <- fff %>% layout(legend=list(y=.5))
+    #fff
+
+    fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
+    fff <- fff %>% layout(legend=list(y=.5))
+    fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
+    fff
+
+    } else {
+      print("NMDS did not converge. Printing PCoA")
+      #calculate bray curtis distance
+      bcdist <- vegdist(datax, "bray")
+      res <- pcoa(bcdist)
+      #res$values
+      #biplot(res) #to make the boring 2D PCoA
+      comp <- as.data.frame(res$vectors)
+      comp$sample <- data5$sample
+      comp2 <- merge(comp, metadata, by="sample")
+      fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+      fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                            yaxis = list(title = "PCoA 2"))
+      fig <- fig %>% layout(legend=list(y=.5))
+      fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
+      fig
+    }
+}
+```
+
+<br>
+<br>
+<br>
+<br>
+
+# phyloGroup-based 3D NMDS and PCoA
+
+<br>
+
+```{r phylo_nmds3d, echo=FALSE}
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    MDS3 <- metaMDS(sqrt(datax),
+                   distance = "bray",autotransform = FALSE,
+                   k = 3,
+                   maxit = 999,
+                   trymax = params$try,
+                   wascores = TRUE)
+
+    if (MDS3$converged == "TRUE") {
+
+    data.scores3 <- as.data.frame(scores(MDS3))
+    data.scores3$sample <- phydata5$sample
+    data.scores.3 <- merge(data.scores3, metadata, by="sample")
+    p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
+            color=~treatment, colors=mycol,
+            mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
+            marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
+            )
+    p3d <- p3d %>% layout(legend=list(y=.5))
+    p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
+    p3d
+
+    } else {
+      print("NMDS did not converge. Printing PCoA")
+      #calculate bray curtis distance
+      bcdist <- vegdist(datax, "bray")
+      res <- pcoa(bcdist)
+      comp <- as.data.frame(res$vectors)
+      comp$sample <- data5$sample
+      comp2 <- merge(comp, metadata, by="sample")
+      fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, z = ~Axis.3, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+      fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                            yaxis = list(title = "PCoA 2"),
+                            zaxis = list(title = "PCoA 3"))
+      fig <- fig %>% layout(legend=list(y=.5))
+      fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
+      fig
+    }
+}
+```
+
+<br>
+<br>
+
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Minimum Energy Decomposition (MED) Results</h2></div>
+
+# MED Group Breakdown
 
 <br>
 <br>
@@ -836,7 +1358,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-MED Relative Abundance Plot</h2></div>
+# MED Group Relative Abundance Plot
 
 <br>
 <br>
@@ -957,7 +1479,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-Med Rarefaction Curves</h2></div>
+# MED Group-based Rarefaction Curves</h2></div>
 
 <br>
 <br>
@@ -984,7 +1506,7 @@ raredata <- as.data.frame(rrarefy(meddata5[,2:cols], sample=minreads))
 <br>
 <br>
 
-### Post-MED Shannon diversity
+# MED Group-based Shannon diversity
 
 <br>
 ```{r med_diversity_analysis1a, echo=FALSE}
@@ -1061,7 +1583,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-### Post-MED Simpson diversity
+# MED Group-based Simpson diversity
 
 <br>
 ```{r med_diversity_analysis2a, echo=FALSE}
@@ -1135,7 +1657,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-### Post-MED Richness
+# MED Group-based Richness
 
 <br>
 ```{r med_diversity_analysis3a, echo=FALSE}
@@ -1211,7 +1733,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-MED Distance To Centroid</h2></div>
+# MED Group-based Distance To Centroid
 <br>
 ```{r med_distance2a, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
@@ -1248,11 +1770,11 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS Plots</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group-based NMDS or PCoA Plots</h2></div>
 
 <br>
 
-### Post-MED 2D NMDS
+# MED Group-based 2D NMDS or PCoA
 
 <br>
 ```{r med_nmds2d, echo=FALSE}
@@ -1312,7 +1834,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-### Post-MED 3D NMDS
+# MED Group-based 3D NMDS or PCoA
 
 <br>
 
@@ -1363,7 +1885,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group Representatives Phylogenetic Tree</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group Representative Phylogenetic Tree</h2></div>
 
 <br>
 <br>

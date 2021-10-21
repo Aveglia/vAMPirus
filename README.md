@@ -8,9 +8,9 @@
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
 # Table of contents
-* [New in vAMPirus version 2.0.0](#New-in-vAMPirus-version-2.0.0)
+* [New in vAMPirus version 2.0.1](#New-in-vAMPirus-version-2.0.1)
 * [Quick intro](#Quick-intro)
-  * [Contact/support](#Contact/support)  
+  * [Contact/support](#Contact/support)
 * [Getting started](#Getting-started)
   * [Order of operations](##Order-of-operations)
     * [Dependencies](###Dependencies-(See-How-to-cite))
@@ -21,7 +21,7 @@
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
 
-# New in vAMPirus version 2.0.0
+# New in vAMPirus version 2.0.1
 
 1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 
@@ -35,7 +35,9 @@
 
 6. (EXPERIMENTAL) Added Minimum Entropy Decomposition analysis using the oligotyping program produced by the Meren Lab. This allows for sequence clustering based on sequence positions of interest (biologically meaningful) or top positions with the highest Shannon's Entropy (read more here: https://merenlab.org/software/oligotyping/ ; and below).
 
-7. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results
+7. Phylogeny-based clustering ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)
+
+8. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results
 
 8. PCoA plots added to Analyze  report if NMDS does not converge.
 
@@ -68,7 +70,7 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 
 ## Quick order of operations
 
-1. Clone vAMPirus from github   
+1. Clone vAMPirus from github
 
 2. Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases (NOTE: You will need to have the xz program installed before running startup script when downloading the RVDB database)
 
@@ -85,7 +87,7 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 8. Explore results directories and produced final reports
 
 
-### Installing dependencies (see Who to cite section)    
+### Installing dependencies (see Who to cite section)
 
 If you plan on using Conda to run vAMPirus, all dependencies will be installed as a Conda environment automatically with the vampirus_startup.sh script.
 
@@ -213,19 +215,19 @@ Launch commands for testing (you do not need to edit anything in the config file
 
 ### DataCheck test =>
 
-      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck
+      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck -resume`
 
 OR
 
-      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck
+      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck -resume`
 
 ### Analyze test =>
 
-      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze`
+      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze -resume`
 
 OR
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze -resume`
 
 
 # Running vAMPirus
@@ -305,3 +307,5 @@ If you do use vAMPirus for your analyses, please cite the following ->
 15. UNOISE algorithm - R.C. Edgar (2016). UNOISE2: improved error-correction for Illumina 16S and ITS amplicon sequencing, https://doi.org/10.1101/081257
 
 16. Oligotyping - A. Murat Eren, Gary G. Borisy, Susan M. Huse, Jessica L. Mark Welch (2014). Oligotyping analysis of the human oral microbiome. Proceedings of the National Academy of Sciences Jul 2014, 111 (28) E2875-E2884; DOI: 10.1073/pnas.1409644111
+
+17. Balaban M, Moshiri N, Mai U, Jia X, Mirarab S (2019). "TreeCluster: Clustering biological sequences using phylogenetic trees." PLoS ONE. 14(8):e0221068. doi:10.1371/journal.pone.0221068
