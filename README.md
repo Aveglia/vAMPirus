@@ -10,7 +10,7 @@
 # Table of contents
 * [New in vAMPirus version 2.0.0](#New-in-vAMPirus-version-2.0.0)
 * [Quick intro](#Quick-intro)
-  * [Contact/support](#Contact/support)  
+  * [Contact/support](#Contact/support)
 * [Getting started](#Getting-started)
   * [Order of operations](##Order-of-operations)
     * [Dependencies](###Dependencies-(See-How-to-cite))
@@ -70,7 +70,7 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 
 ## Quick order of operations
 
-1. Clone vAMPirus from github   
+1. Clone vAMPirus from github
 
 2. Before launching the vAMPirus.nf, be sure to run the vampirus_startup.sh script to install dependencies and/or databases (NOTE: You will need to have the xz program installed before running startup script when downloading the RVDB database)
 
@@ -87,7 +87,7 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 8. Explore results directories and produced final reports
 
 
-### Installing dependencies (see Who to cite section)    
+### Installing dependencies (see Who to cite section)
 
 If you plan on using Conda to run vAMPirus, all dependencies will be installed as a Conda environment automatically with the vampirus_startup.sh script.
 
@@ -215,19 +215,19 @@ Launch commands for testing (you do not need to edit anything in the config file
 
 ### DataCheck test =>
 
-      /path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck
+      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --DataCheck -resume`
 
 OR
 
-      nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck
+      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --DataCheck -resume`
 
 ### Analyze test =>
 
-      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze`
+      `/path/to/nextflow run /path/to/vAMPirus.nf -c /path/to/vampirus.config -profile conda,test --Analyze -resume`
 
 OR
 
-      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze`
+      `nextflow run vAMPirus.nf -c vampirus.config -profile singularity,test --Analyze -resume`
 
 
 # Running vAMPirus
