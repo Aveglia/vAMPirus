@@ -524,6 +524,8 @@ log.info """\
                                                              pcASV:          ${params.pcASV}
                                                            ASV MED:          ${params.asvMED}
                                                      AminoType MED:          ${params.aminoMED}
+                                    Phylogeny-based ASV clustering:          ${params.asvTClust}
+                              Phylogeny-based AminoType clustering:          ${params.aminoTClust}
                                                        Skip FastQC:          ${params.skipFastQC}
                                               Skip read processing:          ${params.skipReadProcessing}
                                               Skip adapter removal:          ${params.skipAdapterRemoval}
