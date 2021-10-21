@@ -63,7 +63,10 @@ mycol=c('#088da5','#73cdc8','#ff6f61','#7cb8df','#88b04b','#00a199','#6B5B95','#
 NOTE: Most plots are interactive and you can use the legend to specify samples/treatment of interest. You can also download an .svg version of each figure within this report.
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 <br>
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Pre- and Post-Adapter Removal Read Stats</h2></div>
+<br>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Read Processing Info/Results</h2></div>
+<br>
+# Pre- and Post-Adapter Removal Read Stats
 <br>
 ```{r readstats, echo=FALSE}
 if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
@@ -88,7 +91,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 <br>
 
 
-### Total number of reads before and after adapter removal
+# Total number of reads before and after adapter removal
 
 ```{r readstats_plot, echo=FALSE}
 # Plot of reads before and after
@@ -115,7 +118,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 ```
 <br>
 
-### Forward (R1) and reverse (R2) read length before and after adapter removal
+# Forward (R1) and reverse (R2) read length before and after adapter removal
 
 ```{r readstats_plot2, echo=FALSE}
 # Plot of R1 and R2 before and after
@@ -214,7 +217,7 @@ data4 <- data3%>%
 ```
 
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Number of Reads Per Sample</h2></div>
+# Number of Reads Per Sample
 
 ```{r plot, echo=FALSE}
 # sample and count
@@ -264,7 +267,7 @@ raredata <- as.data.frame(rrarefy(data5[,2:cols], sample=minreads))
 <br>
 <br>
 
-### Shannon diversity
+# Shannon diversity
 
 <br>
 ```{r diversity_analysis, echo=FALSE}
@@ -334,7 +337,7 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-### Simpson diversity
+# Simpson diversity
 
 <br>
 ```{r diversity_analysis2, echo=FALSE}
@@ -402,7 +405,7 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-### Richness
+# Richness
 
 <br>
 ```{r diversity_analysis3, echo=FALSE}
@@ -472,7 +475,7 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Distance To Centroid</h2></div>
+# Distance To Centroid
 <br>
 ```{r distance, echo=FALSE}
 ##Distance
@@ -504,11 +507,11 @@ if (params$stats == "true" ) {
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS Plots</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS or PCoA Plots</h2></div>
 
 <br>
 
-### 2D NMDS or PCoA
+# 2D NMDS or PCoA
 
 <br>
 ```{r nmds2d, echo=FALSE}
@@ -562,7 +565,7 @@ fig
 <br>
 <br>
 
-### 3D NMDS or PCoA
+# 3D NMDS or PCoA
 
 <br>
 
@@ -789,7 +792,8 @@ This tree is a maximum likelihood tree made with IQTREE2 and the parameters you 
 <br>
 <br>
 <br>
-# Post Phylogeny-based Clustering Analyses
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Phylogeny-based Clustering Results</h2></div>
+# Phylogeny-based Clustering Summary Table
 ```{bash bash_phy_table, include=FALSE}
 if [[ $(ls | grep -c "_phylogroup.csv") -eq 1 ]];then
   awk -F "," '{print $2}' *_phylogroup.csv | sort | uniq | sort -g >group.list
@@ -807,7 +811,7 @@ fi
 ```{r phyloGroup_table, echo=FALSE}
 if (params$asvTClust == "true" || params$aminoTClust == "true"){
     phylogroup=read.csv("phylogroup.csv", header = T)
-    knitr::kable(phylogroup, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: PhyloGroup Table") %>%
+    knitr::kable(phylogroup, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: phyloGroup Table") %>%
     kable_styling(font_size = 12, full_width = F)%>%
     scroll_box(width = "100%", height = "100%")
 }
@@ -819,7 +823,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;PhyloGroup Relative Abundance Plot</h2></div>
+# phyloGroup Relative Abundance Plot
 
 <br>
 <br>
@@ -887,7 +891,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;PhyloGroup Rarefaction Curves</h2></div>
+# phyloGroup-based Rarefaction Curves
 
 <br>
 <br>
@@ -909,12 +913,12 @@ raredata <- as.data.frame(rrarefy(phydata5[,2:cols], sample=minreads))
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;PhyloGroup Diversity Analyses Plots</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;phyloGroup-based Diversity Analyses Plots</h2></div>
 
 <br>
 <br>
 
-### PhyloGroup Shannon diversity
+# phyloGroup-based Shannon diversity
 
 <br>
 ```{r phy_diversity_analysis1a, echo=FALSE}
@@ -991,7 +995,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 <br>
 
-### PhyloGroup Simpson diversity
+# phyloGroup-based Simpson diversity
 
 <br>
 ```{r phy_diversity_analysis2a, echo=FALSE}
@@ -1065,7 +1069,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 <br>
 
-### PhyloGroup Richness
+# phyloGroup-based Richness
 
 <br>
 ```{r phy_diversity_analysis3a, echo=FALSE}
@@ -1141,7 +1145,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;PhyloGroup Distance To Centroid</h2></div>
+# phyloGroup-based Distance To Centroid
 <br>
 ```{r phylo_distance2a, echo=FALSE}
 if (params$asvTClust == "true" || params$aminoTClust == "true"){
@@ -1178,11 +1182,11 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS Plots</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;phyloGroup-based NMDS or PCoA Plots</h2></div>
 
 <br>
 
-### PhyloGroup 2D NMDS
+# phyloGroup-based 2D NMDS or PcOA
 
 <br>
 ```{r phylo_nmds2d, echo=FALSE}
@@ -1242,7 +1246,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 <br>
 
-### PhyloGroup 3D NMDS
+# phyloGroup-based 3D NMDS and PCoA
 
 <br>
 
@@ -1291,9 +1295,9 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 <br>
 
-# Post Minimum Entropy Decomposition (MED) Analyses
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Minimum Energy Decomposition (MED) Results</h2></div>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group Breakdown Table</h2></div>
+# MED Group Breakdown
 
 <br>
 <br>
@@ -1354,7 +1358,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-MED Relative Abundance Plot</h2></div>
+# MED Group Relative Abundance Plot
 
 <br>
 <br>
@@ -1475,7 +1479,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-Med Rarefaction Curves</h2></div>
+# MED Group-based Rarefaction Curves</h2></div>
 
 <br>
 <br>
@@ -1502,7 +1506,7 @@ raredata <- as.data.frame(rrarefy(meddata5[,2:cols], sample=minreads))
 <br>
 <br>
 
-### Post-MED Shannon diversity
+# MED Group-based Shannon diversity
 
 <br>
 ```{r med_diversity_analysis1a, echo=FALSE}
@@ -1579,7 +1583,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-### Post-MED Simpson diversity
+# MED Group-based Simpson diversity
 
 <br>
 ```{r med_diversity_analysis2a, echo=FALSE}
@@ -1653,7 +1657,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-### Post-MED Richness
+# MED Group-based Richness
 
 <br>
 ```{r med_diversity_analysis3a, echo=FALSE}
@@ -1729,7 +1733,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Post-MED Distance To Centroid</h2></div>
+# MED Group-based Distance To Centroid
 <br>
 ```{r med_distance2a, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
@@ -1766,11 +1770,11 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;NMDS Plots</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group-based NMDS or PCoA Plots</h2></div>
 
 <br>
 
-### Post-MED 2D NMDS
+# MED Group-based 2D NMDS or PCoA
 
 <br>
 ```{r med_nmds2d, echo=FALSE}
@@ -1830,7 +1834,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-### Post-MED 3D NMDS
+# MED Group-based 3D NMDS or PCoA
 
 <br>
 
@@ -1881,7 +1885,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group Representatives Phylogenetic Tree</h2></div>
+<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;MED Group Representative Phylogenetic Tree</h2></div>
 
 <br>
 <br>
