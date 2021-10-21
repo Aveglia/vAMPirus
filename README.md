@@ -21,6 +21,8 @@
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
 
+## IF YOU CLONED v2.0.1 PLEASE RE-CLONE v2.0.2; there was an error with how the TreeCluster results were processed in v2.0.1.
+
 # New in vAMPirus version 2.0.2
 
 1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
