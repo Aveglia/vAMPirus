@@ -760,7 +760,7 @@ if (params$skipPhylogeny == "true") {
     gg = ggplotly(p2, tooltip = c("label","tax"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Tax_colors', height= 500, width= 800, scale= 1))
     gg
-} else if (( params$asvTClust == "true") || (params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType") && (params$nodeCol == "TC")) {
+} else if ((params$asvTClust == "true") || (params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType") && (params$nodeCol == "TC")) {
     taxMap=read.csv("phygroup.csv", header=T, check.names = F)
     tree=read.tree("tree.txt")
     p1 <- ggtree(tree)
