@@ -8,7 +8,7 @@
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
 # Table of contents
-* [New in vAMPirus version 2.0.1](#New-in-vAMPirus-version-2.0.1)
+* [New in vAMPirus version 2.0.2](#New-in-vAMPirus-version-2.0.2)
 * [Quick intro](#Quick-intro)
   * [Contact/support](#Contact/support)
 * [Getting started](#Getting-started)
