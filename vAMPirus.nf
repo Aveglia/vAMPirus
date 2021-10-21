@@ -57,6 +57,13 @@ def helpMessage() {
                     --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
 
+            --Phylogeny-based clustering--
+
+                    --asvTClust                        Set this option to perform phylogeny-based clustering of ASV sequences, see manual for more information.
+
+                    --aminoTClust                      Set this option to perform phylogeny-based clustering of AminoType sequences, see manual for more information.                    
+
+
             --Minimum Entropy Decomposition arguments--
 
                     --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
@@ -274,11 +281,19 @@ def fullHelpMessage() {
                               --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
 
+                      --Phylogeny-based clustering--
+
+                              --asvTClust                        Set this option to perform phylogeny-based clustering of ASV sequences, see manual for more information.
+
+                              --aminoTClust                      Set this option to perform phylogeny-based clustering of AminoType sequences, see manual for more information.
+
+
                       --Minimum Entropy Decomposition arguments--
 
                               --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
 
                               --aminoMED                     Set this option to perform Minimum Entropy Decomposition on AminoType sequences, see manual for more information. You will need to set a value for --aminoC to perform this analysis
+
 
                       --Skip options--
 
@@ -301,6 +316,7 @@ def fullHelpMessage() {
                               --skipEMBOSS                    Set this option to skip EMBOSS processes
 
                               --skipReport                    Set this option to skip html report generation
+
 
                 **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
