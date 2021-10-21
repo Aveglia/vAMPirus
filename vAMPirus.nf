@@ -2388,7 +2388,7 @@ if (params.DataCheck || params.Analyze) {
                           done
                           paste -d "," grup.list group.list > groups.csv
                           rm grup.list group.list
-                          awk -F "," '{print \$1}' ${params.projtag}_ASV_counts.csv | sed '1d' > asv.list
+                          awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
                           for z in \$(cat asv.list);
                           do      if [[ \$(grep -wc "\$z" single.list) -ge 1 ]]
                                   then
@@ -2400,7 +2400,7 @@ if (params.DataCheck || params.Analyze) {
                                   echo ""\$z","\$group"" >> ${params.projtag}_ASV_phylogroup.csv
                           done
                           awk -F "," '{print \$2}' ${params.projtag}_ASV_phylogroup.csv > groups.list
-                          paste -d"," groups.list ${params.projtag}_ASV_counts.csv > ${params.projtag}_ASV_phyloGroupingcounts.csv
+                          paste -d"," groups.list ${counts} > ${params.projtag}_ASV_phyloGroupingcounts.csv
                           """
                 }
 
@@ -3129,7 +3129,7 @@ if (params.DataCheck || params.Analyze) {
                           done
                           paste -d "," grup.list group.list > groups.csv
                           rm grup.list group.list
-                          awk -F "," '{print \$1}' ${params.projtag}_amino_counts.csv | sed '1d' > asv.list
+                          awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
                           for z in \$(cat asv.list);
                           do      if [[ \$(grep -wc "\$z" single.list) -ge 1 ]]
                                   then
@@ -3141,7 +3141,7 @@ if (params.DataCheck || params.Analyze) {
                                   echo ""\$z","\$group"" >> ${params.projtag}_amino_phylogroup.csv
                           done
                           awk -F "," '{print \$2}' ${params.projtag}_amino_phylogroup.csv > groups.list
-                          paste -d"," groups.list ${params.projtag}_amino_counts.csv > ${params.projtag}_amino_phyloGroupingcounts.csv
+                          paste -d"," groups.list ${counts} > ${params.projtag}_amino_phyloGroupingcounts.csv
                          """
                      }
             } else {
