@@ -809,7 +809,7 @@ fi
 ```
 
 ```{r phyloGroup_table, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     phylogroup=read.csv("phylogroup.csv", header = T)
     knitr::kable(phylogroup, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: phyloGroup Table") %>%
     kable_styling(font_size = 12, full_width = F)%>%
@@ -829,7 +829,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 
 ```{r phylo_plot, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
   #medgroup=read.csv("uVP_AminoType_Groupingcounts.csv", check.names=FALSE)
   phylogroup=read.csv("phylogroupcounts.csv", header = T, check.names=FALSE)
   phydata <- phylogroup %>% select(-2)
@@ -897,7 +897,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 
 ```{r phy_rarefaction, echo=FALSE, cache=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
 ##Rarefaction curves
 rarefaction <- rarecurve(phydata5[,2:cols])
 
@@ -922,7 +922,7 @@ raredata <- as.data.frame(rrarefy(phydata5[,2:cols], sample=minreads))
 
 <br>
 ```{r phy_diversity_analysis1a, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     metadata <- phydata5[,(cols+1):phydata5dim[2]]
     metadata$sample <- phydata5$sample
     index <-diversity(raredata, index= "shannon")
@@ -940,7 +940,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 
 ```{r phy_diversity_analysis1b, echo=FALSE}
 #divided because error
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     if (params$stats == "true" ) {
         shannonaov <- aov(index ~ treatment, data= shannondata5_2)
         st <- shapiro.test(resid(shannonaov))
@@ -999,7 +999,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 
 <br>
 ```{r phy_diversity_analysis2a, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     index <- diversity(raredata, index= "simpson")
     simpsondata5 <- as.data.frame(index)
     simpsondata5$sample<- phydata5$sample
@@ -1014,7 +1014,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 ```
 
 ```{r phy_diversity_analysis2b, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     if (params$stats == "true" ) {
         simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
         st <- shapiro.test(resid(simpsonaov))
@@ -1073,7 +1073,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 
 <br>
 ```{r phy_diversity_analysis3a, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     mind5<-min(phydata5$sum)
     index <- rarefy(phydata5[,2:cols], sample=mind5)
     rarerichnessdata5 <- as.data.frame(index)
@@ -1089,7 +1089,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 ```
 
 ```{r phylo_diversity_analysis3b, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     if (params$stats == "true" ) {
         richaov <- aov(index ~ treatment, data= richdata5_2)
         st <- shapiro.test(resid(richaov))
@@ -1148,7 +1148,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 # phyloGroup-based Distance To Centroid
 <br>
 ```{r phylo_distance2a, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     ##Distance
     intermediate <- raredata
     bray.distance <- vegdist(sqrt(intermediate), method="bray")
@@ -1167,7 +1167,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 }
 ```
 ```{r phylo_distance2b, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     if (params$stats == "true" ) {
         adn <- adonis(bray.distance~phydata5$treatment)
         adn
@@ -1190,7 +1190,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 
 <br>
 ```{r phylo_nmds2d, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     ##NMDS
     datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 
@@ -1251,7 +1251,7 @@ if (params$asvTClust == "true" || params$aminoTClust == "true"){
 <br>
 
 ```{r phylo_nmds3d, echo=FALSE}
-if (params$asvTClust == "true" || params$aminoTClust == "true"){
+if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     MDS3 <- metaMDS(sqrt(datax),
                    distance = "bray",autotransform = FALSE,
                    k = 3,
