@@ -8,7 +8,7 @@
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
 # Table of contents
-* [New in vAMPirus version 2.0.1](#New-in-vAMPirus-version-2.0.1)
+* [New in vAMPirus version 2.0.2](#New-in-vAMPirus-version-2.0.2)
 * [Quick intro](#Quick-intro)
   * [Contact/support](#Contact/support)
 * [Getting started](#Getting-started)
@@ -20,6 +20,8 @@
 * [Testing vAMPirus install](#Testing-vAMPirus-installation)
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
+
+## IF YOU CLONED v2.0.1 PLEASE RE-CLONE v2.0.2; there was an error with how the TreeCluster results were processed in v2.0.1.
 
 # New in vAMPirus version 2.0.2
 
