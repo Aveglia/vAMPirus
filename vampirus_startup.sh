@@ -58,6 +58,22 @@ os_c() {
         exit 0
     fi
 }
+# get version of GNU tool
+toolversion() {
+    local prog="$1" operator="$2" value="$3" version
+
+    version=$($prog --version | awk '{print $NF; exit}')
+
+    awk -vv1="$version" -vv2="$value" 'BEGIN {
+        split(v1, a, /\./); split(v2, b, /\./);
+        if (a[1] == b[1]) {
+            exit (a[2] '$operator' b[2]) ? 0 : 1
+        }
+        else {
+            exit (a[1] '$operator' b[1]) ? 0 : 1
+        }
+    }'
+}
 source_c() {
     if [ -f ~/.bashrc ];then
         source ~/.bashrc
@@ -72,9 +88,9 @@ conda_c() {
     check_conda=$( command -v conda )
     if [ "$check_conda" != "" ];then #&& [ "$ver" -gt "45" ];then
         echo -e "\n\t -- Conda seems to be installed in your system --\n"
-        ver=$( conda -V | awk '{print $2}' | cut -f 1,2 -d "." )
+        #ver=$( conda -V | awk '{print $2}' | cut -f 1,2 -d "." )
         vern=4.8
-        if [ $( echo "$ver >= $vern" | bc -l ) -eq 1 ];then
+        if toolversion conda '>=' $vern;then
             echo -e "\n\t -- Conda is installed (v4.8 or higher). Checking environment... --\n"
             #Check environment
             check_env=$( conda info -e | grep -c "vAMPirus" )
