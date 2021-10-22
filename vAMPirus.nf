@@ -1864,11 +1864,15 @@ if (params.DataCheck || params.Analyze) {
                       tuple nid, file(asvs) from nuclFastas_forDiamond_ncasv_ch
 
                   output:
-                      tuple nid, file("skipncASVtaxonomy.txt") into ( taxplot_ncasv, tax_table_ncasv, tax_nodCol_ncasv )
+                      tuple nid, file("skipncASVtaxonomy1.txt") into ( taxplot_ncasv )
+                      tuple nid, file("skipncASVtaxonomy2.txt") into ( tax_table_ncasv )
+                      tuple nid, file("skipncASVtaxonomy3.txt") into ( tax_nodCol_ncasv )
 
                   script:
                       """
-                      echo "Skipped" >skipncASVtaxonomy.txt
+                      echo "Skipped" >skipncASVtaxonomy1.txt
+                      echo "Skipped" >skipncASVtaxonomy2.txt
+                      echo "Skipped" >skipncASVtaxonomy3.txt
                       """
               }
           }
@@ -3789,11 +3793,15 @@ if (params.DataCheck || params.Analyze) {
                          tuple nid, file(asvs) from pcASV_ntDiamond_ch
 
                      output:
-                         tuple nid, file("skipncASVnubtaxonomy.txt") into ( taxplot3, tax_table_pcasvnt, tax_nodCol_pcasvnt )
+                         tuple nid, file("skipncASVnubtaxonomy1.txt") into ( taxplot3 )
+                         tuple nid, file("skipncASVnubtaxonomy2.txt") into ( tax_table_pcasvnt )
+                         tuple nid, file("skipncASVnubtaxonomy3.txt") into ( tax_nodCol_pcasvnt )
 
                      script:
                          """
-                         echo "Skipped" >skipncASVnubtaxonomy.txt
+                         echo "Skipped" >skipncASVnubtaxonomy1.txt
+                         echo "Skipped" >skipncASVnubtaxonomy2.txt
+                         echo "Skipped" >skipncASVnubtaxonomy3.txt
                          """
                  }
              }
@@ -4303,11 +4311,15 @@ if (params.DataCheck || params.Analyze) {
                         tuple nid, file(asvs) from pcASV_aaDiamond_ch
 
                     output:
-                        tuple nid, file("skipncASVprottax.txt") into ( taxplot4, tax_table_pcasvaa, tax_nodCol_pcasvaa )
+                        tuple nid, file("skipncASVprottax1.txt") into taxplot4
+                        tuple nid, file("skipncASVprottax2.txt") into tax_table_pcasvaa
+                        tuple nid, file("skipncASVprottax3.txt") into tax_nodCol_pcasvaa
 
                     script:
                         """
-                        echo "Skipped" >skipncASVprottax.txt
+                        echo "Skipped" >skipncASVprottax1.txt
+                        echo "Skipped" >skipncASVprottax2.txt
+                        echo "Skipped" >skipncASVprottax3.txt
                         """
                 }
             }
