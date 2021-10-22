@@ -71,7 +71,7 @@ NOTE: Most plots are interactive and you can use the legend to specify samples/t
 ```{r readstats, echo=FALSE}
 if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
     writeLines("\n--------------------------------------------------------------\n")
-    cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+    message("Read processing skipped.")
     writeLines("\n--------------------------------------------------------------\n")
 } else {
     if (params$skipAdapterRemoval == "false") {
@@ -82,7 +82,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
         scroll_box(width = "100%", height = "100%")
     } else {
         writeLines("\n--------------------------------------------------------------\n")
-        cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+        message("Adapter removal skipped.")
         writeLines("\n--------------------------------------------------------------\n")
     }
 }
@@ -97,7 +97,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 # Plot of reads before and after
 if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
     writeLines("\n--------------------------------------------------------------\n")
-    cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+    message("Read processing skipped.")
     writeLines("\n--------------------------------------------------------------\n")
 } else {
     if (params$skipAdapterRemoval == "false") {
@@ -111,7 +111,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
     } else {
         # file fore here
         writeLines("\n--------------------------------------------------------------\n")
-        cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+        message("Adapter removal skipped.")
         writeLines("\n--------------------------------------------------------------\n")
     }
 }
@@ -124,7 +124,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 # Plot of R1 and R2 before and after
 if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
     writeLines("\n--------------------------------------------------------------\n")
-    cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+    message("Read processing skipped.")) , sep = '\n')
     writeLines("\n--------------------------------------------------------------\n")
 } else {
     if (params$skipAdapterRemoval == "false") {
@@ -139,7 +139,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
     } else {
         # file fore here
         writeLines("\n--------------------------------------------------------------\n")
-        cat(readLines(list.files(pattern="filter_reads.txt")) , sep = '\n')
+        message("Adapter removal skipped.")
         writeLines("\n--------------------------------------------------------------\n")
     }
 }
@@ -701,7 +701,7 @@ heat
 if (params$skipTaxonomy == "true") {
     # file fore here
     writeLines("\n--------------------------------------------------------------\n")
-    cat(readLines(list.files(pattern="tax.txt")) , sep = '\n')
+    message("Taxonomy skipped.")
     writeLines("\n--------------------------------------------------------------\n")
 } else {
     tax=read.csv("sum.csv",header=F)
@@ -732,7 +732,7 @@ if (params$skipTaxonomy == "true") {
 if (params$skipPhylogeny == "true") {
     # file fore here
     writeLines("\n--------------------------------------------------------------\n")
-    cat(readLines(list.files(pattern="tree.txt")) , sep = '\n')
+    message("Phylogeny skipped.")
     writeLines("\n--------------------------------------------------------------\n")
 } else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType") && (params$nodeCol == "MED")) {
     tree=read.tree("tree.txt")
@@ -1894,7 +1894,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 if (params$skipPhylogeny == "true") {
     # file fore here
     writeLines("\n--------------------------------------------------------------\n")
-    cat(readLines(list.files(pattern="tree.txt")) , sep = '\n')
+    message("Skipped phylogeny.") , sep = '\n')
     writeLines("\n--------------------------------------------------------------\n")
 } else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     #tree=read.newick("vAMPrun_otu.55.raxml.support")

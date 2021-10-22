@@ -1856,6 +1856,10 @@ if (params.DataCheck || params.Analyze) {
                       """
                 }
             }
+          } else {
+              taxplot_ncasv = Channel.value('skipping')
+              tax_table_ncasv = Channel.value('skipping')
+              tax_nodCol_ncasv = Channel.value('skipping')
           }
 
 
@@ -1960,7 +1964,9 @@ if (params.DataCheck || params.Analyze) {
                               """
                       }
 
-                }
+                } else {
+                    nucl_phyl_plot_ncasv = Channel.value('skipping')
+            }
 
         } else {
             reads_vsearch5_ch
@@ -2252,7 +2258,12 @@ if (params.DataCheck || params.Analyze) {
                           """
                 }
             }
-        }
+        } else {
+            taxplot_asv = Channel.value('skipping')
+            tax_table_asv = Channel.value('skipping')
+            tax_nodCol_asv = Channel.value('skipping')
+       }
+
 
         process Generate_ASV_Counts_Tables {
 
@@ -2371,6 +2382,10 @@ if (params.DataCheck || params.Analyze) {
                           fi
                           """
                   }
+            } else {
+                nucl_phyl_plot_asv = Channel.value('skipping')
+                asvphy_med = Channel.value('skipping')
+                asv_treeclust = Channel.value('skipping')
             }
 
             if (params.asvTClust){
@@ -2429,8 +2444,8 @@ if (params.DataCheck || params.Analyze) {
                 }
 
             } else {
-                asv_phylogroupcsv = Channel.empty()
-                asv_phylogroupingcsv = Channel.empty()
+                asv_phylogroupcsv = Channel.value('skipping')
+                asv_phylogroupingcsv = Channel.value('skipping')
             }
 
             if (params.asvMED) {
@@ -2571,9 +2586,9 @@ if (params.DataCheck || params.Analyze) {
                   """
               }
             } else {
-                asvgroupscsv = Channel.empty()
-                asv_group_rep_tree = Channel.empty()
-                asvgroupcounts = Channel.empty()
+                asvgroupscsv = Channel.value('skipping')
+                asv_group_rep_tree = Channel.value('skipping')
+                asvgroupcounts = Channel.value('skipping')
             }
 
             if (!params.skipAminoTyping) {
@@ -3014,6 +3029,10 @@ if (params.DataCheck || params.Analyze) {
                               """
                     }
                 }
+             } else {
+                 taxplot2 = Channel.value('skipping')
+                 tax_table_amino = Channel.value('skipping')
+                 tax_nodCol_amino = Channel.value('skipping')
              }
 
                 if (!params.skipPhylogeny) {
@@ -3067,6 +3086,10 @@ if (params.DataCheck || params.Analyze) {
                             fi
                             """
                     }
+                } else {
+                    amino_rax_plot = Channel.value('skipping')
+                    amino_rephy = Channel.value('skipping')
+                    amino_treeclust = Channel.value('skipping')
                 }
 
                 process Generate_AminoTypes_Counts_Table {
@@ -3169,8 +3192,8 @@ if (params.DataCheck || params.Analyze) {
                          """
                      }
             } else {
-                amino_phylogroupcsv = Channel.empty()
-                amino_phylogroupingcsv = Channel.empty()
+                amino_phylogroupcsv = Channel.value('skipping')
+                amino_phylogroupingcsv = Channel.value('skipping')
             }
 
               if (params.aminoMED) {
@@ -3314,9 +3337,9 @@ if (params.DataCheck || params.Analyze) {
                 }
             }
         } else {
-            atygroupscsv = Channel.empty()
-            amino_group_rep_tree = Channel.empty()
-            amino_groupcounts = Channel.empty()
+            atygroupscsv = Channel.value('skipping')
+            amino_group_rep_tree = Channel.value('skipping')
+            amino_groupcounts = Channel.value('skipping')
         }
 
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
@@ -3735,6 +3758,10 @@ if (params.DataCheck || params.Analyze) {
                               """
                     }
                 }
+             } else {
+                 taxplot3 = Channel.value('skipping')
+                 tax_table_pcasvnt = Channel.value('skipping')
+                 tax_nodCol_pcasvnt = Channel.value('skipping')
              }
 
 
@@ -3846,6 +3873,8 @@ if (params.DataCheck || params.Analyze) {
                             fi
                             """
                     }
+                } else {
+                    potu_Ntree_plot = Channel.value('skipping')
                 }
 
                 process pcASV_AminoAcid_Matrix {
@@ -4219,6 +4248,10 @@ if (params.DataCheck || params.Analyze) {
                               """
                     }
                 }
+            } else {
+                taxplot4 = Channel.value('skipping')
+                tax_table_pcasvaa = Channel.value('skipping')
+                tax_nodCol_pcasvaa = Channel.value('skipping')
             }
 
                 if (!params.skipPhylogeny) {
@@ -4275,6 +4308,8 @@ if (params.DataCheck || params.Analyze) {
                             fi
                             """
                     }
+                } else {
+                    potu_Atree_plot = Channel.value('skipping')
                 }
 
                 process Generate_pcASV_Protein_Counts {
@@ -4458,7 +4493,7 @@ if (params.DataCheck || params.Analyze) {
 
                     script:
                         """
-                        name=\$( ls *summary_for_plot.csv | awk -F "_summary_for_plot.csv" '{print \$1}')
+                        name=\$( ls *_counts.csv | awk -F "_counts.csv" '{print \$1}')
                         type=\$( ls *_counts.csv | awk -F "${params.projtag}" '{print \$2}' | awk -F "_" '{print \$2}'  )
                         cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
                         cp ${params.vampdir}/example_data/conf/vamplogo.png .
