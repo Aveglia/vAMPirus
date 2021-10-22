@@ -2405,8 +2405,8 @@ if (params.DataCheck || params.Analyze) {
                 }
 
             } else {
-                asv_phylogroupcsv = Channel.empty()
-                asv_phylogroupingcsv = Channel.empty()
+                asv_phylogroupcsv = Channel.fromPath(${params.vampdir}/bin/skipping.txt)
+                asv_phylogroupingcsv = Channel.fromPath(${params.vampdir}/bin/skipping.txt)
             }
 
             if (params.asvMED) {
@@ -2547,9 +2547,9 @@ if (params.DataCheck || params.Analyze) {
                   """
               }
             } else {
-                asvgroupscsv = Channel.empty()
-                asv_group_rep_tree = Channel.empty()
-                asvgroupcounts = Channel.empty()
+                asvgroupscsv = Channel.fromPath(${params.vampdir}/bin/skipping.txt)
+                asv_group_rep_tree = Channel.fromPath(${params.vampdir}/bin/skipping.txt)
+                asvgroupcounts = Channel.fromPath(${params.vampdir}/bin/skipping.txt)
             }
 
             if (!params.skipAminoTyping) {
@@ -3145,8 +3145,8 @@ if (params.DataCheck || params.Analyze) {
                          """
                      }
             } else {
-                amino_phylogroupcsv = Channel.empty()
-                amino_phylogroupingcsv = Channel.empty()
+                amino_phylogroupcsv = Channel.fromPath(${params.vampdir}/bin/skipping.txt)
+                amino_phylogroupingcsv = Channel.fromPath(${params.vampdir}/bin/skipping.txt)
             }
 
               if (params.aminoMED) {
