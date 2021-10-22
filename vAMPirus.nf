@@ -1832,6 +1832,10 @@ if (params.DataCheck || params.Analyze) {
                       """
                 }
             }
+          } else {
+              taxplot_ncasv = Channel.value('skipping')
+              tax_table_ncasv = Channel.value('skipping')
+              tax_nodCol_ncasv = Channel.value('skipping')
           }
 
 
@@ -1936,7 +1940,9 @@ if (params.DataCheck || params.Analyze) {
                               """
                       }
 
-                }
+                } else {
+                    nucl_phyl_plot_ncasv = Channel.value('skipping')
+            }
 
         } else {
             reads_vsearch5_ch
@@ -2228,6 +2234,10 @@ if (params.DataCheck || params.Analyze) {
                           """
                 }
             }
+        } else {
+            taxplot_asv = Channel.value('skipping')
+            tax_table_asv = Channel.value('skipping')
+            tax_nodCol_asv = Channel.value('skipping')
         }
 
         process Generate_ASV_Counts_Tables {
@@ -2347,9 +2357,13 @@ if (params.DataCheck || params.Analyze) {
                           fi
                           """
                   }
+            } else {
+                nucl_phyl_plot_asv = Channel.value('skipping')
+                asvphy_med = Channel.value('skipping')
+                asv_treeclust = Channel.value('skipping')
             }
 
-            if (params.asvTClust){
+            if (params.asvTClust) {
 
                 process ASV_PhyloClustering {
 
@@ -2990,6 +3004,10 @@ if (params.DataCheck || params.Analyze) {
                               """
                     }
                 }
+             } else {
+                 taxplot2 = Channel.value('skipping')
+                 tax_table_amino = Channel.value('skipping')
+                 tax_nodCol_amino = Channel.value('skipping')
              }
 
                 if (!params.skipPhylogeny) {
@@ -3043,6 +3061,10 @@ if (params.DataCheck || params.Analyze) {
                             fi
                             """
                     }
+                } else {
+                    amino_rax_plot = Channel.value('skipping')
+                    amino_rephy = Channel.value('skipping')
+                    amino_treeclust = Channel.value('skipping')
                 }
 
                 process Generate_AminoTypes_Counts_Table {
@@ -3711,6 +3733,10 @@ if (params.DataCheck || params.Analyze) {
                               """
                     }
                 }
+             } else {
+                 taxplot3 = Channel.value('skipping')
+                 tax_table_pcasvnt = Channel.value('skipping')
+                 tax_nodCol_pcasvnt = Channel.value('skipping')
              }
 
 
@@ -3822,6 +3848,8 @@ if (params.DataCheck || params.Analyze) {
                             fi
                             """
                     }
+                } else {
+                    potu_Ntree_plot = Channel.value('skipping')
                 }
 
                 process pcASV_AminoAcid_Matrix {
@@ -4195,6 +4223,10 @@ if (params.DataCheck || params.Analyze) {
                               """
                     }
                 }
+            } else {
+                taxplot4 = Channel.value('skipping')
+                tax_table_pcasvaa = Channel.value('skipping')
+                tax_nodCol_pcasvaa = Channel.value('skipping')
             }
 
                 if (!params.skipPhylogeny) {
@@ -4251,6 +4283,8 @@ if (params.DataCheck || params.Analyze) {
                             fi
                             """
                     }
+                } else {
+                    potu_Atree_plot = Channel.value('skipping')
                 }
 
                 process Generate_pcASV_Protein_Counts {
