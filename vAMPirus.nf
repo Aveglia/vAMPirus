@@ -2394,15 +2394,15 @@ if (params.DataCheck || params.Analyze) {
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering.out
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
                           #create headless treeclustering.out
-                          tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0/g' > headless.treeout
+                          tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0X/g' > headless.treeout
                           #extracting singletons
-                          grep -w "0" headless.treeout > single.out
+                          grep -w "0X" headless.treeout > single.out
                           awk -F "\\t" '{print \$1}' single.out > single.list
                           #assigning groupID to singletons
                           for x in \$(awk -F "\\t" '{print \$1}' single.out); do echo ""\$x"XX" >> single.groups;done
 
                           #summarizing clustering results
-                          awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0" | sort | uniq > grp.list
+                          awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0X" | sort | uniq > grp.list
                           cat single.groups >> group.list
                           cat grp.list >> group.list
                           echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_ASV_phylogroup.csv
@@ -2418,7 +2418,7 @@ if (params.DataCheck || params.Analyze) {
                                   then
                                           group=\$(grep -w ""\$z"XX" groups.csv | awk -F "," '{print \$1}')
                                   else
-                                          grp=\$(grep -w "\$z" headless.treeout | awk -F "\t" '{print \$2}')
+                                          grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
                                           group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
                                   fi
                                   echo ""\$z","\$group"" >> ${params.projtag}_ASV_phylogroup.csv
@@ -3136,14 +3136,14 @@ if (params.DataCheck || params.Analyze) {
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering.out
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering_verbose.out
                           #create headless treeclustering.out
-                          tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
+                          tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0X/g' > headless.treeout
                           #extracting singletons
-                          grep -w "0" headless.treeout > single.out
+                          grep -w "0X" headless.treeout > single.out
                           awk -F "\\t" '{print \$1}' single.out > single.list
                           #assigning groupID to singletons
                           for x in \$(awk -F "\\t" '{print \$1}' single.out); do echo ""\$x"XX" >> single.groups;done
                           #summarizing clustering results
-                          awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0" | sort | uniq > grp.list
+                          awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0X" | sort | uniq > grp.list
                           cat single.groups >> group.list
                           cat grp.list >> group.list
                           echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_amino_phylogroup.csv
@@ -3159,7 +3159,7 @@ if (params.DataCheck || params.Analyze) {
                                   then
                                           group=\$(grep -w ""\$z"XX" groups.csv | awk -F "," '{print \$1}')
                                   else
-                                          grp=\$(grep -w "\$z" headless.treeout | awk -F "\t" '{print \$2}')
+                                          grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
                                           group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
                                   fi
                                   echo ""\$z","\$group"" >> ${params.projtag}_amino_phylogroup.csv
