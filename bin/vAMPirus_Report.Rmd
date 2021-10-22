@@ -124,7 +124,7 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 # Plot of R1 and R2 before and after
 if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
     writeLines("\n--------------------------------------------------------------\n")
-    message("Read processing skipped.")) , sep = '\n')
+    message("Read processing skipped.")
     writeLines("\n--------------------------------------------------------------\n")
 } else {
     if (params$skipAdapterRemoval == "false") {
@@ -1894,7 +1894,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 if (params$skipPhylogeny == "true") {
     # file fore here
     writeLines("\n--------------------------------------------------------------\n")
-    message("Skipped phylogeny.") , sep = '\n')
+    message("Skipped phylogeny.")
     writeLines("\n--------------------------------------------------------------\n")
 } else if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     #tree=read.newick("vAMPrun_otu.55.raxml.support")
