@@ -1569,7 +1569,7 @@ if (params.DataCheck || params.Analyze) {
 
               if (params.dbtype == "NCBI") {
 
-                process ncASV_Taxonomy_Inference_NCBI { /////// editttt
+                process ncASV_Taxonomy_Inference_NCBI { // edit
 
                     label 'high_cpus'
 
@@ -1725,7 +1725,7 @@ if (params.DataCheck || params.Analyze) {
                       }
             } else if (params.dbtype== "RVDB") {
 
-              process ncASV_Taxonomy_Inference_RVDB { /////// editttt
+              process ncASV_Taxonomy_Inference_RVDB { // edit
 
                   label 'high_cpus'
 
@@ -1857,9 +1857,20 @@ if (params.DataCheck || params.Analyze) {
                 }
             }
           } else {
-              taxplot_ncasv = Channel.value('skipping')
-              tax_table_ncasv = Channel.value('skipping')
-              tax_nodCol_ncasv = Channel.value('skipping')
+
+              process skipncASVtaxonomy {
+
+                  input:
+                      tuple nid, file(asvs) from nuclFastas_forDiamond_ncasv_ch
+
+                  output:
+                      tuple nid, file("skipncASVtaxonomy.txt") into ( taxplot_ncasv, tax_table_ncasv, tax_nodCol_ncasv )
+
+                  script:
+                      """
+                      echo "Skipped" >skipncASVtaxonomy.txt
+                      """
+              }
           }
 
 
@@ -1965,7 +1976,19 @@ if (params.DataCheck || params.Analyze) {
                       }
 
                 } else {
-                    nucl_phyl_plot_ncasv = Channel.value('skipping')
+
+                    process skipncASVphylogeny {
+                        input:
+                            tuple nid, file(asvs) from nuclFastas_forphylogeny_ncasv
+
+                        output:
+                            tuple nid, file("skipncASVphylogeny.txt") into nucl_phyl_plot_ncasv
+
+                        script:
+                            """
+                            echo "Skipped" >skipncASVphylogeny.txt
+                            """
+                    }
             }
 
         } else {
@@ -1977,7 +2000,7 @@ if (params.DataCheck || params.Analyze) {
 
           if (params.dbtype == "NCBI") {
 
-                process ASV_Taxonomy_Inference_NCBI { /////// editttt
+                process ASV_Taxonomy_Inference_NCBI { // edit
 
                     label 'high_cpus'
 
@@ -2130,7 +2153,7 @@ if (params.DataCheck || params.Analyze) {
                       }
                 } else if (params.dbtype== "RVDB") {
 
-                  process ASV_Taxonomy_Inference_RVDB { /////// editttt
+                  process ASV_Taxonomy_Inference_RVDB { // edit
 
                       label 'high_cpus'
 
@@ -3759,11 +3782,21 @@ if (params.DataCheck || params.Analyze) {
                     }
                 }
              } else {
-                 taxplot3 = Channel.value('skipping')
-                 tax_table_pcasvnt = Channel.value('skipping')
-                 tax_nodCol_pcasvnt = Channel.value('skipping')
-             }
 
+                 process skippcASVnuctaxonomy {
+
+                     input:
+                         tuple nid, file(asvs) from pcASV_ntDiamond_ch
+
+                     output:
+                         tuple nid, file("skipncASVnubtaxonomy.txt") into ( taxplot3, tax_table_pcasvnt, tax_nodCol_pcasvnt )
+
+                     script:
+                         """
+                         echo "Skipped" >skipncASVnubtaxonomy.txt
+                         """
+                 }
+             }
 
                 process Generate_Nucleotide_pcASV_Counts {
 
@@ -3874,7 +3907,21 @@ if (params.DataCheck || params.Analyze) {
                             """
                     }
                 } else {
-                    potu_Ntree_plot = Channel.value('skipping')
+
+                    process skippcASVnucphylogeny {
+
+                        input:
+                            tuple nid, file(prot) from pcASV_ntmuscle_ch
+
+                        output:
+                            tuple nid, file("skipncASVnucphy.txt") into ( potu_Ntree_plot )
+
+                        script:
+                            """
+                            echo "Skipped" >skipncASVnucphy.txt
+                            """
+                    }
+
                 }
 
                 process pcASV_AminoAcid_Matrix {
@@ -4249,9 +4296,20 @@ if (params.DataCheck || params.Analyze) {
                     }
                 }
             } else {
-                taxplot4 = Channel.value('skipping')
-                tax_table_pcasvaa = Channel.value('skipping')
-                tax_nodCol_pcasvaa = Channel.value('skipping')
+
+                process skippcASVprotTaxonomy {
+
+                    input:
+                        tuple nid, file(asvs) from pcASV_aaDiamond_ch
+
+                    output:
+                        tuple nid, file("skipncASVprottax.txt") into ( taxplot4, tax_table_pcasvaa, tax_nodCol_pcasvaa )
+
+                    script:
+                        """
+                        echo "Skipped" >skipncASVprottax.txt
+                        """
+                }
             }
 
                 if (!params.skipPhylogeny) {
@@ -4309,7 +4367,21 @@ if (params.DataCheck || params.Analyze) {
                             """
                     }
                 } else {
-                    potu_Atree_plot = Channel.value('skipping')
+
+                    process skippcASVprotPhylogeny {
+
+                        input:
+                            tuple nid, file(prot) from pcASV_aaMafft_ch
+
+                        output:
+                            tuple nid, file("skippcASVprotPhylogeny.txt") into ( potu_Atree_plot )
+
+                        script:
+                            """
+                            echo "Skipped" >skippcASVprotPhylogeny.txt
+                            """
+                    }
+
                 }
 
                 process Generate_pcASV_Protein_Counts {
