@@ -4468,7 +4468,7 @@ if (params.DataCheck || params.Analyze) {
 
                     script:
                         """
-                        name=\$( ls *summary_for_plot.csv | awk -F "_summary_for_plot.csv" '{print \$1}')
+                        name=\$( ls *_counts.csv | awk -F "_counts.csv" '{print \$1}')
                         type=\$( ls *_counts.csv | awk -F "${params.projtag}" '{print \$2}' | awk -F "_" '{print \$2}'  )
                         cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
                         cp ${params.vampdir}/example_data/conf/vamplogo.png .
