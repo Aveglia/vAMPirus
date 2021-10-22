@@ -701,7 +701,7 @@ heat
 if (params$skipTaxonomy == "true") {
     # file fore here
     writeLines("\n--------------------------------------------------------------\n")
-    cat(readLines(list.files(pattern="tax.txt")) , sep = '\n')
+    message("Taxonomy skipped.")
     writeLines("\n--------------------------------------------------------------\n")
 } else {
     tax=read.csv("sum.csv",header=F)
