@@ -61,7 +61,7 @@ def helpMessage() {
 
                     --asvTClust                        Set this option to perform phylogeny-based clustering of ASV sequences, see manual for more information.
 
-                    --aminoTClust                      Set this option to perform phylogeny-based clustering of AminoType sequences, see manual for more information.                    
+                    --aminoTClust                      Set this option to perform phylogeny-based clustering of AminoType sequences, see manual for more information.
 
 
             --Minimum Entropy Decomposition arguments--
@@ -634,8 +634,16 @@ if (params.DataCheck || params.Analyze) {
                         echo "Database present, checking if built now.."
                         if [ ! -e ${params.dbdir}/${params.dbname}.dmnd  ];then
                             echo "Database not built, building now..."
-                            diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname}
-                            export virdb=${params.dbdir}/${params.dbname}
+                            if [ ! -e ${params.dbdir}/${params.dbname}.dmnd ];then
+                                echo "It needs to be built upp, doing it now"
+                                if [[ ${params.ncbitax} == "true" && ${params.dbtype} == "NCBI" ]]
+                                then    diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname} --taxonmap ${params.dbdir}/NCBItaxonomy/prot.accession2taxid.FULL --taxonnodes ${params.dbdir}/NCBItaxonomy/nodes.dmp --taxonnames ${params.dbdir}/NCBItaxonomy/names.dmp
+                                else    diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname}
+                                fi
+                                export virdb=${params.dbdir}/${params.dbname}
+                            else
+                                echo "Database looks to be present and built."
+                            fi
                         else
                             echo "-- Database is ready to go!"
                             export virdb=${params.dbdir}/${params.dbname}
@@ -1633,7 +1641,7 @@ if (params.DataCheck || params.Analyze) {
                                         echo "\$line" | awk '{print \$12}' >> pid.list
                                         echo "\$line" | awk '{print \$2}' >> length.list
                                         echo "Extracting virus and gene ID for \$s now"
-                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                         echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                         echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
@@ -2032,7 +2040,7 @@ if (params.DataCheck || params.Analyze) {
                                         echo "\$line" | awk '{print \$12}' >> pid.list
                                         echo "\$line" | awk '{print \$2}' >> length.list
                                         echo "Extracting virus and gene ID for \$s now"
-                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                         echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                         echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
@@ -2794,7 +2802,7 @@ if (params.DataCheck || params.Analyze) {
                                             echo "\$line" | awk '{print \$12}' >> pid.list
                                             echo "\$line" | awk '{print \$2}' >> length.list
                                             echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
@@ -2802,7 +2810,7 @@ if (params.DataCheck || params.Analyze) {
                                             if [[ "${params.lca}" == "T" ]]
                                             then    if [[ \$(grep -w "\$acc" ${params.dbanno}/*.txt | wc -l) -eq 1 ]]
                                                     then  group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}')
-                                                          lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                                          lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\\t" '{print \$2}')
                                                           echo "\$lcla" >> lca_classification.list
                                                     else  echo "Viruses" >> lca_classification.list
                                                     fi
@@ -3510,7 +3518,7 @@ if (params.DataCheck || params.Analyze) {
                                             echo "\$line" | awk '{print \$12}' >> pid.list
                                             echo "\$line" | awk '{print \$2}' >> length.list
                                             echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
@@ -3995,7 +4003,7 @@ if (params.DataCheck || params.Analyze) {
                                             echo "\$line" | awk '{print \$12}' >> pid.list
                                             echo "\$line" | awk '{print \$2}' >> length.list
                                             echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
