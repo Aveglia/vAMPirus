@@ -87,7 +87,7 @@ def helpMessage() {
 
       **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
-           --Project/analysis information--
+           --Project/analysis information-- test
 
                     --projtag                       Set project name to be used as a prefix for output files
 
