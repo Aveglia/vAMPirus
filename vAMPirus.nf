@@ -3290,9 +3290,9 @@ if (params.DataCheck || params.Analyze) {
                 }
             }
         } else {
-            atygroupscsv = Channel.empty()
-            amino_group_rep_tree = Channel.empty()
-            amino_groupcounts = Channel.empty()
+            atygroupscsv = Channel.value('skipping')
+            amino_group_rep_tree = Channel.value('skipping')
+            amino_groupcounts = Channel.value('skipping')
         }
 
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
