@@ -39,7 +39,7 @@
 
 7. Phylogeny-based clustering ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)
 
-8. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results
+8. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results or TreeClustering results.
 
 8. PCoA plots added to Analyze  report if NMDS does not converge.
 
