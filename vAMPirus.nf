@@ -2405,7 +2405,7 @@ if (params.DataCheck || params.Analyze) {
                 }
 
             } else {
-                asv_phylogroupcsv = Channel.fromPath(${params.vampdir}/bin/skipping.txt)
+                asv_phylogroupcsv = Channel.fromPath('${params.vampdir}/bin/skipping.txt')
                 asv_phylogroupingcsv = Channel.fromPath(${params.vampdir}/bin/skipping.txt)
             }
 
