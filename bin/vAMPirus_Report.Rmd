@@ -787,7 +787,7 @@ if (params$skipPhylogeny == "true") {
     gg
 }
 ```
-This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL. If you ran the MED analysis, the colors of the nodes correspond to the MED group they were assigned to.
+This tree is a maximum likelihood tree made with IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL. Check out the use of the option --nodeCol to color nodes by taxonomy hit, MED group or phyloGroup.
 
 <br>
 <br>
@@ -1297,7 +1297,7 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 
 <div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;Minimum Energy Decomposition (MED) Results</h2></div>
 
-# MED Group Breakdown
+## MED Group Breakdown
 
 <br>
 <br>
@@ -1358,7 +1358,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 <br>
 
-# MED Group Relative Abundance Plot
+## MED Group Relative Abundance Plot
 
 <br>
 <br>
@@ -1479,7 +1479,7 @@ if (params$aminoMED == "true" && params$type == "AminoType"){
 <br>
 <br>
 
-# MED Group-based Rarefaction Curves</h2></div>
+## MED Group-based Rarefaction Curves</h2></div>
 
 <br>
 <br>
@@ -1506,7 +1506,7 @@ raredata <- as.data.frame(rrarefy(meddata5[,2:cols], sample=minreads))
 <br>
 <br>
 
-# MED Group-based Shannon diversity
+## MED Group-based Shannon diversity
 
 <br>
 ```{r med_diversity_analysis1a, echo=FALSE}
@@ -1583,7 +1583,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-# MED Group-based Simpson diversity
+## MED Group-based Simpson diversity
 
 <br>
 ```{r med_diversity_analysis2a, echo=FALSE}
@@ -1657,7 +1657,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-# MED Group-based Richness
+## MED Group-based Richness
 
 <br>
 ```{r med_diversity_analysis3a, echo=FALSE}
@@ -1733,7 +1733,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-# MED Group-based Distance To Centroid
+## MED Group-based Distance To Centroid
 <br>
 ```{r med_distance2a, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
@@ -1774,7 +1774,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 
 <br>
 
-# MED Group-based 2D NMDS or PCoA
+## MED Group-based 2D NMDS or PCoA
 
 <br>
 ```{r med_nmds2d, echo=FALSE}
@@ -1834,7 +1834,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 <br>
 
-# MED Group-based 3D NMDS or PCoA
+## MED Group-based 3D NMDS or PCoA
 
 <br>
 

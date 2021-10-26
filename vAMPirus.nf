@@ -967,7 +967,7 @@ if (params.DataCheck || params.Analyze) {
 
         label 'low_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/Clustering/ASVs", mode: "copy", overwrite: true
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ASVs", mode: "copy", overwrite: true
 
         input:
             file(fasta) from reads_vsearch4_ch
@@ -1116,13 +1116,14 @@ if (params.DataCheck || params.Analyze) {
                 file(fasta) from nucl2aa
 
             output:
-                file("*ASVprotforclust.fasta") into clustering_aa
+                file("*ASVtranslations.fasta") into clustering_aa
                 file("*_translation_report") into reportaa_VR
                 file("*_ASV_all.fasta") into asvfastaforaaclust
 
             script:
                 """
-                ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
+                ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprot.fasta --report ${params.projtag}_translation_report
+                awk '/^>/ { print (NR==1 ? "" : RS) \$0; next } { printf "%s", \$0 } END { printf RS }' ${params.projtag}_ASVprot.fasta > ${params.projtag}_ASVtranslations.fasta
                 cp ${fasta} ${params.projtag}_ASV_all.fasta
                 """
        }
@@ -2635,7 +2636,9 @@ if (params.DataCheck || params.Analyze) {
 
                   script:
                       """
-                      ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
+                      ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translaton.fasta --report ${params.projtag}_translation_report
+                      awk '/^>/ { print (NR==1 ? "" : RS) \$0; next } { printf "%s", \$0 } END { printf RS }' ${params.projtag}_all_translaton.fasta > ${params.projtag}_all_translatons.fasta
+                      rm ${params.projtag}_all_translaton.fasta
                       """
                 }
 
