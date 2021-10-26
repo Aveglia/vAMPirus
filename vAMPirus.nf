@@ -2637,7 +2637,7 @@ if (params.DataCheck || params.Analyze) {
                   script:
                       """
                       ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translaton.fasta --report ${params.projtag}_translation_report
-                      awk '/^>/ { print (NR==1 ? "" : RS) \$0; next } { printf "%s", \$0 } END { printf RS }' ${params.projtag}_all_translaton.fasta > ${params.projtag}_all_translatons.fasta
+                      awk '/^>/ { print (NR==1 ? "" : RS) \$0; next } { printf "%s", \$0 } END { printf RS }' ${params.projtag}_all_translaton.fasta > ${params.projtag}_all_translations.fasta
                       rm ${params.projtag}_all_translaton.fasta
                       """
                 }
