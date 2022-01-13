@@ -21,7 +21,7 @@
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
 
-## IF YOU CLONED v2.0.1 or v2.0.2 PLEASE RE-CLONE v2.0.3; there were errors caused by the use of skip options in previous versions.
+## IF YOU CLONED v2.0.1 or v2.0.2 PLEASE RE-CLONE or git pull v2.0.3; there were errors caused by the use of skip options in previous versions.
 
 # New in vAMPirus version 2.0.3
 
