@@ -518,45 +518,47 @@ if (params$stats == "true" ) {
 ##NMDS
 datax <- decostand(raredata, method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 
-MDS <- metaMDS(sqrt(datax),
-               distance = "bray",autotransform = FALSE,
-               k = 2,
-               maxit = 999,
-               trymax = params$try,
-               wascores = TRUE)
+if (nrow(datax) > 2) {
+    MDS <- metaMDS(sqrt(datax),
+                   distance = "bray",autotransform = FALSE,
+                   k = 2,
+                   maxit = 999,
+                   trymax = params$try,
+                   wascores = TRUE)
 
-if (MDS$converged == "TRUE") {
+    if (MDS$converged == "TRUE") {
 
-data.scores <- as.data.frame(scores(MDS))
-data.scores$sample <- data5$sample
-data.scores.2 <- merge(data.scores, metadata, by="sample")
+    data.scores <- as.data.frame(scores(MDS))
+    data.scores$sample <- data5$sample
+    data.scores.2 <- merge(data.scores, metadata, by="sample")
 
-p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
-  geom_point(size=2)+
-  theme_classic()+
-  theme(legend.title = element_blank())
+    p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
+      geom_point(size=2)+
+      theme_classic()+
+      theme(legend.title = element_blank())
 
-fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
-fff <- fff %>% layout(legend=list(y=.5))
-fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
-fff
+    fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
+    fff <- fff %>% layout(legend=list(y=.5))
+    fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
+    fff
 
-} else {
-print("NMDS did not converge. Printing PCoA")
-#calculate bray curtis distance
-bcdist <- vegdist(datax, "bray")
-res <- pcoa(bcdist)
-#res$values
-#biplot(res) #to make the boring 2D PCoA
-comp <- as.data.frame(res$vectors)
-comp$sample <- data5$sample
-comp2 <- merge(comp, metadata, by="sample")
-fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
-fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
-                      yaxis = list(title = "PCoA 2"))
-fig <- fig %>% layout(legend=list(y=.5))
-fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PCoA', height= 500, width= 800, scale= 1))
-fig
+    } else {
+    print("NMDS did not converge. Printing PCoA")
+    #calculate bray curtis distance
+    bcdist <- vegdist(datax, "bray")
+    res <- pcoa(bcdist)
+    #res$values
+    #biplot(res) #to make the boring 2D PCoA
+    comp <- as.data.frame(res$vectors)
+    comp$sample <- data5$sample
+    comp2 <- merge(comp, metadata, by="sample")
+    fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+    fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                          yaxis = list(title = "PCoA 2"))
+    fig <- fig %>% layout(legend=list(y=.5))
+    fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PCoA', height= 500, width= 800, scale= 1))
+    fig
+    }
 }
 ```
 
@@ -570,42 +572,44 @@ fig
 <br>
 
 ```{r nmds3d, echo=FALSE}
-MDS3 <- metaMDS(sqrt(datax),
-               distance = "bray",autotransform = FALSE,
-               k = 3,
-               maxit = 999,
-               trymax = params$try,
-               wascores = TRUE)
+if (nrow(datax) > 2) {
+    MDS3 <- metaMDS(sqrt(datax),
+                   distance = "bray",autotransform = FALSE,
+                   k = 3,
+                   maxit = 999,
+                   trymax = params$try,
+                   wascores = TRUE)
 
-if (MDS3$converged == "TRUE") {
+    if (MDS3$converged == "TRUE") {
 
-data.scores3 <- as.data.frame(scores(MDS3))
-data.scores3$sample <- data5$sample
-data.scores.3 <- merge(data.scores3, metadata, by="sample")
-p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
-        color=~treatment, colors=mycol,
-        mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
-        marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
-        )
-p3d <- p3d %>% layout(legend=list(y=.5))
-p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
-p3d
+    data.scores3 <- as.data.frame(scores(MDS3))
+    data.scores3$sample <- data5$sample
+    data.scores.3 <- merge(data.scores3, metadata, by="sample")
+    p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
+            color=~treatment, colors=mycol,
+            mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
+            marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
+            )
+    p3d <- p3d %>% layout(legend=list(y=.5))
+    p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
+    p3d
 
-} else {
-print("NMDS did not converge. Printing PCoA")
-#calculate bray curtis distance
-bcdist <- vegdist(datax, "bray")
-res <- pcoa(bcdist)
-comp <- as.data.frame(res$vectors)
-comp$sample <- data5$sample
-comp2 <- merge(comp, metadata, by="sample")
-fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, z = ~Axis.3, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
-fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
-                      yaxis = list(title = "PCoA 2"),
-                      zaxis = list(title = "PCoA 3"))
-fig <- fig %>% layout(legend=list(y=.5))
-fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
-fig
+    } else {
+    print("NMDS did not converge. Printing PCoA")
+    #calculate bray curtis distance
+    bcdist <- vegdist(datax, "bray")
+    res <- pcoa(bcdist)
+    comp <- as.data.frame(res$vectors)
+    comp$sample <- data5$sample
+    comp2 <- merge(comp, metadata, by="sample")
+    fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, z = ~Axis.3, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+    fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                          yaxis = list(title = "PCoA 2"),
+                          zaxis = list(title = "PCoA 3"))
+    fig <- fig %>% layout(legend=list(y=.5))
+    fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
+    fig
+    }
 }
 ```
 
@@ -1191,9 +1195,9 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 <br>
 ```{r phylo_nmds2d, echo=FALSE}
 if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
-    ##NMDS
-    datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
-
+##NMDS
+datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
+if (nrow(datax) > 2) {
     MDS <- metaMDS(sqrt(datax),
                    distance = "bray",autotransform = FALSE,
                    k = 2,
@@ -1238,6 +1242,7 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
       fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
       fig
     }
+    }
 }
 ```
 
@@ -1252,6 +1257,7 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 
 ```{r phylo_nmds3d, echo=FALSE}
 if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    if (nrow(datax) > 2) {
     MDS3 <- metaMDS(sqrt(datax),
                    distance = "bray",autotransform = FALSE,
                    k = 3,
@@ -1288,6 +1294,7 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
       fig <- fig %>% layout(legend=list(y=.5))
       fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
       fig
+    }
     }
 }
 ```
@@ -1779,52 +1786,54 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 ```{r med_nmds2d, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
-    ##NMDS
-    datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
+##NMDS
+datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 
-    MDS <- metaMDS(sqrt(datax),
-                   distance = "bray",autotransform = FALSE,
-                   k = 2,
-                   maxit = 999,
-                   trymax = params$try,
-                   wascores = TRUE)
+if (nrow(datax) > 2) {
+        MDS <- metaMDS(sqrt(datax),
+                       distance = "bray",autotransform = FALSE,
+                       k = 2,
+                       maxit = 999,
+                       trymax = params$try,
+                       wascores = TRUE)
 
-    if (MDS$converged == "TRUE") {
+        if (MDS$converged == "TRUE") {
 
-    data.scores <- as.data.frame(scores(MDS))
-    data.scores$sample <- meddata5$sample
-    data.scores.2 <- merge(data.scores, metadata, by="sample")
+        data.scores <- as.data.frame(scores(MDS))
+        data.scores$sample <- meddata5$sample
+        data.scores.2 <- merge(data.scores, metadata, by="sample")
 
-    p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
-      geom_point(size=2)+
-      theme_classic()+
-      theme(legend.title = element_blank())
+        p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
+          geom_point(size=2)+
+          theme_classic()+
+          theme(legend.title = element_blank())
 
-    #fff <- ggplotly(p)
-    #fff <- fff %>% layout(legend=list(y=.5))
-    #fff
+        #fff <- ggplotly(p)
+        #fff <- fff %>% layout(legend=list(y=.5))
+        #fff
 
-    fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
-    fff <- fff %>% layout(legend=list(y=.5))
-    fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
-    fff
+        fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
+        fff <- fff %>% layout(legend=list(y=.5))
+        fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
+        fff
 
-    } else {
-      print("NMDS did not converge. Printing PCoA")
-      #calculate bray curtis distance
-      bcdist <- vegdist(datax, "bray")
-      res <- pcoa(bcdist)
-      #res$values
-      #biplot(res) #to make the boring 2D PCoA
-      comp <- as.data.frame(res$vectors)
-      comp$sample <- data5$sample
-      comp2 <- merge(comp, metadata, by="sample")
-      fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
-      fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
-                            yaxis = list(title = "PCoA 2"))
-      fig <- fig %>% layout(legend=list(y=.5))
-      fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
-      fig
+        } else {
+          print("NMDS did not converge. Printing PCoA")
+          #calculate bray curtis distance
+          bcdist <- vegdist(datax, "bray")
+          res <- pcoa(bcdist)
+          #res$values
+          #biplot(res) #to make the boring 2D PCoA
+          comp <- as.data.frame(res$vectors)
+          comp$sample <- data5$sample
+          comp2 <- merge(comp, metadata, by="sample")
+          fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+          fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                                yaxis = list(title = "PCoA 2"))
+          fig <- fig %>% layout(legend=list(y=.5))
+          fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
+          fig
+        }
     }
 }
 ```
@@ -1840,7 +1849,8 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 
 ```{r med_nmds3d, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
-    MDS3 <- metaMDS(sqrt(datax),
+    if (nrow(datax) > 2) {
+        MDS3 <- metaMDS(sqrt(datax),
                    distance = "bray",autotransform = FALSE,
                    k = 3,
                    maxit = 999,
@@ -1876,6 +1886,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
       fig <- fig %>% layout(legend=list(y=.5))
       fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
       fig
+    }
     }
 }
 ```
