@@ -57,6 +57,13 @@ def helpMessage() {
                     --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
 
+            --Phylogeny-based clustering--
+
+                    --asvTClust                        Set this option to perform phylogeny-based clustering of ASV sequences, see manual for more information.
+
+                    --aminoTClust                      Set this option to perform phylogeny-based clustering of AminoType sequences, see manual for more information.
+
+
             --Minimum Entropy Decomposition arguments--
 
                     --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
@@ -274,11 +281,19 @@ def fullHelpMessage() {
                               --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
 
+                      --Phylogeny-based clustering--
+
+                              --asvTClust                        Set this option to perform phylogeny-based clustering of ASV sequences, see manual for more information.
+
+                              --aminoTClust                      Set this option to perform phylogeny-based clustering of AminoType sequences, see manual for more information.
+
+
                       --Minimum Entropy Decomposition arguments--
 
                               --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
 
                               --aminoMED                     Set this option to perform Minimum Entropy Decomposition on AminoType sequences, see manual for more information. You will need to set a value for --aminoC to perform this analysis
+
 
                       --Skip options--
 
@@ -301,6 +316,7 @@ def fullHelpMessage() {
                               --skipEMBOSS                    Set this option to skip EMBOSS processes
 
                               --skipReport                    Set this option to skip html report generation
+
 
                 **NOTE** Most opitons below can be set using the configuration file (vampirus.config) to avoid a lengthy launch command.
 
@@ -618,8 +634,16 @@ if (params.DataCheck || params.Analyze) {
                         echo "Database present, checking if built now.."
                         if [ ! -e ${params.dbdir}/${params.dbname}.dmnd  ];then
                             echo "Database not built, building now..."
-                            diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname}
-                            export virdb=${params.dbdir}/${params.dbname}
+                            if [ ! -e ${params.dbdir}/${params.dbname}.dmnd ];then
+                                echo "It needs to be built upp, doing it now"
+                                if [[ ${params.ncbitax} == "true" && ${params.dbtype} == "NCBI" ]]
+                                then    diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname} --taxonmap ${params.dbdir}/NCBItaxonomy/prot.accession2taxid.FULL --taxonnodes ${params.dbdir}/NCBItaxonomy/nodes.dmp --taxonnames ${params.dbdir}/NCBItaxonomy/names.dmp
+                                else    diamond makedb --in ${params.dbdir}/${params.dbname} -d ${params.dbdir}/${params.dbname}
+                                fi
+                                export virdb=${params.dbdir}/${params.dbname}
+                            else
+                                echo "Database looks to be present and built."
+                            fi
                         else
                             echo "-- Database is ready to go!"
                             export virdb=${params.dbdir}/${params.dbname}
@@ -943,7 +967,7 @@ if (params.DataCheck || params.Analyze) {
 
         label 'low_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/Clustering/ASVs", mode: "copy", overwrite: true
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ASVs", mode: "copy", overwrite: true
 
         input:
             file(fasta) from reads_vsearch4_ch
@@ -1092,13 +1116,14 @@ if (params.DataCheck || params.Analyze) {
                 file(fasta) from nucl2aa
 
             output:
-                file("*ASVprotforclust.fasta") into clustering_aa
+                file("*ASVtranslations.fasta") into clustering_aa
                 file("*_translation_report") into reportaa_VR
                 file("*_ASV_all.fasta") into asvfastaforaaclust
 
             script:
                 """
-                ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprotforclust.fasta --report ${params.projtag}_translation_report
+                ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASVprot.fasta --report ${params.projtag}_translation_report
+                awk '/^>/ { print (NR==1 ? "" : RS) \$0; next } { printf "%s", \$0 } END { printf RS }' ${params.projtag}_ASVprot.fasta > ${params.projtag}_ASVtranslations.fasta
                 cp ${fasta} ${params.projtag}_ASV_all.fasta
                 """
        }
@@ -1545,7 +1570,7 @@ if (params.DataCheck || params.Analyze) {
 
               if (params.dbtype == "NCBI") {
 
-                process ncASV_Taxonomy_Inference_NCBI { /////// editttt
+                process ncASV_Taxonomy_Inference_NCBI { // edit
 
                     label 'high_cpus'
 
@@ -1617,7 +1642,7 @@ if (params.DataCheck || params.Analyze) {
                                         echo "\$line" | awk '{print \$12}' >> pid.list
                                         echo "\$line" | awk '{print \$2}' >> length.list
                                         echo "Extracting virus and gene ID for \$s now"
-                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                         echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                         echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
@@ -1676,8 +1701,8 @@ if (params.DataCheck || params.Analyze) {
                         then
                               paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list lca_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                               paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                              paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list ncbi_classification.list >> \${name}_quick_Taxbreakdown.csv
-                        elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T"]]
+                              paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list >> \${name}_quick_Taxbreakdown.csv
+                        elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T" ]]
                         then
                               paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list ncbi_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                               paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list ncbi_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
@@ -1701,7 +1726,7 @@ if (params.DataCheck || params.Analyze) {
                       }
             } else if (params.dbtype== "RVDB") {
 
-              process ncASV_Taxonomy_Inference_RVDB { /////// editttt
+              process ncASV_Taxonomy_Inference_RVDB { // edit
 
                   label 'high_cpus'
 
@@ -1833,9 +1858,30 @@ if (params.DataCheck || params.Analyze) {
                 }
             }
           } else {
+<<<<<<< HEAD
               taxplot_ncasv = Channel.value('skipping')
               tax_table_ncasv = Channel.value('skipping')
               tax_nodCol_ncasv = Channel.value('skipping')
+=======
+
+              process skipncASVtaxonomy {
+
+                  input:
+                      tuple nid, file(asvs) from nuclFastas_forDiamond_ncasv_ch
+
+                  output:
+                      tuple nid, file("skipncASVtaxonomy1.txt") into ( taxplot_ncasv )
+                      tuple nid, file("skipncASVtaxonomy2.txt") into ( tax_table_ncasv )
+                      tuple nid, file("skipncASVtaxonomy3.txt") into ( tax_nodCol_ncasv )
+
+                  script:
+                      """
+                      echo "Skipped" >skipncASVtaxonomy1.txt
+                      echo "Skipped" >skipncASVtaxonomy2.txt
+                      echo "Skipped" >skipncASVtaxonomy3.txt
+                      """
+              }
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
           }
 
 
@@ -1941,7 +1987,23 @@ if (params.DataCheck || params.Analyze) {
                       }
 
                 } else {
+<<<<<<< HEAD
                     nucl_phyl_plot_ncasv = Channel.value('skipping')
+=======
+
+                    process skipncASVphylogeny {
+                        input:
+                            tuple nid, file(asvs) from nuclFastas_forphylogeny_ncasv
+
+                        output:
+                            tuple nid, file("skipncASVphylogeny.txt") into nucl_phyl_plot_ncasv
+
+                        script:
+                            """
+                            echo "Skipped" >skipncASVphylogeny.txt
+                            """
+                    }
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
             }
 
         } else {
@@ -1953,7 +2015,7 @@ if (params.DataCheck || params.Analyze) {
 
           if (params.dbtype == "NCBI") {
 
-                process ASV_Taxonomy_Inference_NCBI { /////// editttt
+                process ASV_Taxonomy_Inference_NCBI { // edit
 
                     label 'high_cpus'
 
@@ -2022,7 +2084,7 @@ if (params.DataCheck || params.Analyze) {
                                         echo "\$line" | awk '{print \$12}' >> pid.list
                                         echo "\$line" | awk '{print \$2}' >> length.list
                                         echo "Extracting virus and gene ID for \$s now"
-                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                        gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                         echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                         virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                         echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
@@ -2081,8 +2143,8 @@ if (params.DataCheck || params.Analyze) {
                         then
                               paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list lca_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                               paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                              paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list ncbi_classification.list >> \${name}_quick_Taxbreakdown.csv
-                        elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T"]]
+                              paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list >> \${name}_quick_Taxbreakdown.csv
+                        elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T" ]]
                         then
                               paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list ncbi_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                               paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list ncbi_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
@@ -2106,7 +2168,7 @@ if (params.DataCheck || params.Analyze) {
                       }
                 } else if (params.dbtype== "RVDB") {
 
-                  process ASV_Taxonomy_Inference_RVDB { /////// editttt
+                  process ASV_Taxonomy_Inference_RVDB { // edit
 
                       label 'high_cpus'
 
@@ -2238,7 +2300,12 @@ if (params.DataCheck || params.Analyze) {
             taxplot_asv = Channel.value('skipping')
             tax_table_asv = Channel.value('skipping')
             tax_nodCol_asv = Channel.value('skipping')
+<<<<<<< HEAD
         }
+=======
+       }
+
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
 
         process Generate_ASV_Counts_Tables {
 
@@ -2384,15 +2451,25 @@ if (params.DataCheck || params.Analyze) {
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering.out
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
                           #create headless treeclustering.out
+<<<<<<< HEAD
                           tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0/g' > headless.treeout
                           #extracting singletons
                           grep -w "0" headless.treeout > single.out
+=======
+                          tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0X/g' > headless.treeout
+                          #extracting singletons
+                          grep -w "0X" headless.treeout > single.out
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
                           awk -F "\\t" '{print \$1}' single.out > single.list
                           #assigning groupID to singletons
                           for x in \$(awk -F "\\t" '{print \$1}' single.out); do echo ""\$x"XX" >> single.groups;done
 
                           #summarizing clustering results
+<<<<<<< HEAD
                           awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0" | sort | uniq > grp.list
+=======
+                          awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0X" | sort | uniq > grp.list
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
                           cat single.groups >> group.list
                           cat grp.list >> group.list
                           echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_ASV_phylogroup.csv
@@ -2408,7 +2485,11 @@ if (params.DataCheck || params.Analyze) {
                                   then
                                           group=\$(grep -w ""\$z"XX" groups.csv | awk -F "," '{print \$1}')
                                   else
+<<<<<<< HEAD
                                           grp=\$(grep -w "\$z" headless.treeout | awk -F "\t" '{print \$2}')
+=======
+                                          grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
                                           group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
                                   fi
                                   echo ""\$z","\$group"" >> ${params.projtag}_ASV_phylogroup.csv
@@ -2583,7 +2664,9 @@ if (params.DataCheck || params.Analyze) {
 
                   script:
                       """
-                      ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translations.fasta --report ${params.projtag}_translation_report
+                      ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_all_translaton.fasta --report ${params.projtag}_translation_report
+                      awk '/^>/ { print (NR==1 ? "" : RS) \$0; next } { printf "%s", \$0 } END { printf RS }' ${params.projtag}_all_translaton.fasta > ${params.projtag}_all_translations.fasta
+                      rm ${params.projtag}_all_translaton.fasta
                       """
                 }
 
@@ -2792,7 +2875,7 @@ if (params.DataCheck || params.Analyze) {
                                             echo "\$line" | awk '{print \$12}' >> pid.list
                                             echo "\$line" | awk '{print \$2}' >> length.list
                                             echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
@@ -2800,7 +2883,7 @@ if (params.DataCheck || params.Analyze) {
                                             if [[ "${params.lca}" == "T" ]]
                                             then    if [[ \$(grep -w "\$acc" ${params.dbanno}/*.txt | wc -l) -eq 1 ]]
                                                     then  group=\$(grep -w "\$acc" ${params.dbanno}/*.txt | awk -F ":" '{print \$1}')
-                                                          lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\t" '{print \$2}')
+                                                          lcla=\$(grep -w "\$group" lcainfo.list | awk -F "\\t" '{print \$2}')
                                                           echo "\$lcla" >> lca_classification.list
                                                     else  echo "Viruses" >> lca_classification.list
                                                     fi
@@ -2851,8 +2934,8 @@ if (params.DataCheck || params.Analyze) {
                             then
                                   paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list lca_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                   paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                                  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list ncbi_classification.list >> \${name}_quick_Taxbreakdown.csv
-                            elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T"]]
+                                  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list >> \${name}_quick_Taxbreakdown.csv
+                            elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T" ]]
                             then
                                   paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list ncbi_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                   paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list ncbi_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
@@ -3134,14 +3217,24 @@ if (params.DataCheck || params.Analyze) {
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering.out
                           TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering_verbose.out
                           #create headless treeclustering.out
+<<<<<<< HEAD
                           tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0/g' > headless.treeout
                           #extracting singletons
                           grep -w "0" headless.treeout > single.out
+=======
+                          tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0X/g' > headless.treeout
+                          #extracting singletons
+                          grep -w "0X" headless.treeout > single.out
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
                           awk -F "\\t" '{print \$1}' single.out > single.list
                           #assigning groupID to singletons
                           for x in \$(awk -F "\\t" '{print \$1}' single.out); do echo ""\$x"XX" >> single.groups;done
                           #summarizing clustering results
+<<<<<<< HEAD
                           awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0" | sort | uniq > grp.list
+=======
+                          awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0X" | sort | uniq > grp.list
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
                           cat single.groups >> group.list
                           cat grp.list >> group.list
                           echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_amino_phylogroup.csv
@@ -3157,7 +3250,11 @@ if (params.DataCheck || params.Analyze) {
                                   then
                                           group=\$(grep -w ""\$z"XX" groups.csv | awk -F "," '{print \$1}')
                                   else
+<<<<<<< HEAD
                                           grp=\$(grep -w "\$z" headless.treeout | awk -F "\t" '{print \$2}')
+=======
+                                          grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
                                           group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
                                   fi
                                   echo ""\$z","\$group"" >> ${params.projtag}_amino_phylogroup.csv
@@ -3516,7 +3613,7 @@ if (params.DataCheck || params.Analyze) {
                                             echo "\$line" | awk '{print \$12}' >> pid.list
                                             echo "\$line" | awk '{print \$2}' >> length.list
                                             echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
@@ -3575,8 +3672,8 @@ if (params.DataCheck || params.Analyze) {
                             then
                                   paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list lca_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                   paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                                  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list  ncbi_classification.list >> \${name}_quick_Taxbreakdown.csv
-                            elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T"]]
+                                  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list >> \${name}_quick_Taxbreakdown.csv
+                            elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T" ]]
                             then
                                   paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list ncbi_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                   paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list ncbi_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
@@ -3734,11 +3831,32 @@ if (params.DataCheck || params.Analyze) {
                     }
                 }
              } else {
+<<<<<<< HEAD
                  taxplot3 = Channel.value('skipping')
                  tax_table_pcasvnt = Channel.value('skipping')
                  tax_nodCol_pcasvnt = Channel.value('skipping')
              }
+=======
 
+                 process skippcASVnuctaxonomy {
+
+                     input:
+                         tuple nid, file(asvs) from pcASV_ntDiamond_ch
+
+                     output:
+                         tuple nid, file("skipncASVnubtaxonomy1.txt") into ( taxplot3 )
+                         tuple nid, file("skipncASVnubtaxonomy2.txt") into ( tax_table_pcasvnt )
+                         tuple nid, file("skipncASVnubtaxonomy3.txt") into ( tax_nodCol_pcasvnt )
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
+
+                     script:
+                         """
+                         echo "Skipped" >skipncASVnubtaxonomy1.txt
+                         echo "Skipped" >skipncASVnubtaxonomy2.txt
+                         echo "Skipped" >skipncASVnubtaxonomy3.txt
+                         """
+                 }
+             }
 
                 process Generate_Nucleotide_pcASV_Counts {
 
@@ -3849,7 +3967,25 @@ if (params.DataCheck || params.Analyze) {
                             """
                     }
                 } else {
+<<<<<<< HEAD
                     potu_Ntree_plot = Channel.value('skipping')
+=======
+
+                    process skippcASVnucphylogeny {
+
+                        input:
+                            tuple nid, file(prot) from pcASV_ntmuscle_ch
+
+                        output:
+                            tuple nid, file("skipncASVnucphy.txt") into ( potu_Ntree_plot )
+
+                        script:
+                            """
+                            echo "Skipped" >skipncASVnucphy.txt
+                            """
+                    }
+
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
                 }
 
                 process pcASV_AminoAcid_Matrix {
@@ -4007,7 +4143,7 @@ if (params.DataCheck || params.Analyze) {
                                             echo "\$line" | awk '{print \$12}' >> pid.list
                                             echo "\$line" | awk '{print \$2}' >> length.list
                                             echo "Extracting virus and gene ID for \$s now"
-                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " print substr(\$0, index(\$0,\$2)) | sed 's/ /_/g') &&
+                                            gene=\$(grep -w "\$acc" "\$headers" | awk -F "." '{ print \$2 }' | awk -F "[" '{ print \$1 }' | awk -F " " '{print substr(\$0, index(\$0,\$2))}' | sed 's/ /_/g') &&
                                             echo "\$gene" | sed 's/_/ /g' >> "\$name"_genes.list
                                             virus=\$(grep -w "\$acc" "\$headers" | awk -F "[" '{ print \$2 }' | awk -F "]" '{ print \$1 }'| sed 's/ /_/g')
                                             echo "\$virus" | sed 's/_/ /g' >> "\$name"_virus.list
@@ -4066,8 +4202,8 @@ if (params.DataCheck || params.Analyze) {
                             then
                                   paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list lca_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                   paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
-                                  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list ncbi_classification.list >> \${name}_quick_Taxbreakdown.csv
-                            elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T"]]
+                                  paste -d"," otu.list access.list "\$name"_virus.list "\$name"_genes.list lca_classification.list >> \${name}_quick_Taxbreakdown.csv
+                            elif [[ "${params.ncbitax}" == "true" && "${params.lca}" != "T" ]]
                             then
                                   paste -d "," sequence.list "\$name"_virus.list "\$name"_genes.list otu.list ncbi_classification.list newnames.list length.list bit.list evalue.list pid.list access.list >> "\$name"_phyloformat.csv
                                   paste -d"\t" otu.list access.list "\$name"_virus.list "\$name"_genes.list ncbi_classification.list sequence.list length.list bit.list evalue.list pid.list >> "\$name"_summaryTable.tsv
@@ -4224,9 +4360,30 @@ if (params.DataCheck || params.Analyze) {
                     }
                 }
             } else {
+<<<<<<< HEAD
                 taxplot4 = Channel.value('skipping')
                 tax_table_pcasvaa = Channel.value('skipping')
                 tax_nodCol_pcasvaa = Channel.value('skipping')
+=======
+
+                process skippcASVprotTaxonomy {
+
+                    input:
+                        tuple nid, file(asvs) from pcASV_aaDiamond_ch
+
+                    output:
+                        tuple nid, file("skipncASVprottax1.txt") into taxplot4
+                        tuple nid, file("skipncASVprottax2.txt") into tax_table_pcasvaa
+                        tuple nid, file("skipncASVprottax3.txt") into tax_nodCol_pcasvaa
+
+                    script:
+                        """
+                        echo "Skipped" >skipncASVprottax1.txt
+                        echo "Skipped" >skipncASVprottax2.txt
+                        echo "Skipped" >skipncASVprottax3.txt
+                        """
+                }
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
             }
 
                 if (!params.skipPhylogeny) {
@@ -4284,7 +4441,25 @@ if (params.DataCheck || params.Analyze) {
                             """
                     }
                 } else {
+<<<<<<< HEAD
                     potu_Atree_plot = Channel.value('skipping')
+=======
+
+                    process skippcASVprotPhylogeny {
+
+                        input:
+                            tuple nid, file(prot) from pcASV_aaMafft_ch
+
+                        output:
+                            tuple nid, file("skippcASVprotPhylogeny.txt") into ( potu_Atree_plot )
+
+                        script:
+                            """
+                            echo "Skipped" >skippcASVprotPhylogeny.txt
+                            """
+                    }
+
+>>>>>>> 662b665bb865ed6ab1983f29e21f916e6d3a086d
                 }
 
                 process Generate_pcASV_Protein_Counts {

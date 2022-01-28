@@ -8,7 +8,7 @@
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
 # Table of contents
-* [New in vAMPirus version 2.0.1](#New-in-vAMPirus-version-2.0.1)
+* [New in vAMPirus version 2.0.3](#New-in-vAMPirus-version-2.0.3)
 * [Quick intro](#Quick-intro)
   * [Contact/support](#Contact/support)
 * [Getting started](#Getting-started)
@@ -21,7 +21,9 @@
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
 
-# New in vAMPirus version 2.0.1
+## IF YOU CLONED v2.0.1 or v2.0.2 PLEASE RE-CLONE or git pull v2.0.3; there were errors caused by the use of skip options in previous versions.
+
+# New in vAMPirus version 2.0.3
 
 1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 
@@ -37,7 +39,7 @@
 
 7. Phylogeny-based clustering ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)
 
-8. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results
+8. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results or TreeClustering results.
 
 8. PCoA plots added to Analyze  report if NMDS does not converge.
 
