@@ -4750,7 +4750,9 @@ if (params.DataCheck || params.Analyze) {
                         \${type} \
                         ${params.nodeCol} \
                         ${params.asvTClust} \
-                        ${params.aminoTClust}
+                        ${params.aminoTClust} \
+                        ${params.deseq} \
+                        ${params.compare}
                         """
                 }
 

@@ -206,10 +206,10 @@ if [[ $DATABASE -eq 1 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
-        echo "Database installation: RVDB version 21.0 (latest as of 2021-02)"
-        curl -o U-RVDBv21.0-prot.fasta.xz  https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot.fasta.xz
+        echo "Database installation: RVDB version 23.0 (latest as of 2021-02)"
+        curl -o U-RVDBv23.0-prot.fasta.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv23.0-prot.fasta.xz
         xz -d U-RVDBv21.0-prot.fasta.xz
-        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
+        curl -o U-RVDBv23.0-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv23.0-prot-hmm-txt.tar.xz
         unzip U-RVDBv21.0-prot-hmm-txt.zip
         mv annot ./RVDBannot/
         echo "Editing confiration file for you now..."
@@ -229,12 +229,15 @@ then    mkdir "$mypwd"/Databases
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         curl -o viral.1.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.protein.faa.gz
         curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.protein.faa.gz
+        curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.4.protein.faa.gz
         gunzip viral.1.protein.faa.gz
         cat viral.1.protein.faa >> complete_virus_refseq_prot.fasta
         gunzip viral.2.protein.faa.gz
         cat viral.2.protein.faa >> complete_virus_refseq_prot.fasta
         gunzip viral.3.protein.faa.gz
         cat viral.3.protein.faa >> complete_virus_refseq_prot.fasta
+        gunzip viral.4.protein.faa.gz
+        cat viral.4.protein.faa >> complete_virus_refseq_prot.fasta
         rm viral.*.protein.faa
         curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
         unzip U-RVDBv21.0-prot-hmm-txt.zip
