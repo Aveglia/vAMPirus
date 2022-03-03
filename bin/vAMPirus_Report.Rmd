@@ -47,7 +47,6 @@ library(vegan)
 library(tidyverse)
 library(scales)
 library(cowplot)
-library(dplyr)
 library(ggtree)
 library(plotly)
 library(knitr)
@@ -182,7 +181,7 @@ if [ `ls -1 *_phyloGroupingcounts.csv | wc -l` -ge 1 ];then
     cp *_phylogroup.csv ./phygroup.csv
 fi
 if [ params$deseq == "true" ]; then
-    echo params$deseq > compare.csv
+    echo params$compare > compare.csv
 fi
 
 ```
@@ -1952,8 +1951,12 @@ This tree is a maximum likelihood tree made with the representative sequences fr
 ```{r deseq2_raw, echo=FALSE}
 ##dds object creation and analysis
 if (params$deseq == "true") {
-countData <- read.csv('counts.csv', header = TRUE, sep = ",")
-metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
+#countData <- read.csv('counts.csv', header = TRUE, sep = ",")
+countData <- read.csv('~/git/vAMPirus/bin/vAMPtest_ASV_counts.csv', header = TRUE, sep = ",")
+#comp <- read.csv('compare.csv', header = FALSE, sep = ",")
+comp <- read.csv('~/git/vAMPirus/bin/compare.csv', header = FALSE, sep = ",")
+#metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
+metaData <- read.csv('~/git/vAMPirus/bin/testmeta.csv', header = TRUE, sep = ",")
 if ( ncol(comp) == 2 ) {
   metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2"))
 } else if ( ncol(comp) == 3 ) {
@@ -1977,7 +1980,8 @@ if ( ncol(comp) == 2 ) {
 } else if (ncol(comp) == 12) {
   metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10","comp$V11","comp$V12"))
 }
-ddsraw <- DESeqDataSetFromMatrix(countData=round(countData), colData=metaData, design=~treatment, tidy = TRUE)
+ddsraw <- DESeqDataSetFromMatrix(countData=round(countData), colData=metaData,
+                                 design=~treatment, tidy = TRUE)
 ddsraw <- DESeq(dds)
 #summarixe results and sort by pvalue
 
@@ -2018,7 +2022,7 @@ print("DEseq2 analysis not signaled to run. edit the config file or add --deseq 
 if (params$deseq == "true") {
 countData <- read.csv('deseq_medtable.csv', header = TRUE, sep = ",")
 metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
-comp <- read.csv('co mpare.csv', header = FALSE, sep = ",")
+comp <- read.csv('compare.csv', header = FALSE, sep = ",")
 
 if ( ncol(comp) == 2 ) {
   metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2"))
@@ -2068,6 +2072,7 @@ print("DEseq2 analysis not signaled to run. edit the config file or add --deseq 
 if (params$deseq == "true") {
 countData <- read.csv('deseq_phylogroupcounts.csv', header = TRUE, sep = ",")
 metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
+comp <- read.csv('compare.csv', header = FASLE, sep = ",")
 if ( ncol(comp) == 2 ) {
   metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2"))
 } else if ( ncol(comp) == 3 ) {
