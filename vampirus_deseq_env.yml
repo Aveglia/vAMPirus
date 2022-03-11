@@ -1,0 +1,15 @@
+name: vAMPirus_deseq
+channels:
+  - conda-forge
+  - bioconda
+  - anaconda
+  - defaults
+  - genomedk
+dependencies:
+  - r-knitr
+  - r-rmarkdown
+  - r-tidyverse
+  - bioconductor-deseq2
+  - r-ape
+  - bioconductor-ihw
+  - r-ashr

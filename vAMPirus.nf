@@ -2581,7 +2581,7 @@ if (params.DataCheck || params.Analyze) {
                       output:
                           file("*treeclustering*.out") into asvtreeclustering_res
                           file("${params.projtag}_ASV_phylogroup.csv") into asv_phylogroupcsv
-                          file("${params.projtag}_ASV_phyloGroupingcounts.csv") into asv_phylogroupingcsv
+                          file("${params.projtag}_ASV_phyloGroupingcounts.csv") into (asv_phylogroupingcsv, asv_phylogroupingcsv2)
 
                       script:
                           """
@@ -2625,6 +2625,7 @@ if (params.DataCheck || params.Analyze) {
             } else {
                 asv_phylogroupcsv = Channel.value('skipping')
                 asv_phylogroupingcsv = Channel.value('skipping')
+                asv_phylogroupingcsv2 = Channel.value('skipping')
             }
 
             if (params.asvMED) {
@@ -2639,7 +2640,7 @@ if (params.DataCheck || params.Analyze) {
                   file(asvs) from asv_for_med
 
                 output:
-                  file("*_ASV_Grouping.csv") into asvgroupscsv
+                  file("*_ASV_Grouping.csv") into (asvgroupscsv, asvgroupscsv2)
                   file("${params.projtag}_ASV_group_reps_aligned.fasta") into groupreps
                   file("${params.projtag}_asvMED_${params.asvC}")
 
@@ -2751,7 +2752,7 @@ if (params.DataCheck || params.Analyze) {
                   file(map) from asvgroupscsv
 
               output:
-                  file("${params.projtag}_ASV_Groupingcounts.csv") into asvgroupcounts
+                  file("${params.projtag}_ASV_Groupingcounts.csv") into (asvgroupcounts, asvgroupcounts2)
 
               script:
                   """
@@ -2766,8 +2767,10 @@ if (params.DataCheck || params.Analyze) {
               }
             } else {
                 asvgroupscsv = Channel.value('skipping')
+                asvgroupscsv2 = Channel.value('skipping')
                 asv_group_rep_tree = Channel.value('skipping')
                 asvgroupcounts = Channel.value('skipping')
+                asvgroupcounts2 = Channel.value('skipping')
             }
 
             if (!params.skipAminoTyping) {
@@ -3332,8 +3335,8 @@ if (params.DataCheck || params.Analyze) {
                          file(counts) from amino_countphylo
                       output:
                          file("*treeclustering*.out") into aminotreeclustering_res
-                         file("${params.projtag}_amino_phylogroup.csv") into amino_phylogroupcsv
-                         file("${params.projtag}_amino_phyloGroupingcounts.csv") into amino_phylogroupingcsv
+                         file("${params.projtag}_amino_phylogroup.csv") into (amino_phylogroupcsv, amino_phylogroupcsv2)
+                         file("${params.projtag}_amino_phyloGroupingcounts.csv") into (amino_phylogroupingcsv, amino_phylogroupingcsv2)
 
                       script:
                           """
@@ -3374,6 +3377,7 @@ if (params.DataCheck || params.Analyze) {
                      }
             } else {
                 amino_phylogroupcsv = Channel.value('skipping')
+                amino_phylogroupcsv2 = Channel.value('skipping')
                 amino_phylogroupingcsv = Channel.value('skipping')
             }
 
@@ -3389,7 +3393,7 @@ if (params.DataCheck || params.Analyze) {
                         file(aminos) from aminos_for_med
 
                     output:
-                        file("*_AminoType_Grouping.csv") into atygroupscsv
+                        file("*_AminoType_Grouping.csv") into (atygroupscsv, atygroupscsv2)
                         file("${params.projtag}_AminoType_group_reps_aligned.fasta") into atygroupreps
 
                     script:
@@ -3503,7 +3507,7 @@ if (params.DataCheck || params.Analyze) {
                           file(map) from atygroupscsv
 
                       output:
-                          file("${params.projtag}_AminoType_Groupingcounts.csv") into amino_groupcounts
+                          file("${params.projtag}_AminoType_Groupingcounts.csv") into (amino_groupcounts, amino_groupcounts2)
 
                       script:
                           """
@@ -3519,8 +3523,10 @@ if (params.DataCheck || params.Analyze) {
             }
         } else {
             atygroupscsv = Channel.value('skipping')
+            atygroupscsv2 = Channel.value('skipping')
             amino_group_rep_tree = Channel.value('skipping')
             amino_groupcounts = Channel.value('skipping')
+            amino_groupcounts2 = Channel.value('skipping')
         }
 
             if (params.pcASV) {        // ASV_nucl -> ASV_aa -> clusteraa by %id with ch-hit -> extract representative nucl sequences to generate new OTU file
@@ -4637,33 +4643,9 @@ if (params.DataCheck || params.Analyze) {
                     }
                 }
 
-                //NEW REPORT !!!!!!!!!!!!!!!!!
-                /*Report_ASV
-                asv_counts_plots -> ${params.projtag}_ASV_counts.csv
-                taxplot1 -> ${params.projtag}_ASV_summary_for_plot.csv
-                asv_heatmap -> ${params.projtag}_ASV_PercentID.matrix
-                nucl_phyl_plot -> ${params.projtag}_ASV_iq.treefile
-                file("*_ASV_Grouping.csv") into asvgroupscsv
-                "${params.projtag}_ASV_Groupingcounts.csv") into asvgroupcounts
-                *_quick_Taxbreakdown.csv") into tax_table_asv
-                \\${params.projtag}_ASV_Group_Reps_iq.treefile
-                file ("*_quicker_taxbreakdown.csv") into tax_nodCol_asv
-                */
-
-                report_asv = Channel.create()
-                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv, tax_nodCol_asv, asv_phylogroupcsv, asv_phylogroupingcsv).flatten().buffer(size:11).dump(tag:'asv').into(report_asv)
-
                 if (params.ncASV) {
                     report_ncasv = Channel.create()
                     notu_counts_plots.mix(taxplot_ncasv, notu_heatmap, nucl_phyl_plot_ncasv, tax_table_ncasv, tax_nodCol_ncasv).groupTuple(by:0, size:6).dump(tag:'ncasv').into(report_ncasv)
-                    /*
-                    notu_counts_plots -> ${params.projtag}_ncASV${id}_counts.csv
-                    taxplot1a -> ${params.projtag}_ncASV${id}_summary_for_plot.csv
-                    notu_heatmap -> ${params.projtag}_ncASV${id}_PercentID.matrix
-                    nucl_phyl_plot -> ${params.projtag}_ncASV${id}_iq.treefile
-                                      ${params.projtag}_ncASV${id}_quick_Taxbreakdown.csv
-                    tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_ncasv
-                    */
                 } else {
                     report_ncasv = Channel.empty()
                 }
@@ -4671,24 +4653,10 @@ if (params.DataCheck || params.Analyze) {
                 if (params.pcASV) {
                     report_pcasv_aa = Channel.create()
                     potu_Acounts.mix(taxplot4, potu_aa_heatmap, potu_Atree_plot, tax_table_pcasvaa, tax_nodCol_pcasvaa).groupTuple(by:0, size:6).dump(tag:'pcasv1').into(report_pcasv_aa)
-                    /*Report_pcASV_AminoAcid
-                    potu_Acounts -> ${params.projtag}_pcASV${id}_noTaxonomy_counts.csv
-                    taxplot4 -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_summary_for_plot.csv
-                    potu_aa_heatmap -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_PercentID.matrix
-                    potu_Atree_plot -> ${params.projtag}_aminoacid_pcASV${id}_noTaxonomy_iq.treefile
-                    tax_table_pcasvaa -> ${params.projtag}_aminoacid_pcASV${id}_quick_Taxbreakdown.csv
-                    tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_pcasvaa
-                    */
+
                     report_pcasv_nucl = Channel.create()
                     potu_Ncounts_for_report.mix(taxplot3, potu_nucl_heatmap, potu_Ntree_plot, tax_table_pcasvnt, tax_nodCol_pcasvnt).groupTuple(by:0, size:6).dump(tag:'pcasv2').into(report_pcasv_nucl)
-                    /*Report_pcASV_Nucleotide
-                    potu_Ncounts_for_report -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_counts.csv
-                    taxplot3 -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_summary_for_plot.csv
-                    potu_nucl_heatmap -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_PercentID.matrix
-                    potu_Ntree_plot -> ${params.projtag}_nucleotide_pcASV${id}_noTaxonomy_iq.treefile
-                    tax_table_pcasvnt -> ${params.projtag}_nucleotide_pcASV${id}_quick_Taxbreakdown.csv
-                    tuple nid, file ("*_quicker_taxbreakdown.csv") into tax_nodCol_pcasvnt
-                    */
+
                 } else {
                      report_pcasv_aa = Channel.empty()
                      report_pcasv_nucl = Channel.empty()
@@ -4697,18 +4665,7 @@ if (params.DataCheck || params.Analyze) {
                 if (!params.skipAminoTyping) {
                     report_aminotypes = Channel.create()
                     aminocounts_plot.mix(taxplot2, aminotype_heatmap, amino_rax_plot, atygroupscsv, amino_group_rep_tree, amino_groupcounts, tax_table_amino, tax_nodCol_amino, amino_phylogroupcsv, amino_phylogroupingcsv).flatten().buffer(size:11).dump(tag:'amino').into(report_aminotypes)
-                    /*
-                    Report_AminoTypes
-                    aminocounts_plot -> ${params.projtag}_AminoType_counts.csv
-                    taxplot2 -> ${params.projtag}_AminoTypes_summary_for_plot.csv
-                    aminotype_heatmap -> ${params.projtag}_AminoTypes_PercentID.matrix
-                    amino_rax_plot -> ${params.projtag}_AminoTypes_iq.treefile
-                    atygroupscsv  -> *_AminoType_Grouping.csv
-                    amino_group_rep_tree -> ${params.projtag}_AminoType_Group_Reps_iq.treefile
-                                         params.projtag}_AminoType_Groupingcounts.csv") into amino_groupcounts
-                    *_quick_Taxbreakdown.csv") into tax_table_amino
-                    file ("*_quicker_taxbreakdown.csv") into tax_nodCol_amino
-                    */
+
                 } else {
                     report_aminotypes = Channel.empty()
                 }
@@ -4751,13 +4708,60 @@ if (params.DataCheck || params.Analyze) {
                         ${params.nodeCol} \
                         ${params.asvTClust} \
                         ${params.aminoTClust} \
+                        """
+                }
+            }
+
+            if (params.deseq) {
+
+                deseq_report_asv = Channel.create()
+                asv_deseq.mix(asvgroupscsv2, asvgroupcounts2, asv_phylogroupcsv2, asv_phylogroupingcsv2).flatten().buffer(size:5).dump(tag:'asv').into(deseq_report_asv)
+
+                if (!params.skipAminoTyping) {
+                    deseq_report_aminotypes = Channel.create()
+                    aminocounts_deseq.mix(atygroupscsv2, amino_groupcounts2, amino_phylogroupcsv2, amino_phylogroupingcsv2).flatten().buffer(size:5).dump(tag:'amino').into(deseq_report_aminotypes)
+                } else {
+                    deseq_report_aminotypes = Channel.empty()
+                }
+
+                report_deseq_ch = Channel.create()
+                report_deseq.mix(deseq_report_ncasv, deseq_report_aminotypes).map{it.flatten()}.dump(tag:'report').into(deseq_report_all_ch)
+
+                process DEseq2_Report {
+
+                    label 'norm_cpus'
+
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReports", mode: "copy", overwrite: true
+
+                    input:
+                        file(files) from deseq_report_all_ch
+
+                    output:
+                        file("*.html") into report_all_out
+
+                    script:
+                        """
+                        name=\$( ls *_counts.csv | awk -F "_counts.csv" '{print \$1}')
+                        type=\$( ls *_counts.csv | awk -F "${params.projtag}" '{print \$2}' | awk -F "_" '{print \$2}'  )
+                        cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
+                        cp ${params.vampdir}/example_data/conf/vamplogo.png .
+                        Rscript -e "rmarkdown::render('vAMPirus_Report.Rmd',output_file='\${name}_Report.html')" \${name} \
+                        ${params.trymax} \
+                        ${params.stats} \
+                        ${params.metadata} \
+                        ${params.minimumCounts} \
+                        ${params.asvMED} \
+                        ${params.aminoMED} \
+                        \${type} \
+                        ${params.nodeCol} \
+                        ${params.asvTClust} \
+                        ${params.aminoTClust} \
                         ${params.deseq} \
                         ${params.compare}
                         """
                 }
 
             }
-
         }
 
 } else {

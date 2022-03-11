@@ -20,8 +20,6 @@ params:
     nodeCol: !r commandArgs(trailingOnly=T)[14]
     asvTClust: !r commandArgs(trailingOnly=T)[15]
     aminoTClust: !r commandArgs(trailingOnly=T)[16]
-    deseq: |r commandArgs(trailingOnly=T)[17]
-    compare: |r commandArgs(trailingOnly=T)[18]
 ---
 <style>
 .rectangle {
@@ -179,9 +177,6 @@ if [ `ls -1 *_phyloGroupingcounts.csv | wc -l` -ge 1 ];then
     mv *_phyloGroupingcounts.csv phylogroupcounts.csv
     ln -s ./phylogroupcounts.csv deseq_phylogroupcounts.csv
     cp *_phylogroup.csv ./phygroup.csv
-fi
-if [ params$deseq == "true" ]; then
-    echo params$compare > compare.csv
 fi
 
 ```
@@ -1943,165 +1938,7 @@ This tree is a maximum likelihood tree made with the representative sequences fr
 <br>
 <br>
 
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;DESeq2 Analyis</h2></div>
 
-<br>
-<br>
-
-```{r deseq2_raw, echo=FALSE}
-##dds object creation and analysis
-if (params$deseq == "true") {
-#countData <- read.csv('counts.csv', header = TRUE, sep = ",")
-countData <- read.csv('~/git/vAMPirus/bin/vAMPtest_ASV_counts.csv', header = TRUE, sep = ",")
-#comp <- read.csv('compare.csv', header = FALSE, sep = ",")
-comp <- read.csv('~/git/vAMPirus/bin/compare.csv', header = FALSE, sep = ",")
-#metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
-metaData <- read.csv('~/git/vAMPirus/bin/testmeta.csv', header = TRUE, sep = ",")
-if ( ncol(comp) == 2 ) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2"))
-} else if ( ncol(comp) == 3 ) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3"))
-} else if (ncol(comp) == 4) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4"))
-} else if (ncol(comp) == 5) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5"))
-} else if (ncol(comp) == 6) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6"))
-} else if (ncol(comp) == 7) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V7"))
-} else if (ncol(comp) == 8) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8"))
-} else if (ncol(comp) == 9) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9"))
-} else if (ncol(comp) == 10) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10"))
-} else if (ncol(comp) == 11) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10","comp$V11"))
-} else if (ncol(comp) == 12) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10","comp$V11","comp$V12"))
-}
-ddsraw <- DESeqDataSetFromMatrix(countData=round(countData), colData=metaData,
-                                 design=~treatment, tidy = TRUE)
-ddsraw <- DESeq(dds)
-#summarixe results and sort by pvalue
-
-
-alpha = .05
-res1 <- results(dds, name = "dex_infected_vs_healthy", cooksCutoff = FALSE)
-res1 = res1[which(res1$padj < alpha),]
-res1 = cbind(as(res1, "data.frame"),as(countData[rownames(res1), ], "matrix"))
-res1$comparison <- "dex_infected_vs_healthy"
-res2 <- results(dds, name = "dex_healthy_vs_apparhealthy", cooksCutoff = FALSE)
-res2 = res2[which(res2$padj < alpha),]
-res2 = cbind(as(res2, "data.frame"),as(countData[rownames(res2), ], "matrix"))
-res2$comparison <- "dex_healthy_vs_apparhealthy"
-#basic code to graph deseq outputs
-islandside <- ggplot(res1, aes(x=rownames(res1), y=log2FoldChange, color=tres1$padj)) +
-  facet_grid("comparison") + geom_point(size=6) +
-  theme(axis.text.x = element_text(angle = -90, hjust = 0, vjust=0.5)) +
-  theme(strip.text.x = element_text(size=10, face="bold"),
-        strip.background = element_rect(fill="#FFFFFF"))
-islandside
-
-} else {
-print("DEseq2 analysis not signaled to run. edit the config file or add --deseq to your launch command")
-}
-```
-<br>
-<br>
-<br>
-<br>
-<br>
-
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;DESeq2 Analyis -- MED </h2></div>
-
-<br>
-<br>
-
-```{r deseq2_MED, echo=FALSE}
-if (params$deseq == "true") {
-countData <- read.csv('deseq_medtable.csv', header = TRUE, sep = ",")
-metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
-comp <- read.csv('compare.csv', header = FALSE, sep = ",")
-
-if ( ncol(comp) == 2 ) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2"))
-} else if ( ncol(comp) == 3 ) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3"))
-} else if (ncol(comp) == 4) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4"))
-} else if (ncol(comp) == 5) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5"))
-} else if (ncol(comp) == 6) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6"))
-} else if (ncol(comp) == 7) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V7"))
-} else if (ncol(comp) == 8) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8"))
-} else if (ncol(comp) == 9) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9"))
-} else if (ncol(comp) == 10) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10"))
-} else if (ncol(comp) == 11) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10","comp$V11"))
-} else if (ncol(comp) == 12) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10","comp$V11","comp$V12"))
-}
-ddsmed <- DESeqDataSetFromMatrix(countData=round(countData), colData=metaData, design=~treatment, tidy = TRUE)
-ddsmed <- DESeq(dds)
-
-
-} else {
-print("DEseq2 analysis not signaled to run. edit the config file or add --deseq to your launch command")
-}
-```
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-
-<div class="rectangle"><h2 style="color:white">&nbsp;&nbsp;DESeq2 Analyis -- MED </h2></div>
-
-<br>
-<br>
-
-```{r deseq2_MED, echo=FALSE}
-if (params$deseq == "true") {
-countData <- read.csv('deseq_phylogroupcounts.csv', header = TRUE, sep = ",")
-metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
-comp <- read.csv('compare.csv', header = FASLE, sep = ",")
-if ( ncol(comp) == 2 ) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2"))
-} else if ( ncol(comp) == 3 ) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3"))
-} else if (ncol(comp) == 4) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4"))
-} else if (ncol(comp) == 5) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5"))
-} else if (ncol(comp) == 6) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6"))
-} else if (ncol(comp) == 7) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V7"))
-} else if (ncol(comp) == 8) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8"))
-} else if (ncol(comp) == 9) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9"))
-} else if (ncol(comp) == 10) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10"))
-} else if (ncol(comp) == 11) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10","comp$V11"))
-} else if (ncol(comp) == 12) {
-  metaData$treatment <- factor(metaData$treatment, levels= c("comp$V1","comp$V2","comp$V3","comp$V4","comp$V5","comp$V6","comp$V8","comp$V9","comp$V10","comp$V11","comp$V12"))
-}
-ddsphylo <- DESeqDataSetFromMatrix(countData=round(countData), colData=metaData, design=~treatment, tidy = TRUE)
-ddsphylo <- DESeq(dds)
-} else {
-print("DEseq2 analysis not signaled to run. edit the config file or add --deseq to your launch command")
-}
-```
 <br>
 <br>
 <br>
