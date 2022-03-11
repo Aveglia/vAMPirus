@@ -4728,13 +4728,16 @@ if (params.DataCheck || params.Analyze) {
                 }
 
                 report_deseq_ch = Channel.create()
-                report_deseq.mix(deseq_report_ncasv, deseq_report_aminotypes).map{it.flatten()}.dump(tag:'report').into(deseq_report_all_ch)
+                report_deseq.mix(deseq_report_asv, deseq_report_aminotypes).map{it.flatten()}.dump(tag:'report').into(deseq_report_all_ch)
 
                 process DEseq2_Report {
 
                     label 'norm_cpus'
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReports", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/DEseq2", mode: "copy", overwrite: true, pattern: *.csv
+
+                    conda (params.condaActivate && params.myConda ? params.localConda : params.condaActivate ? "bioconda::fastp=0.20.1=h8b12597_0" : null)
 
                     input:
                         file(files) from deseq_report_all_ch

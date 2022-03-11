@@ -8,8 +8,12 @@ channels:
 dependencies:
   - r-knitr
   - r-rmarkdown
-  - r-tidyverse
+  - r-dplyr
   - bioconductor-deseq2
   - r-ape
   - bioconductor-ihw
   - r-ashr
+
+
+
+#bioconda::r-tidyverse=0.20.1=h8b12597_0

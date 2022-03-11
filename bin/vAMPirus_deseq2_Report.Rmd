@@ -112,10 +112,19 @@ ddsraw <- estimateSizeFactors(ddsraw, type="poscounts")
 #Run DEseq2
 ddsraw <- DESeq(ddsraw)
 #summarixe results and sort by pvalue
-resraw <- results(ddsraw)
+resraw <- results(ddsraw, C)
 resOrdered <- resraw[order(resraw$pvalue),]
-#generate deseq2 results.csv
-write.csv(as.data.frame(resOrdered), file=""params$projtag"_deseq2_results.csv")
+
+
+resnames <- as.data.frame(resultsNames(ddsraw))
+x <- nrow(resnames)
+for (v in 2:x) {
+  z <- resnames[v, ]
+  res1 <- results(ddsraw, name = "treatment_Acropora_vs_Coralivore", cooksCutoff = TRUE)
+  resLFC <- lfcShrink(ddsraw, coef=z, type="apeglm")
+  write.csv(as.data.frame(resLFC), paste0(params$projtag,"deseq2_LFCshrunk_apeglm_results", z,".csv"))
+  plotMA(resraw)
+}
 
 resnames[2, ] <- as.data.frame(resultsNames(ddsraw))
 
