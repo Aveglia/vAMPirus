@@ -160,7 +160,7 @@ elif [ `ls *_AminoType_Grouping.csv | wc -l` -ge 1 ];then
 fi
 cat *_counts.csv >counts.csv
 cat *_PercentID.matrix >matrix.txt
-if [ `ls -1 *_PercentID.matrix | wc -l` -ge 1 ];then
+if [ `ls -1 *summary_for_plot.csv | wc -l` -ge 1 ];then
   cat *_summary_for_plot.csv >sum.csv
 else
   echo "Taxonomy analysis was skipped" >tax.txt

@@ -55,20 +55,12 @@ if [ `ls *_ASV_Grouping.csv | wc -l` -ge 1 ];then
   cat *_ASV_Grouping.csv >asv_medfile.csv
   mv *_ASV_Groupingcounts.csv asv_groupcounts.csv
   cat asv_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
-  mv *_ASV_Group_Reps_iq.treefile grouptree.txt
 elif [ `ls *_AminoType_Grouping.csv | wc -l` -ge 1 ];then
   cat *_AminoType_Grouping.csv >amino_medfile.csv
   mv *_AminoType_Groupingcounts.csv amino_groupcounts.csv
   cat amino_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
-  mv *_AminoType_Group_Reps_iq.treefile grouptree.txt
 fi
 cat *_counts.csv >counts.csv
-cat *_PercentID.matrix >matrix.txt
-if [ `ls -1 *_PercentID.matrix | wc -l` -ge 1 ];then
-  cat *_summary_for_plot.csv >sum.csv
-else
-  echo "Taxonomy analysis was skipped" >tax.txt
-fi
 if [ `ls -1 *_phyloGroupingcounts.csv | wc -l` -ge 1 ];then
     mv *_phyloGroupingcounts.csv phylogroupcounts.csv
     ln -s ./phylogroupcounts.csv deseq_phylogroupcounts.csv
@@ -83,12 +75,13 @@ fi
 ```{r deseq2_raw, echo=FALSE}
 ##dds object creation and analysis
 if (params$deseq == "true") {
-#countData <- read.csv('counts.csv', header = TRUE, sep = ",")
-countData <- read.csv('~/git/vAMPirus/bin/vAMPtest_ASV_counts.csv', header = TRUE, sep = ",")
-#comp <- read.csv('compare.csv', header = FALSE, sep = ",")
-comp <- read.csv('~/git/vAMPirus/bin/compare.csv', header = FALSE, sep = ",")
-#metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
-metaData <- read.csv('~/git/vAMPirus/bin/testmeta.csv', header = TRUE, sep = ",")
+#read counts.csv
+countData <- read.csv('counts.csv', header = TRUE, sep = ",")
+#read compare value set by user
+comp <- read.csv('compare.csv', header = FALSE, sep = ",")
+#read metadata csv to get treatment info
+metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
+#organize metadata CSV by treatment for deseq2 comparisons
 if ( ncol(comp) == 2 ) {
   metaData$treatment <- factor(metaData$treatment, levels= c(comp$V1,comp$V2))
 } else if ( ncol(comp) == 3 ) {
@@ -112,10 +105,20 @@ if ( ncol(comp) == 2 ) {
 } else if (ncol(comp) == 12) {
   metaData$treatment <- factor(metaData$treatment, levels= c(comp$V1,comp$V2,comp$V3,comp$V4,comp$V5,comp$V6,comp$V7,comp$V8,comp$V9,comp$V10,comp$V11,comp$V12))
 }
-ddsraw <- DESeqDataSetFromMatrix(countData=round(countData), colData=metaData,
-                                 design=~treatment, tidy = TRUE)
-ddsraw <- DESeq(dds)
+#Create deseq2 object
+ddsraw <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~treatment, tidy = TRUE)
+#fix sequences with zeros as counts
+ddsraw <- estimateSizeFactors(ddsraw, type="poscounts")
+#Run DEseq2
+ddsraw <- DESeq(ddsraw)
 #summarixe results and sort by pvalue
+resraw <- results(ddsraw)
+resOrdered <- resraw[order(resraw$pvalue),]
+#generate deseq2 results.csv
+write.csv(as.data.frame(resOrdered), file=""params$projtag"_deseq2_results.csv")
+
+resnames[2, ] <- as.data.frame(resultsNames(ddsraw))
+
 
 
 alpha = .05

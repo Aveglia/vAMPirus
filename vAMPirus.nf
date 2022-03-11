@@ -2456,7 +2456,7 @@ if (params.DataCheck || params.Analyze) {
 
             output:
                 tuple file("*_counts.csv"), file("*_counts.biome") into counts_vsearch_asv
-                file("*_ASV*counts.csv") into (asv_counts_plots, asvcount_med, asvcount_phylogr)
+                file("*_ASV*counts.csv") into (asv_counts_plots, asvcount_med, asvcount_phylogr, asv_deseq)
 
             script:
                 """
@@ -3289,7 +3289,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         tuple file("*_AminoType_counts.csv"), file("*dmd.out") into counts_summary
-                        file("*_AminoType_counts.csv") into (aminocounts_plot, aminocountmed, amino_countphylo)
+                        file("*_AminoType_counts.csv") into (aminocounts_plot, aminocountmed, amino_countphylo, aminocounts_deseq)
 
                     script:
                         """
@@ -4643,6 +4643,9 @@ if (params.DataCheck || params.Analyze) {
                     }
                 }
 
+                report_asv = Channel.create()
+                asv_counts_plots.mix(taxplot_asv, asv_heatmap, nucl_phyl_plot_asv, asvgroupscsv, asvgroupcounts, asv_group_rep_tree, tax_table_asv, tax_nodCol_asv, asv_phylogroupcsv, asv_phylogroupingcsv).flatten().buffer(size:11).dump(tag:'asv').into(report_asv)
+
                 if (params.ncASV) {
                     report_ncasv = Channel.create()
                     notu_counts_plots.mix(taxplot_ncasv, notu_heatmap, nucl_phyl_plot_ncasv, tax_table_ncasv, tax_nodCol_ncasv).groupTuple(by:0, size:6).dump(tag:'ncasv').into(report_ncasv)
@@ -4745,9 +4748,7 @@ if (params.DataCheck || params.Analyze) {
                         type=\$( ls *_counts.csv | awk -F "${params.projtag}" '{print \$2}' | awk -F "_" '{print \$2}'  )
                         cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
                         cp ${params.vampdir}/example_data/conf/vamplogo.png .
-                        Rscript -e "rmarkdown::render('vAMPirus_Report.Rmd',output_file='\${name}_Report.html')" \${name} \
-                        ${params.trymax} \
-                        ${params.stats} \
+                        Rscript -e "rmarkdown::render('vAMPirus_deseq2_Report.Rmd',output_file='\${name}_deseq2_Report.html')" \${name} \
                         ${params.metadata} \
                         ${params.minimumCounts} \
                         ${params.asvMED} \
@@ -4757,7 +4758,8 @@ if (params.DataCheck || params.Analyze) {
                         ${params.asvTClust} \
                         ${params.aminoTClust} \
                         ${params.deseq} \
-                        ${params.compare}
+                        ${params.compare} \
+                        ${params.alpha}
                         """
                 }
 
