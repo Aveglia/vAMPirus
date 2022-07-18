@@ -1100,7 +1100,7 @@ if (params.DataCheck || params.Analyze) {
 
         label 'norm_cpus'
 
-        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/Clustering/ASVs/ChimeraCheck", mode: "copy", overwrite: true
+        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ASVs/ChimeraCheck", mode: "copy", overwrite: true
 
         input:
             file(reads) from reads_vsearch3_ch
@@ -1110,7 +1110,7 @@ if (params.DataCheck || params.Analyze) {
 
         script:
             """
-            vsearch --cluster_unoise ${reads} --unoise_alpha ${params.alpha} --relabel ASV --centroids ${params.projtag}_notChecked.fasta --minsize ${params.minSize}
+            vsearch --cluster_unoise ${reads} --unoise_alpha ${params.alpha} --relabel ASV --centroids ${params.projtag}_notChecked.fasta --minsize ${params.minSize} --sizeout
             """
     }
 
@@ -2887,7 +2887,7 @@ if (params.DataCheck || params.Analyze) {
                         label 'low_cpus'
 
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments*'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
@@ -2903,7 +2903,8 @@ if (params.DataCheck || params.Analyze) {
                             """
                             name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
                             garnier -sequence ${prot} -outfile \${name}_2dStructures.garnier
-                            hmoment -seqall ${prot} -graph svg -plot
+                            hmoment -seqall ${prot} -graph svg -plot -double
+                            hmoment -seqall ${prot} -double -outfile ${prot}_HydrophobicMoments
                             mv hmoment.svg ./"\${name}"_HydrophobicMoments.svg
                             iep -sequence ${prot} -graph svg -plot -outfile "\${name}"_IsoelectricPoint.iep
                             mv iep.svg ./"\${name}"_IsoelectricPoint.svg
@@ -4127,7 +4128,7 @@ if (params.DataCheck || params.Analyze) {
                         tag "${mtag}"
 
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/2dStructure", mode: "copy", overwrite: true, pattern: '*.{garnier}'
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments.{svg}'
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/HydrophobicMoment", mode: "copy", overwrite: true, pattern: '*HydrophobicMoments*'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/IsoelectricPoint", mode: "copy", overwrite: true, pattern: '*IsoelectricPoint.{iep,svg}'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
@@ -4145,7 +4146,8 @@ if (params.DataCheck || params.Analyze) {
                             """
                             name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
                             garnier -sequence ${prot} -outfile \${name}_2dStructures.garnier
-                            hmoment -seqall ${prot} -graph svg -plot
+                            hmoment -seqall ${prot} -graph svg -plot -double
+                            hmoment -seqall ${prot} -double -outfile ${prot}_HydrophobicMoments
                             mv hmoment.svg ./"\${name}"_HydrophobicMoments.svg
                             iep -sequence ${prot} -graph svg -plot -outfile "\${name}"_IsoelectricPoint.iep
                             mv iep.svg ./"\${name}"_IsoelectricPoint.svg

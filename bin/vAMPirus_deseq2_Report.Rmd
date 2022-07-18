@@ -5,8 +5,8 @@ output: html_document
 params:
     interactive: TRUE
     projtag: !r commandArgs(trailingOnly=T)[1]
-    deseq: |r commandArgs(trailingOnly=T)[2]
-    compare: |r commandArgs(trailingOnly=T)[3]
+    deseq: !r commandArgs(trailingOnly=T)[2]
+    compare: !r commandArgs(trailingOnly=T)[3]
 ---
 <style>
 .rectangle {
@@ -31,8 +31,10 @@ knitr::include_graphics("vamplogo.png")
 library(tidyverse)
 library(plotly)
 library(knitr)
+library(IHW)
 library(rmarkdown)
-library(ape)
+library(apeglm)
+library(DESeq2)
 ```
 
 ```{r colors, include=FALSE}
@@ -55,12 +57,28 @@ if [ `ls *_ASV_Grouping.csv | wc -l` -ge 1 ];then
   cat *_ASV_Grouping.csv >asv_medfile.csv
   mv *_ASV_Groupingcounts.csv asv_groupcounts.csv
   cat asv_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
+  mv *_ASV_Group_Reps_iq.treefile grouptree.txt
 elif [ `ls *_AminoType_Grouping.csv | wc -l` -ge 1 ];then
   cat *_AminoType_Grouping.csv >amino_medfile.csv
   mv *_AminoType_Groupingcounts.csv amino_groupcounts.csv
   cat amino_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
+  mv *_AminoType_Group_Reps_iq.treefile grouptree.txt
 fi
 cat *_counts.csv >counts.csv
+cat *_PercentID.matrix >matrix.txt
+if [ `ls -1 *_PercentID.matrix | wc -l` -ge 1 ];then
+  cat *_summary_for_plot.csv >sum.csv
+else
+  echo "Taxonomy analysis was skipped" >tax.txt
+fi
+if [ `ls -1 *_iq.treefile | wc -l` -ge 1 ];then
+  cat *_iq.treefile >tree.txt
+else
+  echo "Phylogeny analysis was skipped" >tree.txt
+fi
+if [ `ls -1 *_quicker_taxbreakdown.csv | wc -l` -ge 1 ];then
+    cat *_quicker_taxbreakdown.csv > quicker_taxbreakdown.csv
+fi
 if [ `ls -1 *_phyloGroupingcounts.csv | wc -l` -ge 1 ];then
     mv *_phyloGroupingcounts.csv phylogroupcounts.csv
     ln -s ./phylogroupcounts.csv deseq_phylogroupcounts.csv
@@ -75,13 +93,12 @@ fi
 ```{r deseq2_raw, echo=FALSE}
 ##dds object creation and analysis
 if (params$deseq == "true") {
-#read counts.csv
-countData <- read.csv('counts.csv', header = TRUE, sep = ",")
-#read compare value set by user
-comp <- read.csv('compare.csv', header = FALSE, sep = ",")
-#read metadata csv to get treatment info
-metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
-#organize metadata CSV by treatment for deseq2 comparisons
+#countData <- read.csv('counts.csv', header = TRUE)
+countData <- read.csv('C:/Users/alexv/My Drive/Alex_Veglia/RICE/vAMPirus/testingdeseq/counts.csv', header = TRUE, sep = ",", check.names=FALSE)
+#comp <- read.csv('compare.csv', header = FALSE, sep = ",")
+comp <- read.csv('C:/Users/alexv/My Drive/Alex_Veglia/RICE/vAMPirus/testingdeseq/compare.csv', header = FALSE, sep = ",")
+#metaData <- read.csv('params$metadata', header = TRUE, sep = ",")
+metaData <- read.csv('C:/Users/alexv/My Drive/Alex_Veglia/RICE/vAMPirus/testingdeseq/rna_virus_meta.csv', header = TRUE, sep = ",")
 if ( ncol(comp) == 2 ) {
   metaData$treatment <- factor(metaData$treatment, levels= c(comp$V1,comp$V2))
 } else if ( ncol(comp) == 3 ) {
@@ -105,29 +122,11 @@ if ( ncol(comp) == 2 ) {
 } else if (ncol(comp) == 12) {
   metaData$treatment <- factor(metaData$treatment, levels= c(comp$V1,comp$V2,comp$V3,comp$V4,comp$V5,comp$V6,comp$V7,comp$V8,comp$V9,comp$V10,comp$V11,comp$V12))
 }
-#Create deseq2 object
-ddsraw <- DESeqDataSetFromMatrix(countData=countData, colData=metaData, design=~treatment, tidy = TRUE)
-#fix sequences with zeros as counts
+ddsraw <- DESeqDataSetFromMatrix(countData=round(countData), colData=metaData, design=~treatment, tidy = TRUE)
 ddsraw <- estimateSizeFactors(ddsraw, type="poscounts")
-#Run DEseq2
 ddsraw <- DESeq(ddsraw)
+
 #summarixe results and sort by pvalue
-resraw <- results(ddsraw, C)
-resOrdered <- resraw[order(resraw$pvalue),]
-
-
-resnames <- as.data.frame(resultsNames(ddsraw))
-x <- nrow(resnames)
-for (v in 2:x) {
-  z <- resnames[v, ]
-  res1 <- results(ddsraw, name = "treatment_Acropora_vs_Coralivore", cooksCutoff = TRUE)
-  resLFC <- lfcShrink(ddsraw, coef=z, type="apeglm")
-  write.csv(as.data.frame(resLFC), paste0(params$projtag,"deseq2_LFCshrunk_apeglm_results", z,".csv"))
-  plotMA(resraw)
-}
-
-resnames[2, ] <- as.data.frame(resultsNames(ddsraw))
-
 
 
 alpha = .05
