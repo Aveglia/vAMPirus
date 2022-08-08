@@ -1034,10 +1034,10 @@ if (params.DataCheck || params.Analyze) {
                 do  #check for a hit
                     if [[ \$(grep -cw "\$x" ${params.projtag}_diamondfilter.out) -eq 1 ]]
                     then    #check if hit is to filter
-                            hit=\$(grep "\$x" ${params.projtag}_diamondfilter.out | awk '{print \$3}')
-                            if [[ \$(grep -c "\$hit" filt.headers) -eq 1 ]]
+                            hit=\$(grep -w "\$x" ${params.projtag}_diamondfilter.out | awk '{print \$3}')
+                            if [[ \$(grep -wc "\$hit" filt.headers) -eq 1 ]]
                             then    echo "\$x,\$hit" >> filtered_asvs_summary.csv
-                            elif [[ \$(grep -c "\$hit" keep.headers) -eq 1 ]]
+                            elif [[ \$(grep -wc "\$hit" keep.headers) -eq 1 ]]
                             then    echo "\$x" >> kep.list
                             fi
                     else    echo \$x >> nohit.list
@@ -1052,7 +1052,7 @@ if (params.DataCheck || params.Analyze) {
                             echo ">ASV\${u}" >> asvrename.list
                             u=\$(( \${u}+1 ))
                         done
-                        ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
+                        ./rename_seq.py kept.fasta asvrename.list ${params.projtag}_ASV.fasta
                 else
                         cat kep.list | sort > keep.list
                         seqtk subseq ${asv} keep.list > kept.fasta
@@ -1061,7 +1061,7 @@ if (params.DataCheck || params.Analyze) {
                             echo ">ASV\${u}" >> asvrename.list
                             u=\$(( \${u}+1 ))
                         done
-                        ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
+                        ./rename_seq.py kept.fasta asvrename.list ${params.projtag}_ASV.fasta
                 fi
                 paste -d',' keep.list asvrename.list > ASV_rename_map.csv
                 """
