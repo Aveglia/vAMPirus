@@ -1156,7 +1156,7 @@ if (params.DataCheck || params.Analyze) {
                     else
                         word=5
                     fi
-                    awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
+                    awk 'BEGIN{RS=">";ORS=""}length(\$2)>=${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                     cd-hit -i ${params.projtag}_filtered_proteins.fasta -n \${word} -c \${id} -o ${params.projtag}_pcASV\${id}.fasta
                     sed 's/>Cluster />Cluster_/g' ${params.projtag}_pcASV\${id}.fasta.clstr >${params.projtag}_pcASV\${id}.clstr
                     grep ">Cluster_" ${params.projtag}_pcASV\${id}.clstr >temporaryclusters.list
@@ -1211,7 +1211,7 @@ if (params.DataCheck || params.Analyze) {
                     ./rename_seq.py ${params.projtag}_pcASV\${id}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta
                     stats.sh in=${params.projtag}_aminoacid_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_aminoacid_clustered.gc gcformat=4 overwrite=true
                     stats.sh in=${params.projtag}_nucleotide_pcASV\${id}_noTaxonomy.fasta gc=${params.projtag}_pcASV\${id}_nucleotide_clustered.gc gcformat=4 overwrite=true
-                    awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pcASV\${id}_problematic_translations.fasta
+                    awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_pcASV\${id}_problematic_translations.fasta
                     if [ `wc -l ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                         grep ">" ${params.projtag}_pcASV\${id}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
                         seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pcASV\${id}_problematic_nucleotides.fasta
@@ -2663,8 +2663,8 @@ if (params.DataCheck || params.Analyze) {
                         """
                         set +e
                         cp ${params.vampdir}/bin/rename_seq.py .
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${prot} >${params.projtag}_filtered_translations.fasta
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${prot} >${params.projtag}_problematic_translations.fasta
+                        awk 'BEGIN{RS=">";ORS=""}length(\$2)>=${params.minAA}{print ">"\$0}' ${prot} >${params.projtag}_filtered_translations.fasta
+                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${prot} >${params.projtag}_problematic_translations.fasta
                         if [ `wc -l ${params.projtag}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                             grep ">" ${params.projtag}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
                             seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_problematic_nucleotides.fasta
@@ -3422,7 +3422,7 @@ if (params.DataCheck || params.Analyze) {
                         """
                         set +e
                         cp ${params.vampdir}/bin/rename_seq.py .
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)>="${params.minAA}"{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
+                        awk 'BEGIN{RS=">";ORS=""}length(\$2)>=${params.minAA}{print ">"\$0}' ${fasta} > ${params.projtag}_filtered_proteins.fasta
                         cd-hit -i ${params.projtag}_filtered_proteins.fasta -c .${nid} -o ${params.projtag}_pcASV${nid}.fasta
                         sed 's/>Cluster />Cluster_/g' ${params.projtag}_pcASV${nid}.fasta.clstr >${params.projtag}_pcASV${nid}.clstr
                         grep ">Cluster_" ${params.projtag}_pcASV${nid}.clstr >temporaryclusters.list
@@ -3478,7 +3478,7 @@ if (params.DataCheck || params.Analyze) {
                         ./rename_seq.py ${params.projtag}_pcASV${nid}.fasta ${params.projtag}_aminoheaders.list ${params.projtag}_aminoacid_pcASV${nid}_noTaxonomy.fasta
                         stats.sh in=${params.projtag}_aminoacid_pcASV${nid}_noTaxonomy.fasta gc=${params.projtag}_pcASV${nid}_aminoacid_clustered.gc gcformat=4
                         stats.sh in=${params.projtag}_nucleotide_pcASV${nid}_noTaxonomy.fasta gc=${params.projtag}_pcASV${nid}_nucleotide_clustered.gc gcformat=4
-                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<"${params.minAA}"{print ">"\$0}' ${fasta} >${params.projtag}_pcASV${nid}_problematic_translations.fasta
+                        awk 'BEGIN{RS=">";ORS=""}length(\$2)<${params.minAA}{print ">"\$0}' ${fasta} >${params.projtag}_pcASV${nid}_problematic_translations.fasta
                         if [ `wc -l ${params.projtag}_pcASV${nid}_problematic_translations.fasta | awk '{print \$1}'` -gt 1 ];then
                             grep ">" ${params.projtag}_pcASV${nid}_problematic_translations.fasta | awk -F ">" '{print \$2}' > problem_tmp.list
                             seqtk subseq ${asvs} problem_tmp.list > ${params.projtag}_pcASV${nid}_problematic_nucleotides.fasta
