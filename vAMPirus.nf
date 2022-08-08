@@ -979,6 +979,9 @@ if (params.DataCheck || params.Analyze) {
         script:
             """
 	        vsearch --uchime3_denovo ${fasta} --relabel ASV --nonchimeras ${params.projtag}_ASVs.fasta
+            if [[ ${params.filter} == "true"]]
+            then    mv ${params.projtag}_ASVs.fasta ${params.projtag}_unfiltered_ASVs.fasta
+            fi
             """
     }
 
@@ -990,6 +993,7 @@ if (params.DataCheck || params.Analyze) {
             label 'norm_cpus'
 
             publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ASVFiltering", mode: "copy", overwrite: true
+            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ASVs", mode: "copy", overwrite: true, pattern: "*ASV.fasta"
 
             input:
                 file(asv) from asvforfilt
