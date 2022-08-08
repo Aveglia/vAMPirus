@@ -1032,7 +1032,7 @@ if (params.DataCheck || params.Analyze) {
                 grep ">" ${asv} | awk -F ">" '{print \$2}' > asv.list
                 for x in \$(cat asv.list)
                 do  #check for a hit
-                    if [[ \$(grep -c "\$x" ${params.projtag}_diamondfilter.out) -eq 1 ]]
+                    if [[ \$(grep -cw "\$x" ${params.projtag}_diamondfilter.out) -eq 1 ]]
                     then    #check if hit is to filter
                             hit=\$(grep "\$x" ${params.projtag}_diamondfilter.out | awk '{print \$3}')
                             if [[ \$(grep -c "\$hit" filt.headers) -eq 1 ]]
