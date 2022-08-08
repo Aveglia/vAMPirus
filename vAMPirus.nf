@@ -979,7 +979,7 @@ if (params.DataCheck || params.Analyze) {
         script:
             """
 	        vsearch --uchime3_denovo ${fasta} --relabel ASV --nonchimeras ${params.projtag}_ASVs.fasta
-            if [[ ${params.filter} == "true"]]
+            if [[ ${params.filter} == "true" ]]
             then    mv ${params.projtag}_ASVs.fasta ${params.projtag}_unfiltered_ASVs.fasta
             fi
             """
