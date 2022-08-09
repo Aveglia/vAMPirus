@@ -7,6 +7,8 @@
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
+## UPDATE: We are cuurently working up the manuscript for vAMPirus and during the next month will be making important changes to help the stability of the recent release. If you run into any issues, please create an issue above or send an email to ajv5@rice.edu, thanks!
+
 # Table of contents
 * [New in vAMPirus version 2.0.3](#New-in-vAMPirus-version-2.0.3)
 * [Quick intro](#Quick-intro)
@@ -21,7 +23,6 @@
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
 
-## IF YOU CLONED v2.0.1 or v2.0.2 PLEASE RE-CLONE or git pull v2.0.3; there were errors caused by the use of skip options in previous versions.
 
 # New in vAMPirus version 2.0.3
 
