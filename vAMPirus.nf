@@ -1141,6 +1141,7 @@ if (params.DataCheck || params.Analyze) {
             label 'norm_cpus'
 
             publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ASVFiltering", mode: "copy", overwrite: true
+            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ASVs", mode: "copy", overwrite: true, pattern: "*ASV.fasta"
 
             input:
                 file(asv) from asvforfilt
@@ -1148,53 +1149,65 @@ if (params.DataCheck || params.Analyze) {
             output:
                 file("*ASV.fasta") into ( reads_vsearch5_ch, asv_med, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck )
                 file("*.csv") into ( nothing )
-                file("*diamondfilter.out") into ( noth)
+                file("*diamondfilter.out") into ( noth )
             script:
                 """
                 cp ${params.vampdir}/bin/rename_seq.py .
 
                 #create and rename  filter database
-                grep ">" ${params.filtDB} | sed 's/ //g' | awk -F ">" '{print \$2}' >> filt.head
-                j=1
-                for y in \$( cat filt.head );do
-                    echo ">Filt"\$j"" >> filt.headers
-                    j=\$(( \${j}+1 ))
-                done
-                ./rename_seq.py ${params.filtDB} filt.headers filterdatabaserenamed.fasta
-                cat filterdatabaserenamed.fasta >> combodatabase.fasta
-                paste -d',' filt.head filt.headers > filtername_map.csv
-
-                #create and rename keep database
-                grep ">" ${params.keepDB} | sed 's/ //g' | awk -F ">" '{print \$2}' >> keep.head
-                d=1
-                for y in \$( cat keep.head );do
-                    echo ">keep"\$d"" >> keep.headers
-                    d=\$(( \${d}+1 ))
-                done
-                ./rename_seq.py ${params.keepDB} keep.headers keepdatabaserenamed.fasta
-                cat keepdatabaserenamed.fasta >> combodatabase.fasta
-                paste -d',' keep.head keep.headers > keepername_map.csv
-                rm filterdatabaserenamed.fasta
+                if [[ ${params.filtDB} =! "" ]]
+                then    grep ">" ${params.filtDB} | sed 's/ //g' | awk -F ">" '{print \$2}' > filt.head
+                        j=1
+                        for y in \$( cat filt.head );do
+                            echo ">Filt"\$j"" >> filt.headers
+                            j=\$(( \${j}+1 ))
+                        done
+                        ./rename_seq.py ${params.filtDB} filt.headers filterdatabaserenamed.fasta
+                        cat filterdatabaserenamed.fasta >> combodatabase.fasta
+                        paste -d',' filt.head filt.headers > filtername_map.csv
+                        rm filterdatabaserenamed.fasta filt.head filt.headers
+                fi
+                #create and rename keep database if available
+                if [[ ${params.keepDB} =! "" ]]
+                then    grep ">" ${params.keepDB} | sed 's/ //g' | awk -F ">" '{print \$2}' > keep.head
+                        d=1
+                        for y in \$( cat keep.head );do
+                        echo ">keep"\$d"" >> keep.headers
+                        d=\$(( \${d}+1 ))
+                        done
+                        ./rename_seq.py ${params.keepDB} keep.headers keepdatabaserenamed.fasta
+                        cat keepdatabaserenamed.fasta >> combodatabase.fasta
+                        paste -d',' keep.head keep.headers > keepername_map.csv
+                        rm keepdatabaserenamed.fasta keep.head keep.headers
+                fi
                 #index database
                 diamond makedb --in combodatabase.fasta --db combodatabase.fasta
                 #run diamond_db
                 diamond blastx -q ${asv} -d combodatabase.fasta -p ${task.cpus} --id ${params.filtminID} -l ${params.filtminaln} -e ${params.filtevalue} --${params.filtsensitivity} -o ${params.projtag}_diamondfilter.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident --max-target-seqs 1 --max-hsps 1
                 #get asvs
                 grep ">" ${asv} | awk -F ">" '{print \$2}' > asv.list
+
                 for x in \$(cat asv.list)
                 do  #check for a hit
-                    if [[ \$(grep -c "\$x" ${params.projtag}_diamondfilter.out) -eq 1 ]]
-                    then    #check if hit is to filter
-                            hit=\$(grep "\$x" ${params.projtag}_diamondfilter.out | awk '{print \$3}')
-                            if [[ \$(grep -c "\$hit" filt.headers) -eq 1 ]]
-                            then    echo "\$x,\$hit" >> filtered_asvs_summary.csv
-                            elif [[ \$(grep -c "\$hit" keep.headers) -eq 1 ]]
-                            then    echo "\$x" >> kep.list
+                    if [[ \$(grep -cw "\$x" ${params.projtag}_diamondfilter.out) -eq 1 ]]
+                    then    hit=\$(grep -w "\$x" ${params.projtag}_diamondfilter.out | awk '{print \$3}')
+                            #check if hit is to filter
+                            if [[ ${params.filtDB} =! "" ]]
+                            then    if [[ \$(grep -wc "\$hit" filt.headers) -eq 1 ]]
+                                    then    echo "\$x,\$hit" >> filtered_asvs_summary.csv
+                                    fi
+                            fi
+                            if [[ ${params.keepDB} =! "" ]]
+                            then    #check if hit is to keep
+                                    if [[ \$(grep -wc "\$hit" keep.headers) -eq 1 ]]
+                                    then    echo "\$x" >> kep.list
+                                    fi
                             fi
                     else    echo \$x >> nohit.list
                     fi
                 done
-                if [[ ${params.keepnohit} == "true" ]]
+                #Add ASVs with no hit
+                if [[ ${params.keepnohit} == "true" ]] || [[ ${params.keepDB} = "" ]]
                 then    cat nohit.list >> kep.list
                         cat kep.list | sort >> keep.list
                         seqtk subseq ${asv} keep.list > kept.fasta
@@ -1203,7 +1216,7 @@ if (params.DataCheck || params.Analyze) {
                             echo ">ASV\${u}" >> asvrename.list
                             u=\$(( \${u}+1 ))
                         done
-                        ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
+                        ./rename_seq.py kept.fasta asvrename.list ${params.projtag}_ASV.fasta
                 else
                         cat kep.list | sort > keep.list
                         seqtk subseq ${asv} keep.list > kept.fasta
@@ -1212,7 +1225,7 @@ if (params.DataCheck || params.Analyze) {
                             echo ">ASV\${u}" >> asvrename.list
                             u=\$(( \${u}+1 ))
                         done
-                        ./rename_seq.py ${asv} asvrename.list ${params.projtag}_ASV.fasta
+                        ./rename_seq.py kept.fasta asvrename.list ${params.projtag}_ASV.fasta
                 fi
                 paste -d',' keep.list asvrename.list > ASV_rename_map.csv
                 """
