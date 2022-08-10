@@ -2474,7 +2474,7 @@ if (params.DataCheck || params.Analyze) {
             script:
                 """
                 name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}' | sed 's/ASVs/ASV/g')
-                vsearch --usearch_global ${merged} --db ${asvs} --id ${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
+                vsearch --usearch_global ${merged} --db ${asvs} --id .${params.asvcountID} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
                 cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                 sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
                 rm \${name}_count.csv
@@ -4000,7 +4000,7 @@ if (params.DataCheck || params.Analyze) {
                         mtag="ID=" + nid
                         """
                     	name=\$( echo ${potus} | awk -F ".fasta" '{print \$1}')
-                    	vsearch --usearch_global ${merged} --db ${potus} --id .${params.npcasvcountID} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
+                    	vsearch --usearch_global ${merged} --db ${potus} --id .${nid} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                     	cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                     	sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
                     	rm \${name}_count.csv
@@ -4595,7 +4595,7 @@ if (params.DataCheck || params.Analyze) {
                         set +e
                         potu="\$( echo ${fasta} | awk -F "_" '{print \$3}')"
                         diamond makedb --in ${fasta} --db ${fasta}
-                        diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${nid} -l ${params.ProtCountsLength} --${params.sensitivity} -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1 --max-hsps 1
+                        diamond blastx -q ${merged} -d ${fasta} -p ${task.cpus} --min-score ${params.ProtCountsBit} --id ${params.ProtCountID} -l ${params.ProtCountsLength} --${params.sensitivity} -o ${params.projtag}_\${potu}_Counts_dmd.out -f 6 qseqid qlen sseqid qstart qend qseq sseq length qframe evalue bitscore pident btop --max-target-seqs 1 --max-hsps 1 --max-hsps 1
                         echo "OTU_ID" >tmp.col1.txt
                         echo "Generating sample id list"
                         grep ">" ${fasta} | awk -F ">" '{print \$2}' | sort | uniq > otuid.list
@@ -4729,6 +4729,60 @@ if (params.DataCheck || params.Analyze) {
                         """
                 }
             }
+
+            if (params.deseq) {
+
+                deseq_report_asv = Channel.create()
+                asv_deseq.mix(asvgroupscsv2, asvgroupcounts2, asv_phylogroupcsv2, asv_phylogroupingcsv2).flatten().buffer(size:5).dump(tag:'asv').into(deseq_report_asv)
+
+                if (!params.skipAminoTyping) {
+                    deseq_report_aminotypes = Channel.create()
+                    aminocounts_deseq.mix(atygroupscsv2, amino_groupcounts2, amino_phylogroupcsv2, amino_phylogroupingcsv2).flatten().buffer(size:5).dump(tag:'amino').into(deseq_report_aminotypes)
+                } else {
+                    deseq_report_aminotypes = Channel.empty()
+                }
+
+                report_deseq_ch = Channel.create()
+                report_deseq.mix(deseq_report_asv, deseq_report_aminotypes).map{it.flatten()}.dump(tag:'report').into(deseq_report_all_ch)
+
+                process DEseq2_Report {
+
+                    label 'norm_cpus'
+
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReports", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/DEseq2", mode: "copy", overwrite: true, pattern: *.csv
+
+                    conda (params.condaActivate && params.myConda ? params.localConda : params.condaActivate ? "bioconda::fastp=0.20.1=h8b12597_0" : null)
+
+                    input:
+                        file(files) from deseq_report_all_ch
+
+                    output:
+                        file("*.html") into report_all_out
+
+                    script:
+                        """
+                        name=\$( ls *_counts.csv | awk -F "_counts.csv" '{print \$1}')
+                        type=\$( ls *_counts.csv | awk -F "${params.projtag}" '{print \$2}' | awk -F "_" '{print \$2}'  )
+                        cp ${params.vampdir}/bin/vAMPirus_Report.Rmd .
+                        cp ${params.vampdir}/example_data/conf/vamplogo.png .
+                        Rscript -e "rmarkdown::render('vAMPirus_deseq2_Report.Rmd',output_file='\${name}_deseq2_Report.html')" \${name} \
+                        ${params.metadata} \
+                        ${params.minimumCounts} \
+                        ${params.asvMED} \
+                        ${params.aminoMED} \
+                        \${type} \
+                        ${params.nodeCol} \
+                        ${params.asvTClust} \
+                        ${params.aminoTClust} \
+                        ${params.deseq} \
+                        ${params.compare} \
+                        ${params.alpha}
+                        """
+                }
+
+            }
+        }
 
 } else {
     println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
