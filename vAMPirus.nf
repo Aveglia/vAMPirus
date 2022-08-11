@@ -1017,7 +1017,7 @@ if (params.DataCheck || params.Analyze) {
                         ./rename_seq.py ${params.filtDB} filt.headers filterdatabaserenamed.fasta
                         cat filterdatabaserenamed.fasta >> combodatabase.fasta
                         paste -d',' filt.head filt.headers > filtername_map.csv
-                        rm filterdatabaserenamed.fasta filt.head filt.headers
+                        rm filterdatabaserenamed.fasta filt.head 
                 fi
                 #create and rename keep database if available
                 if [[ ${params.keepDB} != "" ]]
@@ -1030,7 +1030,7 @@ if (params.DataCheck || params.Analyze) {
                         ./rename_seq.py ${params.keepDB} keep.headers keepdatabaserenamed.fasta
                         cat keepdatabaserenamed.fasta >> combodatabase.fasta
                         paste -d',' keep.head keep.headers > keepername_map.csv
-                        rm keepdatabaserenamed.fasta keep.head keep.headers
+                        rm keepdatabaserenamed.fasta keep.head
                 fi
                 #index database
                 diamond makedb --in combodatabase.fasta --db combodatabase.fasta
