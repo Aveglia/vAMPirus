@@ -1017,7 +1017,7 @@ if (params.DataCheck || params.Analyze) {
                         ./rename_seq.py ${params.filtDB} filt.headers filterdatabaserenamed.fasta
                         cat filterdatabaserenamed.fasta >> combodatabase.fasta
                         paste -d',' filt.head filt.headers > filtername_map.csv
-                        rm filterdatabaserenamed.fasta filt.head 
+                        rm filterdatabaserenamed.fasta filt.head
                 fi
                 #create and rename keep database if available
                 if [[ ${params.keepDB} != "" ]]
@@ -3407,7 +3407,7 @@ if (params.DataCheck || params.Analyze) {
                       script:
                           """
                           ${tools}/virtualribosomev2/dna2pep.py ${fasta} -r all -x -o none --fasta ${params.projtag}_ASV_translation.fasta --report ${params.projtag}_ASV_translations_report
-                          awk '/^>/ { print (NR==1 ? "" : RS) \$0; next } { printf "%s", \$0 } END { printf RS }' ${params.projtag}_ASV_translaton.fasta > ${params.projtag}_all_translations.fasta
+                          awk '/^>/ { print (NR==1 ? "" : RS) \$0; next } { printf "%s", \$0 } END { printf RS }' ${params.projtag}_ASV_translation.fasta > ${params.projtag}_all_translations.fasta
                           cp ${fasta} ${params.projtag}_ASV_nucleotide.fasta
                           """
                 }
