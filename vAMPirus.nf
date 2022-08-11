@@ -1007,7 +1007,7 @@ if (params.DataCheck || params.Analyze) {
                 cp ${params.vampdir}/bin/rename_seq.py .
 
                 #create and rename  filter database
-                if [[ ${params.filtDB} =! "" ]]
+                if [[ ${params.filtDB} != "" ]]
                 then    grep ">" ${params.filtDB} | sed 's/ //g' | awk -F ">" '{print \$2}' > filt.head
                         j=1
                         for y in \$( cat filt.head );do
@@ -1020,7 +1020,7 @@ if (params.DataCheck || params.Analyze) {
                         rm filterdatabaserenamed.fasta filt.head filt.headers
                 fi
                 #create and rename keep database if available
-                if [[ ${params.keepDB} =! "" ]]
+                if [[ ${params.keepDB} != "" ]]
                 then    grep ">" ${params.keepDB} | sed 's/ //g' | awk -F ">" '{print \$2}' > keep.head
                         d=1
                         for y in \$( cat keep.head );do
@@ -1044,12 +1044,12 @@ if (params.DataCheck || params.Analyze) {
                     if [[ \$(grep -cw "\$x" ${params.projtag}_diamondfilter.out) -eq 1 ]]
                     then    hit=\$(grep -w "\$x" ${params.projtag}_diamondfilter.out | awk '{print \$3}')
                             #check if hit is to filter
-                            if [[ ${params.filtDB} =! "" ]]
+                            if [[ ${params.filtDB} != "" ]]
                             then    if [[ \$(grep -wc "\$hit" filt.headers) -eq 1 ]]
                                     then    echo "\$x,\$hit" >> filtered_asvs_summary.csv
                                     fi
                             fi
-                            if [[ ${params.keepDB} =! "" ]]
+                            if [[ ${params.keepDB} != "" ]]
                             then    #check if hit is to keep
                                     if [[ \$(grep -wc "\$hit" keep.headers) -eq 1 ]]
                                     then    echo "\$x" >> kep.list
