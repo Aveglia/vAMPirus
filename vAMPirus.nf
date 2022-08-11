@@ -1218,7 +1218,7 @@ if (params.DataCheck || params.Analyze) {
                 cp ${params.vampdir}/bin/rename_seq.py .
 
                 #create and rename  filter database
-                if [[ ${params.filtDB} =! "" ]]
+                if [[ ${params.filtDB} != "" ]]
                 then    grep ">" ${params.filtDB} | sed 's/ //g' | awk -F ">" '{print \$2}' > filt.head
                         j=1
                         for y in \$( cat filt.head );do
@@ -1228,10 +1228,10 @@ if (params.DataCheck || params.Analyze) {
                         ./rename_seq.py ${params.filtDB} filt.headers filterdatabaserenamed.fasta
                         cat filterdatabaserenamed.fasta >> combodatabase.fasta
                         paste -d',' filt.head filt.headers > filtername_map.csv
-                        rm filterdatabaserenamed.fasta filt.head filt.headers
+                        rm filterdatabaserenamed.fasta filt.head
                 fi
                 #create and rename keep database if available
-                if [[ ${params.keepDB} =! "" ]]
+                if [[ ${params.keepDB} != "" ]]
                 then    grep ">" ${params.keepDB} | sed 's/ //g' | awk -F ">" '{print \$2}' > keep.head
                         d=1
                         for y in \$( cat keep.head );do
@@ -1241,7 +1241,7 @@ if (params.DataCheck || params.Analyze) {
                         ./rename_seq.py ${params.keepDB} keep.headers keepdatabaserenamed.fasta
                         cat keepdatabaserenamed.fasta >> combodatabase.fasta
                         paste -d',' keep.head keep.headers > keepername_map.csv
-                        rm keepdatabaserenamed.fasta keep.head keep.headers
+                        rm keepdatabaserenamed.fasta keep.head
                 fi
                 #index database
                 diamond makedb --in combodatabase.fasta --db combodatabase.fasta
@@ -1255,12 +1255,12 @@ if (params.DataCheck || params.Analyze) {
                     if [[ \$(grep -cw "\$x" ${params.projtag}_diamondfilter.out) -eq 1 ]]
                     then    hit=\$(grep -w "\$x" ${params.projtag}_diamondfilter.out | awk '{print \$3}')
                             #check if hit is to filter
-                            if [[ ${params.filtDB} =! "" ]]
+                            if [[ ${params.filtDB} != "" ]]
                             then    if [[ \$(grep -wc "\$hit" filt.headers) -eq 1 ]]
                                     then    echo "\$x,\$hit" >> filtered_asvs_summary.csv
                                     fi
                             fi
-                            if [[ ${params.keepDB} =! "" ]]
+                            if [[ ${params.keepDB} != "" ]]
                             then    #check if hit is to keep
                                     if [[ \$(grep -wc "\$hit" keep.headers) -eq 1 ]]
                                     then    echo "\$x" >> kep.list
