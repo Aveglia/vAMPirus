@@ -2985,6 +2985,11 @@ if (params.DataCheck || params.Analyze) {
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Problematic", mode: "copy", overwrite: true, pattern: '*problematic*.{fasta}'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes", mode: "copy", overwrite: true, pattern: '*AminoTypes_noTaxonomy.{fasta}'
 
+                    conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.9.8=h5c4e2a8_0" : null)
+
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################
+
+
                     input:
                         file(prot) from amintypegen
                         file(asvs) from asvaminocheck
@@ -3077,7 +3082,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/ProteinProperties", mode: "copy", overwrite: true, pattern: '*.{pepstats,pepinfo}'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
-                        
+
                         conda (params.condaActivate ? "bioconda::emboss=6.6.0=h86d058a_5" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/emboss:6.6.0--h86d058a_5" : "quay.io/biocontainers/emboss:6.6.0--h86d058a_5")
@@ -3772,6 +3777,10 @@ if (params.DataCheck || params.Analyze) {
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Problematic", mode: "copy", overwrite: true, pattern: '*problem*.{fasta}'
 
+                    conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.9.8=h5c4e2a8_0" : null)
+
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################
+
                     input:
                         each x from 1..naa
                         file(fasta) from clustering_aa
@@ -4191,6 +4200,10 @@ if (params.DataCheck || params.Analyze) {
                     tag "${mtag}"
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Counts", mode: "copy", overwrite: true, pattern: '*.{biome,csv,txt}'
+
+                    conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1" : null)
+
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/vsearch:2.21.1--hf1761c0_1" : "quay.io/biocontainers/vsearch:2.21.1--hf1761c0_1")
 
                     input:
                         tuple nid, file(potus) from pcASV_nt_counts_ch
