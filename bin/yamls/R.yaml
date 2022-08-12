@@ -1,0 +1,21 @@
+# You can use this file to create a conda environment for this pipeline:
+#   conda env create -f env.yml
+name: vAMPirus_R
+channels:
+  - conda-forge
+  - bioconda
+  - anaconda
+  - defaults
+  - genomedk
+dependencies:
+  - r-plotly
+  - r-knitr
+  - r-rmarkdown
+  - r-kableextra
+  - r-vegan
+  - r-tidyverse
+  - r-cowplot
+  - r-scales
+  - bioconductor-ggtree
+  - r-devtools
+  - r-biocmanager

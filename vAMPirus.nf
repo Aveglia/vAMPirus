@@ -738,9 +738,9 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2" : null)
+                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2 bioconda::jq=1.6" : null)
 
-                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/fastp:0.23.2--hb7a2d85_2" : "quay.io/biocontainers/fastp:0.23.2--hb7a2d85_2")
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ##############################################################################!!
 
                         input:
                             tuple sample_id, file(reads) from reads_ch
@@ -771,7 +771,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2" : null)
+                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2 bioconda::jq=1.6" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/fastp:0.23.2--hb7a2d85_2" : "quay.io/biocontainers/fastp:0.23.2--hb7a2d85_2")
 
@@ -1523,7 +1523,7 @@ if (params.DataCheck || params.Analyze) {
 
                   publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
 
-                  conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6 " : null)
+                  conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
                   container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -1645,7 +1645,7 @@ if (params.DataCheck || params.Analyze) {
 
                   publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
-                  conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6 " : null)
+                  conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
                   container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -1800,9 +1800,10 @@ if (params.DataCheck || params.Analyze) {
 
             publishDir "${params.workingdir}/${params.outdir}/DataCheck/Report", mode: "copy", overwrite: true, pattern: '*.{html}'
 
-            conda (params.condaActivate ? " " : null)
+            conda (params.condaActivate ? "${params.vampdir}/bin/yamls/R.yml" : null)
 
             container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+
 
             input:
                 file(files) from report_dc_in
@@ -2251,7 +2252,7 @@ if (params.DataCheck || params.Analyze) {
                           publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ncASV*mt*'
                           publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ncASV*iq*'
 
-                          conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6 bioconda::iqtree=2.2.0.3=hb97b32f_1 bioconda::modeltest-ng=0.1.7=h5c6ebe3_0 PIP" : null)
+                          conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
                           container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -2699,7 +2700,7 @@ if (params.DataCheck || params.Analyze) {
                       publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
                       publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
 
-                      conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6 bioconda::iqtree=2.2.0.3=hb97b32f_1 bioconda::modeltest-ng=0.1.7=h5c6ebe3_0 PIP" : null)
+                      conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
                       container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -2750,6 +2751,10 @@ if (params.DataCheck || params.Analyze) {
                       label 'norm_cpus'
 
                       publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/TreeClustering", mode: "copy", overwrite: true
+
+                      conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+
+                      container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
                       input:
                          file(tree) from asv_treeclust
@@ -2811,6 +2816,10 @@ if (params.DataCheck || params.Analyze) {
                 label 'low_cpus'
 
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true
+
+                conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+
+                container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
                 input:
                   file(asvs) from asv_for_med
@@ -2881,7 +2890,7 @@ if (params.DataCheck || params.Analyze) {
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
 
-                conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6 bioconda::iqtree=2.2.0.3=hb97b32f_1 bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
+                conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
                 container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -3431,7 +3440,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
-                        conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6 bioconda::iqtree=2.2.0.3=hb97b32f_1 bioconda::modeltest-ng=0.1.7=h5c6ebe3_0 PIP" : null)
+                        conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -3488,7 +3497,7 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Counts", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "-c conda-forge bioconda::diamond=2.0.15=hb97b32f_1" : null)
+                    conda (params.condaActivate ? "bioconda::diamond=2.0.15=hb97b32f_1" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/diamond:2.0.15--hb97b32f_1" : "quay.io/biocontainers/diamond:2.0.15--hb97b32f_1")
 
@@ -3599,6 +3608,10 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED", mode: "copy", overwrite: true
 
+                    conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+
                     input:
                         file(aminos) from aminos_for_med
 
@@ -3669,7 +3682,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
-                        conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6 bioconda::iqtree=2.2.0.3=hb97b32f_1 bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
+                        conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -4267,7 +4280,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
-                        conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6 bioconda::iqtree=2.2.0.3=hb97b32f_1 bioconda::modeltest-ng=0.1.7=h5c6ebe3_0 PIP" : null)
+                        conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -4752,7 +4765,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
-                        conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6 bioconda::iqtree=2.2.0.3=hb97b32f_1 bioconda::modeltest-ng=0.1.7=h5c6ebe3_0 PIP" : null)
+                        conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -4946,9 +4959,9 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReports", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "" : null)
+                    conda (params.condaActivate ? "${params.vampdir}/bin/yamls/R.yml" : null)
 
-                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ############################################################################!!!!!
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
                     input:
                         file(csv) from fastp_csv_in

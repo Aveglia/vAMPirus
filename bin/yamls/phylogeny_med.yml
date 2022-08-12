@@ -1,0 +1,18 @@
+# You can use this file to create a conda environment for this pipeline:
+#   conda env create -f env.yml
+name: vAMPirus_phy_med
+channels:
+  - conda-forge
+  - bioconda
+  - anaconda
+  - defaults
+  - genomedk
+dependencies:
+  - python=3.6
+  - trimal=1.4.1
+  - iqtree=2.0.3
+  - modeltest-ng=0.1.6
+  - pip
+  - pip:
+    - oligotyping
+    - treecluster
