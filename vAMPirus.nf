@@ -3875,7 +3875,7 @@ if (params.DataCheck || params.Analyze) {
                         name=\$( echo ${potus} | awk -F ".fasta" '{print \$1}')
                         clustalo -i ${potus} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                         clustalo -i ${potus} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                        cat \${name}_PercentIDq.matrix | tr " " "," | grep "," >\${name}_PercentID.matrix
+                        cat \${name}_PercentIDq.matrix | sed 's/  / /g' | tr " " "," | grep "," >\${name}_PercentID.matrix
                         rm \${name}_PercentIDq.matrix
                         """
                 }
