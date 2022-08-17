@@ -811,9 +811,9 @@ if (params.DataCheck || params.Analyze) {
 
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
 
-                        conda (params.condaActivate ? "bioconda::bbmap=38.9.8=h5c4e2a8_0" : null)
+                        conda (params.condaActivate ? "bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
-                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/bbamap:38.9.8--h5c4e2a8_0" : "quay.io/biocontainers/bbmap:38.9.8--h5c4e2a8_0")
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/bbamap:38.98--h5c4e2a8_0" : "quay.io/biocontainers/bbmap:38.98--h5c4e2a8_0")
 
                         input:
                             tuple sample_id, file(reads) from reads_fastp_ch
@@ -857,9 +857,9 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "bioconda::bbmap=38.9.8=h5c4e2a8_0" : null)
+                    conda (params.condaActivate ? "bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
-                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/bbamap:38.9.8--h5c4e2a8_0" : "quay.io/biocontainers/bbmap:38.9.8--h5c4e2a8_0")
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/bbamap:38.98--h5c4e2a8_0" : "quay.io/biocontainers/bbmap:38.98--h5c4e2a8_0")
 
                     input:
                         tuple sample_id, file(reads) from reads_fastp_ch
@@ -1071,9 +1071,9 @@ if (params.DataCheck || params.Analyze) {
         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/pre_length_filtering", mode: "copy", overwrite: true, pattern: "*preFilt_*st.txt"
         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/post_length_filtering", mode: "copy", overwrite: true, pattern: "*postFilt_*st.txt"
 
-        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2 bioconda::bbmap=38.9.8=h5c4e2a8_0" : null)
+        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2 bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
-        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/")#########################################################################################################
+        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-22ce7eae944f2086a1f83e59d4735573352eff58:f8832d34305db510dcb75c90775f8b0ff5aab759-0" : "quay.io/biocontainers/mulled-v2-22ce7eae944f2086a1f83e59d4735573352eff58:f8832d34305db510dcb75c90775f8b0ff5aab759-0")
 
         input:
             file(reads) from collect_samples_ch
@@ -1386,7 +1386,7 @@ if (params.DataCheck || params.Analyze) {
 
             publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
-            conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.9.8=h5c4e2a8_0" : null)
+            conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
             container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################
 
@@ -1803,7 +1803,6 @@ if (params.DataCheck || params.Analyze) {
             conda (params.condaActivate ? "${params.vampdir}/bin/yamls/R.yml" : null)
 
             container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
-
 
             input:
                 file(files) from report_dc_in
@@ -2993,7 +2992,7 @@ if (params.DataCheck || params.Analyze) {
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Problematic", mode: "copy", overwrite: true, pattern: '*problematic*.{fasta}'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes", mode: "copy", overwrite: true, pattern: '*AminoTypes_noTaxonomy.{fasta}'
 
-                    conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.9.8=h5c4e2a8_0" : null)
+                    conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################
 
@@ -3790,7 +3789,7 @@ if (params.DataCheck || params.Analyze) {
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Problematic", mode: "copy", overwrite: true, pattern: '*problem*.{fasta}'
 
-                    conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.9.8=h5c4e2a8_0" : null)
+                    conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################
 
