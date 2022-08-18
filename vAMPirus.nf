@@ -740,7 +740,7 @@ if (params.DataCheck || params.Analyze) {
 
                         conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2 bioconda::jq=1.6" : null)
 
-                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ##############################################################################!!
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-5666eb6a4fae88fa99ccfec9e989b1cb890c0a2f:e733f77e19050fa17954f82fe0600017cda3ebad-0" : "quay.io/biocontainers/mulled-v2-5666eb6a4fae88fa99ccfec9e989b1cb890c0a2f:e733f77e19050fa17954f82fe0600017cda3ebad-0")
 
                         input:
                             tuple sample_id, file(reads) from reads_ch
@@ -1204,8 +1204,7 @@ if (params.DataCheck || params.Analyze) {
 
             conda (params.condaActivate ? "bioconda::diamond=2.0.15=hb97b32f_1 bioconda::seqtk=1.3=h7132678_4" : null)
 
-            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/")#############################################################################################################
-
+            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-b650c9790d7ca81a2448038cd6bbb974b925ecf2:00a620a1a2f7f99fcc9bb6e73d2cf216ac34bda1-0" : "quay.io/biocontainers/mulled-v2-b650c9790d7ca81a2448038cd6bbb974b925ecf2:00a620a1a2f7f99fcc9bb6e73d2cf216ac34bda1-0")
             input:
                 file(asv) from asvforfilt
 
@@ -1388,7 +1387,7 @@ if (params.DataCheck || params.Analyze) {
 
             conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
-            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################
+            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0" : "quay.io/biocontainers/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0")
 
             input:
                 file(fasta) from clustering_aa
@@ -2994,7 +2993,7 @@ if (params.DataCheck || params.Analyze) {
 
                     conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
-                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0" : "quay.io/biocontainers/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0")
 
 
                     input:
@@ -3791,7 +3790,7 @@ if (params.DataCheck || params.Analyze) {
 
                     conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1 bioconda::cd-hit=4.8.1=h10c929f_7 bioconda::seqtk=1.3=h7132678_4 bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
-                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0" : "quay.io/biocontainers/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0")
 
                     input:
                         each x from 1..naa

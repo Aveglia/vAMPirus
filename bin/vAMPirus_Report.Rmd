@@ -814,7 +814,13 @@ fi
 ```
 
 ```{r phyloGroup_table, echo=FALSE}
-if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+if ((params$asvTClust == "true") && (params$type == "ASV")) {
+    phylogroup=read.csv("phylogroup.csv", header = T)
+    knitr::kable(phylogroup, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: phyloGroup Table") %>%
+    kable_styling(font_size = 12, full_width = F)%>%
+    scroll_box(width = "100%", height = "100%")
+}
+if ((params$aminoTClust == "true") && (params$type == "AminoType")) {
     phylogroup=read.csv("phylogroup.csv", header = T)
     knitr::kable(phylogroup, digits = 2, align = 'c', booktabs = TRUE, caption = "Table: phyloGroup Table") %>%
     kable_styling(font_size = 12, full_width = F)%>%
