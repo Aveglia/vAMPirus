@@ -21,7 +21,16 @@ The vAMPirus program contains two different pipelines:
 
 If you have a feature request or any feedback/questions, feel free to email vAMPirusHelp@gmail.com or you can open an Issue on GitHub.
 
-## Changes in version 2.0.2
+# New in vAMPirus version 3.0.0
+
+1. Supports single-end read libraries as input.
+
+2. Changed to have process-specific Conda evironments and Singularity/Docker containers.
+
+3. Added more output from report analyses.
+
+
+## Changes in version 2.0.3
 
 1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 
@@ -406,7 +415,7 @@ To set up and install vAMPirus dependencies, simply move to the vAMPirus directo
 >You can make the vampirus_startup.sh scrip an exectuable with -> chmod +x vampirus_startup.sh ; ./vampirus_startup.sh
 
 
-The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and will build the vAMPirus conda environment and the installation is complete.
+The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and the installation is complete.
 
 You can also use the startup script to install different databases to use for vAMPirus analyses, these include:
 

@@ -21,7 +21,17 @@
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
 
-## IF YOU CLONED v2.0.1 or v2.0.2 PLEASE RE-CLONE or git pull v2.0.3; there were errors caused by the use of skip options in previous versions.
+# Introduction to vAMPirus
+
+Viruses are the most abundant biological entities on the planet and with advances in next-generation sequencing technologies, there has been significant effort in deciphering the global virome and its impact in nature (Suttle 2007; Breitbart 2019). A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program that is integrated with the Nextflow workflow manager facilitation easy scalability and standardization of analyses.
+
+# New in vAMPirus version 3.0.0
+
+1. Supports single-end read libraries as input.
+
+2. Changed to have process-specific Conda evironments and Singularity/Docker containers.
+
+3. Added more output from report analyses.
 
 # New in vAMPirus version 2.0.3
 
@@ -91,16 +101,16 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 
 ### Installing dependencies (see Who to cite section)
 
-If you plan on using Conda to run vAMPirus, all dependencies will be installed as a Conda environment automatically with the vampirus_startup.sh script.
+New in v3.0.0 the dependencies of vAMPirus will be set up by Nextflow upon the initial launch of a vAMPirus pipeline regardless if you plan to use Conda or Singularity/Docker.
 
-If you plan to use a container engine like Singularity, the dependencies of vAMPirus have been built as a Docker container (aveglia/vAMPirus) that's stored in the vAMPirus directory and will be set up by Nextflow upon the initial launch of a vAMPirus pipeline.
+Run the start up script to set paths automatically in the configuration file, install Conda, and install any databases.
 
 
 # Installing vAMPirus
 
 ## Windows OS users
 
-vAMPirus has been set up and tested on Windows 10 using Ubuntu Sandbox (https://wiki.ubuntu.com/WSL) which is a new feature of Windows 10 - See Windows Subsystem for Linux -> https://docs.microsoft.com/en-us/windows/wsl/about
+vAMPirus has been set up and tested on Windows 10 using Ubuntu Sandbox (https://wiki.ubuntu.com/WSL) which is a feature of Windows 10 - See Windows Subsystem for Linux -> https://docs.microsoft.com/en-us/windows/wsl/about
 
 All you will need to do is set up the subsystem with whatever flavor of Linux you favor and then you can follow the directions for installation and running as normal.
 
@@ -154,7 +164,7 @@ The startup script provided in the vAMPirus program directory will install Conda
 
 
 ### vAMPirus startup script
-To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
+To set up and install vAMPirus dependencies (e.g., Conda, Nextflow), simply move to the vAMPirus directory and run the vampirus_startup.sh script.
 
     cd ./vAMPirus; bash vampirus_startup.sh -h
 
@@ -202,7 +212,7 @@ and if we wanted to do the same thing as above but skip the Conda check/installa
 
     bash vampirus_startup.sh -d 2 -s
 
-NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed.
+NOTE -> if you end up installing Miniconda3 using the script you might have to close and re-open the terminal window after everything is completed.
 
 **NEW in version 2.0.0 -> the startup script will automatically download annotation information from RVDB to infer Lowest Common Ancestor (LCA) information for hits during taxonomy assignment. You can also use "-t" to download NCBI taxonomy files to infer taxonomy using the DIAMOND taxonomy classification feature.
 

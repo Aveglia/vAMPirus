@@ -1801,7 +1801,7 @@ if (params.DataCheck || params.Analyze) {
 
             conda (params.condaActivate ? "${params.vampdir}/bin/yamls/R.yml" : null)
 
-            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-90fb71778d446b480b1050805be9ef346794df6b:6d9281817ba120685d81edae0370730c1ff554cc-0" : "quay.io/biocontainers/mulled-v2-90fb71778d446b480b1050805be9ef346794df6b:6d9281817ba120685d81edae0370730c1ff554cc-0")
 
             input:
                 file(files) from report_dc_in
@@ -4959,7 +4959,7 @@ if (params.DataCheck || params.Analyze) {
 
                     conda (params.condaActivate ? "${params.vampdir}/bin/yamls/R.yml" : null)
 
-                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-90fb71778d446b480b1050805be9ef346794df6b:6d9281817ba120685d81edae0370730c1ff554cc-0" : "quay.io/biocontainers/mulled-v2-90fb71778d446b480b1050805be9ef346794df6b:6d9281817ba120685d81edae0370730c1ff554cc-0")
 
                     input:
                         file(csv) from fastp_csv_in
