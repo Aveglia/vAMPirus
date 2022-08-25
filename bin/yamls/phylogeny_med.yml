@@ -12,7 +12,5 @@ dependencies:
   - trimal=1.4.1
   - iqtree=2.0.3
   - modeltest-ng=0.1.6
-  - pip
-  - pip:
-    - oligotyping
-    - treecluster
+  - oligotyping=2.1
+  - treecluster=1.0.3
