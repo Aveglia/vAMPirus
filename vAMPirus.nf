@@ -1516,33 +1516,75 @@ if (params.DataCheck || params.Analyze) {
 
          if (params.asvMED) {
 
-                process ASV_Shannon_Entropy_Analysis {
+                process ASV_Shannon_Entropy_Analysis_step1 {
 
                   label 'norm_cpus'
 
-                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+                  //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
 
-                  conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+                  conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
 
-                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
 
                   input:
                       file(asvs) from asv_med
 
                   output:
+                      file("_ASVs_muscleAlign.fasta") into shannon_trim
 
+                  script:
+                    """
+                    #alignment
+                    muscle -in ${asvs} -out ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
+                    """
+                }
+
+                process ASV_Shannon_Entropy_Analysis_step2 {
+
+                  label 'norm_cpus'
+
+                  //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+
+                  conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6" : null)
+
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
+
+                  input:
+                      file(asvs) from trim
+
+                  output:
+                      file("*_ASVs_muscleAligned.fasta") into shannon_trim2
+
+                  script:
+                    """
+                    #set +e
+                    #trimming
+                    trimal -in ${asvs} -out ${params.projtag}_ASVs_muscleAligned.fasta  -keepheader -fasta -automated1
+                    rm ${params.projtag}_ASVs_muscleAlign.fasta
+                    """
+                }
+
+                process ASV_Shannon_Entropy_Analysis_step3 {
+
+                  label 'norm_cpus'
+
+                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+
+                  conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
+
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
+
+                  input:
+                      file(asvs) from shannon_trim2
+
+                  output:
                       file("*_ASV_entropy_breakdown.csv") into asv_entro_csv
                       file("*Aligned_informativeonly.fasta-ENTROPY") into asv_entropy
                       file("*ASV*") into entrop
 
                   script:
-                  """
-                    set +e
-                    #alignment
-                    ${tools}/muscle5.0.1278_linux64 -in ${asvs} -out ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
-                    #trimming
-                    trimal -in ${params.projtag}_ASVs_muscleAlign.fasta -out ${params.projtag}_ASVs_muscleAligned.fasta  -keepheader -fasta -automated1
-                    rm ${params.projtag}_ASVs_muscleAlign.fasta
+                    """
+                    #set +e
                     o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_muscleAligned.fasta
                     mv ${params.projtag}_ASVs_muscleAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
                     #entopy analysis
@@ -1627,10 +1669,9 @@ if (params.DataCheck || params.Analyze) {
                     echo "Base_position,Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
                     cat tmp.csv >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
                     rm tmp.csv
-
-                  """
-
+                    """
                 }
+
             } else {
                 asv_entropy = Channel.empty()
                 asv_entro_csv = Channel.empty()
@@ -1638,7 +1679,57 @@ if (params.DataCheck || params.Analyze) {
 
         if (params.aminoMED) {
 
-                process AminoType_Shannon_Entropy_Analysis {
+                process AminoType_Shannon_Entropy_Analysis_step1 {
+
+                  label 'norm_cpus'
+
+                  //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true
+
+                  conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
+
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
+
+                  input:
+                      file(aminos) from amino_med
+
+                  output:
+                      file("*_AminoTypes_muscleAlign.fasta") into amino_shannon_trim1
+
+                  script:
+                    """
+                    #alignment
+                    if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
+                    muscle -\${algo} ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
+                    """
+                }
+
+                process AminoType_Shannon_Entropy_Analysis_step2 {
+
+                  label 'norm_cpus'
+                  conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6" : null)
+
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
+
+                  //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true
+
+                  conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6" : null)
+
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
+
+                  input:
+                      file(aminos) from amino_shannon_trim1
+
+                  output:
+                      file("*_AminoTypes_muscleAligned.fasta") into amino_shannon_trim2
+
+                  script:
+                    """
+                    #trimming
+                    trimal -in ${params.projtag}_AminoTypes_muscleAlign.fasta -out ${params.projtag}_AminoTypes_muscleAligned.fasta  -keepheader -fasta -automated1
+                    """
+                }
+
+                process AminoType_Shannon_Entropy_Analysis_step3 {
 
                   label 'norm_cpus'
 
@@ -1646,10 +1737,13 @@ if (params.DataCheck || params.Analyze) {
 
                   conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
 
-                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
+                                    conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0") ###################################################################################!!!!!!
 
                   input:
-                      file(aminos) from amino_med
+                      file(aminos) from amino_shannon_trim2
 
                   output:
                       file("*AminoType_entropy_breakdown.csv") into amino_entro_csv
@@ -1658,12 +1752,6 @@ if (params.DataCheck || params.Analyze) {
 
                   script:
                     """
-                    #alignment
-                    if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
-                    ${tools}/muscle5.0.1278_linux64 -\${algo} ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
-                    #trimming
-                    trimal -in ${params.projtag}_AminoTypes_muscleAlign.fasta -out ${params.projtag}_AminoTypes_muscleAligned.fasta  -keepheader -fasta -automated1
-                    rm ${params.projtag}_AminoTypes_muscleAlign.fasta
                     o-trim-uninformative-columns-from-alignment ${params.projtag}_AminoTypes_muscleAligned.fasta
                     mv ${params.projtag}_AminoTypes_muscleAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
                     #entropy analysis
@@ -2750,7 +2838,7 @@ if (params.DataCheck || params.Analyze) {
 
                       publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/TreeClustering", mode: "copy", overwrite: true
 
-                      conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+                      conda (params.condaActivate ? "${params.vampdir}/bin/yamls/treecluster.yml" : null)
 
                       container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
@@ -2764,8 +2852,8 @@ if (params.DataCheck || params.Analyze) {
 
                       script:
                           """
-                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering.out
-                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_ASV_treeclustering_verbose.out
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} >${params.projtag}_ASV_treeclustering.out
+                          TreeCluster.py -i ${tree} ${params.asvTCopp} >${params.projtag}_ASV_treeclustering_verbose.out
                           #create headless treeclustering.out
                           tail -n +2 ${params.projtag}_ASV_treeclustering.out | sed 's/-1/0X/g' > headless.treeout
                           #extracting singletons
@@ -2778,7 +2866,7 @@ if (params.DataCheck || params.Analyze) {
                           awk -F "\\t" '{print \$2}' headless.treeout | grep -v "0X" | sort | uniq > grp.list
                           cat single.groups >> group.list
                           cat grp.list >> group.list
-                          echo "Sequence_ID,phyloGroup_ID" > ${params.projtag}_ASV_phylogroup.csv
+                          echo "Sequence_ID,phyloGroup_ID" >${params.projtag}_ASV_phylogroup.csv
 
                           for x in \$(seq "\$(wc -l group.list | awk '{print \$1}')");
                           do      echo "phyloGroup"\$x"" >> grup.list
@@ -2794,10 +2882,10 @@ if (params.DataCheck || params.Analyze) {
                                           grp=\$(grep -w "\$z" headless.treeout | awk -F "\\t" '{print \$2}')
                                           group=\$(grep -w "\$grp" groups.csv | awk -F "," '{print \$1}')
                                   fi
-                                  echo ""\$z","\$group"" >> ${params.projtag}_ASV_phylogroup.csv
+                                  echo ""\$z","\$group"" >>${params.projtag}_ASV_phylogroup.csv
                           done
                           awk -F "," '{print \$2}' ${params.projtag}_ASV_phylogroup.csv > groups.list
-                          paste -d"," groups.list ${counts} > ${params.projtag}_ASV_phyloGroupingcounts.csv
+                          paste -d"," groups.list ${counts} >${params.projtag}_ASV_phyloGroupingcounts.csv
                           """
                 }
 
@@ -3547,6 +3635,10 @@ if (params.DataCheck || params.Analyze) {
 
                       publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/TreeCluster", mode: "copy", overwrite: true
 
+                      conda (params.condaActivate ? "${params.vampdir}/bin/yamls/treecluster.yml" : null)
+
+                      container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/treecluster:1.0.3--pyh3252c3a_0" : "quay.io/biocontainers/treecluster:1.0.3--pyh3252c3a_0")
+
                       input:
                          file(tree) from amino_treeclust
                          file(counts) from amino_countphylo
@@ -3606,7 +3698,7 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+                    conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligo.yaml" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
