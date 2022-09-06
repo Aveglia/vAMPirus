@@ -2328,7 +2328,7 @@ if (params.DataCheck || params.Analyze) {
                 name=\$( echo ${asvs} | awk -F ".fasta" '{print \$1}' | sed 's/ASVs/ASV/g')
                 if [[ "${params.exact}" == "true" ]]
                 then    vsearch --search_exact ${merged} --db ${asvs} --minseqlength ${params.minLencount} --threads ${task.cpus} --otutabout "\$name"_counts.txt --biomout "\$name"_counts.biome
-                else    vsearch --usearch_global ${merged} --db ${asvs} --id .${nid} --minseqlength ${params.minLencount} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
+                else    vsearch --usearch_global ${merged} --db ${asvs} --id ${params.id} --minseqlength ${params.minLencount} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                 fi
                 cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                 sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
