@@ -738,17 +738,18 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2 bioconda::jq=1.6" : null)
+                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2" : null)
 
-                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-5666eb6a4fae88fa99ccfec9e989b1cb890c0a2f:e733f77e19050fa17954f82fe0600017cda3ebad-0" : "quay.io/biocontainers/mulled-v2-5666eb6a4fae88fa99ccfec9e989b1cb890c0a2f:e733f77e19050fa17954f82fe0600017cda3ebad-0")
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/fastp:0.23.2--hb7a2d85_2" : "quay.io/biocontainers/fastp:0.23.2--hb7a2d85_2")
 
                         input:
                             tuple sample_id, file(reads) from reads_ch
 
                         output:
                             tuple sample_id, file("*.fastp.{json,html}") into fastp_results
+                            tuple sample_id, file("*.fastp.{json}") into fastp_json
                             tuple sample_id, file("*.filter.fq") into reads_fastp_ch
-                            file("*.csv") into ( fastp_csv_in1, fastp_csv_in2 )
+
 
                         script:
                             """
@@ -758,10 +759,11 @@ if (params.DataCheck || params.Analyze) {
                             --average_qual ${params.avQ} -n ${params.mN} -c --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} \
                             --report_title ${sample_id}
 
-                            bash get_readstats.sh ${sample_id}.fastp.json
                             """
                         }
+
             } else if (params.single) {
+
                     process Adapter_Removal_se {
 
                         label 'norm_cpus'
@@ -771,7 +773,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2 bioconda::jq=1.6" : null)
+                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/fastp:0.23.2--hb7a2d85_2" : "quay.io/biocontainers/fastp:0.23.2--hb7a2d85_2")
 
@@ -780,19 +782,45 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             tuple sample_id, file("*.fastp.{json,html}") into fastp_results
+                            tuple sample_id, file("*.fastp.{json}") into fastp_json
                             tuple sample_id, file("*.filter.fq") into reads_fastp_ch
-                            file("*.csv") into ( fastp_csv_in1, fastp_csv_in2 )
 
                         script:
                             """
                             echo ${sample_id}
 
                             fastp -i ${reads} -o ${sample_id}.filter.fq --average_qual ${params.avQ} -n ${params.mN} --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} --report_title ${sample_id}
-
-                            bash ${params.vampdir}/bin/get_readstats.sh ${sample_id}.fastp.json  ####check with ramon why tf this isnt automatic with tools being exprted correctly
                             """
                     }
             }
+
+            process Read_stats_processing {
+
+            label 'norm_cpus'
+
+            tag "${sample_id}"
+
+            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
+            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
+
+            conda (params.condaActivate ? "bioconda::jq=1.6" : null)
+
+            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/jq:1.6" : "quay.io/biocontainers/jq:1.6")
+
+            input:
+                tuple sample_id, file(json) from fastp_json
+
+            output:
+                file("*.csv") into ( fastp_csv_in1, fastp_csv_in2 )
+
+            script:
+                """
+                echo ${sample_id}
+
+                bash ${params.vampdir}/bin/get_readstats.sh ${json}  ####check with ramon why tf this isnt automatic with tools being exprted correctly
+                """
+            }
+
         } else {
                 reads_ch
                     .set{ reads_fastp_ch }
@@ -1209,7 +1237,7 @@ if (params.DataCheck || params.Analyze) {
                 file(asv) from asvforfilt
 
             output:
-                file("*ASV.fasta") into ( reads_vsearch5_ch, reads_vsearch6_ch, asv_med, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck )
+                file("*ASV.fasta") into ( reads_vsearch5_ch, reads_vsearch6_ch, asv_med, asv_for_med, nucl2aa, asvsforAminotyping, asvfastaforcounts, asvaminocheck )
                 file("*.csv") into ( nothing )
                 file("*diamondfilter.out") into ( noth )
             script:
@@ -1295,7 +1323,7 @@ if (params.DataCheck || params.Analyze) {
 
     } else {
         asvforfilt
-            .into{ reads_vsearch5_ch; reads_vsearch6_ch; asv_med; nucl2aa; asvsforAminotyping; asvfastaforcounts; asvaminocheck }
+            .into{ reads_vsearch5_ch; reads_vsearch6_ch; asv_med; asv_for_med; nucl2aa; asvsforAminotyping; asvfastaforcounts; asvaminocheck }
     }
 
     if (params.DataCheck) {
@@ -1585,7 +1613,7 @@ if (params.DataCheck || params.Analyze) {
                   script:
                     """
                     #set +e
-                    o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_muscleAligned.fasta
+                    o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_muscleAligned.fasta   #CHECK
                     mv ${params.projtag}_ASVs_muscleAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
                     #entopy analysis
                     entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
@@ -1735,12 +1763,9 @@ if (params.DataCheck || params.Analyze) {
 
                   publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
-                  conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+                  conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
                   container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
-                                    conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
-
-                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0") ###################################################################################!!!!!!
 
                   input:
                       file(aminos) from amino_shannon_trim2
@@ -1752,6 +1777,7 @@ if (params.DataCheck || params.Analyze) {
 
                   script:
                     """
+                    # CHECK
                     o-trim-uninformative-columns-from-alignment ${params.projtag}_AminoTypes_muscleAligned.fasta
                     mv ${params.projtag}_AminoTypes_muscleAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
                     #entropy analysis
@@ -1916,7 +1942,7 @@ if (params.DataCheck || params.Analyze) {
         if (params.ncASV) {
 
             reads_vsearch5_ch
-    	       .into{ asv_file_for_ncasvs; nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch; asv_for_med }
+    	       .into{ asv_file_for_ncasvs; nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch}
 
             process NucleotideBased_ASV_clustering {
 
@@ -2396,7 +2422,7 @@ if (params.DataCheck || params.Analyze) {
 
         } else {
             reads_vsearch5_ch
-    	       .into{ nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch; asv_for_med }
+    	       .into{ nuclFastas_forDiamond_asv_ch; nuclFastas_forCounts_asv_ch; nuclFastas_forphylogeny_asv; nuclFastas_forMatrix_asv_ch}
         }
 
         if (!params.skipTaxonomy) {
@@ -2776,61 +2802,167 @@ if (params.DataCheck || params.Analyze) {
                 """
             }
 
-            if (!params.skipPhylogeny) {
+            if (!params.skipPhylogeny || params.asvMED || params.asvTClust) {
 
-                process ASV_Phylogeny {
+                process ASV_pre_Phylogeny_step1 {
 
                       label 'norm_cpus'
 
-                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ASV*aln.*'
-                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
-                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+                      publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true
 
-                      conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+                      conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
 
-                      container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+                      container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
 
                       input:
                           file(asvs) from nuclFastas_forphylogeny_asv
 
                       output:
-                          tuple file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results_asv
-                          file("*iq.treefile") into (nucl_phyl_plot_asv, asvphy_med, asv_treeclust)
+                          file("*_ALN.fasta") into asv_align1
+
 
                       script:
                           """
                           pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
-                          ${tools}/muscle5.0.1278_linux64 -in ${asvs} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
-                          trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
-                          o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
-                          mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
-                          # Nucleotide_ModelTest
-                          modeltest-ng -i \${pre}_Aligned_informativeonly.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
-                          # Nucleotide_Phylogeny
-                          if [ "${params.iqCustomnt}" != "" ];then
-                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
-                          elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                              mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
-                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
-                          elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                              mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
-                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
-                          elif [ "${params.nonparametric}" != "false" ];then
-                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
-                          elif [ "${params.parametric}" != "false" ];then
-                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                          else
-                              iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                          fi
+                          muscle -in ${asvs} -out \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
                           """
                   }
+
+                  process ASV_pre_Phylogeny_step2 {
+
+                        label 'norm_cpus'
+
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true
+
+                        conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6" : null)
+
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
+
+                        input:
+                            file(aign) from asv_align1
+
+                        output:
+                            file("*_aln.html")into trimalhtml
+                            file("*_aln.fasta")into asv_align2
+
+                        script:
+                            """
+                            pre=\$(echo ${align} | awk -F "_raw" '{print \$1}' )
+                            trimal -in ${align} -out \${pre}_trimal_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_trimal_aln.html
+                            """
+                    }
+
+                    process ASV_pre_Phylogeny_step3 {
+
+                          label 'norm_cpus'
+
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true
+
+                          conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
+
+                          container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
+
+                          input:
+                              file(align) from asv_align2
+
+                          output:
+                              file("*.fasta") into asv_align3_mt, asv_align3_iq, asv_align3_med
+
+                          script:
+                              """
+                              o-trim-uninformative-columns-from-alignment ${align}
+                              pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
+                              mv ${align}-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
+                              """
+                      }
+
+                      process ASV_pre_Phylogeny_step4 {
+
+                            label 'norm_cpus'
+
+                            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
+
+                            conda (params.condaActivate ? "bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
+
+                            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/modeltest-ng:0.1.7--h5c6ebe3_0" : "quay.io/biocontainers/modeltest-ng:0.1.7--h5c6ebe3_0")
+
+                            input:
+                                file(align) from asv_align3_mt
+
+                            output:
+                                file("*mt.out") into asv_align4
+                                file("*mt.*") into mtres
+
+                            script:
+                                """
+                                # Nucleotide_ModelTest
+                                pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
+                                modeltest-ng -i ${align} -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                                """
+                        }
+
+                    }
+
+                    if (!params.skipPhylogeny || params.asvTClust)) {
+
+                        process ASV_Phylogeny_step5 {
+
+                              label 'norm_cpus'
+
+                              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+
+                              conda (params.condaActivate ? "bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
+
+                              container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/iqtree:2.2.0.3--hb97b32f_1" : "quay.io/biocontainers/iqtree:2.2.0.3--hb97b32f_1")
+
+                              input:
+                                  file(align) from asv_align3_iq
+                                  file(mtout) from asv_align4
+
+                              output:
+                                  file("*iq*") into asv_align5
+                                  file("*iq.treefile") into (nucl_phyl_plot_asv, asv_treeclust)
+
+                              script:
+                                  """
+                                  #grabbing best models from modeltestng
+                                  modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
+                                  modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
+                                  modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
+                                  if [[ ${crit} == "BIC" ]]
+                                  then  mod="\$modbic"
+                                  elif  [[ ${crit} == "AIC" ]]
+                                  then  mod="\$modaic"
+                                  elif  [[ ${crit} == "AICc" ]]
+                                  then  mod="\$modaicc"
+                                  fi
+                                  # grab prefix
+                                  pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
+                                  # Nucleotide_Phylogeny
+                                  if [ "${params.iqCustomnt}" != "" ];then
+                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
+                                  elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
+                                      mod=\$(tail -12 ${mtlog}| head -1 | awk '{print \$6}')
+                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                                  elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
+                                      mod=\$(tail -12 ${mtlog}| head -1 | awk '{print \$6}')
+                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                                  elif [ "${params.nonparametric}" != "false" ];then
+                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
+                                  elif [ "${params.parametric}" != "false" ];then
+                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                  else
+                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                  fi
+                                  """
+                          }
+                      }
             } else {
                 nucl_phyl_plot_asv = Channel.value('skipping')
-                asvphy_med = Channel.value('skipping')
                 asv_treeclust = Channel.value('skipping')
             }
 
-            if (params.asvTClust){
+            if (!params.skipPhylogeny || params.asvTClust) {
 
                 process ASV_PhyloClustering {
 
@@ -2840,7 +2972,7 @@ if (params.DataCheck || params.Analyze) {
 
                       conda (params.condaActivate ? "${params.vampdir}/bin/yamls/treecluster.yml" : null)
 
-                      container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+                      container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/treecluster:1.0.3--pyh3252c3a_0" : "quay.io/biocontainers/treecluster:1.0.3--pyh3252c3a_0")
 
                       input:
                          file(tree) from asv_treeclust
@@ -2897,77 +3029,95 @@ if (params.DataCheck || params.Analyze) {
 
             if (params.asvMED) {
 
-                process ASV_Minimum_Entropy_Decomposition {
+                process ASV_Minimum_Entropy_Decomposition_step1 {
 
-                label 'low_cpus'
+                    label 'low_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true
 
-                conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+                    conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
-                container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
 
-                input:
-                  file(asvs) from asv_for_med
+                    input:
+                      file(align) from asv_align3_med
 
-                output:
-                  file("*_ASV_Grouping.csv") into (asvgroupscsv, asvgroupscsv2)
-                  file("${params.projtag}_ASV_group_reps_aligned.fasta") into groupreps
-                  file("${params.projtag}_asvMED_${params.asvC}")
+                    output:
+                      file("*_ASV_Grouping.csv") into (asvgroupscsv, asvgroupscsv2)
+                      file("${params.projtag}_ASV_group_reps_aligned.fasta") into groupreps
+                      file("${params.projtag}_asvMED_${params.asvC}")
+                      file("*_unique") into uniqformed
 
-                script:
-                    """
-                    #alignment
-                    ${tools}/muscle5.0.1278_linux64 -in ${asvs} -out ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
-                    #trimming
-                    trimal -in ${params.projtag}_ASVs_muscleAlign.fasta -out ${params.projtag}_ASVs_muscleAligned.fasta  -keepheader -fasta -automated1
-                    rm ${params.projtag}_ASVs_muscleAlign.fasta
-                    o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_muscleAligned.fasta
-                    mv ${params.projtag}_ASVs_muscleAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
-                    #entopy analysis
-                    entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
-                    #Decomposition
-                    if [[ \$(echo ${params.asvC} | grep -c ",") -eq 1 || "${params.asvSingle}" == "true" ]]
-                    then
-                          tag=\$(echo ${params.asvC} | sed 's/,/_/g')
-                          oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
-                    elif [[ "${params.asvSingle}" == "true" ]]
-                    then
-                          tag="${params.asvC}"
-                          oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
-                    else
-                          oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
-                    fi
-                    #generatemaps
-                    cd ./${params.projtag}_asvMED_${params.asvC}/OLIGO-REPRESENTATIVES/
-                    echo "ASV,GroupID,IDPattern"
-                    j=1
-                    for x in *_unique;
-                    do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
-                            uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
-                            grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
-                            seqtk subseq ../../${asvs} asv.list > Group"\${j}"_sequences.fasta
-                            for z in \$( cat asv.list)
-                            do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_ASV_Grouping.csv
-
-                            done
-                            rm asv.list
-                            echo ">Group\${j}" >> ${params.projtag}_ASV_group_reps_aligned.fasta
-                            echo "\$uni" > group.list
-                            seqtk subseq ../OLIGO-REPRESENTATIVES.fasta group.list > group.fasta
-                            tail -1 group.fasta >> ${params.projtag}_ASV_group_reps_aligned.fasta
-                            mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
-                            mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
-                            rm "\$gid"*.cPickle
-                            j=\$((\$j+1))
-                    done
-                    mv ${params.projtag}_ASV_Grouping.csv ../../
-                    mv ${params.projtag}_ASV_group_reps_aligned.fasta ../../
-                    cd ..
-                    """
+                    script:
+                        """
+                        #entopy analysis
+                        entropy-analysis ${align}
+                        #Decomposition
+                        if [[ \$(echo ${params.asvC} | grep -c ",") -ge 1 || "${params.asvSingle}" == "false" ]]
+                        then
+                              tag=\$(echo ${params.asvC} | sed 's/,/_/g')
+                              oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                        elif [[ "${params.asvSingle}" == "true" ]]
+                        then
+                              tag="${params.asvC}"
+                              oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                        else
+                              oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                        fi
+////if statement makes sense now to me, need to continue working on the remaining parts -- the fasta files needed for the next process
+                        #generatemaps
+                        mv ./${params.projtag}_asvMED_${params.asvC}/OLIGO-REPRESENTATIVES/*_unique ../../
+                        """
                 }
 
-              if (!params.skipPhylogeny) {
+                process ASV_Minimum_Entropy_Decomposition_step2 {
+
+                    label 'low_cpus'
+
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true
+
+                    conda (params.condaActivate ? "bioconda::seqtk=1.3=h7132678_4" : null)
+
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/seqtk:1.3--h7132678_4" : "quay.io/biocontainers/seqtk:1.3--h7132678_4")
+
+                    input:
+                      file(uniq) from uniqformed
+                      file(asvs) from asv_for_med
+
+                    output:
+                      file("*_ASV_Grouping.csv") into (asvgroupscsv, asvgroupscsv2)
+                      file("${params.projtag}_ASV_group_reps_aligned.fasta") into groupreps
+                      file("${params.projtag}_asvMED_${params.asvC}")
+
+                    script:
+                        """
+                        #generatemaps
+                        echo "ASV,GroupID,IDPattern"
+                        j=1
+                        for x in ${uniq};
+                        do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
+                                uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
+                                grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
+                                seqtk subseq ${asvs} asv.list > Group"\${j}"_sequences.fasta
+                                for z in \$( cat asv.list)
+                                do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_ASV_Grouping.csv
+
+                                done
+                                rm asv.list
+                                echo ">Group\${j}" >> ${params.projtag}_ASV_group_reps_aligned.fasta
+                                echo "\$uni" > group.list
+                                seqtk subseq ../OLIGO-REPRESENTATIVES.fasta group.list > group.fasta
+                                tail -1 group.fasta >> ${params.projtag}_ASV_group_reps_aligned.fasta
+                                mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
+                                mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
+                                rm "\$gid"*.cPickle
+                                j=\$((\$j+1))
+                        done
+                        mv ${params.projtag}_ASV_Grouping.csv ../../
+                        mv ${params.projtag}_ASV_group_reps_aligned.fasta ../../
+                        cd ..
+                        """
+              }
 
                 process ASV_MED_Reps_phylogeny {
 
@@ -3015,7 +3165,7 @@ if (params.DataCheck || params.Analyze) {
                     fi
                     """
                 }
-              }
+
               process Adding_ASV_MED_Info {
 
               label 'low_cpus'
