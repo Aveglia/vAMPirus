@@ -2395,11 +2395,11 @@ if (params.DataCheck || params.Analyze) {
                                   mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
                                   iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                               elif [ "${params.nonparametric}" != "false" ];then
-                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
                               elif [ "${params.parametric}" != "false" ];then
-                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                               else
-                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                               fi
                               """
                       }
@@ -2948,15 +2948,14 @@ if (params.DataCheck || params.Analyze) {
                                       mod=\$(tail -12 ${mtlog}| head -1 | awk '{print \$6}')
                                       iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                                   elif [ "${params.nonparametric}" != "false" ];then
-                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
+                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
                                   elif [ "${params.parametric}" != "false" ];then
-                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                                   else
-                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                                   fi
                                   """
                           }
-                      }
             } else {
                 nucl_phyl_plot_asv = Channel.value('skipping')
                 asv_treeclust = Channel.value('skipping')
@@ -3033,7 +3032,8 @@ if (params.DataCheck || params.Analyze) {
 
                     label 'low_cpus'
 
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true, ////ADD SOMETHING HERE TO SAY EVERYTHING BUT *_unique FILES GO HERE
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/unique", mode: "copy", overwrite: true, pattern: '*_unique'
 
                     conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
@@ -3045,8 +3045,8 @@ if (params.DataCheck || params.Analyze) {
                     output:
                       file("*_ASV_Grouping.csv") into (asvgroupscsv, asvgroupscsv2)
                       file("${params.projtag}_ASV_group_reps_aligned.fasta") into groupreps
-                      file("${params.projtag}_asvMED_${params.asvC}")
                       file("*_unique") into uniqformed
+                      file("OLIGO-REPRESENTATIVES.fasta") into oligorep
 
                     script:
                         """
@@ -3064,8 +3064,9 @@ if (params.DataCheck || params.Analyze) {
                         else
                               oligotype ${params.projtag}_ASVs_Aligned_informativeonly.fasta ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                         fi
-////if statement makes sense now to me, need to continue working on the remaining parts -- the fasta files needed for the next process
+                        ###if statement makes sense now to me, need to continue working on the remaining parts -- the fasta files needed for the next process -- looks like this might work - 10/23/22
                         #generatemaps
+                        mv ./${params.projtag}_asvMED_${params.asvC}/OLIGO-REPRESENTATIVES.fasta ..
                         mv ./${params.projtag}_asvMED_${params.asvC}/OLIGO-REPRESENTATIVES/*_unique ../../
                         """
                 }
@@ -3081,20 +3082,20 @@ if (params.DataCheck || params.Analyze) {
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/seqtk:1.3--h7132678_4" : "quay.io/biocontainers/seqtk:1.3--h7132678_4")
 
                     input:
-                      file(uniq) from uniqformed
                       file(asvs) from asv_for_med
-
+                      file(oligo) form oligorep
                     output:
                       file("*_ASV_Grouping.csv") into (asvgroupscsv, asvgroupscsv2)
                       file("${params.projtag}_ASV_group_reps_aligned.fasta") into groupreps
-                      file("${params.projtag}_asvMED_${params.asvC}")
 
                     script:
                         """
+                        #copy _unique files here so we can werk with them
+                        cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/unique .
                         #generatemaps
                         echo "ASV,GroupID,IDPattern"
                         j=1
-                        for x in ${uniq};
+                        for x in *unique;
                         do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
                                 uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
                                 grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
@@ -3106,18 +3107,49 @@ if (params.DataCheck || params.Analyze) {
                                 rm asv.list
                                 echo ">Group\${j}" >> ${params.projtag}_ASV_group_reps_aligned.fasta
                                 echo "\$uni" > group.list
-                                seqtk subseq ../OLIGO-REPRESENTATIVES.fasta group.list > group.fasta
+                                seqtk subseq ${oligo} group.list > group.fasta
                                 tail -1 group.fasta >> ${params.projtag}_ASV_group_reps_aligned.fasta
                                 mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
                                 mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
-                                rm "\$gid"*.cPickle
+                                #rm "\$gid"*.cPickle
                                 j=\$((\$j+1))
                         done
-                        mv ${params.projtag}_ASV_Grouping.csv ../../
-                        mv ${params.projtag}_ASV_group_reps_aligned.fasta ../../
-                        cd ..
+                        #mv ${params.projtag}_ASV_Grouping.csv ../../
+                        #mv ${params.projtag}_ASV_group_reps_aligned.fasta ../../
+                        #cd ..
+
                         """
               }
+
+              process ASV_MED_Reps_pre_phylogeny {
+
+              label 'low_cpus'
+
+              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
+              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+
+              conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+
+              container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+
+              input:
+                file(reps) from groupreps
+
+              output:
+                file("*mt.out") into asvmedrep_align4
+                file("*mt.*") into mtres
+
+              script:
+                  """
+                  # Protein_ModelTest
+                  modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_ASV_Group_Reps_mt -d aa -s 203 --disable-checkpoint
+
+                  # Nucleotide_ModelTest
+                  pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
+                  modeltest-ng -i ${align} -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                  """
+              }
+
 
                 process ASV_MED_Reps_phylogeny {
 
@@ -3131,7 +3163,7 @@ if (params.DataCheck || params.Analyze) {
                 container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
 
                 input:
-                  file(reps) from groupreps
+                  file(reps) from asvmedrep_align4
 
                 output:
                   file("*_ASV_Group_Reps*") into align_results_asvmed
@@ -3139,9 +3171,17 @@ if (params.DataCheck || params.Analyze) {
 
                 script:
                     """
-                    # Protein_ModelTest
-                    modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_ASV_Group_Reps_mt -d aa -s 203 --disable-checkpoint
-
+                    #grabbing best models from modeltestng
+                    modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
+                    modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
+                    modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
+                    if [[ ${crit} == "BIC" ]]
+                    then  mod="\$modbic"
+                    elif  [[ ${crit} == "AIC" ]]
+                    then  mod="\$modaic"
+                    elif  [[ ${crit} == "AICc" ]]
+                    then  mod="\$modaicc"
+                    fi
                     # Protein_Phylogeny
                     if [ "${params.iqCustomaa}" != "" ];then
                         iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
@@ -3155,13 +3195,13 @@ if (params.DataCheck || params.Analyze) {
                         iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                     elif [ "${params.nonparametric}" != "false" ];then
-                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
+                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -b ${params.boots}
 
                     elif [ "${params.parametric}" != "false" ];then
-                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
 
                     else
-                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                     fi
                     """
                 }
@@ -3666,66 +3706,167 @@ if (params.DataCheck || params.Analyze) {
                  tax_nodCol_amino = Channel.value('skipping')
              }
 
-                if (!params.skipPhylogeny) {
 
-                    process AminoType_Phylogeny {
+
+                if (!params.skipPhylogeny || params.aminoMED || params.aminoTClust) {
+
+                    process AminoType_pre_Phylogeny_step1 {
 
                         label 'norm_cpus'
 
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true, pattern: '*aln.*'
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/Modeltest", mode: "copy", overwrite: true, pattern: '*mt*'
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true
 
-                        conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+                        conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
 
-                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
 
                         input:
-                            file(prot) from aminotypesMafft
+                            file(amino) from aminotypesMafft
 
                         output:
-                            tuple file("*_aln.fasta"), file("*_aln.html"), file("*.log"), file("*iq*"), file("*mt*") into alignprot_results
-                            file("*iq.treefile") into (amino_rax_plot, amino_repphy, amino_treeclust)
+                            file("*_ALN.fasta") into amino_align1
+
 
                         script:
                             """
-                            # Protein_Alignment
-                            pre=\$(echo ${prot} | awk -F "_noTax" '{print \$1}' )
-                            if [[ \$(grep -c ">" ${prot}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
-                            ${tools}/muscle5.0.1278_linux64 -"\${algo}" ${prot} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
-                            trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
-                            o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
-                            mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
-                            # Protein_ModelTest
-                            modeltest-ng -i \${pre}_Aligned_informativeonly.fasta -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
-
-                            # Protein_Phylogeny
-                            if [ "${params.iqCustomaa}" != "" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomaa}
-
-                            elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
-
-                            elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                                mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
-
-                            elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
-
-                            elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                            else
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
-                            fi
+                            pre=\$(echo ${amino} | awk -F ".fasta" '{print \$1}' )
+                            muscle -in ${amino} -out \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
                             """
                     }
-                } else {
-                    amino_rax_plot = Channel.value('skipping')
-                    amino_rephy = Channel.value('skipping')
-                    amino_treeclust = Channel.value('skipping')
-                }
+
+                    process AminoType_pre_Phylogeny_step2 {
+
+                        label 'norm_cpus'
+
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true
+
+                        conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6" : null)
+
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
+
+                        input:
+                            file(aign) from amino_align1
+
+                        output:
+                            file("*_aln.html")into trimalhtml
+                            file("*_aln.fasta")into amino_align2
+
+                        script:
+                            """
+                            pre=\$(echo ${align} | awk -F "_raw" '{print \$1}' )
+                            trimal -in ${align} -out \${pre}_trimal_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_trimal_aln.html
+                            """
+                    }
+
+                    process AminoType_pre_Phylogeny_step3 {
+
+                        label 'norm_cpus'
+
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/Alignment", mode: "copy", overwrite: true
+
+                        conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
+
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
+
+                        input:
+                            file(align) from amino_align2
+
+                        output:
+                            file("*.fasta") into amino_align3_mt, amino_align3_iq, amino_align3_med
+
+                        script:
+                            """
+                            o-trim-uninformative-columns-from-alignment ${align}
+                            pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
+                            mv ${align}-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
+                            """
+                    }
+
+                    process ASV_pre_Phylogeny_step4 {
+
+                          label 'norm_cpus'
+
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
+
+                          conda (params.condaActivate ? "bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
+
+                          container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/modeltest-ng:0.1.7--h5c6ebe3_0" : "quay.io/biocontainers/modeltest-ng:0.1.7--h5c6ebe3_0")
+
+                          input:
+                              file(align) from amino_align3_mt
+
+                          output:
+                              file("*mt.out") into amino_align4
+                              file("*mt.*") into aminomtres
+
+                          script:
+                              """
+                              # Nucleotide_ModelTest
+                              pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
+                              modeltest-ng -i ${align} -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                              """
+                      }
+
+                  }
+
+                  if (!params.skipPhylogeny || params.asvTClust)) {
+
+                      process AminoType_Phylogeny_step5 {
+
+                            label 'norm_cpus'
+
+                            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+
+                            conda (params.condaActivate ? "bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
+
+                            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/iqtree:2.2.0.3--hb97b32f_1" : "quay.io/biocontainers/iqtree:2.2.0.3--hb97b32f_1")
+
+                            input:
+                                file(align) from amino_align3_iq
+                                file(mtout) from amino_align4
+
+                            output:
+                                file("*iq*") into amino_align5
+                                file("*iq.treefile") into (amino_rax_plot, amino_repphy, amino_treeclust)
+
+                            script:
+                                """
+                                #grabbing best models from modeltestng
+                                modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
+                                modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
+                                modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
+                                if [[ ${crit} == "BIC" ]]
+                                then  mod="\$modbic"
+                                elif  [[ ${crit} == "AIC" ]]
+                                then  mod="\$modaic"
+                                elif  [[ ${crit} == "AICc" ]]
+                                then  mod="\$modaicc"
+                                fi
+                                # grab prefix
+                                pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
+                                # Nucleotide_Phylogeny
+                                if [ "${params.iqCustomnt}" != "" ];then
+                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
+                                elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
+                                    mod=\$(tail -12 ${mtlog}| head -1 | awk '{print \$6}')
+                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                                elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
+                                    mod=\$(tail -12 ${mtlog}| head -1 | awk '{print \$6}')
+                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                                elif [ "${params.nonparametric}" != "false" ];then
+                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                elif [ "${params.parametric}" != "false" ];then
+                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                else
+                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                fi
+                                """
+                        }
+          } else {
+              amino_rax_plot = Channel.value('skipping')
+              amino_rephy = Channel.value('skipping')
+              amino_treeclust = Channel.value('skipping')
+          }
 
                 process Generate_AminoTypes_Counts_Table {
 
@@ -3951,16 +4092,17 @@ if (params.DataCheck || params.Analyze) {
                                 iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
+                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP -madd --redo -nt auto -b ${params.boots}
 
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
 
                             else
-                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                         }
+                }
 
                   process Adding_AminoType_MED_Info {
 
@@ -3986,7 +4128,6 @@ if (params.DataCheck || params.Analyze) {
                           done
                           paste -d',' group.list ${counts} > ${params.projtag}_AminoType_Groupingcounts.csv
                           """
-                }
             }
         } else {
             atygroupscsv = Channel.value('skipping')
@@ -4556,13 +4697,13 @@ if (params.DataCheck || params.Analyze) {
                                 iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -b ${params.boots}
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m MFP -madd --redo -nt auto -b ${params.boots}
 
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
 
                             else
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_noTaxonomy_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                     }
@@ -5041,13 +5182,13 @@ if (params.DataCheck || params.Analyze) {
                                 iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
 
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
 
                             else
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                     }
