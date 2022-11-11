@@ -289,8 +289,6 @@ echo "--------------------------------------------------------------------------
 
 cd "$mypwd"
 echo "Ok, everything downloaded. To test installation, check out the EXAMPLE_COMMANDS.txt file within "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
-chmod a+x "$mypwd"/bin/virtualribosomev2/*
-chmod a+x "$mypwd"/bin/muscle5.0.1278_linux64
 
 
 if [[ $(ls "$mypwd"| grep -wc "EXAMPLE_COMMANDS.txt") -eq 0 ]]
