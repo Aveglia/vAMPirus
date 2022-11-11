@@ -707,7 +707,7 @@ if (params.DataCheck || params.Analyze) {
 
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/FastQC/PreClean", mode: "copy", overwrite: true
 
-                        conda (params.condaActivate ? "-c conda-forge bioconda::fastqc=0.11.9=0" : null)
+                        conda (params.condaActivate ? "bioconda::fastqc=0.11.9=0" : null)
 
                         conda (params.condaActivate && params.myConda ? params.localConda : params.condaActivate ? "bioconda::fastp=0.20.1=h8b12597_0" : null)
 
