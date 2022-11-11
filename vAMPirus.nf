@@ -764,62 +764,62 @@ if (params.DataCheck || params.Analyze) {
 
             } else if (params.single) {
 
-                    process Adapter_Removal_se {
+                process Adapter_Removal_se {
 
-                        label 'norm_cpus'
+                    label 'norm_cpus'
 
-                        tag "${sample_id}"
+                    tag "${sample_id}"
 
-                        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
-                        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
+                    publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
+                    publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2" : null)
+                    conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2" : null)
 
-                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/fastp:0.23.2--hb7a2d85_2" : "quay.io/biocontainers/fastp:0.23.2--hb7a2d85_2")
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/fastp:0.23.2--hb7a2d85_2" : "quay.io/biocontainers/fastp:0.23.2--hb7a2d85_2")
 
-                        input:
-                            tuple sample_id, file(reads) from reads_ch
+                    input:
+                        tuple sample_id, file(reads) from reads_ch
 
-                        output:
-                            tuple sample_id, file("*.fastp.{json,html}") into fastp_results
-                            tuple sample_id, file("*.fastp.{json}") into fastp_json
-                            tuple sample_id, file("*.filter.fq") into reads_fastp_ch
+                    output:
+                        tuple sample_id, file("*.fastp.{json,html}") into fastp_results
+                        tuple sample_id, file("*.fastp.{json}") into fastp_json
+                        tuple sample_id, file("*.filter.fq") into reads_fastp_ch
 
-                        script:
-                            """
-                            echo ${sample_id}
+                    script:
+                        """
+                        echo ${sample_id}
 
-                            fastp -i ${reads} -o ${sample_id}.filter.fq --average_qual ${params.avQ} -n ${params.mN} --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} --report_title ${sample_id}
-                            """
-                    }
+                        fastp -i ${reads} -o ${sample_id}.filter.fq --average_qual ${params.avQ} -n ${params.mN} --overrepresentation_analysis --html ${sample_id}.fastp.html --json ${sample_id}.fastp.json --thread ${task.cpus} --report_title ${sample_id}
+                        """
+                }
             }
 
             process Read_stats_processing {
 
-            label 'norm_cpus'
+                label 'norm_cpus'
 
-            tag "${sample_id}"
+                tag "${sample_id}"
 
-            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
-            publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
+                publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
+                publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-            conda (params.condaActivate ? "bioconda::jq=1.6" : null)
+                conda (params.condaActivate ? "bioconda::jq=1.6" : null)
 
-            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/jq:1.6" : "quay.io/biocontainers/jq:1.6")
+                container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/jq:1.6" : "quay.io/biocontainers/jq:1.6")
 
-            input:
-                tuple sample_id, file(json) from fastp_json
+                input:
+                    tuple sample_id, file(json) from fastp_json
 
-            output:
-                file("*.csv") into ( fastp_csv_in1, fastp_csv_in2 )
+                output:
+                    file("*.csv") into ( fastp_csv_in1, fastp_csv_in2 )
 
-            script:
-                """
-                echo ${sample_id}
+                script:
+                    """
+                    echo ${sample_id}
 
-                bash ${params.vampdir}/bin/get_readstats.sh ${json}  ####check with ramon why tf this isnt automatic with tools being exprted correctly
-                """
-            }
+                    bash ${params.vampdir}/bin/get_readstats.sh ${json}  ####check with ramon why tf this isnt automatic with tools being exprted correctly
+                    """
+                }
 
         } else {
                 reads_ch
@@ -831,50 +831,51 @@ if (params.DataCheck || params.Analyze) {
 
             if (!params.single) {
 
-                    process Primer_Removal {
+                process Primer_Removal {
 
-                        label 'norm_cpus'
+                    label 'norm_cpus'
 
-                        tag "${sample_id}"
+                    tag "${sample_id}"
 
-                        publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
 
-                        conda (params.condaActivate ? "bioconda::bbmap=38.98=h5c4e2a8_0" : null)
+                    conda (params.condaActivate ? "bioconda::bbmap=38.98=h5c4e2a8_0" : null)
 
-                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/bbamap:38.98--h5c4e2a8_0" : "quay.io/biocontainers/bbmap:38.98--h5c4e2a8_0")
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/bbamap:38.98--h5c4e2a8_0" : "quay.io/biocontainers/bbmap:38.98--h5c4e2a8_0")
 
-                        input:
-                            tuple sample_id, file(reads) from reads_fastp_ch
+                    input:
+                        tuple sample_id, file(reads) from reads_fastp_ch
 
-                        output:
-                            tuple sample_id, file("*bbduk*.fastq.gz") into ( reads_bbduk_ch, readsforqc2 )
+                    output:
+                        tuple sample_id, file("*bbduk*.fastq.gz") into ( reads_bbduk_ch, readsforqc2 )
 
-                        script:
-                            // check if we need to check this outside processes
-                            if ( params.fwd == "" && params.rev == "" && !params.multi && params.GlobTrim == "") {
-                                """
-                                bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.defaultFwdTrim} t=${task.cpus}
-                                bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.defaultRevTrim} t=${task.cpus}
-                		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
-                                """
-                            } else if ( params.GlobTrim != "" && !params.multi) {
-                                """
-                                FTRIM=\$( echo ${GlobTrim} | cut -f 1 -d "," )
-                                RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
-                                bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
-                                bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
-                		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
-                                """
-                            } else if ( params.multi && params.primers ) {
-                                """
-                                bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz ref=${params.primers} copyundefined=t t=${task.cpus} restrictleft=${params.primerLength} k=${params.maxkmer} ordered=t mink=${params.minkmer} ktrim=l ecco=t rcomp=t minlength=${params.minilen} tbo tpe
-                                """
-                            } else {
-                                """
-                                bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus} restrictleft=${params.primerLength} k=${params.maxkmer} ordered=t mink=${params.minkmer} ktrim=l ecco=t rcomp=t minlength=${params.minilen} tbo tpe
-                                """
-                            }
-                	  }
+                    script:
+                        // check if we need to check this outside processes
+                        if ( params.fwd == "" && params.rev == "" && !params.multi && params.GlobTrim == "") {
+                            """
+                            bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.defaultFwdTrim} t=${task.cpus}
+                            bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.defaultRevTrim} t=${task.cpus}
+            		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+                            """
+                        } else if ( params.GlobTrim != "" && !params.multi) {
+                            """
+                            FTRIM=\$( echo ${GlobTrim} | cut -f 1 -d "," )
+                            RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
+                            bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
+                            bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
+            		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+                            """
+                        } else if ( params.multi && params.primers ) {
+                            """
+                            bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz ref=${params.primers} copyundefined=t t=${task.cpus} restrictleft=${params.primerLength} k=${params.maxkmer} ordered=t mink=${params.minkmer} ktrim=l ecco=t rcomp=t minlength=${params.minilen} tbo tpe
+                            """
+                        } else {
+                            """
+                            bbduk.sh in=${reads[0]} in2=${reads[1]} out=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz literal=${params.fwd},${params.rev} copyundefined=t t=${task.cpus} restrictleft=${params.primerLength} k=${params.maxkmer} ordered=t mink=${params.minkmer} ktrim=l ecco=t rcomp=t minlength=${params.minilen} tbo tpe
+                            """
+                        }
+                }
+
             } else if (params.single) {
 
                 process Primer_Removal_se {
@@ -917,10 +918,10 @@ if (params.DataCheck || params.Analyze) {
                         }
                 }
             }
+
         } else {
             reads_fastp_ch
                 .set{ reads_bbduk_ch }
-
         }
 
         if (!params.skipFastQC && !params.skipPrimerRemoval) {
@@ -950,6 +951,7 @@ if (params.DataCheck || params.Analyze) {
                             fastqc --quiet --threads ${task.cpus} ${reads}
                             """
                     }
+
             } else if (params.single) {
 
                     process QualityCheck_se2 {
@@ -974,13 +976,13 @@ if (params.DataCheck || params.Analyze) {
                             """
                             fastqc --quiet --threads ${task.cpus} ${reads}
                             """
-                    }
+                }
             }
         }
+
     } else {
         reads_ch
             .set{ reads_bbduk_ch }
-
     }
 
     if (!params.skipMerging && !params.single) {
@@ -1050,7 +1052,6 @@ if (params.DataCheck || params.Analyze) {
           .set{ reads_vsearch1_ch }
     }
 
-
     process Filtering_Prep1 {
 
         label 'low_cpus'
@@ -1087,7 +1088,6 @@ if (params.DataCheck || params.Analyze) {
             """
             cat ${names} >>${params.projtag}_sample_ids.list
             """
-
     }
 
     process Length_Filtering {
@@ -1347,7 +1347,7 @@ if (params.DataCheck || params.Analyze) {
                 file("number_per_percentage_nucl.csv") into number_per_percent_nucl_plot
 
             script:
-            if (params.datacheckntIDlist) {
+                if (params.datacheckntIDlist) {
                 """
                 for id in `echo ${params.datacheckntIDlist} | tr "," "\\n"`;do
                     vsearch --cluster_fast ${fasta} --centroids ${params.projtag}_ncASV\${id}.fasta --threads ${task.cpus} --relabel OTU --id \${id}
@@ -1361,7 +1361,7 @@ if (params.DataCheck || params.Analyze) {
     	        echo "1.0,\${yo}" >> number_per_percentage_nucl.csv
                 """
                 }
-            }
+        }
 
         process ASV_Pairwise_Similarity_Check {
 
@@ -1385,7 +1385,7 @@ if (params.DataCheck || params.Analyze) {
                     cat ${params.projtag}_PercentIDq.matrix | tr " " ","  | grep "," >${params.projtag}_ASV_PairwisePercentID.matrix
                     rm ${params.projtag}_PercentIDq.matrix
                     """
-        }
+       }
 
        process Translation_For_ProteinBased_Clustering_DC {
 
@@ -1407,7 +1407,7 @@ if (params.DataCheck || params.Analyze) {
                 awk '/^>/ { print (NR==1 ? "" : RS) \$0; next } { printf "%s", \$0 } END { printf RS }' ${params.projtag}_ASVprot.fasta > ${params.projtag}_ASVtranslations.fasta
                 cp ${fasta} ${params.projtag}_ASV_all.fasta
                 """
-       }
+        }
 
         process Protein_clustering_DC { //CHECK rename_seq.py in container !!!!!!!!!!!
 
@@ -1544,168 +1544,168 @@ if (params.DataCheck || params.Analyze) {
                     """
         }
 
-         if (params.asvMED) {
+        if (params.asvMED) {
 
-                process ASV_Shannon_Entropy_Analysis_step1 {
+            process ASV_Shannon_Entropy_Analysis_step1 {
 
-                  label 'norm_cpus'
+              label 'norm_cpus'
 
-                  //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+              //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
 
-                  conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
+              conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
 
-                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
+              container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
 
-                  input:
-                      file(asvs) from asv_med
+              input:
+                  file(asvs) from asv_med
 
-                  output:
-                      file("_ASVs_muscleAlign.fasta") into shannon_trim
+              output:
+                  file("_ASVs_muscleAlign.fasta") into shannon_trim
 
-                  script:
-                    """
-                    #alignment
-                    muscle -in ${asvs} -out ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
-                    """
-                }
-
-                process ASV_Shannon_Entropy_Analysis_step2 {
-
-                  label 'norm_cpus'
-
-                  //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
-
-                  conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6" : null)
-
-                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
-
-                  input:
-                      file(asvs) from trim
-
-                  output:
-                      file("*_ASVs_muscleAligned.fasta") into shannon_trim2
-
-                  script:
-                    """
-                    #set +e
-                    #trimming
-                    trimal -in ${asvs} -out ${params.projtag}_ASVs_muscleAligned.fasta  -keepheader -fasta -automated1
-                    rm ${params.projtag}_ASVs_muscleAlign.fasta
-                    """
-                }
-
-                process ASV_Shannon_Entropy_Analysis_step3 {
-
-                  label 'norm_cpus'
-
-                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
-
-                  conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
-
-                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
-
-                  input:
-                      file(asvs) from shannon_trim2
-
-                  output:
-                      file("*_ASV_entropy_breakdown.csv") into asv_entro_csv
-                      file("*Aligned_informativeonly.fasta-ENTROPY") into asv_entropy
-                      file("*ASV*") into entrop
-
-                  script:
-                    """
-                    #set +e
-                    o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_muscleAligned.fasta   #CHECK
-                    mv ${params.projtag}_ASVs_muscleAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
-                    #entopy analysis
-                    entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
-                    #summarize entropy peaks
-                    awk '{print \$2}' ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
-                    for x in \$(cat tmp_value.list)
-                    do      echo "\$x"
-                            if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.0-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.1-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.2-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.3-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.4-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.5-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.6-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.7-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.8-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.9-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.0-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.1-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.2-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.3-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.4-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.5-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.6-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.7-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.8-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.9-.list
-                            fi
-                            if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-2.0-.list
-                            fi
-                    done
-                    echo "Entropy,Peaks_above" >> ${params.projtag}_ASV_entropy_breakdown.csv
-                    for z in above*.list;
-                    do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
-                            echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_ASV_entropy_breakdown.csv
-                    done
-                    rm above*
-                    mv ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY ./tmp2.tsv
-                    cat tmp2.tsv | tr "\\t" "," > tmp.csv
-                    rm tmp2.tsv
-                    echo "Base_position,Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
-                    cat tmp.csv >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
-                    rm tmp.csv
-                    """
-                }
-
-            } else {
-                asv_entropy = Channel.empty()
-                asv_entro_csv = Channel.empty()
+              script:
+                """
+                #alignment
+                muscle -in ${asvs} -out ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
+                """
             }
+
+            process ASV_Shannon_Entropy_Analysis_step2 {
+
+              label 'norm_cpus'
+
+              //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+
+              conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6" : null)
+
+              container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
+
+              input:
+                  file(asvs) from trim
+
+              output:
+                  file("*_ASVs_muscleAligned.fasta") into shannon_trim2
+
+              script:
+                """
+                #set +e
+                #trimming
+                trimal -in ${asvs} -out ${params.projtag}_ASVs_muscleAligned.fasta  -keepheader -fasta -automated1
+                rm ${params.projtag}_ASVs_muscleAlign.fasta
+                """
+            }
+
+            process ASV_Shannon_Entropy_Analysis_step3 {
+
+              label 'norm_cpus'
+
+              publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+
+              conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
+
+              container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
+
+              input:
+                  file(asvs) from shannon_trim2
+
+              output:
+                  file("*_ASV_entropy_breakdown.csv") into asv_entro_csv
+                  file("*Aligned_informativeonly.fasta-ENTROPY") into asv_entropy
+                  file("*ASV*") into entrop
+
+              script:
+                """
+                #set +e
+                o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_muscleAligned.fasta   #CHECK
+                mv ${params.projtag}_ASVs_muscleAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
+                #entopy analysis
+                entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
+                #summarize entropy peaks
+                awk '{print \$2}' ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
+                for x in \$(cat tmp_value.list)
+                do      echo "\$x"
+                        if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.0-.list
+                        fi
+                        if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.1-.list
+                        fi
+                        if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.2-.list
+                        fi
+                        if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.3-.list
+                        fi
+                        if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.4-.list
+                        fi
+                        if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.5-.list
+                        fi
+                        if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.6-.list
+                        fi
+                        if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.7-.list
+                        fi
+                        if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.8-.list
+                        fi
+                        if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-0.9-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.0-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.1-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.2-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.3-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.4-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.5-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.6-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.7-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.8-.list
+                        fi
+                        if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-1.9-.list
+                        fi
+                        if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
+                        then    echo dope >> above-2.0-.list
+                        fi
+                done
+                echo "Entropy,Peaks_above" >> ${params.projtag}_ASV_entropy_breakdown.csv
+                for z in above*.list;
+                do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
+                        echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_ASV_entropy_breakdown.csv
+                done
+                rm above*
+                mv ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY ./tmp2.tsv
+                cat tmp2.tsv | tr "\\t" "," > tmp.csv
+                rm tmp2.tsv
+                echo "Base_position,Shannons_Entropy" >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
+                cat tmp.csv >> ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY
+                rm tmp.csv
+                """
+            }
+
+        } else {
+            asv_entropy = Channel.empty()
+            asv_entro_csv = Channel.empty()
+        }
 
         if (params.aminoMED) {
 
@@ -1867,15 +1867,14 @@ if (params.DataCheck || params.Analyze) {
                     """
                 }
 
-            } else {
-                amino_entro_csv = Channel.empty()
-                amino_entropy = Channel.empty()
-            }
+        } else {
+            amino_entro_csv = Channel.empty()
+            amino_entropy = Channel.empty()
+        }
 
         if (!params.skipReadProcessing || !params.skipMerging ) {
 
             process combine_csv_DC {
-
                 input:
                     file(csv) from fastp_csv_in1
                         .collect()
@@ -1891,8 +1890,8 @@ if (params.DataCheck || params.Analyze) {
                     cat tmp.names.csv tmp.reads.stats.csv >final_reads_stats.csv
                     rm tmp.names.csv tmp.reads.stats.csv
                     """
-
             }
+
         } else {
 
             process skip_combine_csv_DC {
@@ -2292,8 +2291,7 @@ if (params.DataCheck || params.Analyze) {
                       echo "Skipped" >skipncASVtaxonomy3.txt
                       """
               }
-          }
-
+        }
 
             process Generate_ncASV_Counts_Table {
 
@@ -2357,7 +2355,7 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipPhylogeny) {
 
-                    process ncASV_Phylogeny {
+                    process ncASV_Phylogeny { ////// NEEED TO BREAK UP into steps 1-5
 
                           label 'norm_cpus'
 
@@ -2727,8 +2725,7 @@ if (params.DataCheck || params.Analyze) {
             tax_nodCol_asv = Channel.value('skipping')
        }
 
-
-        process Generate_ASV_Counts_Tables {
+       process Generate_ASV_Counts_Tables {
 
             label 'norm_cpus'
 
@@ -3854,11 +3851,11 @@ if (params.DataCheck || params.Analyze) {
                                 fi
                                 """
                         }
-          } else {
-              amino_rax_plot = Channel.value('skipping')
-              amino_rephy = Channel.value('skipping')
-              amino_treeclust = Channel.value('skipping')
-          }
+              } else {
+                  amino_rax_plot = Channel.value('skipping')
+                  amino_rephy = Channel.value('skipping')
+                  amino_treeclust = Channel.value('skipping')
+              }
 
                 process Generate_AminoTypes_Counts_Table {
 
@@ -3900,8 +3897,8 @@ if (params.DataCheck || params.Analyze) {
                                 echo "Counting \$z hits"
                 	            echo "grep -wc "\$z" >> "\$y"_col.txt"
                 	            grep -wc "\$z" tmp."\$y".out >> "\$y"_col.txt
-            		            echo "\$z counted"
-            	            done
+                	            echo "\$z counted"
+                            done
                        done
                        paste -d "," tmp.col1.txt *col.txt > ${params.projtag}_AminoType_counts.csv
                        rm tmp*
@@ -5634,6 +5631,7 @@ if (params.DataCheck || params.Analyze) {
                         """
                 }
             }
+        }
 
 } else {
     println("\n\t\033[0;31mMandatory argument not specified. For more info use `nextflow run vAMPirus.nf --help`\n\033[0m")
