@@ -853,13 +853,13 @@ if (params.DataCheck || params.Analyze) {
 
                     script:
                         // check if we need to check this outside processes
-                        if ( params.fwd == "" && params.rev == "" && !params.multi && params.GlobTrim == "") {
+                        if ( params.fwd == "" && params.rev == "" && !params.multi && params.GlobTrim == "" ) {
                             """
                             bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.defaultFwdTrim} t=${task.cpus}
                             bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.defaultRevTrim} t=${task.cpus}
             		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
                             """
-                        } else if ( params.GlobTrim != "" && !params.multi) {
+                        } else if ( params.GlobTrim != "" && !params.multi ) {
                             """
                             FTRIM=\$( echo ${GlobTrim} | cut -f 1 -d "," )
                             RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
