@@ -3888,7 +3888,7 @@ if (params.DataCheck || params.Analyze) {
                             """
                     }
 
-                    process ASV_pre_Phylogeny_step4 {
+                    process AminoType_pre_Phylogeny_step4 {
 
                           label 'norm_cpus'
 
