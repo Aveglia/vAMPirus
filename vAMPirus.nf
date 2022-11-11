@@ -3020,7 +3020,7 @@ if (params.DataCheck || params.Analyze) {
 
                     }
 
-                    if (!params.skipPhylogeny || params.asvTClust)) {
+                    if (!params.skipPhylogeny || params.asvTClust) {
 
                         process ASV_Phylogeny_step5 {
 
@@ -3915,7 +3915,7 @@ if (params.DataCheck || params.Analyze) {
 
                   }
 
-                  if (!params.skipPhylogeny || params.asvTClust)) {
+                  if (!params.skipPhylogeny || params.asvTClust) {
 
                       process AminoType_Phylogeny_step5 {
 
