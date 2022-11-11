@@ -740,7 +740,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
                         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-                        conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2" : null)
+                        conda (params.condaActivate ? "bioconda::fastp=0.23.2" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/fastp:0.23.2--hb7a2d85_2" : "quay.io/biocontainers/fastp:0.23.2--hb7a2d85_2")
 
@@ -775,7 +775,7 @@ if (params.DataCheck || params.Analyze) {
                     publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
                     publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-                    conda (params.condaActivate ? "bioconda::fastp=0.23.2=hb7a2d85_2" : null)
+                    conda (params.condaActivate ? "bioconda::fastp=0.23.2" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/fastp:0.23.2--hb7a2d85_2" : "quay.io/biocontainers/fastp:0.23.2--hb7a2d85_2")
 
