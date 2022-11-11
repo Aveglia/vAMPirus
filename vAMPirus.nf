@@ -3123,107 +3123,107 @@ if (params.DataCheck || params.Analyze) {
 
               process ASV_MED_Reps_ModelTesting {
 
-              label 'low_cpus'
+                  label 'low_cpus'
 
-              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ASV*mt*'
 
-              conda (params.condaActivate ? "bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
+                  conda (params.condaActivate ? "bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
 
-              container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/modeltest-ng:0.1.7--h5c6ebe3_0" : "quay.io/biocontainers/modeltest-ng:0.1.7--h5c6ebe3_0")
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/modeltest-ng:0.1.7--h5c6ebe3_0" : "quay.io/biocontainers/modeltest-ng:0.1.7--h5c6ebe3_0")
 
-              input:
-                file(reps) from groupreps
+                  input:
+                    file(reps) from groupreps
 
-              output:
-                file("*mt.out") into asvmedrep_mtout
-                file("*mt.*") into mtres
+                  output:
+                    file("*mt.out") into asvmedrep_mtout
+                    file("*mt.*") into mtres
 
-              script:
-                  """
-                  modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_ASV_MEDGroup_Reps_mt -d nt -s 203 --disable-checkpoint
-                  """
-              }
+                  script:
+                      """
+                      modeltest-ng -i ${reps} -p ${task.cpus} -o ${params.projtag}_ASV_MEDGroup_Reps_mt -d nt -s 203 --disable-checkpoint
+                      """
+                  }
 
 
                 process ASV_MED_Reps_Phylogeny {
 
-                label 'low_cpus'
+                    label 'low_cpus'
 
-                publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ASV*iq*'
 
-                conda (params.condaActivate ? "bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
+                    conda (params.condaActivate ? "bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
 
-                container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/iqtree:2.2.0.3--hb97b32f_1" : "quay.io/biocontainers/iqtree:2.2.0.3--hb97b32f_1")
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/iqtree:2.2.0.3--hb97b32f_1" : "quay.io/biocontainers/iqtree:2.2.0.3--hb97b32f_1")
 
-                input:
-                  file(reps) from groupreps2
-                  file(mtout) from asvmedrep_mtout
+                    input:
+                      file(reps) from groupreps2
+                      file(mtout) from asvmedrep_mtout
 
-                output:
-                  file("*_ASV_Group_Reps*") into align_results_asvmed
-                  file("*iq.treefile") into asv_group_rep_tree
+                    output:
+                      file("*_ASV_Group_Reps*") into align_results_asvmed
+                      file("*iq.treefile") into asv_group_rep_tree
 
-                script:
-                    """
-                    #grabbing best models from modeltestng
-                    modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
-                    modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
-                    modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
-                    if [[ ${crit} == "BIC" ]]
-                    then  mod="\$modbic"
-                    elif  [[ ${crit} == "AIC" ]]
-                    then  mod="\$modaic"
-                    elif  [[ ${crit} == "AICc" ]]
-                    then  mod="\$modaicc"
-                    fi
-                    # Protein_Phylogeny
-                    if [ "${params.iqCustomaa}" != "" ];then
-                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
+                    script:
+                        """
+                        #grabbing best models from modeltestng
+                        modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
+                        modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
+                        modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
+                        if [[ ${crit} == "BIC" ]]
+                        then  mod="\$modbic"
+                        elif  [[ ${crit} == "AIC" ]]
+                        then  mod="\$modaic"
+                        elif  [[ ${crit} == "AICc" ]]
+                        then  mod="\$modaicc"
+                        fi
+                        # Protein_Phylogeny
+                        if [ "${params.iqCustomaa}" != "" ];then
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
 
-                    elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
-                        mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                        elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
+                            mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
 
-                    elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                        mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
-                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                        elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
+                            mod=\$(tail -12 ${reps}.log | head -1 | awk '{print \$6}')
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
 
-                    elif [ "${params.nonparametric}" != "false" ];then
-                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                        elif [ "${params.nonparametric}" != "false" ];then
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -b ${params.boots}
 
-                    elif [ "${params.parametric}" != "false" ];then
-                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                        elif [ "${params.parametric}" != "false" ];then
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
 
-                    else
-                        iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
-                    fi
-                    """
-                }
+                        else
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                        fi
+                        """
+                    }
 
               process Adding_ASV_MED_Info {
 
-              label 'low_cpus'
+                  label 'low_cpus'
 
-              publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/", mode: "copy", overwrite: true
+                  publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/", mode: "copy", overwrite: true
 
-              input:
-                  file(counts) from asvcount_med
-                  file(map) from asvgroupscsv
+                  input:
+                      file(counts) from asvcount_med
+                      file(map) from asvgroupscsv
 
-              output:
-                  file("${params.projtag}_ASV_Groupingcounts.csv") into (asvgroupcounts, asvgroupcounts2)
+                  output:
+                      file("${params.projtag}_ASV_Groupingcounts.csv") into (asvgroupcounts, asvgroupcounts2)
 
-              script:
-                  """
-                  awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
-                  echo "GroupID" >> group.list
-                  for x in \$(cat asv.list);
-                  do    group=\$(grep -w \$x ${map} | awk -F "," '{print \$2}')
-                        echo "\$group" >> group.list
-                  done
-                  paste -d',' group.list ${counts} > ${params.projtag}_ASV_Groupingcounts.csv
-                  """
-              }
+                  script:
+                      """
+                      awk -F "," '{print \$1}' ${counts} | sed '1d' > asv.list
+                      echo "GroupID" >> group.list
+                      for x in \$(cat asv.list);
+                      do    group=\$(grep -w \$x ${map} | awk -F "," '{print \$2}')
+                            echo "\$group" >> group.list
+                      done
+                      paste -d',' group.list ${counts} > ${params.projtag}_ASV_Groupingcounts.csv
+                      """
+                  }
             } else {
                 asvgroupscsv = Channel.value('skipping')
                 asvgroupscsv2 = Channel.value('skipping')
