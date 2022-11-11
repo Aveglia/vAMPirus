@@ -2355,7 +2355,117 @@ if (params.DataCheck || params.Analyze) {
 
                 if (!params.skipPhylogeny) {
 
-                    process ncASV_Phylogeny { ////// NEEED TO BREAK UP into steps 1-5
+                    process ncASV_Phylogeny_step1 {
+
+                          label 'norm_cpus'
+
+                          tag "${mtag}"
+
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/Alignment", mode: "copy", overwrite: true
+
+                          conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
+
+                          container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
+
+                          input:
+                              tuple nid, file(asvs) from nuclFastas_forphylogeny_ncasv
+
+                          output:
+                              tuple nid, file("*_ALN.fasta") into ncalign1
+
+                          script:
+                              mtag="ID=" + nid
+                              """
+                              pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
+                              muscle -in ${asvs} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
+                              """
+                    }
+
+                    process ncASV_Phylogeny_step2 {
+
+                        label 'norm_cpus'
+
+                        tag "${mtag}"
+
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ncASV*aln.*'
+
+                        conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6" : null)
+
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
+
+                        input:
+                            tuple nid, file(asvs) from ncalign1
+
+                        output:
+                            tuple nid, file("*_aln.html"), file("*.log") into align_results_ncasv
+                            tuple nid, file("*_aln.fasta") into ncalign2
+
+                        script:
+                            mtag="ID=" + nid
+                            """
+                            pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
+                            trimal -in ${asvs} -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
+                            """
+                    }
+
+                    process ncASV_Phylogeny_step3 {
+
+                          label 'norm_cpus'
+
+                          tag "${mtag}"
+
+                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/Alignment", mode: "copy", overwrite: true
+
+                          conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
+
+                          container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
+
+                          input:
+                              tuple nid, file(asvs) from ncalign2
+
+                          output:
+                              tuple nid, file("*_Aligned_informativeonly.fasta") into ncalign3
+
+                          script:
+                              mtag="ID=" + nid
+                              """
+                              pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
+                              o-trim-uninformative-columns-from-alignment ${asvs}
+                              mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
+                              """
+                    }
+
+                    process ncASV_Phylogeny_step4 {
+
+                        label 'norm_cpus'
+
+                        tag "${mtag}"
+
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ncASV*aln.*'
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ncASV*mt*'
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ncASV*iq*'
+
+                        conda (params.condaActivate ? "bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
+
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/modeltest-ng:0.1.7--h5c6ebe3_0" : "quay.io/biocontainers/modeltest-ng:0.1.7--h5c6ebe3_0")
+
+                        input:
+                            tuple nid, file(asvs) from ncalign3
+
+                        output:
+                            tuple nid, file("*mt*") into align_results_ncasv
+                            tuple nid, file("*mt.out") into ncalign4
+
+                        script:
+                            mtag="ID=" + nid
+                            """
+                            pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
+                            # Nucleotide_ModelTest
+                            modeltest-ng -i ${asvs} -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                            """
+                    }
+
+                    process ncASV_Phylogeny_step5 {
 
                           label 'norm_cpus'
 
@@ -2365,12 +2475,13 @@ if (params.DataCheck || params.Analyze) {
                           publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ncASV*mt*'
                           publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ncASV*iq*'
 
-                          conda (params.condaActivate ? "${params.vampdir}/bin/yamls/phylogeny_med.yml" : null)
+                          conda (params.condaActivate ? "bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
 
-                          container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/" : "quay.io/biocontainers/") ###################################################################################!!!!!!
+                          container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/iqtree:2.2.0.3--hb97b32f_1" : "quay.io/biocontainers/iqtree:2.2.0.3--hb97b32f_1")
 
                           input:
                               tuple nid, file(asvs) from nuclFastas_forphylogeny_ncasv
+                              tuple nid, file(mtout) from ncalign4
 
                           output:
                               tuple nid, file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results_ncasv
@@ -2379,31 +2490,37 @@ if (params.DataCheck || params.Analyze) {
                           script:
                               mtag="ID=" + nid
                               """
+                              #grabbing best models from modeltestng
+                              modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
+                              modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
+                              modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
+                              if [[ ${crit} == "BIC" ]]
+                              then  mod="\$modbic"
+                              elif  [[ ${crit} == "AIC" ]]
+                              then  mod="\$modaic"
+                              elif  [[ ${crit} == "AICc" ]]
+                              then  mod="\$modaicc"
+                              fi
+                              # grab prefix
                               pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
-                              ${tools}/muscle5.0.1278_linux64 -in ${asvs} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
-                              trimal -in \${pre}_ALN.fasta -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
-                              o-trim-uninformative-columns-from-alignment \${pre}_aln.fasta
-                              mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
-                              # Nucleotide_ModelTest
-                              modeltest-ng -i \${pre}_Aligned_informativeonly.fasta -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
                               # Nucleotide_Phylogeny
                               if [ "${params.iqCustomnt}" != "" ];then
-                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
+                                  iqtree -s ${asvs} --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
                               elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
                                   mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
-                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
                               elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
                                   mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
-                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                               elif [ "${params.nonparametric}" != "false" ];then
-                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
                               elif [ "${params.parametric}" != "false" ];then
-                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                               else
-                                  iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
                               fi
                               """
-                      }
+                    }
 
                 } else {
 
@@ -4735,7 +4852,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASVn) from potu_align1
 
                         output:
-                            tuple file("*_aln.html"), file("*.log") into pcASV_nucleotide_phylogeny_results
+                            tuple nid, file("*_aln.html"), file("*.log") into pcASV_nucleotide_phylogeny_results
                             tuple nid, file("*_aln.fasta") into potu_align2
 
                         script:
@@ -4789,7 +4906,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASVn) from potu_align3
 
                         output:
-                            tuple file("*mt*") into pcASV_nucleotide_phylogeny_results
+                            tuple nid, file("*mt*") into pcASV_nucleotide_phylogeny_results
                             tuple nid, file("*mt.out") into pcASVmtout
                         script:
                             mtag="ID=" + nid
@@ -4817,7 +4934,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(mtout) from pcASVmtout
 
                         output:
-                            tuple file("*.tree"), file("*.log"), file("*iq*") into pcASV_nucleotide_phylogeny_results
+                            tuple nid, file("*.tree"), file("*.log"), file("*iq*") into pcASV_nucleotide_phylogeny_results
                             tuple nid, file("*iq.treefile") into potu_Ntree_plot
 
                         script:
@@ -5326,7 +5443,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASV) from pcASV_align1
 
                         output:
-                            tuple file("*_aln.html"), file("*.tree"), file("*.log") into pcASV_protein_phylogeny_results
+                            tuple nid, file("*_aln.html"), file("*.tree"), file("*.log") into pcASV_protein_phylogeny_results
                             tuple nid, file("*_aln.fasta") into pcASV_align2
 
                         script:
@@ -5380,7 +5497,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASV) from pcASV_align3
 
                         output:
-                            tuple file("*mt*") into pcASV_protein_phylogeny_results3
+                            tuple nid, file("*mt*") into pcASV_protein_phylogeny_results3
                             tuple nid, file("*mt.out") into potu_mtout
 
                         script:
@@ -5411,7 +5528,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(mtout) from potu_mtout
 
                         output:
-                            tuple file("*iq*") into pcASV_protein_phylogeny_results
+                            tuple nid, file("*iq*") into pcASV_protein_phylogeny_results
                             tuple nid, file("*iq.treefile") into potu_Atree_plot
 
                         script:
