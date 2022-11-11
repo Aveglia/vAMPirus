@@ -709,6 +709,8 @@ if (params.DataCheck || params.Analyze) {
 
                         conda (params.condaActivate ? "-c conda-forge bioconda::fastqc=0.11.9=0" : null)
 
+                        conda (params.condaActivate && params.myConda ? params.localConda : params.condaActivate ? "bioconda::fastp=0.20.1=h8b12597_0" : null)
+
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/fastqc:0.11.9--0" : "quay.io/biocontainers/fastqc:0.11.9--0")
 
                         input:
