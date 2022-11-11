@@ -749,7 +749,7 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             tuple sample_id, file("*.fastp.{json,html}") into fastp_results
-                            tuple sample_id, file("*.fastp.{json}") into fastp_json
+                            tuple sample_id, file("*.fastp.json") into fastp_json
                             tuple sample_id, file("*.filter.fq") into reads_fastp_ch
 
 
@@ -784,7 +784,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         tuple sample_id, file("*.fastp.{json,html}") into fastp_results
-                        tuple sample_id, file("*.fastp.{json}") into fastp_json
+                        tuple sample_id, file("*.fastp.json") into fastp_json
                         tuple sample_id, file("*.filter.fq") into reads_fastp_ch
 
                     script:
