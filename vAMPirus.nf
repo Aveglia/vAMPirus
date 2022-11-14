@@ -1062,6 +1062,8 @@ if (params.DataCheck || params.Analyze) {
 
         conda (params.condaActivate ? null : null)
 
+        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
+
         input:
             file(reads) from reads_vsearch1_ch
                 .collect()
@@ -1082,6 +1084,8 @@ if (params.DataCheck || params.Analyze) {
         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging", mode: "copy", overwrite: true
 
         conda (params.condaActivate ? null : null)
+
+        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
 
         input:
             file(names) from names
@@ -1105,7 +1109,7 @@ if (params.DataCheck || params.Analyze) {
         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/pre_length_filtering", mode: "copy", overwrite: true, pattern: "*preFilt_*st.txt"
         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Histograms/post_length_filtering", mode: "copy", overwrite: true, pattern: "*postFilt_*st.txt"
 
-        conda (params.condaActivate ? "bioconda::fastp=0.23.2 bioconda::bbmap=39.01" : null)
+        conda (params.condaActivate ? "-c bioconda -c conda-forge fastp=0.23.2 bbmap=39.01" : null)
 
         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-22ce7eae944f2086a1f83e59d4735573352eff58:f8832d34305db510dcb75c90775f8b0ff5aab759-0" : "quay.io/biocontainers/mulled-v2-22ce7eae944f2086a1f83e59d4735573352eff58:f8832d34305db510dcb75c90775f8b0ff5aab759-0")
 
