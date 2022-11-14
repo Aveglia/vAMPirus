@@ -1181,7 +1181,7 @@ if (params.DataCheck || params.Analyze) {
 
         script:
             """
-            vsearch --derep_fulllength ${reads} --sizeout --relabel_keep --output ${params.projtag}_unique_sequences.fasta
+            vsearch --fastx_uniques ${reads} --sizeout --relabel_keep --output ${params.projtag}_unique_sequences.fasta
             """
     }
 
