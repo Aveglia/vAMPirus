@@ -1169,7 +1169,7 @@ if (params.DataCheck || params.Analyze) {
 
         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/Uniques", mode: "copy", overwrite: true
 
-        conda (params.condaActivate ? "bioconda::vsearch=2.21.1=hf1761c0_1" : null)
+        conda (params.condaActivate ? "-c bioconda -c conda-forge vsearch=2.21.1=hf1761c0_1" : null)
 
         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/vsearch:2.21.1--hf1761c0_1" : "quay.io/biocontainers/vsearch:2.21.1--hf1761c0_1")
 
