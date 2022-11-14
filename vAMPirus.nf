@@ -1877,6 +1877,9 @@ if (params.DataCheck || params.Analyze) {
         if (!params.skipReadProcessing || !params.skipMerging ) {
 
             process combine_csv_DC {
+
+                conda (params.condaActivate ? null : null)
+
                 input:
                     file(csv) from fastp_csv_in1
                         .collect()
