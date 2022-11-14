@@ -841,7 +841,7 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "bbmap=39.01" : null)
+                    conda (params.condaActivate ? "-c bioconda -c conda-forge  bbmap=39.01" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/bbamap:38.98--h5c4e2a8_0" : "quay.io/biocontainers/bbmap:38.98--h5c4e2a8_0")
 
@@ -888,7 +888,7 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/PrimerRemoval", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "bbmap=39.01" : null)
+                    conda (params.condaActivate ? "-c bioconda -c conda-forge  bbmap=39.01" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/bbamap:38.98--h5c4e2a8_0" : "quay.io/biocontainers/bbmap:38.98--h5c4e2a8_0")
 
