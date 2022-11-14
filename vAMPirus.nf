@@ -136,7 +136,7 @@ def helpMessage() {
 
                 Single primer set removal-
 
-                    --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
+                    --gtrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--gtrim #basesfromforward,#basesfromreverse"
 
                     --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
 
@@ -362,7 +362,7 @@ def fullHelpMessage() {
 
                           Single primer set removal-
 
-                              --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
+                              --gtrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--gtrim #basesfromforward,#basesfromreverse"
 
                               --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
 
@@ -477,7 +477,7 @@ def fullHelpMessage() {
 
         Example 3. Launching the vAMPirus DataCheck pipeline with primer removal by global trimming of 20 bp from forward reads and 26 bp from reverse reads
 
-            nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --GlobTrim 20,26
+            nextflow run vAMPirus.nf -c vampirus.config -profile conda --DataCheck --gtrim 20,26
 
 
         Analyze pipeline =>
@@ -853,16 +853,16 @@ if (params.DataCheck || params.Analyze) {
 
                     script:
                         // check if we need to check this outside processes
-                        if ( params.fwd == "" && params.rev == "" && !params.multi && params.GlobTrim == "" ) {
+                        if ( params.fwd == "" && params.rev == "" && !params.multi && params.gtrim == "" ) {
                             """
                             bbduk.sh in1=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=${params.defaultFwdTrim} t=${task.cpus}
                             bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=${params.defaultRevTrim} t=${task.cpus}
             		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
                             """
-                        } else if ( params.GlobTrim != "" && !params.multi ) {
+                        } else if ( params.gtrim != "" && !params.multi ) {
                             """
-                            FTRIM=\$( echo ${GlobTrim} | cut -f 1 -d "," )
-                            RTRIM=\$( echo ${GlobTrim} | cut -f 2 -d "," )
+                            FTRIM=\$( echo ${gtrim} | cut -f 1 -d "," )
+                            RTRIM=\$( echo ${gtrim} | cut -f 2 -d "," )
                             bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
                             bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
             		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
