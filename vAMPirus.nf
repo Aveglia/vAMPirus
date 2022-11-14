@@ -2957,7 +2957,7 @@ if (params.DataCheck || params.Analyze) {
 
                       publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true
 
-                      conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
+                      conda (params.condaActivate ? "-c bioconda -c conda-forge muscle=5.1" : null)
 
                       container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
 
@@ -2981,7 +2981,7 @@ if (params.DataCheck || params.Analyze) {
 
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/Alignment", mode: "copy", overwrite: true
 
-                        conda (params.condaActivate ? "bioconda::trimal=1.4.1=h9f5acd7_6" : null)
+                        conda (params.condaActivate ? "-c bioconda -c conda-forge trimal=1.4.1=h9f5acd7_6" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
 
