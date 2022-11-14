@@ -1388,7 +1388,7 @@ if (params.DataCheck || params.Analyze) {
                     file(fasta) from reads_vsearch6_ch
 
                 output:
-                    file("${params.projtag}_ASV_PairwisePairwisePercentID") into asvpdm
+                    file("${params.projtag}_ASV_PairwisePercentID") into asvpdm
 
                 script:
                     """
