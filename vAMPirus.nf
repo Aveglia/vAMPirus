@@ -2868,9 +2868,9 @@ if (params.DataCheck || params.Analyze) {
 
             publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
 
-            conda (params.condaActivate ? null : null)
+            conda (params.condaActivate ? "-c bioconda -c conda-forge vsearch=2.21.1=hf1761c0_1" : null)
 
-            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
+            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/vsearch:2.21.1--hf1761c0_1" : "quay.io/biocontainers/vsearch:2.21.1--hf1761c0_1")
 
             input:
                 file(asvs) from nuclFastas_forCounts_asv_ch
