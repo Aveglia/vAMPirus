@@ -1895,6 +1895,8 @@ if (params.DataCheck || params.Analyze) {
 
                 conda (params.condaActivate ? null : null)
 
+                container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
+
                 input:
                     file(csv) from fastp_csv_in1
                         .collect()
@@ -1917,6 +1919,10 @@ if (params.DataCheck || params.Analyze) {
             process skip_combine_csv_DC {
                 output:
                     file("filter_reads.txt") into fastp_csv_dc
+
+                    conda (params.condaActivate ? null : null)
+
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
 
                 script:
                     """
@@ -5678,6 +5684,10 @@ if (params.DataCheck || params.Analyze) {
                 if (!params.skipAdapterRemoval || !params.skipReadProcessing || !params.skipMerging) {
 
                     process combine_csv {
+
+                        conda (params.condaActivate ? null : null)
+
+                        container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
 
                         input:
                             file(csv) from fastp_csv_in2
