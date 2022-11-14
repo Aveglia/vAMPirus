@@ -1404,6 +1404,10 @@ if (params.DataCheck || params.Analyze) {
 
            publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/translation", mode: "copy", overwrite: true
 
+           conda (params.condaActivate ? null : null)
+
+           container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
+
            input:
                 file(fasta) from nucl2aa
 
@@ -4316,6 +4320,10 @@ if (params.DataCheck || params.Analyze) {
                       label 'low_cpus'
 
                       publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Translation", mode: "copy", overwrite: true, pattern: '*_ASV_translations*'
+
+                      conda (params.condaActivate ? null : null)
+
+                      container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
 
                       input:
                           file(fasta) from nucl2aa
