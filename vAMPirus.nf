@@ -1430,7 +1430,7 @@ if (params.DataCheck || params.Analyze) {
 
             publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
-            conda (params.condaActivate ? "bioconda::vsearch=2.21.1 bioconda::cd-hit=4.8.1 bioconda::seqtk=1.3 bioconda::bbmap=39.01" : null)
+            conda (params.condaActivate ? "-c bioconda -c conda-forge vsearch=2.21.1 cd-hit=4.8.1 seqtk=1.3 bbmap=39.01" : null)
 
             container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0" : "quay.io/biocontainers/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0")
 
@@ -3395,7 +3395,7 @@ if (params.DataCheck || params.Analyze) {
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Problematic", mode: "copy", overwrite: true, pattern: '*problematic*.{fasta}'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes", mode: "copy", overwrite: true, pattern: '*AminoTypes_noTaxonomy.{fasta}'
 
-                    conda (params.condaActivate ? "bioconda::vsearch=2.21.1 bioconda::cd-hit=4.8.1 bioconda::seqtk=1.3 bioconda::bbmap=39.01" : null)
+                    conda (params.condaActivate ? "-c bioconda -c conda-forge vsearch=2.21.1 cd-hit=4.8.1 seqtk=1.3 bbmap=39.01" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0" : "quay.io/biocontainers/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0")
 
@@ -4351,7 +4351,7 @@ if (params.DataCheck || params.Analyze) {
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/SummaryFiles", mode: "copy", overwrite: true, pattern: '*.{clstr,csv,gc}'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/pcASV/Problematic", mode: "copy", overwrite: true, pattern: '*problem*.{fasta}'
 
-                    conda (params.condaActivate ? "bioconda::vsearch=2.21.1 bioconda::cd-hit=4.8.1 bioconda::seqtk=1.3 bioconda::bbmap=39.01" : null)
+                    conda (params.condaActivate ? "-c bioconda -c conda-forge vsearch=2.21.1 cd-hit=4.8.1 seqtk=1.3 bbmap=39.01" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0" : "quay.io/biocontainers/mulled-v2-089fb9f3537921c3d6dbcc7521fbc33d82301df5:1e1ccff83e5d9864e7f3c008bd4ece458ffbdb8d-0")
 
