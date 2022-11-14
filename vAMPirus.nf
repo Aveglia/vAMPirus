@@ -1178,10 +1178,11 @@ if (params.DataCheck || params.Analyze) {
 
         output:
             file("*unique_sequences.fasta") into reads_vsearch3_ch
+            file("*unique_sequences.fastq") into reads_fastquniq
 
         script:
             """
-            vsearch --fastx_uniques ${reads} --sizeout --relabel_keep --output ${params.projtag}_unique_sequences.fasta
+            vsearch --fastx_uniques ${reads} --sizeout --relabel_keep --fastaout ${params.projtag}_unique_sequences.fasta --fastqout ${params.projtag}_unique_sequences.fastq
             """
     }
 
@@ -1196,7 +1197,7 @@ if (params.DataCheck || params.Analyze) {
         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/vsearch:2.21.1--hf1761c0_1" : "quay.io/biocontainers/vsearch:2.21.1--hf1761c0_1")
 
         input:
-            file(reads) from reads_vsearch3_ch
+            file(reads) from reads_fastquniq
 
         output:
             file("*notChecked.fasta") into reads_vsearch4_ch
