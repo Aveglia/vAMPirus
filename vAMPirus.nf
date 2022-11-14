@@ -805,7 +805,7 @@ if (params.DataCheck || params.Analyze) {
                 publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval", mode: "copy", overwrite: true, pattern: "*.filter.fq"
                 publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/AdapterRemoval/fastpOut", mode: "copy", overwrite: true, pattern: "*.fastp.{json,html}"
 
-                conda (params.condaActivate ? "bioconda::jq=1.6" : null)
+                conda (params.condaActivate ? "conda-forge::jq=1.6" : null)
 
                 container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/jq:1.6" : "quay.io/biocontainers/jq:1.6")
 
