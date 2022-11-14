@@ -2868,6 +2868,10 @@ if (params.DataCheck || params.Analyze) {
 
             publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Counts", mode: "copy", overwrite: true, pattern: '*ASV*.{biome,csv}'
 
+            conda (params.condaActivate ? null : null)
+
+            container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
+
             input:
                 file(asvs) from nuclFastas_forCounts_asv_ch
                 file(merged) from nuclCounts_mergedreads_asv_ch
