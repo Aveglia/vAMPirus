@@ -361,8 +361,8 @@ postlhp
 ```
 <br>
 ```{bash load_datasets_bash, include=FALSE}
-mv *AminoType_PairwiseDistance.matrix ./amino_matrix.txt
-mv *_ASV_PairwiseDistance.matrix ./asv_matrix.txt
+mv *AminoType_PairwisePercentID.matrix ./amino_matrix.txt
+mv *_ASV_PairwisePercentID.matrix ./asv_matrix.txt
 
 ```
 
