@@ -2979,7 +2979,7 @@ if (params.DataCheck || params.Analyze) {
                             file(aign) from asv_align1
 
                         output:
-                            file("*_aln.html")into trimalhtml
+                            file("*_aln.html")into trimalhtml2
                             file("*_aln.fasta")into asv_align2
 
                         script:
