@@ -3378,6 +3378,10 @@ if (params.DataCheck || params.Analyze) {
 
                   publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/Translation", mode: "copy", overwrite: true
 
+                  conda (params.condaActivate ? null : null)
+
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
+
                   input:
                       file(fasta) from asvsforAminotyping
 
