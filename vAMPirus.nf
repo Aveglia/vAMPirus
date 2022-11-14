@@ -1380,7 +1380,7 @@ if (params.DataCheck || params.Analyze) {
 
                 publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide", mode: "copy", overwrite: true, pattern: '*{.matrix}'
 
-                conda (params.condaActivate ? "bioconda::clustalo=1.2.4=h87f3376_5" : null)
+                conda (params.condaActivate ? "-c bioconda -c conda-forge clustalo=1.2.4=h87f3376_5" : null)
 
                 container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/clustalo:1.2.4--h87f3376_5" : "quay.io/biocontainers/clustalo:1.2.4--h87f3376_5")
 
@@ -1541,7 +1541,7 @@ if (params.DataCheck || params.Analyze) {
 
             publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
-            conda (params.condaActivate ? "bioconda::clustalo=1.2.4=h87f3376_5" : null)
+            conda (params.condaActivate ? "-c bioconda -c conda-forge clustalo=1.2.4=h87f3376_5" : null)
 
             container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/clustalo:1.2.4--h87f3376_5" : "quay.io/biocontainers/clustalo:1.2.4--h87f3376_5")
 
@@ -2349,7 +2349,7 @@ if (params.DataCheck || params.Analyze) {
 
                 publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Matrices", mode: "copy", overwrite: true, pattern: '*ncASV*PercentID.matrix'
 
-                conda (params.condaActivate ? "bioconda::clustalo=1.2.4=h87f3376_5" : null)
+                conda (params.condaActivate ? "-c bioconda -c conda-forge clustalo=1.2.4=h87f3376_5" : null)
 
                 container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/clustalo:1.2.4--h87f3376_5" : "quay.io/biocontainers/clustalo:1.2.4--h87f3376_5")
 
@@ -2890,7 +2890,7 @@ if (params.DataCheck || params.Analyze) {
 
             publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Matrices", mode: "copy", overwrite: true, pattern: '*ASV*PercentID.matrix'
 
-            conda (params.condaActivate ? "bioconda::clustalo=1.2.4=h87f3376_5" : null)
+            conda (params.condaActivate ? "-c bioconda -c conda-forge clustalo=1.2.4=h87f3376_5" : null)
 
             container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/clustalo:1.2.4--h87f3376_5" : "quay.io/biocontainers/clustalo:1.2.4--h87f3376_5")
 
@@ -3451,7 +3451,7 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Matrices", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "bioconda::clustalo=1.2.4=h87f3376_5" : null)
+                    conda (params.condaActivate ? "-c bioconda -c conda-forge clustalo=1.2.4=h87f3376_5" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/clustalo:1.2.4--h87f3376_5" : "quay.io/biocontainers/clustalo:1.2.4--h87f3376_5")
 
@@ -4806,7 +4806,7 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Nucleotide/Matrix", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "bioconda::clustalo=1.2.4=h87f3376_5" : null)
+                    conda (params.condaActivate ? "-c bioconda -c conda-forge clustalo=1.2.4=h87f3376_5" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/clustalo:1.2.4--h87f3376_5" : "quay.io/biocontainers/clustalo:1.2.4--h87f3376_5")
 
@@ -5017,7 +5017,7 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Matrix", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "bioconda::clustalo=1.2.4=h87f3376_5" : null)
+                    conda (params.condaActivate ? "-c bioconda -c conda-forge clustalo=1.2.4=h87f3376_5" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/clustalo:1.2.4--h87f3376_5" : "quay.io/biocontainers/clustalo:1.2.4--h87f3376_5")
 
