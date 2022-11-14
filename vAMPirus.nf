@@ -1393,7 +1393,7 @@ if (params.DataCheck || params.Analyze) {
                 script:
                     """
                     clustalo -i ${fasta} --distmat-out=${params.projtag}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                    cat ${params.projtag}_PercentIDq.matrix | tr " " ","  | grep "," >${params.projtag}_ASV_PairwisePercentID.matrix
+                    cat ${params.projtag}_PercentIDq.matrix | tr " " "," | sed 's/,,/,/g' | grep "," >${params.projtag}_ASV_PairwisePercentID.matrix
                     rm ${params.projtag}_PercentIDq.matrix
                     """
        }
@@ -1556,7 +1556,7 @@ if (params.DataCheck || params.Analyze) {
                 script:
                     """
                     clustalo -i ${fasta} --distmat-out=${params.projtag}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                    cat ${params.projtag}_PercentIDq.matrix | tr " " ","  | grep "," >${params.projtag}_AminoType_PairwisePercentID.matrix
+                    cat ${params.projtag}_PercentIDq.matrix | tr " " "," | sed 's/,,/,/g' | grep "," >${params.projtag}_AminoType_PairwisePercentID.matrix
                     rm ${params.projtag}_PercentIDq.matrix
                     """
         }
@@ -2368,7 +2368,7 @@ if (params.DataCheck || params.Analyze) {
                     name=\$( echo ${asvs}| awk -F ".fasta" '{print \$1}')
                     clustalo -i ${asvs} --distmat-out=\${name}_PairwiseDistance.matrix --full --force --threads=${task.cpus}
                     clustalo -i ${asvs} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                    cat \${name}_PercentIDq.matrix | tr " " ","  | grep "," >\${name}_PercentID.matrix
+                    cat \${name}_PercentIDq.matrix | tr " " ","| sed 's/,,/,/g' | grep "," >\${name}_PercentID.matrix
                     rm \${name}_PercentIDq.matrix
                     """
                 }
@@ -4830,7 +4830,7 @@ if (params.DataCheck || params.Analyze) {
                         name=\$( echo ${potus} | awk -F ".fasta" '{print \$1}')
                         clustalo -i ${potus} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                         clustalo -i ${potus} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                        cat \${name}_PercentIDq.matrix | tr " " "," | grep "," >\${name}_PercentID.matrix
+                        cat \${name}_PercentIDq.matrix | tr " " "," | sed 's/,,/,/g' | grep "," >\${name}_PercentID.matrix
                         rm \${name}_PercentIDq.matrix
                         """
                 }
@@ -5040,7 +5040,7 @@ if (params.DataCheck || params.Analyze) {
                         name=\$( echo ${prot} | awk -F ".fasta" '{print \$1}')
                         clustalo -i ${prot} --distmat-out=\${name}_PairwiseDistanceq.matrix --full --force --threads=${task.cpus}
                         clustalo -i ${prot} --distmat-out=\${name}_PercentIDq.matrix --percent-id --full --force --threads=${task.cpus}
-                        cat \${name}_PercentIDq.matrix | tr " " "," | grep "," >\${name}_PercentID.matrix
+                        cat \${name}_PercentIDq.matrix | tr " " "," | sed 's/,,/,/g' | grep "," >\${name}_PercentID.matrix
                         rm \${name}_PercentIDq.matrix
                         """
                 }
