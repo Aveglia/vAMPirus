@@ -1060,6 +1060,8 @@ if (params.DataCheck || params.Analyze) {
 
         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging/LengthFiltering", mode: "copy", overwrite: true
 
+        conda (params.condaActivate ? null : null)
+
         input:
             file(reads) from reads_vsearch1_ch
                 .collect()
@@ -1078,6 +1080,8 @@ if (params.DataCheck || params.Analyze) {
         label 'low_cpus'
 
         publishDir "${params.workingdir}/${params.outdir}/ReadProcessing/ReadMerging", mode: "copy", overwrite: true
+
+        conda (params.condaActivate ? null : null)
 
         input:
             file(names) from names
