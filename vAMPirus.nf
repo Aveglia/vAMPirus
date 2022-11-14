@@ -861,8 +861,8 @@ if (params.DataCheck || params.Analyze) {
                             """
                         } else if ( params.gtrim != "" && !params.multi ) {
                             """
-                            FTRIM=\$( echo ${gtrim} | cut -f 1 -d "," )
-                            RTRIM=\$( echo ${gtrim} | cut -f 2 -d "," )
+                            FTRIM=\$( echo ${params.gtrim} | cut -f 1 -d "," )
+                            RTRIM=\$( echo ${params.gtrim} | cut -f 2 -d "," )
                             bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
                             bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
             		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
