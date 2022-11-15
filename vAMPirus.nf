@@ -4918,7 +4918,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASVn) from pcASV_ntmuscle_ch
 
                         output:
-                            tuple nid, file("*_ALN.fasta"), into potu_align1
+                            tuple nid, file("*_ALN.fasta") into potu_align1
                             file("*.efa")
 
                         script:
