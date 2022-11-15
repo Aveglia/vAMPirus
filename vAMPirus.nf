@@ -531,28 +531,17 @@ log.info """\
                                                     Metadata file:          ${params.metadata}
 
                ---------------------------------------------------Run details------------------------------------------------
-                                                      Single input:         ${params.single}
-                                        Minimum merged read length:         ${params.maxLen}
-                                                     ASV filtering:         ${params.filter}
-                                                Database directory:         ${params.dbdir}
-                                                     Database name:         ${params.dbname}
-                                                     Database type:         ${params.dbtype}
-                                                             ncASV:         ${params.ncASV}
-                                                             pcASV:         ${params.pcASV}
-                                                           ASV MED:         ${params.asvMED}
-                                                     AminoType MED:         ${params.aminoMED}
-                                    Phylogeny-based ASV clustering:         ${params.asvTClust}
-                              Phylogeny-based AminoType clustering:         ${params.aminoTClust}
-                                                       Skip FastQC:         ${params.skipFastQC}
-                                              Skip read processing:         ${params.skipReadProcessing}
-                                              Skip adapter removal:         ${params.skipAdapterRemoval}
-                                               Skip primer removal:         ${params.skipPrimerRemoval}
-                                                 Skip read merging:         ${params.skipMerging}
-                                                  Skip AminoTyping:         ${params.skipAminoTyping}
-                                                     Skip Taxonomy:         ${params.skipTaxonomy}
-                                                    Skip phylogeny:         ${params.skipPhylogeny}
-                                                       Skip EMBOSS:         ${params.skipEMBOSS}
-                                                      Skip Reports:         ${params.skipReport}
+                  Single input:         ${params.single}        Phylogeny-based AminoType clustering:         ${params.aminoTClust}
+    Minimum merged read length:         ${params.maxLen}                                 Skip FastQC:         ${params.skipFastQC}
+                 ASV filtering:         ${params.filter}                        Skip read processing:         ${params.skipReadProcessing}
+            Database directory:         ${params.dbdir}                         Skip adapter removal:         ${params.skipAdapterRemoval}
+                 Database name:         ${params.dbname}                         Skip primer removal:         ${params.skipPrimerRemoval}
+                 Database type:         ${params.dbtype}                           Skip read merging:         ${params.skipMerging}
+                         ncASV:         ${params.ncASV}                             Skip AminoTyping:         ${params.skipAminoTyping}
+                         pcASV:         ${params.pcASV}                          Skip Taxonomy steps:         ${params.skipTaxonomy}
+                       ASV MED:         ${params.asvMED}                        Skip phylogeny steps:         ${params.skipPhylogeny}
+                 AminoType MED:         ${params.aminoMED}                               Skip EMBOSS:         ${params.skipEMBOSS}
+Phylogeny-based ASV clustering:         ${params.asvTClust}                             Skip Reports:         ${params.skipReport}                              
         """.stripIndent()
 
 if (params.readsTest) {
@@ -1787,7 +1776,7 @@ if (params.DataCheck || params.Analyze) {
                 process AminoType_Shannon_Entropy_Analysis_step2 {
 
                   label 'norm_cpus'
-                  
+
                   conda (params.condaActivate ? "-c conda-forge bioconda::trimal=1.4.1=h9f5acd7_6" : null)
 
                   container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
@@ -3236,7 +3225,7 @@ if (params.DataCheck || params.Analyze) {
                     label 'low_cpus'
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true, pattern: '*.{fasta,csv}'
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/unique", mode: "copy", overwrite: true, pattern: '*_unique'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/uniques", mode: "copy", overwrite: true, pattern: '*_unique'
 
                     conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
@@ -3293,7 +3282,7 @@ if (params.DataCheck || params.Analyze) {
                     script:
                         """
                         #copy _unique files here so we can werk with them
-                        cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/unique .
+                        cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/uniques/*_unique .
                         #generatemaps
                         echo "ASV,GroupID,IDPattern"
                         j=1
@@ -4200,7 +4189,7 @@ if (params.DataCheck || params.Analyze) {
                         label 'low_cpus'
 
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED", mode: "copy", overwrite: true, pattern: '*.{fasta,csv}'
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED", mode: "copy", overwrite: true, pattern: '*_unique'
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/uniques", mode: "copy", overwrite: true, pattern: '*_unique'
 
                         conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
@@ -4258,7 +4247,7 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             """
                             #copy _unique files here so we can werk with them
-                            cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/unique .
+                            cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/uniques/*_unique .
                             #generatemaps
                             echo "AminoType,Group,IDPattern"
                             j=1
