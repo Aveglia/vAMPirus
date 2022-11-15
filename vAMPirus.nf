@@ -4957,7 +4957,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASVn) from potu_align1
 
                         output:
-                            tuple nid, file("*_aln.html"), file("*.log") into pcASV_nucleotide_phylogeny_results
+                            tuple nid, file("*_aln.html"), file("*.log") into pcASV_nucleotide_phylogeny_results1
                             tuple nid, file("*_aln.fasta") into potu_align2
 
                         script:
@@ -5011,7 +5011,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASVn) from potu_align3
 
                         output:
-                            tuple nid, file("*mt*") into pcASV_nucleotide_phylogeny_results
+                            tuple nid, file("*mt*") into pcASV_nucleotide_phylogeny_results2
                             tuple nid, file("*mt.out") into pcASVmtout
                         script:
                             mtag="ID=" + nid
@@ -5039,7 +5039,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(mtout) from pcASVmtout
 
                         output:
-                            tuple nid, file("*.tree"), file("*.log"), file("*iq*") into pcASV_nucleotide_phylogeny_results
+                            tuple nid, file("*.tree"), file("*.log"), file("*iq*") into pcASV_nucleotide_phylogeny_results3
                             tuple nid, file("*iq.treefile") into potu_Ntree_plot
 
                         script:
