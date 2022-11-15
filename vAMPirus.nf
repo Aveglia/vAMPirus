@@ -2520,9 +2520,7 @@ if (params.DataCheck || params.Analyze) {
 
                         tag "${mtag}"
 
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ncASV*aln.*'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ncASV*mt*'
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ncASV*iq*'
 
                         conda (params.condaActivate ? "-c conda-forge bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
 
@@ -2550,8 +2548,6 @@ if (params.DataCheck || params.Analyze) {
 
                           tag "${mtag}"
 
-                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/Alignment", mode: "copy", overwrite: true,  pattern: '*ncASV*aln.*'
-                          publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*ncASV*mt*'
                           publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ncASV/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*ncASV*iq*'
 
                           conda (params.condaActivate ? "-c conda-forge bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
@@ -2584,19 +2580,17 @@ if (params.DataCheck || params.Analyze) {
                               pre=\$(echo ${asvs} | awk -F "_aligned" '{print \$1}' )
                               # Nucleotide_Phylogeny
                               if [ "${params.iqCustomnt}" != "" ];then
-                                  iqtree -s ${asvs} --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
+                                  iqtree -s ${asvs} --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
                               elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                  mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
-                                  iqtree -s ${asvs} --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
                               elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                                  mod=\$(tail -12 \${pre}_Aligned_informativeonly.fasta.log | head -1 | awk '{print \$6}')
-                                  iqtree -s ${asvs} --prefix \${pre}_iq -m \${mod} --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                               elif [ "${params.nonparametric}" != "false" ];then
-                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -b ${params.boots}
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
                               elif [ "${params.parametric}" != "false" ];then
-                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                               else
-                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -t \${pre}_mt.tree -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                               fi
                               """
                     }
