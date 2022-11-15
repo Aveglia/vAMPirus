@@ -2458,7 +2458,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(asvs) from ncalign1
 
                         output:
-                            tuple nid, file("*_aln.html"), file("*.log") into align_results_ncasv
+                            tuple nid, file("*_aln.html"), file("*.log") into align_results_ncasv2
                             tuple nid, file("*_aln.fasta") into ncalign2
 
                         script:
@@ -2514,7 +2514,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(asvs) from ncalign3
 
                         output:
-                            tuple nid, file("*mt*") into align_results_ncasv
+                            tuple nid, file("*mt*") into align_results_ncasv4
                             tuple nid, file("*mt.out") into ncalign4
 
                         script:
@@ -2545,7 +2545,7 @@ if (params.DataCheck || params.Analyze) {
                               tuple nid, file(mtout) from ncalign4
 
                           output:
-                              tuple nid, file("*_aln.fasta"), file("*_aln.html"), file("*.tree"), file("*.log"), file("*iq*"), file("*mt*") into align_results_ncasv
+                              tuple nid, file("*iq*") into align_results_ncasv5
                               tuple nid, file("*iq.treefile") into nucl_phyl_plot_ncasv
 
                           script:
