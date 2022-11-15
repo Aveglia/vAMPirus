@@ -2482,8 +2482,8 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
-                            trimal -in ${asvs} -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
+                            pre=\$(echo ${asvs} | awk -F "_muscle" '{print \$1}' )
+                            trimal -in ${asvs} -out \${pre}_trimal_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
                             """
                     }
 
@@ -2508,7 +2508,7 @@ if (params.DataCheck || params.Analyze) {
                           script:
                               mtag="ID=" + nid
                               """
-                              pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
+                              pre=\$(echo ${asvs} | awk -F "_trimal" '{print \$1}' )
                               o-trim-uninformative-columns-from-alignment ${asvs}
                               mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                               """
@@ -2538,7 +2538,7 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
+                            pre=\$(echo ${asvs} | awk -F "_Aligned" '{print \$1}' )
                             # Nucleotide_ModelTest
                             modeltest-ng -i ${asvs} -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
                             """
@@ -2581,7 +2581,7 @@ if (params.DataCheck || params.Analyze) {
                               then  mod="\$modaicc"
                               fi
                               # grab prefix
-                              pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
+                              pre=\$(echo ${asvs} | awk -F "_aligned" '{print \$1}' )
                               # Nucleotide_Phylogeny
                               if [ "${params.iqCustomnt}" != "" ];then
                                   iqtree -s ${asvs} --prefix \${pre}_iq --redo -t \${pre}_mt.tree -T auto ${params.iqCustomnt}
@@ -5001,8 +5001,8 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$( echo ${pcASVn} | awk -F "_ALN" '{print \$1}' )
-                            trimal -in ${pcASVn} -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
+                            pre=\$( echo ${pcASVn} | awk -F "_muscle" '{print \$1}' )
+                            trimal -in ${pcASVn} -out \${pre}_trimal_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
                             """
                     }
 
@@ -5027,7 +5027,7 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$( echo ${pcASVn} | awk -F "_aln" '{print \$1}' )
+                            pre=\$( echo ${pcASVn} | awk -F "_trimal" '{print \$1}' )
                             o-trim-uninformative-columns-from-alignment ${pcASVn}
                             mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                             """
@@ -5054,9 +5054,9 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$( echo ${pcASVn} | awk -F "_noTax" '{print \$1}' )
+                            pre=\$( echo ${pcASVn} | awk -F "_Aligned" '{print \$1}' )
                             # pcASV_Nucleotide_ModelTest
-                            modeltest-ng -i \${pre}_Aligned_informativeonly.fasta -p ${task.cpus} -o \${pre}_noTaxonomy_mt -d nt -s 203 --disable-checkpoint
+                            modeltest-ng -i ${pcASVn} -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
                             """
                     }
 
@@ -5095,7 +5095,7 @@ if (params.DataCheck || params.Analyze) {
                             then  mod="\$modaicc"
                             fi
                             # grab prefix
-                            pre=\$( echo ${pcASVn} | awk -F "_noTax" '{print \$1}' )
+                            pre=\$( echo ${pcASVn} | awk -F "_Aligned" '{print \$1}' )
                             # pcASV_Nucleotide_Phylogeny
                             if [ "${params.iqCustomnt}" != "" ];then
                                 iqtree -s ${pcASVn} --prefix \${pre}_noTaxonomy_iq --redo -T auto ${params.iqCustomnt}
@@ -5608,8 +5608,8 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$( echo ${pcASV} | awk -F ".fasta" '{print \$1}' )
-                            trimal -in ${pcASV} -out \${pre}_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
+                            pre=\$( echo ${pcASV} | awk -F "_muscle" '{print \$1}' )
+                            trimal -in ${pcASV} -out \${pre}_trimal_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_aln.html
                             """
                     }
 
@@ -5634,7 +5634,7 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$( echo ${pcASV} | awk -F ".fasta" '{print \$1}' )
+                            pre=\$( echo ${pcASV} | awk -F "_trimal" '{print \$1}' )
                             o-trim-uninformative-columns-from-alignment ${pcASV}
                             mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                             """
@@ -5662,7 +5662,7 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$( echo ${pcASV} | awk -F ".fasta" '{print \$1}' )
+                            pre=\$( echo ${pcASV} | awk -F "_Aligned" '{print \$1}' )
                             # pcASV_Protein_ModelTest
                             modeltest-ng -i ${pcASV} -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
                             """
@@ -5705,7 +5705,7 @@ if (params.DataCheck || params.Analyze) {
                             then  mod="\$modaicc"
                             fi
                             # grab prefix
-                            pre=\$( echo ${prot} | awk -F ".fasta" '{print \$1}' )
+                            pre=\$( echo ${prot} | awk -F "_Aligned" '{print \$1}' )
                             # pcASV_Protein_Phylogeny
                             if [ "${params.iqCustomaa}" != "" ];then
                                 iqtree -s ${prot} --prefix \${pre}_iq --redo -T auto ${params.iqCustomaa}
