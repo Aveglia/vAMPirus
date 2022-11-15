@@ -5546,7 +5546,7 @@ if (params.DataCheck || params.Analyze) {
 
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/Phylogeny/Alignment", mode: "copy", overwrite: true
 
-                        conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
+                        conda (params.condaActivate ? "-c conda-forge bioconda::muscle=5.1=h9f5acd7" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
 
