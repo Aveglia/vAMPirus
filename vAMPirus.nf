@@ -2510,7 +2510,7 @@ if (params.DataCheck || params.Analyze) {
                               """
                               pre=\$(echo ${asvs} | awk -F "_trimal" '{print \$1}' )
                               o-trim-uninformative-columns-from-alignment ${asvs}
-                              mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
+                              mv ${asvs}-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                               """
                     }
 
