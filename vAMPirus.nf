@@ -3578,8 +3578,7 @@ if (params.DataCheck || params.Analyze) {
                             pepstats -sequence ${prot} -outfile \${name}_ProteinProperties.pepstats
                             grep ">" ${prot} | awk -F ">" '{print \$2}' > tmpsequence.list
                             for x in \$(cat tmpsequence.list);do
-                                echo \$x > tmp1.list
-                                seqtk subseq ${prot} tmp1.list > tmp2.fasta
+                                grep -A 1 ""\$x"" ${prot} > tmp2.fasta
                                 len=\$(tail -1 tmp2.fasta | awk '{print length}')
                                 pepinfo -sequence tmp2.fasta -graph svg -outfile "\$x"_PropertiesPlot.pepinfo
                                 mv pepinfo.svg ./"\$x"_PropertiesPlot.svg
@@ -5166,8 +5165,7 @@ if (params.DataCheck || params.Analyze) {
                             pepstats -sequence ${prot} -outfile \${name}_ProteinProperties.pepstats
                             grep ">" ${prot} | awk -F ">" '{print \$2}' > tmpsequence.list
                             for x in \$(cat tmpsequence.list);do
-                                echo \$x > tmp1.list
-                                seqtk subseq ${prot} tmp1.list > tmp2.fasta
+                                grep -A 1 ""\$x"" ${prot} > tmp2.fasta
                                 len=\$(tail -1 tmp2.fasta | awk '{print length}')
                                 pepinfo -sequence tmp2.fasta -graph svg -outfile "\$x"_PropertiesPlot.pepinfo
                                 mv pepinfo.svg ./"\$x"_PropertiesPlot.svg
