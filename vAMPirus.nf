@@ -5558,7 +5558,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASV) from pcASV_align1
 
                         output:
-                            tuple nid, file("*_aln.html"), file("*.tree"), file("*.log") into pcASV_protein_phylogeny_results
+                            tuple nid, file("*_aln.html"), file("*.tree"), file("*.log") into pcASV_protein_phylogeny_results2
                             tuple nid, file("*_aln.fasta") into pcASV_align2
 
                         script:
