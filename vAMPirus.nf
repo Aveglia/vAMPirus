@@ -2011,7 +2011,7 @@ if (params.DataCheck || params.Analyze) {
                     file(fasta) from asv_file_for_ncasvs
 
                 output:
-                    tuple nid, file("*_ncASV*.fasta") into ( nuclFastas_forphylogeny_ncasv, nuclFastas_forDiamond_ncasv_ch, nuclFastas_forCounts_ncasv_ch, nuclFastas_forMatrix_ncasv_ch )
+                    tuple nid, file("*_ncASV*.fasta") into ( nuclFastas_forphylogeny_ncasv, nuclFastas_forphylogeny_ncasv2, nuclFastas_forDiamond_ncasv_ch, nuclFastas_forCounts_ncasv_ch, nuclFastas_forMatrix_ncasv_ch )
 
                 script:
                     nid=slist.get(x-1)
@@ -2541,7 +2541,7 @@ if (params.DataCheck || params.Analyze) {
                           container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/iqtree:2.2.0.3--hb97b32f_1" : "quay.io/biocontainers/iqtree:2.2.0.3--hb97b32f_1")
 
                           input:
-                              tuple nid, file(asvs) from nuclFastas_forphylogeny_ncasv
+                              tuple nid, file(asvs) from nuclFastas_forphylogeny_ncasv2
                               tuple nid, file(mtout) from ncalign4
 
                           output:
