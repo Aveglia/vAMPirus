@@ -2555,11 +2555,11 @@ if (params.DataCheck || params.Analyze) {
                               modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
                               modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
                               modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
-                              if [[ ${crit} == "BIC" ]]
+                              if [[ ${params.crit} == "BIC" ]]
                               then  mod="\$modbic"
-                              elif  [[ ${crit} == "AIC" ]]
+                              elif  [[ ${params.crit} == "AIC" ]]
                               then  mod="\$modaic"
-                              elif  [[ ${crit} == "AICc" ]]
+                              elif  [[ ${params.crit} == "AICc" ]]
                               then  mod="\$modaicc"
                               fi
                               # grab prefix
@@ -3122,11 +3122,11 @@ if (params.DataCheck || params.Analyze) {
                                   modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
                                   modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
                                   modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
-                                  if [[ ${crit} == "BIC" ]]
+                                  if [[ ${params.crit} == "BIC" ]]
                                   then  mod="\$modbic"
-                                  elif  [[ ${crit} == "AIC" ]]
+                                  elif  [[ ${params.crit} == "AIC" ]]
                                   then  mod="\$modaic"
-                                  elif  [[ ${crit} == "AICc" ]]
+                                  elif  [[ ${params.crit} == "AICc" ]]
                                   then  mod="\$modaicc"
                                   fi
                                   # grab prefix
@@ -3359,11 +3359,11 @@ if (params.DataCheck || params.Analyze) {
                         modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
                         modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
                         modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
-                        if [[ ${crit} == "BIC" ]]
+                        if [[ ${params.crit} == "BIC" ]]
                         then  mod="\$modbic"
-                        elif  [[ ${crit} == "AIC" ]]
+                        elif  [[ ${params.crit} == "AIC" ]]
                         then  mod="\$modaic"
-                        elif  [[ ${crit} == "AICc" ]]
+                        elif  [[ ${params.crit} == "AICc" ]]
                         then  mod="\$modaicc"
                         fi
                         # Protein_Phylogeny
@@ -4032,11 +4032,11 @@ if (params.DataCheck || params.Analyze) {
                                 modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
                                 modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
                                 modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
-                                if [[ ${crit} == "BIC" ]]
+                                if [[ ${params.crit} == "BIC" ]]
                                 then  mod="\$modbic"
-                                elif  [[ ${crit} == "AIC" ]]
+                                elif  [[ ${params.crit} == "AIC" ]]
                                 then  mod="\$modaic"
-                                elif  [[ ${crit} == "AICc" ]]
+                                elif  [[ ${params.crit} == "AICc" ]]
                                 then  mod="\$modaicc"
                                 fi
                                 # grab prefix
@@ -4321,11 +4321,11 @@ if (params.DataCheck || params.Analyze) {
                                 modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
                                 modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
                                 modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
-                                if [[ ${crit} == "BIC" ]]
+                                if [[ ${params.crit} == "BIC" ]]
                                 then  mod="\$modbic"
-                                elif  [[ ${crit} == "AIC" ]]
+                                elif  [[ ${params.crit} == "AIC" ]]
                                 then  mod="\$modaic"
-                                elif  [[ ${crit} == "AICc" ]]
+                                elif  [[ ${params.crit} == "AICc" ]]
                                 then  mod="\$modaicc"
                                 fi
                                 # Protein_Phylogeny
@@ -5053,11 +5053,11 @@ if (params.DataCheck || params.Analyze) {
                             modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
                             modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
                             modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
-                            if [[ ${crit} == "BIC" ]]
+                            if [[ ${params.crit} == "BIC" ]]
                             then  mod="\$modbic"
-                            elif  [[ ${crit} == "AIC" ]]
+                            elif  [[ ${params.crit} == "AIC" ]]
                             then  mod="\$modaic"
-                            elif  [[ ${crit} == "AICc" ]]
+                            elif  [[ ${params.crit} == "AICc" ]]
                             then  mod="\$modaicc"
                             fi
                             # grab prefix
@@ -5657,11 +5657,11 @@ if (params.DataCheck || params.Analyze) {
                             modbic=\$(grep "iqtree" ${mtout} | head -1 | awk -F "-m " '{print \$2}')
                             modaic=\$(grep "iqtree" ${mtout} | head -2 | tail -1 | awk -F "-m " '{print \$2}')
                             modaicc=\$(grep "iqtree" ${mtout} | tail -1 | awk -F "-m " '{print \$2}')
-                            if [[ ${crit} == "BIC" ]]
+                            if [[ ${params.crit} == "BIC" ]]
                             then  mod="\$modbic"
-                            elif  [[ ${crit} == "AIC" ]]
+                            elif  [[ ${params.crit} == "AIC" ]]
                             then  mod="\$modaic"
-                            elif  [[ ${crit} == "AICc" ]]
+                            elif  [[ ${params.crit} == "AICc" ]]
                             then  mod="\$modaicc"
                             fi
                             # grab prefix
