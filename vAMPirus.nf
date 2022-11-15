@@ -3588,7 +3588,7 @@ if (params.DataCheck || params.Analyze) {
                                 mv pepnet.svg ./"\$x"_HelicalNet.svg
                                 pepwheel -sequence tmp2.fasta -graph svg -sbegin1 1 -send1 \$len
                                 mv pepwheel.svg ./"\$x"_HelicalWheel.svg
-                                rm tmp1.list tmp2.fasta
+                                rm tmp2.fasta
                             done
                             rm tmpsequence.list
                             """
@@ -5175,7 +5175,7 @@ if (params.DataCheck || params.Analyze) {
                                 mv pepnet.svg ./"\$x"_HelicalNet.svg
                                 pepwheel -sequence tmp2.fasta -graph svg -sbegin1 1 -send1 \$len
                                 mv pepwheel.svg ./"\$x"_HelicalWheel.svg
-                                rm tmp1.list tmp2.fasta
+                                rm tmp2.fasta
                             done
                             rm tmpsequence.list
                             """
