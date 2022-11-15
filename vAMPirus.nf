@@ -3324,7 +3324,7 @@ if (params.DataCheck || params.Analyze) {
 
                   output:
                     file("*mt.out") into asvmedrep_mtout
-                    file("*mt.*") into mtres
+                    file("*mt.*") into mtres2
 
                   script:
                       """
