@@ -3272,7 +3272,7 @@ if (params.DataCheck || params.Analyze) {
 
                     input:
                       file(asvs) from asv_for_med
-                      file(oligo) form oligorep
+                      file(oligo) from oligorep
                     output:
                       file("*_ASV_Grouping.csv") into (asvgroupscsv, asvgroupscsv2)
                       file("${params.projtag}_ASV_group_reps_aligned.fasta") into (groupreps, groupreps2)
@@ -4229,7 +4229,7 @@ if (params.DataCheck || params.Analyze) {
 
                         input:
                             file(aminos) from aminos_for_med
-                            file(oligo) form oligorepamino
+                            file(oligo) from oligorepamino
 
                         output:
                             file("*_AminoType_Grouping.csv") into (atygroupscsv, atygroupscsv2)
