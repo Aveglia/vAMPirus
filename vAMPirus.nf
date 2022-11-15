@@ -3135,10 +3135,8 @@ if (params.DataCheck || params.Analyze) {
                                   if [ "${params.iqCustomnt}" != "" ];then
                                       iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
                                   elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                      mod=\$(tail -12 ${mtlog}| head -1 | awk '{print \$6}')
                                       iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
                                   elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                                      mod=\$(tail -12 ${mtlog}| head -1 | awk '{print \$6}')
                                       iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                                   elif [ "${params.nonparametric}" != "false" ];then
                                       iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
@@ -4045,10 +4043,8 @@ if (params.DataCheck || params.Analyze) {
                                 if [ "${params.iqCustomnt}" != "" ];then
                                     iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
                                 elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                    mod=\$(tail -12 ${mtlog}| head -1 | awk '{print \$6}')
                                     iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
                                 elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                                    mod=\$(tail -12 ${mtlog}| head -1 | awk '{print \$6}')
                                     iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                                 elif [ "${params.nonparametric}" != "false" ];then
                                     iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
