@@ -3348,7 +3348,7 @@ if (params.DataCheck || params.Analyze) {
                       file(mtout) from asvmedrep_mtout
 
                     output:
-                      file("*_ASV_Group_Reps*") into align_results_asvmed
+                      file("*_ASV_Group_Reps*") into align_results_asvmed2
                       file("*iq.treefile") into asv_group_rep_tree
 
                     script:
