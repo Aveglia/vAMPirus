@@ -3064,7 +3064,7 @@ if (params.DataCheck || params.Analyze) {
 
                         script:
                             """
-                            pre=\$(echo ${align} | awk -F "_raw" '{print \$1}' )
+                            pre=\$(echo ${align} | awk -F "_muscle" '{print \$1}' )
                             trimal -in ${align} -out \${pre}_trimal_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_trimal_aln.html
                             """
                     }
@@ -3088,7 +3088,7 @@ if (params.DataCheck || params.Analyze) {
                           script:
                               """
                               o-trim-uninformative-columns-from-alignment ${align}
-                              pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
+                              pre=\$(echo ${align} | awk -F "_trimal" '{print \$1}' )
                               mv ${align}-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                               """
                       }
@@ -3113,7 +3113,7 @@ if (params.DataCheck || params.Analyze) {
                             script:
                                 """
                                 # Nucleotide_ModelTest
-                                pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
+                                pre=\$(echo ${align} | awk -F "_Aligned_informativeonly.fasta" '{print \$1}' )
                                 modeltest-ng -i ${align} -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
                                 """
                         }
@@ -3263,19 +3263,20 @@ if (params.DataCheck || params.Analyze) {
 
                     script:
                         """
+                        pre=\$(echo ${align} | awk -F "_Aligned" '{print \$1}' )
                         #entopy analysis
                         entropy-analysis ${align}
                         #Decomposition
                         if [[ \$(echo ${params.asvC} | grep -c ",") -ge 1 || "${params.asvSingle}" == "false" ]]
                         then
                               tag=\$(echo ${params.asvC} | sed 's/,/_/g')
-                              oligotype ${align} ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                              oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                         elif [[ "${params.asvSingle}" == "true" ]]
                         then
                               tag="${params.asvC}"
-                              oligotype ${align} ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                              oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                         else
-                              oligotype ${align} ${params.projtag}_ASVs_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                              oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                         fi
                         ###if statement makes sense now to me, need to continue working on the remaining parts -- the fasta files needed for the next process -- looks like this might work - 10/23/22
                         #generatemaps
@@ -3978,7 +3979,7 @@ if (params.DataCheck || params.Analyze) {
 
                         script:
                             """
-                            pre=\$(echo ${align} | awk -F "_raw" '{print \$1}' )
+                            pre=\$(echo ${align} | awk -F "_muscle" '{print \$1}' )
                             trimal -in ${align} -out \${pre}_trimal_aln.fasta -keepheader -fasta -automated1 -htmlout \${pre}_trimal_aln.html
                             """
                     }
@@ -4002,7 +4003,7 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             """
                             o-trim-uninformative-columns-from-alignment ${align}
-                            pre=\$(echo ${align} | awk -F "_aln.fasta" '{print \$1}' )
+                            pre=\$(echo ${align} | awk -F "_trimal" '{print \$1}' )
                             mv ${align}-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                             """
                     }
@@ -4027,7 +4028,7 @@ if (params.DataCheck || params.Analyze) {
                           script:
                               """
                               # Nucleotide_ModelTest
-                              pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
+                              pre=\$(echo ${align} | awk -F "_Aligned_informativeonly.fasta" '{print \$1}' )
                               modeltest-ng -i ${align} -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
                               """
                       }
@@ -4068,7 +4069,7 @@ if (params.DataCheck || params.Analyze) {
                                 then  mod="\$modaicc"
                                 fi
                                 # grab prefix
-                                pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
+                                pre=\$(echo ${align} | awk -F "_Aligned_informativeonly.fasta" '{print \$1}' )
                                 # Nucleotide_Phylogeny
                                 if [ "${params.iqCustomnt}" != "" ];then
                                     iqtree -s ${align} --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
@@ -4227,19 +4228,20 @@ if (params.DataCheck || params.Analyze) {
 
                         script:
                             """
+                            pre=\$(echo ${align} | awk -F "_Aligned_informativeonly.fasta" '{print \$1}' )
                             #entopy analysis
                             entropy-analysis ${align}
                             #Decomposition
                             if [[ \$(echo ${params.aminoC} | grep -c ",") -gt 0 ]]
                             then
                                   tag=\$(echo ${params.aminoC} | sed 's/,/_/g')
-                                  oligotype ${align} ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                                  oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                             elif [[ "${params.aminoSingle}" == "true" ]]
                             then
                                   tag="${params.aminoC}"
-                                  oligotype ${align} ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                                  oligotype ${align} \${pre}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                             else
-                                  oligotype ${align} ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                                  oligotype ${align} \${pre}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                             fi
                             #generatemaps
                             mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES.fasta ..
