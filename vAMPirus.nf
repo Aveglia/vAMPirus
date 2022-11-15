@@ -4072,7 +4072,7 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Counts", mode: "copy", overwrite: true
 
-                    conda (params.condaActivate ? "bioconda::diamond=2.0.15=hb97b32f_1" : null)
+                    conda (params.condaActivate ? "-c conda-forge bioconda::diamond=2.0.15=hb97b32f_1" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/diamond:2.0.15--hb97b32f_1" : "quay.io/biocontainers/diamond:2.0.15--hb97b32f_1")
 
