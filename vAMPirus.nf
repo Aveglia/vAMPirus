@@ -3133,17 +3133,17 @@ if (params.DataCheck || params.Analyze) {
                                   pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
                                   # Nucleotide_Phylogeny
                                   if [ "${params.iqCustomnt}" != "" ];then
-                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
+                                      iqtree -s ${align} --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
                                   elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                                      iqtree -s ${align} --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
                                   elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                                      iqtree -s ${align} --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                                   elif [ "${params.nonparametric}" != "false" ];then
-                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                      iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
                                   elif [ "${params.parametric}" != "false" ];then
-                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                      iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                                   else
-                                      iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                      iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                                   fi
                                   """
                           }
@@ -4041,17 +4041,17 @@ if (params.DataCheck || params.Analyze) {
                                 pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
                                 # Nucleotide_Phylogeny
                                 if [ "${params.iqCustomnt}" != "" ];then
-                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
+                                    iqtree -s ${align} --prefix \${pre}_iq --redo -T auto ${params.iqCustomnt}
                                 elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
-                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
+                                    iqtree -s ${align} --prefix \${pre}_iq -m \${mod} --redo -nt auto -b ${params.boots}
                                 elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
-                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s ${align} --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                                 elif [ "${params.nonparametric}" != "false" ];then
-                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                    iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
                                 elif [ "${params.parametric}" != "false" ];then
-                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                                 else
-                                    iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                                 fi
                                 """
                         }
@@ -5668,13 +5668,13 @@ if (params.DataCheck || params.Analyze) {
                             elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
                                 iqtree -s ${prot} --prefix \${pre}_iq -m \${mod} --redo  -nt auto -b ${params.boots}
                             elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s ${prot} --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                iqtree -s ${prot} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s ${prot} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                             else
-                                iqtree -s \${pre}_Aligned_informativeonly.fasta --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s ${prot} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                     }
