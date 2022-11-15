@@ -3556,7 +3556,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
 
-                        conda (params.condaActivate ? "bioconda::emboss=6.6.0=h86d058a_5" : null)
+                        conda (params.condaActivate ? "-c bioconda -c conda-forge emboss=6.6.0=h86d058a_5" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/emboss:6.6.0--h86d058a_5" : "quay.io/biocontainers/emboss:6.6.0--h86d058a_5")
 
@@ -5142,7 +5142,7 @@ if (params.DataCheck || params.Analyze) {
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/ProteinProperties/Plots", mode: "copy", overwrite: true, pattern: '*PropertiesPlot.{svg}'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/pcASV/Aminoacid/EMBOSS/2dStructure/Plots", mode: "copy", overwrite: true, pattern: '*Helical*.{svg}'
 
-                        conda (params.condaActivate ? "bioconda::emboss=6.6.0=h86d058a_5" : null)
+                        conda (params.condaActivate ? "-c bioconda -c conda-forge emboss=6.6.0=h86d058a_5" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/emboss:6.6.0--h86d058a_5" : "quay.io/biocontainers/emboss:6.6.0--h86d058a_5")
 
