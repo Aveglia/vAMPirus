@@ -4430,7 +4430,7 @@ if (params.DataCheck || params.Analyze) {
                         file(asvs) from asvfastaforaaclust
 
                     output:
-                        tuple nid, file("${params.projtag}_nucleotide_pcASV*.fasta") into ( pcASV_ntDiamond_ch, pcASV_nt_counts_ch, pcASV_ntmatrix_ch, pcASV_ntmuscle_ch )
+                        tuple nid, file("${params.projtag}_nucleotide_pcASV*.fasta") into ( pcASV_ntDiamond_ch, pcASV_nt_counts_ch, pcASV_ntmatrix_ch, pcASV_ntmuscle_ch, pcASV_ntmuscle_ch2 )
                         tuple nid, file("*_aminoacid_pcASV*_noTaxonomy.fasta") into ( pcASV_aaMatrix_ch, pcASV_aaDiamond_ch, pcASV_aaMafft_ch, pcASV_aaCounts_ch, pcASVEMBOSS )
                         tuple nid, file("*.fasta"), file("*.clstr"), file("*.csv"), file("*.gc") into ( pcASVsupplementalfiles )
 
@@ -5035,7 +5035,7 @@ if (params.DataCheck || params.Analyze) {
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/iqtree:2.2.0.3--hb97b32f_1" : "quay.io/biocontainers/iqtree:2.2.0.3--hb97b32f_1")
 
                         input:
-                            tuple nid, file(pcASVn) from pcASV_ntmuscle_ch
+                            tuple nid, file(pcASVn) from pcASV_ntmuscle_ch2
                             tuple nid, file(mtout) from pcASVmtout
 
                         output:
