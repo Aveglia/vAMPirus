@@ -1594,6 +1594,12 @@ if (params.DataCheck || params.Analyze) {
                     elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
                     then  muscle -align ${asvs} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
                           muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                    else  if [[ \$( grep -c ">" ${asvs}) -lt 300 ]]
+                            then    comm="align"
+                            else    comm="super5"
+                            fi
+                            muscle -"\$comm" ${asvs} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                            echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
                     fi
                     """
             }
@@ -1769,6 +1775,12 @@ if (params.DataCheck || params.Analyze) {
                         elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
                         then  muscle -align ${aminos} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
                               muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                        else  if [[ \$( grep -c ">" ${aminos}) -lt 300 ]]
+                                then    comm="align"
+                                else    comm="super5"
+                                fi
+                                muscle -"\$comm" ${aminos} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
                         fi
                         """
                 }
@@ -2438,6 +2450,12 @@ if (params.DataCheck || params.Analyze) {
                               elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
                               then  muscle -align ${asvs} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
                                     muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                              else  if [[ \$( grep -c ">" ${asvs}) -lt 300 ]]
+                                      then    comm="align"
+                                      else    comm="super5"
+                                      fi
+                                      muscle -"\$comm" ${asvs} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                      echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
                               fi
                               """
                     }
@@ -3016,7 +3034,13 @@ if (params.DataCheck || params.Analyze) {
                                 echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
                           elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
                           then  muscle -align ${asvs} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
-                                muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+
+                          else  if [[ \$( grep -c ">" ${asvs}) -lt 300 ]]
+                                then    comm="align"
+                                else    comm="super5"
+                                fi
+                                muscle -"\$comm" ${asvs} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
                           fi
                           """
                   }
@@ -3925,6 +3949,12 @@ if (params.DataCheck || params.Analyze) {
                             elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
                             then  muscle -align ${amino} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
                                   muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                            else  if [[ \$( grep -c ">" ${amino}) -lt 300 ]]
+                                  then    comm="align"
+                                  else    comm="super5"
+                                  fi
+                                  muscle -"\$comm" ${amino} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                  echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
                             fi
                             """
                     }
@@ -4936,6 +4966,12 @@ if (params.DataCheck || params.Analyze) {
                             elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
                             then  muscle -align ${pcASVn} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
                                   muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                            else  if [[ \$( grep -c ">" ${pcASVn}) -lt 300 ]]
+                                  then    comm="align"
+                                  else    comm="super5"
+                                  fi
+                                  muscle -"\$comm" ${pcASVn} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                  echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
                             fi
                             """
                     }
@@ -5536,6 +5572,12 @@ if (params.DataCheck || params.Analyze) {
                             elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
                             then  muscle -align ${pcASV} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
                                   muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                            else  if [[ \$( grep -c ">" ${pcASV}) -lt 300 ]]
+                                  then    comm="align"
+                                  else    comm="super5"
+                                  fi
+                                  muscle -"\$comm" ${pcASV} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                  echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
                             fi
                             """
                     }
