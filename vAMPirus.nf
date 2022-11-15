@@ -3032,7 +3032,7 @@ if (params.DataCheck || params.Analyze) {
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
 
                         input:
-                            file(aign) from asv_align1
+                            file(align) from asv_align1
 
                         output:
                             file("*_aln.html")into trimalhtml2
@@ -3942,7 +3942,7 @@ if (params.DataCheck || params.Analyze) {
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/trimal:1.4.1--h9f5acd7_6" : "quay.io/biocontainers/trimal:1.4.1--h9f5acd7_6")
 
                         input:
-                            file(aign) from amino_align1
+                            file(align) from amino_align1
 
                         output:
                             file("*_aln.html")into trimalhtml
