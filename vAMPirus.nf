@@ -541,7 +541,7 @@ log.info """\
                          pcASV:         ${params.pcASV}                          Skip Taxonomy steps:         ${params.skipTaxonomy}
                        ASV MED:         ${params.asvMED}                        Skip phylogeny steps:         ${params.skipPhylogeny}
                  AminoType MED:         ${params.aminoMED}                               Skip EMBOSS:         ${params.skipEMBOSS}
-Phylogeny-based ASV clustering:         ${params.asvTClust}                             Skip Reports:         ${params.skipReport}                              
+Phylogeny-based ASV clustering:         ${params.asvTClust}                             Skip Reports:         ${params.skipReport}
         """.stripIndent()
 
 if (params.readsTest) {
@@ -3289,7 +3289,7 @@ if (params.DataCheck || params.Analyze) {
                         for x in *unique;
                         do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
                                 uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
-                                grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
+                                grep ">"  \$x | awk -F ">" '{print \$2}' > asv.list
                                 seqtk subseq ${asvs} asv.list > Group"\${j}"_sequences.fasta
                                 for z in \$( cat asv.list)
                                 do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_ASV_Grouping.csv
@@ -4254,7 +4254,7 @@ if (params.DataCheck || params.Analyze) {
                             for x in *_unique;
                             do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
                                     uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
-                                    grep ">"  "\$gid"_"\$uni" | awk -F ">" '{print \$2}' > asv.list
+                                    grep ">" \$x | awk -F ">" '{print \$2}' > asv.list
                                     seqtk subseq ../../${aminos} asv.list > Group"\${j}"_sequences.fasta
                                     for z in \$( cat asv.list)
                                     do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_AminoType_Grouping.csv
