@@ -9,6 +9,17 @@ channels:
   - genomedk
 dependencies:
   - python=3.6
+  - blast
+  - r-base
+  - r-ggplot2
+  - r-vegan
+  - r-gplots
+  - r-gtools
+  - r-reshape
+  - r-optparse
+  - r-pheatmap
+  - r-rcolorbrewer
+  - r-compute.es
   - pip
   - pip:
     - oligotyping
