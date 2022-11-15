@@ -865,7 +865,7 @@ if (params.DataCheck || params.Analyze) {
                             RTRIM=\$( echo ${params.gtrim} | cut -f 2 -d "," )
                             bbduk.sh in=${reads[0]} out=${sample_id}_bb_R1.fastq.gz ftl=\${FTRIM} t=${task.cpus}
                             bbduk.sh in=${reads[1]} out=${sample_id}_bb_R2.fastq.gz ftl=\${RTRIM} t=${task.cpus}
-            		            repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
+            		        repair.sh in1=${sample_id}_bb_R1.fastq.gz in2=${sample_id}_bb_R2.fastq.gz out1=${sample_id}_bbduk_R1.fastq.gz out2=${sample_id}_bbduk_R2.fastq.gz outs=sing.fq repair
                             """
                         } else if ( params.multi && params.primers ) {
                             """
@@ -2476,7 +2476,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(asvs) from ncalign1
 
                         output:
-                            tuple nid, file("*_aln.html"), file("*.log") into align_results_ncasv2
+                            tuple nid, file("*_aln.html") into align_results_ncasv2
                             tuple nid, file("*_aln.fasta") into ncalign2
 
                         script:
@@ -3059,8 +3059,8 @@ if (params.DataCheck || params.Analyze) {
                             file(align) from asv_align1
 
                         output:
-                            file("*_aln.html")into trimalhtml2
-                            file("*_aln.fasta")into asv_align2
+                            file("*_aln.html") into trimalhtml2
+                            file("*_aln.fasta") into asv_align2
 
                         script:
                             """
@@ -3974,8 +3974,8 @@ if (params.DataCheck || params.Analyze) {
                             file(align) from amino_align1
 
                         output:
-                            file("*_aln.html")into trimalhtml
-                            file("*_aln.fasta")into amino_align2
+                            file("*_aln.html") into trimalhtml
+                            file("*_aln.fasta") into amino_align2
 
                         script:
                             """
@@ -4995,7 +4995,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASVn) from potu_align1
 
                         output:
-                            tuple nid, file("*_aln.html"), file("*.log") into pcASV_nucleotide_phylogeny_results1
+                            tuple nid, file("*_aln.html") into pcASV_nucleotide_phylogeny_results1
                             tuple nid, file("*_aln.fasta") into potu_align2
 
                         script:
@@ -5602,7 +5602,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASV) from pcASV_align1
 
                         output:
-                            tuple nid, file("*_aln.html"), file("*.tree"), file("*.log") into pcASV_protein_phylogeny_results2
+                            tuple nid, file("*_aln.html") into pcASV_protein_phylogeny_results2
                             tuple nid, file("*_aln.fasta") into pcASV_align2
 
                         script:
