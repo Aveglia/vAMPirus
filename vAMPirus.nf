@@ -3274,8 +3274,8 @@ if (params.DataCheck || params.Analyze) {
                         fi
                         ###if statement makes sense now to me, need to continue working on the remaining parts -- the fasta files needed for the next process -- looks like this might work - 10/23/22
                         #generatemaps
-                        mv ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES.fasta ..
-                        mv ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/*_unique ../../
+                        mv ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES.fasta .
+                        mv ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/*_unique .
                         """
                 }
 
@@ -4238,8 +4238,8 @@ if (params.DataCheck || params.Analyze) {
                                   oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                             fi
                             #generatemaps
-                            mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES.fasta ..
-                            mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES/*_unique ../../
+                            mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES.fasta .
+                            mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES/*_unique .
                             """
                     }
 
