@@ -5029,7 +5029,7 @@ if (params.DataCheck || params.Analyze) {
                             """
                             pre=\$( echo ${pcASVn} | awk -F "_trimal" '{print \$1}' )
                             o-trim-uninformative-columns-from-alignment ${pcASVn}
-                            mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
+                            mv ${pcASVn}-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                             """
                     }
 
@@ -5636,7 +5636,7 @@ if (params.DataCheck || params.Analyze) {
                             """
                             pre=\$( echo ${pcASV} | awk -F "_trimal" '{print \$1}' )
                             o-trim-uninformative-columns-from-alignment ${pcASV}
-                            mv \${pre}_aln.fasta-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
+                            mv ${pcASV}-TRIMMED ./\${pre}_Aligned_informativeonly.fasta
                             """
                     }
 
