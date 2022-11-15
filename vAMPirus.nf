@@ -4000,7 +4000,7 @@ if (params.DataCheck || params.Analyze) {
                               """
                               # Nucleotide_ModelTest
                               pre=\$(echo ${align} | awk -F "_trimal_Aligned_informativeonly.fasta" '{print \$1}' )
-                              modeltest-ng -i ${align} -p ${task.cpus} -o \${pre}_mt -d nt -s 203 --disable-checkpoint
+                              modeltest-ng -i ${align} -p ${task.cpus} -o \${pre}_mt -d aa -s 203 --disable-checkpoint
                               """
                       }
 
