@@ -3075,7 +3075,7 @@ if (params.DataCheck || params.Analyze) {
 
                             publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
 
-                            conda (params.condaActivate ? "bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
+                            conda (params.condaActivate ? "-c conda-forge bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
 
                             container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/modeltest-ng:0.1.7--h5c6ebe3_0" : "quay.io/biocontainers/modeltest-ng:0.1.7--h5c6ebe3_0")
 
@@ -3104,7 +3104,7 @@ if (params.DataCheck || params.Analyze) {
 
                               publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
-                              conda (params.condaActivate ? "bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
+                              conda (params.condaActivate ? "-c conda-forge bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
 
                               container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/iqtree:2.2.0.3--hb97b32f_1" : "quay.io/biocontainers/iqtree:2.2.0.3--hb97b32f_1")
 
@@ -3985,7 +3985,7 @@ if (params.DataCheck || params.Analyze) {
 
                           publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/ModelTest", mode: "copy", overwrite: true, pattern: '*mt*'
 
-                          conda (params.condaActivate ? "bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
+                          conda (params.condaActivate ? "-c conda-forge bioconda::modeltest-ng=0.1.7=h5c6ebe3_0" : null)
 
                           container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/modeltest-ng:0.1.7--h5c6ebe3_0" : "quay.io/biocontainers/modeltest-ng:0.1.7--h5c6ebe3_0")
 
@@ -4014,7 +4014,7 @@ if (params.DataCheck || params.Analyze) {
 
                             publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
-                            conda (params.condaActivate ? "bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
+                            conda (params.condaActivate ? "-c conda-forge bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
 
                             container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/iqtree:2.2.0.3--hb97b32f_1" : "quay.io/biocontainers/iqtree:2.2.0.3--hb97b32f_1")
 
