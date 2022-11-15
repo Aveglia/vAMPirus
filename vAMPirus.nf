@@ -1565,25 +1565,37 @@ if (params.DataCheck || params.Analyze) {
 
             process ASV_Shannon_Entropy_Analysis_step1 {
 
-              label 'norm_cpus'
+                label 'norm_cpus'
 
-              //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
+                //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Nucleotide/ShannonEntropy", mode: "copy", overwrite: true
 
-              conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
+                conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
 
-              container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
+                container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
 
-              input:
-                  file(asvs) from asv_med
+                input:
+                    file(asvs) from asv_med
 
-              output:
-                  file("_ASVs_muscleAlign.fasta") into shannon_trim
+                output:
+                    file("_ASVs_muscleAlign.fasta") into shannon_trim
+                    file("*.efa")
 
-              script:
-                """
-                #alignment
-                muscle -in ${asvs} -out ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
-                """
+                script:
+                    """
+                    pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
+
+                    if [[ ${params.srep} == "true" && ${params.ensemble} == "false" ]];
+                    then  if [[ \$( grep -c ">" ${asvs}) -lt 300 ]]
+                          then    comm="align"
+                          else    comm="super5"
+                          fi
+                          muscle -"\$comm" ${asvs} -perm ${params.perm} -perturb ${params.perm} -output ${params.projtag}_ASVs_muscleAlign.fasta -threads ${task.cpus} -quiet
+                          echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
+                    elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
+                    then  muscle -align ${asvs} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
+                          muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                    fi
+                    """
             }
 
             process ASV_Shannon_Entropy_Analysis_step2 {
@@ -1632,7 +1644,7 @@ if (params.DataCheck || params.Analyze) {
               script:
                 """
                 #set +e
-                o-trim-uninformative-columns-from-alignment ${params.projtag}_ASVs_muscleAligned.fasta   #CHECK
+                o-trim-uninformative-columns-from-alignment ${asvs}  #CHECK
                 mv ${params.projtag}_ASVs_muscleAligned.fasta-TRIMMED ./${params.projtag}_ASVs_Aligned_informativeonly.fasta
                 #entopy analysis
                 entropy-analysis ${params.projtag}_ASVs_Aligned_informativeonly.fasta
@@ -1728,26 +1740,37 @@ if (params.DataCheck || params.Analyze) {
 
                 process AminoType_Shannon_Entropy_Analysis_step1 {
 
-                  label 'norm_cpus'
+                    label 'norm_cpus'
 
-                  //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true
+                    //publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true
 
-                  conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
+                    conda (params.condaActivate ? "bioconda::muscle=5.1=h9f5acd7" : null)
 
-                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/muscle:5.1--h9f5acd7" : "quay.io/biocontainers/muscle:5.1--h9f5acd7")
 
-                  input:
-                      file(aminos) from amino_med
+                    input:
+                        file(aminos) from amino_med
 
-                  output:
-                      file("*_AminoTypes_muscleAlign.fasta") into amino_shannon_trim1
+                    output:
+                        file("*_AminoTypes_muscleAlign.fasta") into amino_shannon_trim1
+                        file("*.efa")
 
-                  script:
-                    """
-                    #alignment
-                    if [[ \$(grep -c ">" ${aminos}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
-                    muscle -\${algo} ${aminos} -out ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
-                    """
+                    script:
+                        """
+                        pre=\$(echo ${aminos} | awk -F ".fasta" '{print \$1}' )
+
+                        if [[ ${params.srep} == "true" && ${params.ensemble} == "false" ]];
+                        then  if [[ \$( grep -c ">" ${aminos}) -lt 300 ]]
+                              then    comm="align"
+                              else    comm="super5"
+                              fi
+                              muscle -"\$comm" ${aminos} -perm ${params.perm} -perturb ${params.perm} -output ${params.projtag}_AminoTypes_muscleAlign.fasta -threads ${task.cpus} -quiet
+                              echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
+                        elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
+                        then  muscle -align ${aminos} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
+                              muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                        fi
+                        """
                 }
 
                 process AminoType_Shannon_Entropy_Analysis_step2 {
@@ -1772,116 +1795,116 @@ if (params.DataCheck || params.Analyze) {
                   script:
                     """
                     #trimming
-                    trimal -in ${params.projtag}_AminoTypes_muscleAlign.fasta -out ${params.projtag}_AminoTypes_muscleAligned.fasta  -keepheader -fasta -automated1
+                    trimal -in ${aminos} -out ${params.projtag}_AminoTypes_muscleAligned.fasta  -keepheader -fasta -automated1
                     """
                 }
 
                 process AminoType_Shannon_Entropy_Analysis_step3 {
 
-                  label 'norm_cpus'
+                    label 'norm_cpus'
 
-                  publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true, pattern: '*{.csv}'
+                    publishDir "${params.workingdir}/${params.outdir}/DataCheck/ClusteringTest/Aminoacid/ShannonEntropy", mode: "copy", overwrite: true, pattern: '*{.csv}'
 
-                  conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
+                    conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
-                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
+                    container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
 
-                  input:
-                      file(aminos) from amino_shannon_trim2
+                    input:
+                        file(aminos) from amino_shannon_trim2
 
-                  output:
-                      file("*AminoType_entropy_breakdown.csv") into amino_entro_csv
-                      file ("*Aligned_informativeonly.fasta-ENTROPY") into amino_entropy
-                      file("*AminoTypes*") into aminos
+                    output:
+                        file("*AminoType_entropy_breakdown.csv") into amino_entro_csv
+                        file ("*Aligned_informativeonly.fasta-ENTROPY") into amino_entropy
+                        file("*AminoTypes*") into aminos
 
-                  script:
-                    """
-                    # CHECK
-                    o-trim-uninformative-columns-from-alignment ${params.projtag}_AminoTypes_muscleAligned.fasta
-                    mv ${params.projtag}_AminoTypes_muscleAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
-                    #entropy analysis
-                    entropy-analysis ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta --amino-acid-sequences
-                    #summarize entropy peaks
-                    awk '{print \$2}' ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
-                    for x in \$(cat tmp_value.list)
-                    do      echo "\$x"
-                            if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.0-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.1-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.2-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.3-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.4-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.5-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.6-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.7-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.8-.list
-                            fi
-                            if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-0.9-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.0-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.1-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.2-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.3-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.4-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.5-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.6-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.7-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.8-.list
-                            fi
-                            if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-1.9-.list
-                            fi
-                            if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
-                            then    echo dope >> above-2.0-.list
-                            fi
-                    done
-                    echo "Entropy,Peaks_above" >> ${params.projtag}_AminoType_entropy_breakdown.csv
-                    for z in above*.list;
-                    do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
-                            echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_AminoType_entropy_breakdown.csv
-                    done
-                    rm above*
-                    mv ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY ./tmp2.tsv
-                    cat tmp2.tsv | tr "\t" "," > tmp.csv
-                    rm tmp2.tsv
-                    echo "Base_position,Shannons_Entropy" >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
-                    cat tmp.csv >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
-                    rm tmp.csv
-                    """
+                    script:
+                        """
+                        # CHECK
+                        o-trim-uninformative-columns-from-alignment ${aminos}
+                        mv ${params.projtag}_AminoTypes_muscleAligned.fasta-TRIMMED ./${params.projtag}_AminoTypes_Aligned_informativeonly.fasta
+                        #entropy analysis
+                        entropy-analysis ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta --amino-acid-sequences
+                        #summarize entropy peaks
+                        awk '{print \$2}' ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY >> tmp_value.list
+                        for x in \$(cat tmp_value.list)
+                        do      echo "\$x"
+                                if [[ \$(echo "\$x > 0.0"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.0-.list
+                                fi
+                                if [[ \$(echo "\$x > 0.1"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.1-.list
+                                fi
+                                if [[ \$(echo "\$x > 0.2"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.2-.list
+                                fi
+                                if [[ \$(echo "\$x > 0.3"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.3-.list
+                                fi
+                                if [[ \$(echo "\$x > 0.4"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.4-.list
+                                fi
+                                if [[ \$(echo "\$x > 0.5"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.5-.list
+                                fi
+                                if [[ \$(echo "\$x > 0.6"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.6-.list
+                                fi
+                                if [[ \$(echo "\$x > 0.7"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.7-.list
+                                fi
+                                if [[ \$(echo "\$x > 0.8"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.8-.list
+                                fi
+                                if [[ \$(echo "\$x > 0.9"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-0.9-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.0"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.0-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.1"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.1-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.2"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.2-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.3"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.3-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.4"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.4-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.5"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.5-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.6"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.6-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.7"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.7-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.8"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.8-.list
+                                fi
+                                if [[ \$(echo "\$x > 1.9"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-1.9-.list
+                                fi
+                                if [[ \$(echo "\$x > 2.0"|bc -l) -eq 1 ]];
+                                then    echo dope >> above-2.0-.list
+                                fi
+                        done
+                        echo "Entropy,Peaks_above" >> ${params.projtag}_AminoType_entropy_breakdown.csv
+                        for z in above*.list;
+                        do      entrop=\$(echo \$z | awk -F "-" '{print \$2}')
+                                echo ""\$entrop", "\$(wc -l \$z | awk '{print \$1}')"" >> ${params.projtag}_AminoType_entropy_breakdown.csv
+                        done
+                        rm above*
+                        mv ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY ./tmp2.tsv
+                        cat tmp2.tsv | tr "\t" "," > tmp.csv
+                        rm tmp2.tsv
+                        echo "Base_position,Shannons_Entropy" >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
+                        cat tmp.csv >> ${params.projtag}_AminoTypes_Aligned_informativeonly.fasta-ENTROPY
+                        rm tmp.csv
+                        """
                 }
 
         } else {
@@ -2398,12 +2421,24 @@ if (params.DataCheck || params.Analyze) {
 
                           output:
                               tuple nid, file("*_ALN.fasta") into ncalign1
+                              tuple nid, file("*.efa")
 
                           script:
                               mtag="ID=" + nid
                               """
                               pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
-                              muscle -in ${asvs} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
+
+                              if [[ ${params.srep} == "true" && ${params.ensemble} == "false" ]];
+                              then  if [[ \$( grep -c ">" ${asvs}) -lt 300 ]]
+                                    then    comm="align"
+                                    else    comm="super5"
+                                    fi
+                                    muscle -"\$comm" ${asvs} -perm ${params.perm} -perturb ${params.perm} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                    echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
+                              elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
+                              then  muscle -align ${asvs} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
+                                    muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                              fi
                               """
                     }
 
@@ -2966,12 +3001,23 @@ if (params.DataCheck || params.Analyze) {
 
                       output:
                           file("*_ALN.fasta") into asv_align1
-
+                          file("*.efa")
 
                       script:
                           """
                           pre=\$(echo ${asvs} | awk -F ".fasta" '{print \$1}' )
-                          muscle -in ${asvs} -out \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+
+                          if [[ ${params.srep} == "true" && ${params.ensemble} == "false" ]];
+                          then  if [[ \$( grep -c ">" ${asvs}) -lt 300 ]]
+                                then    comm="align"
+                                else    comm="super5"
+                                fi
+                                muscle -"\$comm" ${asvs} -perm ${params.perm} -perturb ${params.perm} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
+                          elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
+                          then  muscle -align ${asvs} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
+                                muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                          fi
                           """
                   }
 
@@ -3866,12 +3912,23 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             file("*_ALN.fasta") into amino_align1
-
+                            file("*.efa")
 
                         script:
                             """
                             pre=\$(echo ${amino} | awk -F ".fasta" '{print \$1}' )
-                            muscle -in ${amino} -out \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+
+                            if [[ ${params.srep} == "true" && ${params.ensemble} == "false" ]];
+                            then  if [[ \$( grep -c ">" ${amino}) -lt 300 ]]
+                                  then    comm="align"
+                                  else    comm="super5"
+                                  fi
+                                  muscle -"\$comm" ${amino} -perm ${params.perm} -perturb ${params.perm} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                  echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
+                            elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
+                            then  muscle -align ${amino} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
+                                  muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                            fi
                             """
                     }
 
@@ -4867,12 +4924,24 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             tuple nid, file("*_ALN.fasta"), into potu_align1
+                            file("*.efa")
 
                         script:
                             mtag="ID=" + nid
                             """
-                            pre=\$( echo ${pcASVn} | awk -F "_noTax" '{print \$1}' )
-                            muscle -"\${algo}" ${pcASVn} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
+                            pre=\$(echo ${pcASVn} | awk -F ".fasta" '{print \$1}' )
+
+                            if [[ ${params.srep} == "true" && ${params.ensemble} == "false" ]];
+                            then  if [[ \$( grep -c ">" ${pcASVn}) -lt 300 ]]
+                                  then    comm="align"
+                                  else    comm="super5"
+                                  fi
+                                  muscle -"\$comm" ${pcASVn} -perm ${params.perm} -perturb ${params.perm} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                  echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
+                            elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
+                            then  muscle -align ${pcASVn} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
+                                  muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                            fi
                             """
                     }
 
@@ -5456,13 +5525,24 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
                             tuple nid, file("*_ALN.fasta") into pcASV_align1
+                            tuple nid, file("*.efa")
 
                         script:
-                            mtag="ID=" + nid
+                        mtag="ID=" + nid
                             """
-                            pre=\$( echo ${pcASV} | awk -F ".fasta" '{print \$1}' )
-                            if [[ \$(grep -c ">" ${pcASV}) -gt 499 ]]; then algo="super5"; else algo="mpc"; fi
-                            muscle -"\${algo}" ${pcASV} -out \${pre}_ALN.fasta -threads ${task.cpus} -quiet
+                            pre=\$(echo ${pcASV} | awk -F ".fasta" '{print \$1}' )
+
+                            if [[ ${params.srep} == "true" && ${params.ensemble} == "false" ]];
+                            then  if [[ \$( grep -c ">" ${pcASV}) -lt 300 ]]
+                                  then    comm="align"
+                                  else    comm="super5"
+                                  fi
+                                  muscle -"\$comm" ${pcASV} -perm ${params.perm} -perturb ${params.perm} -output \${pre}_muscle_raw_ALN.fasta -threads ${task.cpus} -quiet
+                                  echo "single replicate alignment chosen; look over muscle5 documentation to learn about ensemble alignment approach" >note.efa
+                            elif [[ ${params.srep} == "false" && ${params.ensemble} == "true" ]];
+                            then  muscle -align ${pcASV} -${params.fied} -output \${pre}_muscle.efa -threads ${task.cpus} -quiet
+                                  muscle -maxcc \${pre}_muscle.efa -output \${pre}_muscle_raw_ALN.fasta
+                            fi
                             """
                     }
 
