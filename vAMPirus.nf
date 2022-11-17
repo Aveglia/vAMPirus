@@ -3245,7 +3245,7 @@ if (params.DataCheck || params.Analyze) {
                         #entopy analysis
                         entropy-analysis ${align}
                         #Decomposition
-                        if [[ ${params.asvC} != "" ]]
+                        if [[ "${params.asvC}" != "" ]]
                         then
                                 if [[ \$( echo ${params.asvC} | grep -c ",") -eq 0 ]]
                                 then    tag="${params.asvC}"
@@ -4211,7 +4211,7 @@ if (params.DataCheck || params.Analyze) {
                             #entopy analysis
                             entropy-analysis ${align}
                             #Decomposition
-                            if [[ ${params.aminoC} != "" ]]
+                            if [[ "${params.aminoC}" != "" ]]
                             then
                                     if [[ \$( echo ${params.aminoC} | grep -c ",") -eq 0 ]]
                                     then    tag="${params.aminoC}"
