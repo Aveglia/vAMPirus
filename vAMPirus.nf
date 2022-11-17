@@ -3262,7 +3262,7 @@ if (params.DataCheck || params.Analyze) {
                         for x in *unique;
                         do  next=\$(echo "\$x" | awk -F "_" '{print \$1"_"\$2}')
                             mv \$next ./"\$next"_uni
-                            mv \$x ./"\$(echo \$next | awk -F "_" '{print \$2}')"_unqiues_aligned.fasta
+                            mv \$x ./"\$(echo \$next | awk -F "_" '{print \$2}')"_uniques_aligned.fasta
                         done
                         cd ../..
                         mv ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES.fasta .
