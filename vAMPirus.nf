@@ -3232,12 +3232,12 @@ if (params.DataCheck || params.Analyze) {
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
 
                     input:
-                      file(align) from asv_align3_med
+                        file(align) from asv_align3_med
 
                     output:
-                      file("*_uni*") into uniqformed
-                      file("OLIGO-REPRESENTATIVES.fasta") into oligorep
-                      file("*aligned.fasta") into yezir
+                        file("*_uni*") into uniqformed
+                        file("OLIGO-REPRESENTATIVES.fasta") into oligorep
+                        file("*aligned.fasta") into yezir
 
                     script:
                         """
@@ -3245,24 +3245,24 @@ if (params.DataCheck || params.Analyze) {
                         #entopy analysis
                         entropy-analysis ${align}
                         #Decomposition
-                        if [[ \$(echo ${params.asvC} | grep -c ",") -ge 1 || "${params.asvSingle}" == "false" ]]
+                        if [[ ${params.asvC} != "" ]]
                         then
-                              tag=\$(echo ${params.asvC} | sed 's/,/_/g')
-                              oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
-                        elif [[ "${params.asvSingle}" == "true" ]]
-                        then
-                              tag="${params.asvC}"
-                              oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
-                        else
-                              oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvC} -M 1 -c ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                                if [[ \$( echo ${params.asvC} | grep -c ",") -eq 0 ]]
+                                then    tag="${params.asvC}"
+                                else    tag=\$(echo ${params.asvC} | sed 's/,/_/g')
+                                fi
+                                oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                        elif [[ ${params.asvc} != "" ]]
+                                oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvc} -M 1 -c ${params.asvc} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                        else exit 1
                         fi
                         ###if statement makes sense now to me, need to continue working on the remaining parts -- the fasta files needed for the next process -- looks like this might work - 10/23/22
                         #generatemaps
                         cd ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/
                         for x in *unique;
-                        do  next=\$(echo "\$x" | awk -F "_" '{print \$1"_"\$2}')
-                            mv \$next ./"\$next"_uni
-                            mv \$x ./"\$(echo \$next | awk -F "_" '{print \$2}')"_uniques_aligned.fasta
+                        do      next=\$(echo "\$x" | awk -F "_" '{print \$1"_"\$2}')
+                                mv \$next ./"\$next"_uni
+                                mv \$x ./"\$(echo \$next | awk -F "_" '{print \$2}')"_uniques_aligned.fasta
                         done
                         cd ../..
                         mv ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES.fasta .
@@ -3309,9 +3309,6 @@ if (params.DataCheck || params.Analyze) {
                                 mv \$x ./Group"\$j"_"\$uni"_aligned.fasta
                                 j=\$((\$j+1))
                         done
-                        #mv ${params.projtag}_ASV_Grouping.csv ../../
-                        #mv ${params.projtag}_ASV_group_reps_aligned.fasta ../../
-                        #cd ..
                         """
               }
 
@@ -4214,16 +4211,16 @@ if (params.DataCheck || params.Analyze) {
                             #entopy analysis
                             entropy-analysis ${align}
                             #Decomposition
-                            if [[ \$(echo ${params.aminoC} | grep -c ",") -gt 0 ]]
+                            if [[ ${params.aminoC} != "" ]]
                             then
-                                  tag=\$(echo ${params.aminoC} | sed 's/,/_/g')
-                                  oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
-                            elif [[ "${params.aminoSingle}" == "true" ]]
-                            then
-                                  tag="${params.aminoC}"
-                                  oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
-                            else
-                                  oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                                    if [[ \$( echo ${params.aminoC} | grep -c ",") -eq 0 ]]
+                                    then    tag="${params.aminoC}"
+                                    else    tag=\$(echo ${params.aminoC} | sed 's/,/_/g')
+                                    fi
+                                    oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                            elif [[ ${params.aminoc} != "" ]]
+                                    oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoc} -M 1 -c ${params.aminoc} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
+                            else exit 1
                             fi
                             #generatemaps
                             cd ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES/
