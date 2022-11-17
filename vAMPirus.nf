@@ -3225,7 +3225,7 @@ if (params.DataCheck || params.Analyze) {
                     label 'low_cpus'
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true, pattern: '*.{fasta,csv}'
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/uniques", mode: "copy", overwrite: true, pattern: '*_unique'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/uniques", mode: "copy", overwrite: true, pattern: '*_uni*'
 
                     conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
@@ -3235,8 +3235,9 @@ if (params.DataCheck || params.Analyze) {
                       file(align) from asv_align3_med
 
                     output:
-                      file("*_unique") into uniqformed
+                      file("*_uni*") into uniqformed
                       file("OLIGO-REPRESENTATIVES.fasta") into oligorep
+                      file("*aligned.fasta") into yezir
 
                     script:
                         """
@@ -3257,8 +3258,17 @@ if (params.DataCheck || params.Analyze) {
                         fi
                         ###if statement makes sense now to me, need to continue working on the remaining parts -- the fasta files needed for the next process -- looks like this might work - 10/23/22
                         #generatemaps
+                        cd ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/
+                        for x in *unique;
+                        do  next=$(echo "\$x" | awk -F "_" '{print \$1"_"\$2}')
+                            #echo "$x" 
+                            #echo "$next"
+                            mv \$next ./"\$next"_uni
+                            mv \$x ./"\$(echo \$next | awk -F "_" '{print \$2}')"_unqiues_aligned.fasta
+                        done
+                        cd ../..
                         mv ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES.fasta .
-                        mv ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/*_unique .
+                        mv ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/*_uni* .
                         """
                 }
 
@@ -3278,30 +3288,29 @@ if (params.DataCheck || params.Analyze) {
                     output:
                       file("*_ASV_Grouping.csv") into (asvgroupscsv, asvgroupscsv2)
                       file("${params.projtag}_ASV_group_reps_aligned.fasta") into (groupreps, groupreps2)
+                      file("*_sequences.fasta") into yesir
 
                     script:
                         """
-                        #copy _unique files here so we can werk with them
-                        cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/uniques/*_unique .
+                        #copy _uni files here so we can werk with them
+                        cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/uniques/*_uni .
                         #generatemaps
-                        echo "ASV,GroupID,IDPattern"
                         j=1
-                        for x in *unique;
+                        for x in *uni;
                         do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
-                                uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
-                                grep ">"  \$x | awk -F ">" '{print \$2}' > asv.list
+                                uni=\$(echo \$x | awk -F "_" '{print \$2}')
+                                grep ">" \$x | awk -F ">" '{print \$2}' > asv.list
                                 seqtk subseq ${asvs} asv.list > Group"\${j}"_sequences.fasta
                                 for z in \$( cat asv.list)
                                 do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_ASV_Grouping.csv
-
                                 done
                                 rm asv.list
                                 echo ">Group\${j}" >> ${params.projtag}_ASV_group_reps_aligned.fasta
                                 echo "\$uni" > group.list
                                 seqtk subseq ${oligo} group.list > group.fasta
                                 tail -1 group.fasta >> ${params.projtag}_ASV_group_reps_aligned.fasta
-                                mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
-                                mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
+                                mv \$x ./Group"\$j"_"\$uni"_aligned.fasta
+                                #mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
                                 #rm "\$gid"*.cPickle
                                 j=\$((\$j+1))
                         done
@@ -4189,7 +4198,7 @@ if (params.DataCheck || params.Analyze) {
                         label 'low_cpus'
 
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED", mode: "copy", overwrite: true, pattern: '*.{fasta,csv}'
-                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/uniques", mode: "copy", overwrite: true, pattern: '*_unique'
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/uniques", mode: "copy", overwrite: true, pattern: '*_uni*'
 
                         conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
@@ -4202,6 +4211,7 @@ if (params.DataCheck || params.Analyze) {
 
                             file("*_unique") into uniqformedamino
                             file("OLIGO-REPRESENTATIVES.fasta") into oligorepamino
+                            file("*aligned.fasta") into yezirr
 
                         script:
                             """
@@ -4221,8 +4231,17 @@ if (params.DataCheck || params.Analyze) {
                                   oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                             fi
                             #generatemaps
+                            cd ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/
+                            for x in *unique;
+                            do  next=$(echo "\$x" | awk -F "_" '{print \$1"_"\$2}')
+                                #echo "$x"
+                                #echo "$next"
+                                mv \$next ./"\$next"_uni
+                                mv \$x ./"\$(echo \$next | awk -F "_" '{print \$2}')"_unqiues_aligned.fasta
+                            done
+                            cd ../..
                             mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES.fasta .
-                            mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES/*_unique .
+                            mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES/*_uni* .
                             """
                     }
 
@@ -4243,17 +4262,18 @@ if (params.DataCheck || params.Analyze) {
                         output:
                             file("*_AminoType_Grouping.csv") into (atygroupscsv, atygroupscsv2)
                             file("${params.projtag}_AminoType_group_reps_aligned.fasta") into (grouprepsatalign, grouprepsatalign2)
+                            file("*_sequences.fasta") into yesirr
 
                         script:
                             """
                             #copy _unique files here so we can werk with them
-                            cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/uniques/*_unique .
+                            cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/uniques/*_uni .
                             #generatemaps
                             echo "AminoType,Group,IDPattern"
                             j=1
                             for x in *_unique;
                             do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
-                                    uni=\$(echo \$x | awk -F ""\${gid}"_" '{print \$2}' | awk -F "_uni" '{print \$1}')
+                                    uni=\$(echo \$x | awk -F "_" '{print \$2}')
                                     grep ">" \$x | awk -F ">" '{print \$2}' > asv.list
                                     seqtk subseq ../../${aminos} asv.list > Group"\${j}"_sequences.fasta
                                     for z in \$( cat asv.list)
@@ -4266,8 +4286,8 @@ if (params.DataCheck || params.Analyze) {
                                     seqtk subseq ${oligo} group.list > group.fasta
                                     tail -1 group.fasta >> ${params.projtag}_AminoType_group_reps_aligned.fasta
                                     mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
-                                    mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
-                                    rm "\$gid"*.cPickle
+                                    #mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
+                                    #rm "\$gid"*.cPickle
                                     j=\$((\$j+1))
                             done
                             #mv ${params.projtag}_AminoType_Grouping.csv ../../
