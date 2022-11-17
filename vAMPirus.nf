@@ -3398,6 +3398,10 @@ if (params.DataCheck || params.Analyze) {
 
                   publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/MED/", mode: "copy", overwrite: true
 
+                  conda (params.condaActivate ? null : null)
+
+                  container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
+
                   input:
                       file(counts) from asvcount_med
                       file(map) from asvgroupscsv
@@ -4368,6 +4372,10 @@ if (params.DataCheck || params.Analyze) {
                           label 'low_cpus'
 
                           publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/MED/", mode: "copy", overwrite: true
+
+                          conda (params.condaActivate ? null : null)
+
+                          container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? null : null)
 
                           input:
                               file(counts) from aminocountmed
