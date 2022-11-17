@@ -3261,8 +3261,6 @@ if (params.DataCheck || params.Analyze) {
                         cd ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/
                         for x in *unique;
                         do  next=\$(echo "\$x" | awk -F "_" '{print \$1"_"\$2}')
-                            #echo "$x"
-                            #echo "$next"
                             mv \$next ./"\$next"_uni
                             mv \$x ./"\$(echo \$next | awk -F "_" '{print \$2}')"_unqiues_aligned.fasta
                         done
@@ -4234,8 +4232,6 @@ if (params.DataCheck || params.Analyze) {
                             cd ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/
                             for x in *unique;
                             do  next=\$(echo "\$x" | awk -F "_" '{print \$1"_"\$2}')
-                                #echo "$x"
-                                #echo "$next"
                                 mv \$next ./"\$next"_uni
                                 mv \$x ./"\$(echo \$next | awk -F "_" '{print \$2}')"_unqiues_aligned.fasta
                             done
