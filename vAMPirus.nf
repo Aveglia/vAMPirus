@@ -4438,7 +4438,7 @@ if (params.DataCheck || params.Analyze) {
                         file(asvs) from asvfastaforaaclust
 
                     output:
-                        tuple nid, file("${params.projtag}_nucleotide_pcASV*.fasta") into ( pcASV_ntDiamond_ch, pcASV_nt_counts_ch, pcASV_ntmatrix_ch, pcASV_ntmuscle_ch, pcASV_ntmuscle_ch2 )
+                        tuple nid, file("${params.projtag}_nucleotide_pcASV*.fasta") into ( pcASV_ntDiamond_ch, pcASV_nt_counts_ch, pcASV_ntmatrix_ch, pcASV_ntmuscle_ch )
                         tuple nid, file("*_aminoacid_pcASV*_noTaxonomy.fasta") into ( pcASV_aaMatrix_ch, pcASV_aaDiamond_ch, pcASV_aaMafft_ch, pcASV_aaMafft_ch2, pcASV_aaCounts_ch, pcASVEMBOSS )
                         tuple nid, file("*.fasta"), file("*.clstr"), file("*.csv"), file("*.gc") into ( pcASVsupplementalfiles )
 
@@ -4998,7 +4998,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(pcASVn) from potu_align2
 
                         output:
-                            tuple nid, file("*_Aligned_informativeonly.fasta") into potu_align3
+                            tuple nid, file("*_Aligned_informativeonly.fasta") into ( potu_align3, pcASV_ntmuscle_ch2 )
 
                         script:
                             mtag="ID=" + nid
