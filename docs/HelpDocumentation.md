@@ -1170,7 +1170,7 @@ There are two ways to utilize MED within the vAMPirus pipeline:
 
                 Example -> Entropy value table from the DataCheck report shows I have 23 ASV sequence positions that have Shannon entropy values above 0.1 and I would like to oligotype using all of these high entropy positions.
 
-                          To use these 23 positions for MED clustering of ASVs, all I need to do is add the options "--asvMED" (signals use of MED on ASV sequences) and "--asvC 23" (specifies the number of high entropy positions to be used for MED - could also be done by editing "asvC="23"" in config file) to the launch command:
+                          To use these 23 positions for MED clustering of ASVs, all I need to do is add the options "--asvMED" (signals use of MED on ASV sequences) and "--asvc 23" (specifies the number of high entropy positions to be used for MED - could also be done by editing "asvc="23"" in config file) to the launch command:
 
                                 nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --asvMED --asvC 23
 
@@ -1191,12 +1191,17 @@ MED related options within the configuration file:
 
         // Minimum Entropy Decomposition (MED) parameters for clustering (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
 
-            // If you plan to do MED on ASVs using the option "--asvMED" you can set here the number of entropy peak positions or a comma separated list of biologically meaningful positons (e.g. 35,122,21) for oligotyping to take into consideration. vAMPirus will automatically detect a comma separated list of positions, however, if you want to use a single specific position, make "asvSingle="true"".
+        // If you plan to do MED on ASVs using the option "--asvMED" you can set here the number of entopy peak positions or for oligotyping to take into consideration.
+            // Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (asvC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for asvC, it will overide asvc.
                 asvC=""
-                asvSingle=""
-            // If you plan to do MED on ASVs using the option "--aminoMED"  you can set here the number of entropy peak positions or a comma separated list of biologically meaningful positons (e.g. 35,122,21) for oligotyping to take into consideration. vAMPirus will automatically detect a comma separated list of positions, however, if you want to use a single specific position, make "aminoSingle="true"".
+            // Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
+                asvc=""
+
+        // If you plan to do MED on ASVs using the option "--aminoMED" you can set here the number of positions for oligotyping to take into consideration.
+            // Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (aminoC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for aminoC, it will overide aminoc.
                 aminoC=""
-                aminoSingle=""
+            // Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
+                aminoc=""
 
 ## Phylogeny-based clustering of ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)
 
@@ -1224,6 +1229,8 @@ To signal the use of phylogeny-based clustering, add "--asvTClust" to cluster AS
 
           // TreeCluster command options for AminoType clustering (--aminoTClust) -- (Example: aminoTCopp"-option1 A -option2 B -option3 C -option4 D") - See TreeCluster paper and github page to determine the best options
               aminoTCopp="-t 0.045 -m max_clade -s 0.5"
+
+NOTE:: If planning to use this approach, it is recommended to use the ensemble sequence alignment approach ith musclev5
 
 ## Counts tables and percent ID matrices
 
