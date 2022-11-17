@@ -4229,13 +4229,13 @@ if (params.DataCheck || params.Analyze) {
                                   oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoC} -M 1 -c ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                             fi
                             #generatemaps
-                            cd ./${params.projtag}_asvMED_*/OLIGO-REPRESENTATIVES/
+                            cd ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES/
                             for x in *unique;
                             do  next=\$(echo "\$x" | awk -F "_" '{print \$1"_"\$2}')
                                 mv \$next ./"\$next"_uni
                                 mv \$x ./"\$(echo \$next | awk -F "_" '{print \$2}')"_unqiues_aligned.fasta
                             done
-                            cd ../..
+                            cd ../.. ##vAMPtest_AminoTypeMED_
                             mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES.fasta .
                             mv ./${params.projtag}_AminoTypeMED_*/OLIGO-REPRESENTATIVES/*_uni* .
                             """
