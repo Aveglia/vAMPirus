@@ -3305,12 +3305,8 @@ if (params.DataCheck || params.Analyze) {
                                 done
                                 rm asv.list
                                 echo ">Group\${j}" >> ${params.projtag}_ASV_group_reps_aligned.fasta
-                                echo "\$uni" > group.list
-                                seqtk subseq ${oligo} group.list > group.fasta
-                                tail -1 group.fasta >> ${params.projtag}_ASV_group_reps_aligned.fasta
+                                grep -A 1 "\$uni" ${oligo} | tail -1 >> ${params.projtag}_ASV_group_reps_aligned.fasta
                                 mv \$x ./Group"\$j"_"\$uni"_aligned.fasta
-                                #mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
-                                #rm "\$gid"*.cPickle
                                 j=\$((\$j+1))
                         done
                         #mv ${params.projtag}_ASV_Grouping.csv ../../
@@ -4279,13 +4275,8 @@ if (params.DataCheck || params.Analyze) {
                                     done
                                     rm asv.list
                                     echo ">Group\${j}" >> ${params.projtag}_AminoType_group_reps_aligned.fasta
-                                    #echo "\$uni" > group.list
-                                    #seqtk subseq ${oligo} group.list > group.fasta
-                                    #tail -1 group.fasta >> ${params.projtag}_AminoType_group_reps_aligned.fasta
                                     grep -A 1 "\$uni" ${oligo} | tail -1 >> ${params.projtag}_AminoType_group_reps_aligned.fasta
                                     mv \$x ./Group"\$j"_"\$uni"_aligned.fasta
-                                    #mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
-                                    #rm "\$gid"*.cPickle
                                     j=\$((\$j+1))
                             done
                             """
