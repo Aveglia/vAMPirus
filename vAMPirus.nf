@@ -3226,7 +3226,7 @@ if (params.DataCheck || params.Analyze) {
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED", mode: "copy", overwrite: true, pattern: '*.{fasta,csv}'
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/uniques", mode: "copy", overwrite: true, pattern: '*_uni*'
-
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/temp2", mode: "copy", overwrite: true, pattern: '*_uni'
                     conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
                     container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
@@ -3291,7 +3291,8 @@ if (params.DataCheck || params.Analyze) {
                     script:
                         """
                         #copy _uni files here so we can werk with them
-                        cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/ASVs/MED/uniques/*_uni .
+                        cp ${params.workingdir}/${params.outdir}/Analyze/temp2/*_uni .
+                        rm -r ${params.workingdir}/${params.outdir}/Analyze/temp2/
                         #generatemaps
                         j=1
                         for x in *uni;
@@ -4197,7 +4198,7 @@ if (params.DataCheck || params.Analyze) {
 
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED", mode: "copy", overwrite: true, pattern: '*.{fasta,csv}'
                         publishDir "${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/uniques", mode: "copy", overwrite: true, pattern: '*_uni*'
-
+                        publishDir "${params.workingdir}/${params.outdir}/Analyze/temp", mode: "copy", overwrite: true, pattern: '*_uni'
                         conda (params.condaActivate ? "${params.vampdir}/bin/yamls/oligotyping.yml" : null)
 
                         container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/oligotyping:2.1--py27_0" : "quay.io/biocontainers/oligotyping:2.1--py27_0")
@@ -4263,9 +4264,9 @@ if (params.DataCheck || params.Analyze) {
                         script:
                             """
                             #copy _unique files here so we can werk with them
-                            cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/uniques/*_uni .
+                            cp ${params.workingdir}/${params.outdir}/Analyze/temp/*_uni .
+                            rm -r ${params.workingdir}/${params.outdir}/Analyze/temp/
                             #generatemaps
-                            #echo "AminoType,Group,IDPattern"
                             j=1
                             for x in *_uni;
                             do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
@@ -4287,9 +4288,6 @@ if (params.DataCheck || params.Analyze) {
                                     #rm "\$gid"*.cPickle
                                     j=\$((\$j+1))
                             done
-                            #mv ${params.projtag}_AminoType_Grouping.csv ../../
-                            #mv ${params.projtag}_AminoType_group_reps_aligned.fasta ../../
-                            #cd ..
                             """
                     }
 
