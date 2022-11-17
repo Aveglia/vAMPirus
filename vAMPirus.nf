@@ -4271,7 +4271,7 @@ if (params.DataCheck || params.Analyze) {
                             do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
                                     uni=\$(echo \$x | awk -F "_" '{print \$2}')
                                     grep ">" \$x | awk -F ">" '{print \$2}' > asv.list
-                                    seqtk subseq ../../${aminos} asv.list > Group"\${j}"_sequences.fasta
+                                    seqtk subseq ${aminos} asv.list > Group"\${j}"_sequences.fasta
                                     for z in \$( cat asv.list)
                                     do      echo ""\$z",Group"\$j","\$uni"" >> ${params.projtag}_AminoType_Grouping.csv
 
@@ -4281,7 +4281,7 @@ if (params.DataCheck || params.Analyze) {
                                     echo "\$uni" > group.list
                                     seqtk subseq ${oligo} group.list > group.fasta
                                     tail -1 group.fasta >> ${params.projtag}_AminoType_group_reps_aligned.fasta
-                                    mv "\$gid"_"\$uni" ./Group"\$j"_"\$uni"_aligned.fasta
+                                    mv \$x ./Group"\$j"_"\$uni"_aligned.fasta
                                     #mv "\$gid"_"\$uni"_unique ./Group"\$j"_"\$uni"_unqiues_aligned.fasta
                                     #rm "\$gid"*.cPickle
                                     j=\$((\$j+1))
