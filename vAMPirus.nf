@@ -4207,7 +4207,7 @@ if (params.DataCheck || params.Analyze) {
 
                         output:
 
-                            file("*_unique") into uniqformedamino
+                            file("*_uni*") into uniqformedamino
                             file("OLIGO-REPRESENTATIVES.fasta") into oligorepamino
                             file("*aligned.fasta") into yezirr
 
