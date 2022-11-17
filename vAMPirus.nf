@@ -3253,6 +3253,7 @@ if (params.DataCheck || params.Analyze) {
                                 fi
                                 oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_"\$tag" -M 1 -C ${params.asvC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                         elif [[ ${params.asvc} != "" ]]
+                        then
                                 oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_asvMED_${params.asvc} -M 1 -c ${params.asvc} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                         else exit 1
                         fi
@@ -4219,6 +4220,7 @@ if (params.DataCheck || params.Analyze) {
                                     fi
                                     oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_"\$tag" -M 1 -C ${params.aminoC} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                             elif [[ ${params.aminoc} != "" ]]
+                            then
                                     oligotype ${align} \${pre}_Aligned_informativeonly.fasta-ENTROPY -o ${params.projtag}_AminoTypeMED_${params.aminoc} -M 1 -c ${params.aminoc} -N ${task.cpus} --skip-check-input --no-figures --skip-gen-html
                             else exit 1
                             fi
