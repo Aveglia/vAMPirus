@@ -4267,7 +4267,7 @@ if (params.DataCheck || params.Analyze) {
                             #generatemaps
                             echo "AminoType,Group,IDPattern"
                             j=1
-                            for x in *_unique;
+                            for x in *_uni;
                             do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
                                     uni=\$(echo \$x | awk -F "_" '{print \$2}')
                                     grep ">" \$x | awk -F ">" '{print \$2}' > asv.list
