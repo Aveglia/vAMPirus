@@ -4265,7 +4265,7 @@ if (params.DataCheck || params.Analyze) {
                             #copy _unique files here so we can werk with them
                             cp ${params.workingdir}/${params.outdir}/Analyze/Clustering/AminoTypes/MED/uniques/*_uni .
                             #generatemaps
-                            echo "AminoType,Group,IDPattern"
+                            #echo "AminoType,Group,IDPattern"
                             j=1
                             for x in *_uni;
                             do      gid=\$(echo \$x | awk -F "_" '{print \$1}')
