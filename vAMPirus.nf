@@ -2569,11 +2569,11 @@ if (params.DataCheck || params.Analyze) {
                               elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
                                   iqtree -s ${asvs} --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                               elif [ "${params.nonparametric}" != "false" ];then
-                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
                               elif [ "${params.parametric}" != "false" ];then
-                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                               else
-                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                  iqtree -s ${asvs} --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                               fi
                               """
                     }
@@ -3140,11 +3140,11 @@ if (params.DataCheck || params.Analyze) {
                                   elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
                                       iqtree -s ${align} --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                                   elif [ "${params.nonparametric}" != "false" ];then
-                                      iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                      iqtree -s ${align} --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
                                   elif [ "${params.parametric}" != "false" ];then
-                                      iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                      iqtree -s ${align} --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                                   else
-                                      iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                      iqtree -s ${align} --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                                   fi
                                   """
                           }
@@ -3376,11 +3376,11 @@ if (params.DataCheck || params.Analyze) {
                         elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
                             iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                         elif [ "${params.nonparametric}" != "false" ];then
-                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
                         elif [ "${params.parametric}" != "false" ];then
-                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                         else
-                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                         fi
                         """
                     }
@@ -4054,11 +4054,11 @@ if (params.DataCheck || params.Analyze) {
                                 elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
                                     iqtree -s ${align} --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                                 elif [ "${params.nonparametric}" != "false" ];then
-                                    iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                    iqtree -s ${align} --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
                                 elif [ "${params.parametric}" != "false" ];then
-                                    iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s ${align} --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                                 else
-                                    iqtree -s ${align} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s ${align} --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                                 fi
                                 """
                         }
@@ -4343,11 +4343,11 @@ if (params.DataCheck || params.Analyze) {
                                 elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
                                     iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                                 elif [ "${params.nonparametric}" != "false" ];then
-                                    iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                    iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
                                 elif [ "${params.parametric}" != "false" ];then
-                                    iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                                 else
-                                    iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                    iqtree -s ${reps} --prefix ${params.projtag}_AminoType_Group_Reps_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                                 fi
                                 """
                             }
@@ -5080,11 +5080,11 @@ if (params.DataCheck || params.Analyze) {
                             elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
                                 iqtree -s ${pcASVn} --prefix \${pre}_noTaxonomy_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s ${pcASVn} --prefix \${pre}_noTaxonomy_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                iqtree -s ${pcASVn} --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -b ${params.boots}
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s ${pcASVn} --prefix \${pre}_noTaxonomy_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s ${pcASVn} --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                             else
-                                iqtree -s ${pcASVn} --prefix \${pre}_noTaxonomy_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s ${pcASVn} --prefix \${pre}_noTaxonomy_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                     }
@@ -5690,11 +5690,11 @@ if (params.DataCheck || params.Analyze) {
                             elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
                                 iqtree -s ${prot} --prefix \${pre}_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                             elif [ "${params.nonparametric}" != "false" ];then
-                                iqtree -s ${prot} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -b ${params.boots}
+                                iqtree -s ${prot} --prefix \${pre}_iq -m MFP --redo -nt auto -b ${params.boots}
                             elif [ "${params.parametric}" != "false" ];then
-                                iqtree -s ${prot} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s ${prot} --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                             else
-                                iqtree -s ${prot} --prefix \${pre}_iq -m MFP -madd --redo -nt auto -bb ${params.boots} -bnni
+                                iqtree -s ${prot} --prefix \${pre}_iq -m MFP --redo -nt auto -bb ${params.boots} -bnni
                             fi
                             """
                     }
