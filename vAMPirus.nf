@@ -3369,11 +3369,11 @@ if (params.DataCheck || params.Analyze) {
                         then  mod="\$modaicc"
                         fi
                         # Protein_Phylogeny
-                        if [ "${params.iqCustomaa}" != "" ];then
-                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq --redo -T auto ${params.iqCustomaa}
-                        elif [[ "${params.ModelTaa}" != "false" && "${params.nonparametric}" != "false" ]];then
+                        if [ "${params.iqCustomnt}" != "" ];then
+                            iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq --redo -T auto ${params.iqCustomnt}
+                        elif [[ "${params.ModelTnt}" != "false" && "${params.nonparametric}" != "false" ]];then
                             iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -b ${params.boots}
-                        elif [[ "${params.ModelTaa}" != "false" && "${params.parametric}" != "false" ]];then
+                        elif [[ "${params.ModelTnt}" != "false" && "${params.parametric}" != "false" ]];then
                             iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m \${mod} --redo -nt auto -bb ${params.boots} -bnni
                         elif [ "${params.nonparametric}" != "false" ];then
                             iqtree -s ${reps} --prefix ${params.projtag}_ASV_Group_Reps_iq -m MFP --redo -nt auto -b ${params.boots}
