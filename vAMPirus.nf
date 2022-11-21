@@ -5053,7 +5053,7 @@ if (params.DataCheck || params.Analyze) {
                             tuple nid, file(mtout) from pcASVmtout
 
                         output:
-                            tuple nid, file("*.tree"), file("*.log"), file("*iq*") into pcASV_nucleotide_phylogeny_results3
+                            tuple nid, file("*iq*") into pcASV_nucleotide_phylogeny_results3
                             tuple nid, file("*iq.treefile") into potu_Ntree_plot
 
                         script:
