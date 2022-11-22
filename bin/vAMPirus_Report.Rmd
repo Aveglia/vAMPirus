@@ -827,6 +827,7 @@ if [[ $(ls | grep -c "_phylogroup.csv") -eq 1 ]];then
   done
   paste -d "," *.col > phylogroup.csv
   rm *.col
+  cp phylogroup.csv ./"$name"-phylogroup.csv
 else
     echo "Not phylogeny based clustering"
 fi
