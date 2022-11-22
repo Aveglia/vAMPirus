@@ -5878,6 +5878,7 @@ if (params.DataCheck || params.Analyze) {
                     label 'norm_cpus'
 
                     publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReports", mode: "copy", overwrite: true
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/DiversityResults", mode: "copy", overwrite: true, ppattern: '*.csv'
 
                     conda (params.condaActivate ? "${params.vampdir}/bin/yamls/R.yml" : null)
 
@@ -5889,6 +5890,7 @@ if (params.DataCheck || params.Analyze) {
 
                     output:
                         file("*.html") into report_all_out
+                        file("*.csv") into report_csv
 
                     script:
                         """
@@ -5912,6 +5914,10 @@ if (params.DataCheck || params.Analyze) {
                         ${params.nodeCol} \
                         ${params.asvTClust} \
                         ${params.aminoTClust} \
+
+                        if [[ $(ls | grep -c "phylogroup.csv") -eq 1 ]];then
+                        rm phylogroup.csv
+                        fi
                         """
                 }
             }

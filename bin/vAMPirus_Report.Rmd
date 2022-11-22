@@ -285,6 +285,8 @@ sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis
 sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
 sh
 
+write.csv(shannondata5_2, file=paste(params$projtag, "shannon-data.csv", sep="_"), row.names = F)
+
 if (params$stats == "true" ) {
     shannonaov <- aov(index ~ treatment, data= shannondata5_2)
     st <- shapiro.test(resid(shannonaov))
@@ -352,6 +354,8 @@ s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=my
 s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
 s
+
+write.csv(simpsondata5_2, file=paste(params$projtag, "simpson-data.csv", sep="_"), row.names = F)
 
 if (params$stats == "true" ) {
     simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
@@ -421,6 +425,8 @@ ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=myco
 ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
 ri
+
+write.csv(richdata5_2, file=paste(params$projtag, "richness-data.csv", sep="_"), row.names = F)
 
 if (params$stats == "true" ) {
     richaov <- aov(index ~ treatment, data= richdata5_2)
@@ -495,6 +501,8 @@ cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), 
 cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
 cen
 
+write.csv(df2, file=paste(params$projtag, "distance-to-centroid-data.csv", sep="_"), row.names = F)
+
 if (params$stats == "true" ) {
     adn <- adonis(bray.distance~data5$treatment)
     adn
@@ -543,6 +551,8 @@ if (nrow(datax) > 2) {
     fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
     fff
 
+    write.csv(data.scores.2, file=paste(params$projtag, "MDS2d-data.csv", sep="_"), row.names = F)
+
     } else {
     print("NMDS did not converge. Printing PCoA")
     #calculate bray curtis distance
@@ -559,6 +569,8 @@ if (nrow(datax) > 2) {
     fig <- fig %>% layout(legend=list(y=.5))
     fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PCoA', height= 500, width= 800, scale= 1))
     fig
+
+    write.csv(comp2, file=paste(params$projtag, "PCoA2d-data.csv", sep="_"), row.names = F)
     }
 }
 ```
@@ -595,6 +607,8 @@ if (nrow(datax) > 2) {
     p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
     p3d
 
+    write.csv(data.scores.3, file=paste(params$projtag, "MDS3d-data.csv", sep="_"), row.names = F)
+
     } else {
     print("NMDS did not converge. Printing PCoA")
     #calculate bray curtis distance
@@ -610,6 +624,8 @@ if (nrow(datax) > 2) {
     fig <- fig %>% layout(legend=list(y=.5))
     fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
     fig
+
+    write.csv(comp2, file=paste(params$projtag, "PCoA3d-data.csv", sep="_"), row.names = F)
     }
 }
 ```
@@ -635,6 +651,8 @@ ddd <- ddd %>% layout(type='bar',barmode = 'stack')
 ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
 ddd <- ddd %>% config(toImageButtonOptions=list(format='svg',filename='Relative_abundance', height= 500, width= 800, scale= 1))
 ddd
+
+write.csv(datalong, file=paste(params$projtag, "relative-abundance-data.csv", sep="_"), row.names = F)
 ```
 
 
@@ -801,12 +819,13 @@ This tree is a maximum likelihood tree made with IQTREE2 and the parameters you 
 # Phylogeny-based Clustering Summary Table
 ```{bash bash_phy_table, include=FALSE}
 if [[ $(ls | grep -c "_phylogroup.csv") -eq 1 ]];then
+  name=$( ls *_counts.csv | awk -F "_counts.csv" '{print $1}')
   awk -F "," '{print $2}' *_phylogroup.csv | sort | uniq | sort -g >group.list
   for x in $(cat group.list);do
     echo "${x}" >> ${x}.col
     grep -w "$x" *_phylogroup.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
-  paste -d "," *.col > phylogroup.csv
+  paste -d "," *.col > "$name"-phylogroup.csv
   rm *.col
 else
     echo "Not phylogeny based clustering"
@@ -893,6 +912,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
   ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
   ddd <- ddd %>% config(toImageButtonOptions=list(format='svg',filename='Relative_abundance', height= 500, width= 800, scale= 1))
   ddd
+
+  write.csv(datalong, file=paste(params$projtag, "phylogroup-relative-abundance-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -946,6 +967,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
     sh
+
+    write.csv(shannondata5_2, file=paste(params$projtag, "phylogroup-shannon-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1021,6 +1044,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
     s
+
+    write.csv(simpsondata5_2, file=paste(params$projtag, "phylogroup-simpson-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1096,6 +1121,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
     ri
+
+    write.csv(richdata5_2, file=paste(params$projtag, "phylogroup-richness-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1175,6 +1202,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
     cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
     cen
+
+    write.csv(df2, file=paste(params$projtag, "phylogroup-distancetocentroid-data.csv", sep="_"), row.names = F)
 }
 ```
 ```{r phylo_distance2b, echo=FALSE}
@@ -1232,6 +1261,8 @@ if (nrow(datax) > 2) {
     fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
     fff
 
+    write.csv(data.scores.2, file=paste(params$projtag, "phylogroup-MDS2d-data.csv", sep="_"), row.names = F)
+
     } else {
       print("NMDS did not converge. Printing PCoA")
       #calculate bray curtis distance
@@ -1248,6 +1279,8 @@ if (nrow(datax) > 2) {
       fig <- fig %>% layout(legend=list(y=.5))
       fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
       fig
+
+      write.csv(comp2, file=paste(params$projtag, "phylogroup-PCoA2d-data.csv", sep="_"), row.names = F)
     }
     }
 }
@@ -1286,6 +1319,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
     p3d
 
+    write.csv(data.scores.3, file=paste(params$projtag, "phylogroup-MDS3d-data.csv", sep="_"), row.names = F)
+
     } else {
       print("NMDS did not converge. Printing PCoA")
       #calculate bray curtis distance
@@ -1301,6 +1336,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
       fig <- fig %>% layout(legend=list(y=.5))
       fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
       fig
+
+      write.csv(comp2, file=paste(params$projtag, "phylogroup-PCoA3d-data.csv", sep="_"), row.names = F)
     }
     }
 }
@@ -1324,7 +1361,7 @@ if [[ $(ls | grep -wc "asv_medfile.csv") -eq 1 ]];then
     grep -w "$x" asv_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
   paste -d "," *.col > asv_medtable.csv
-  ln -s ./asv_medtable.csv deseq_medtable.csv
+  #ln -s ./asv_medtable.csv deseq_medtable.csv
   rm *.col
 else
     echo "Not MED"
@@ -1338,7 +1375,7 @@ if [[ $(ls | grep -wc "amino_medfile.csv") -eq 1 ]];then
     grep -w "$gr" amino_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
   paste -d "," *.col > amino_medtable.csv
-  ln -s ./amino_medtable.csv deseq_medtable.csv
+  #ln -s ./amino_medtable.csv deseq_medtable.csv
   rm *.col
 else
       echo "Not MED"
@@ -1539,6 +1576,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
     sh
+    write.csv(shannondata5_2, file=paste(params$projtag, "MEDgroup-shannon-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1614,6 +1652,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
     s
+    write.csv(simpsondata5_2, file=paste(params$projtag, "MEDgroup-simpson-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1689,6 +1728,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
     ri
+    write.csv(richdata5_2, file=paste(params$projtag, "MEDgroup-richness-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1768,6 +1808,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
     cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
     cen
+    write.csv(df2, file=paste(params$projtag, "MEDgroup-distancetocentroid-data.csv", sep="_"), row.names = F)
 }
 ```
 ```{r med_distance2b, echo=FALSE}
@@ -1826,6 +1867,8 @@ if (nrow(datax) > 2) {
         fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
         fff
 
+        write.csv(data.scores.2, file=paste(params$projtag, "MEDgroup-MDS2d-data.csv", sep="_"), row.names = F)
+
         } else {
           print("NMDS did not converge. Printing PCoA")
           #calculate bray curtis distance
@@ -1842,6 +1885,7 @@ if (nrow(datax) > 2) {
           fig <- fig %>% layout(legend=list(y=.5))
           fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
           fig
+          write.csv(comp2, file=paste(params$projtag, "MEDgroup-PCoA2d-data.csv", sep="_"), row.names = F)
         }
     }
 }
@@ -1880,6 +1924,8 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
     p3d
 
+    write.csv(data.scores.3, file=paste(params$projtag, "MEDgroup-MDS3d-data.csv", sep="_"), row.names = F)
+
     } else {
       print("NMDS did not converge. Printing PCoA")
       #calculate bray curtis distance
@@ -1895,6 +1941,8 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
       fig <- fig %>% layout(legend=list(y=.5))
       fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
       fig
+
+      write.csv(comp2, file=paste(params$projtag, "MEDgroup-PCoA3d-data.csv", sep="_"), row.names = F)
     }
     }
 }
