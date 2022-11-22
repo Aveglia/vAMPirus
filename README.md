@@ -51,7 +51,7 @@ Viruses are the most abundant biological entities on the planet and with advance
 
 8. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results or TreeClustering results.
 
-8. PCoA plots added to Analyze  report if NMDS does not converge.
+8. PCoA plots added to Analyze report if NMDS does not converge.
 
 # Quick intro
 
@@ -172,7 +172,7 @@ To set up and install vAMPirus dependencies (e.g., Conda, Nextflow), simply move
 >You can make the vampirus_startup.sh scrip an exectuable with -> chmod +x vampirus_startup.sh ; ./vampirus_startup.sh
 
 
-The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and will build the vAMPirus conda environment and the installation is complete.
+The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and the installation is complete.
 
 You can also use the startup script to install different databases to use for vAMPirus analyses, these include:
 
@@ -321,3 +321,5 @@ If you do use vAMPirus for your analyses, please cite the following ->
 16. Oligotyping - A. Murat Eren, Gary G. Borisy, Susan M. Huse, Jessica L. Mark Welch (2014). Oligotyping analysis of the human oral microbiome. Proceedings of the National Academy of Sciences Jul 2014, 111 (28) E2875-E2884; DOI: 10.1073/pnas.1409644111
 
 17. Balaban M, Moshiri N, Mai U, Jia X, Mirarab S (2019). "TreeCluster: Clustering biological sequences using phylogenetic trees." PLoS ONE. 14(8):e0221068. doi:10.1371/journal.pone.0221068
+
+18. Wernersson R. Virtual Ribosome--a comprehensive DNA translation tool with support for integration of sequence feature annotation. Nucleic Acids Res. 2006 Jul 1;34(Web Server issue):W385-8. doi: 10.1093/nar/gkl252. PMID: 16845033; PMCID: PMC1538826.
