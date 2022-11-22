@@ -825,7 +825,7 @@ if [[ $(ls | grep -c "_phylogroup.csv") -eq 1 ]];then
     echo "${x}" >> ${x}.col
     grep -w "$x" *_phylogroup.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
-  paste -d "," *.col > "$name"-phylogroup.csv
+  paste -d "," *.col > phylogroup.csv
   rm *.col
 else
     echo "Not phylogeny based clustering"
