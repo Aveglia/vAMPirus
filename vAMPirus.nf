@@ -5915,7 +5915,7 @@ if (params.DataCheck || params.Analyze) {
                         ${params.asvTClust} \
                         ${params.aminoTClust} \
 
-                        if [[ $(ls | grep -c "phylogroup.csv") -eq 1 ]];then
+                        if [[ \$(ls | grep -c "phylogroup.csv") -eq 1 ]];then
                         rm phylogroup.csv
                         fi
                         """
