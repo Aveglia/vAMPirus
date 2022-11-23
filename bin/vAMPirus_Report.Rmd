@@ -765,7 +765,7 @@ if (params$skipPhylogeny == "true") {
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
     treelist=read.csv("tree_group.csv")
     metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
-    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
+    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID)) + geom_treescale(y=-50, offset=10)
     gg = ggplotly(p2, tooltip = c("label","GroupID"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_MED_colors', height= 500, width= 800, scale= 1))
     gg
@@ -779,7 +779,7 @@ if (params$skipPhylogeny == "true") {
     colnames(taxMap) <- c("label","tax")
     taxMap
     taxDF <- merge(metat, taxMap, by="label")
-    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax))
+    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax)) + geom_treescale(y=-50, offset=10)
     gg = ggplotly(p2, tooltip = c("label","tax"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Tax_colors', height= 500, width= 800, scale= 1))
     gg
@@ -793,7 +793,7 @@ if (params$skipPhylogeny == "true") {
     colnames(taxMap) <- c("label","tax")
     taxMap
     taxDF <- merge(metat, taxMap, by="label")
-    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax))
+    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax)) + geom_treescale(y=-50, offset=10)
     gg = ggplotly(p2, tooltip = c("label","tax"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Phygroup_colors', height= 500, width= 800, scale= 1))
     gg
@@ -804,7 +804,7 @@ if (params$skipPhylogeny == "true") {
     id <- tree$tip.label
     dat <- tibble::tibble(id = id)
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
-    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color = id))
+    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color = id)) + geom_treescale(y=-50, offset=10)
     gg = ggplotly(p2, tooltip = "label")
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_id_colors', height= 500, width= 800, scale= 1))
     gg
@@ -1974,14 +1974,14 @@ if (params$skipPhylogeny == "true") {
     #cdat <- tibble::tibble(dcolor = c(1:247))
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
 
-    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color=label))
+    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color=label)) + geom_treescale(y=-50, offset=10)
     ggplotly(p2, tooltip = "label")
 
     treelist=read.csv("tree_group.csv")
     colnames(treelist) <- c("GroupID","ID")
 
     metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'GroupID'))
-    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = ID, color = label))
+    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = ID, color = label)) + geom_treescale(y=-50, offset=10)
     ggplotly(p2, tooltip = "label")
 
 }
