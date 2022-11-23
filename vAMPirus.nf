@@ -4890,7 +4890,7 @@ if (params.DataCheck || params.Analyze) {
                         mtag="ID=" + nid
                         """
                     	name=\$( echo ${potus} | awk -F ".fasta" '{print \$1}')
-                    	vsearch --usearch_global ${merged} --db ${potus} --id .${params.npcasvcountID} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
+                    	vsearch --usearch_global ${merged} --db ${potus} --id .${nid} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                     	cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                     	sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
                     	rm \${name}_count.csv

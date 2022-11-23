@@ -1566,9 +1566,9 @@ Stats tests included with "--stats":
 12. Post-Minimum Entropy Decomposition Analyses (combination of above)
 
 
-# All of the options
+# All of the options -- Can also be reviewed in the vampirus.config
 
-UUsage:
+Usage:
 
         nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV] [--asvMED] [--aminoMED] [--stats]
 
@@ -1587,18 +1587,25 @@ UUsage:
         --DataCheck                     Assess how data performs with during processing and clustering
 
 
+--Other important to know about, but not mandatory, arguments--
+
 --ASV clustering arguments--
 
         --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
         --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
-
---Minimum Entropy Decomposition arguments--
+--Oligotyping Minimum Entropy Decomposition arguments--
 
         --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
 
         --aminoMED                     Set this option to perform Minimum Entropy Decomposition on AminoType sequences, see manual for more information. You will need to set a value for --aminoC to perform this analysis
+
+--TreeCluster arguments--
+
+        --asvTClust                     Phylogeny-based ASV clustering parameters using the program TreeCluster (https://github.com/niemasd/TreeCluster)
+
+        --aminoTClust                   Phylogeny-based AminoType clustering parameters using the program TreeCluster (https://github.com/niemasd/TreeCluster)
 
 --Skip options--
 
@@ -1637,6 +1644,14 @@ UUsage:
         --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
 
+--Quality filter/trimming options--
+
+        --avQ                          Average read quality - forward or reverse reads will be discarded if average base quality across the read is below the number set below (25 is a good start)
+
+        --mN                            Maximum number of "N"s acceptable in the forward or reverse reads (default for fastp is 5)
+
+        --trimq                         Minmum base quality to be trimmed (fastp default is 15)
+
 --Merged read length filtering--
 
         --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
@@ -1666,7 +1681,7 @@ UUsage:
 
     Single primer set removal-
 
-        --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
+        --gtrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
 
         --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
 
@@ -1679,11 +1694,34 @@ UUsage:
         --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
 
 
---Amplicon Sequence Variant (ASV) genration and clustering--
+--Amplicon Sequence Variant (ASV) genration--
 
         --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
         --minSize                       Minimum size or representation in the dataset for sequence to be considered in ASV generation
+
+--ASV filtering parameters - You can set the filtering to run with the command
+
+        --filter                        Use this option to signal ASV filtering suing the databases below
+
+        --filtDB                        Path to database containing sequences that if ASVs match, are then removed prior to any analyses. Keep empty if only using a "keep" database.
+
+        --keepDB                        Path to database containing sequences that if ASVs match to, are kept for final ASV file to be used in susequent analyses. Keep empty if only using a "filter" database.
+
+        --keepnohit                     Keep any sequences without hits - for yes, set keepnohit to ="true". All sequences without an alignment will kept if no "keep" database provided.
+
+
+--Parameters for diamond command for ASV filtering--
+
+        --filtminID                     Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+
+        --filtminaln                    Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+
+        --filtsensitivity               Set sensitivity parameters for DIAMOND aligner (read more here: https://github.com/bbuchfink/diamond/wiki; default = ultra-sensitive)
+
+        --filtevalue                    Set the max e-value for best hit to be recorded
+
+--ASV clustering options--
 
         --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
 
@@ -1695,15 +1733,50 @@ UUsage:
 
         --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
---Minimum Entropy Decomposition--
+--Minimum Entropy Decomposition (MED) parameters for clustering (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)--
 
-        --asvC                          Number of high entropy positions to use for ASV MED analysis and generate "Groups"
+        --asvC                          Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (asvC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for asvC, it will overide asvc.
 
-        --aminoC                        Number of high entropy positions to use for AminoType MED analysis and generate "Groups"
+        --asvc                          Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
+
+    --amino_countphylo                  Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (aminoC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for aminoC, it will overide aminoc.
+
+    --aminoc                            Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
+
+
+--Sequence alignment options - Using musclev5 you can decide if you would like to perform single replicate alignment or Ensemble alignment methods (read more here: https://drive5.com/muscle)--
+
+NOTE: if srep and ensemble below are either both true or both false, vAMPirus will default to doing single rep with the default muscle parameters
+
+        Single replicate alignment options
+
+        --srep                          Use this option to make srep = "true" signalling single replicate sequence alignment with musclev5 -- if < 300 sequences, muscle will use MPC algorithm; > 300 sequences muscle will use Super5 algorithm
+
+        --perm                          Set guide tree permutation for muscle (default for muscle is none; other options include "abc, acb, bca")
+
+        --pert                          Set the pertubation seed "0, 1, 2 ..." (default for muscle is 0 = don't perterb)
+
+        Ensemble alignment options
+
+        --ensemble                      Use this option to make ensemble = "true" signalling Ensemble sequence alignent approach
+
+        --fied                          Set "stratified" or "diversified" in ensemble alignment command -- When extracting best alignment from ensemble, diversified input is recommended
+
+        --N                             Number of replicates for ensemble alignment -- Default for stratified is 4; for diversified is 100
+
+--Phylogeny-based ASV/AminoType clustering parameters using the program TreeCluster (https://github.com/niemasd/TreeCluster)--
+
+        --asvTCopp                      TreeCluster command options for ASV clustering (--asvTClust) -- (Example: "-option1 A -option2 B -option3 C -option4 D") - See TreeCluster paper and github page to determine the best options (a good start is what is below)
+
+        --aminoTcopp                    TreeCluster command options for AminoType clustering (--aminoTClust) -- (Example: "-option1 A -option2 B -option3 C -option4 D") - See TreeCluster paper and github page to determine the best options
 
 --Counts table generation--
 
         --asvcountID                    Similarity ID to use for ASV counts
+
+        --
+
+
 
         --ProtCountID                   Minimum amino acid sequence similarity for hit to count
 
