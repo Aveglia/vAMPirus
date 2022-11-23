@@ -43,7 +43,7 @@ Viruses are the most abundant biological entities on the planet and with advance
 
 2. Added further taxonomic classification of sequences using the RVDB annotation database and/or NCBI taxonomy files (see manual for more info).
 
-3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for more accurate virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
+3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for higher confidence virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
 
 4. Added multiple primer pair removal to deal with multiplexed amplicon libraries.
 
