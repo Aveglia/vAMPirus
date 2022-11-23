@@ -13,7 +13,7 @@ The vAMPirus program contains two different pipelines:
 
 ![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV3_11_21_22.png)
 
-2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. NOTE- stats option has changed on 2/19/21; you only need to add "--stats" to the launch commmand without "run"
+2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. Red line represents path for nucleotide sequences, blue represents path for protein sequences.
 
 ![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV3_11_21_22.png)
 
@@ -21,16 +21,20 @@ The vAMPirus program contains two different pipelines:
 
 If you have a feature request or any feedback/questions, feel free to email vAMPirusHelp@gmail.com or you can open an Issue on GitHub.
 
-# New in vAMPirus version 3.0.0
+# New in vAMPirus version 2.1.0
 
 1. Supports single-end read libraries as input.
 
-2. Changed to have process-specific Conda evironments and Singularity/Docker containers.
+2. Changed to have process-specific Conda evironments and Singularity/Docker containers (should help with stability).
 
-3. Added more output from report analyses.
+3. Added output of R-based analyses performed during Report generation.
+
+4. Use of Alignment Ensemble approach from musclev5 for high confidence sequence alignments
+
+5. Added the use of Transfer Bootstrap Exptecation (TBE) in IQTREE analyses.
 
 
-## Changes in version 2.0.3
+## Changes in version 2.0.0 and up
 
 1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 

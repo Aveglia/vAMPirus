@@ -25,15 +25,19 @@
 
 Viruses are the most abundant biological entities on the planet and with advances in next-generation sequencing technologies, there has been significant effort in deciphering the global virome and its impact in nature (Suttle 2007; Breitbart 2019). A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program that is integrated with the Nextflow workflow manager facilitation easy scalability and standardization of analyses.
 
-# New in vAMPirus version 3.0.0
+# New in vAMPirus version 2.1.0
 
 1. Supports single-end read libraries as input.
 
-2. Changed to have process-specific Conda evironments and Singularity/Docker containers.
+2. Changed to have process-specific Conda evironments and Singularity/Docker containers (should help with stability).
 
-3. Added more output from report analyses.
+3. Added output of R-based analyses performed during Report generation.
 
-# New in vAMPirus version 2.0.3
+4. Use of Alignment Ensemble approach from musclev5 for high confidence sequence alignments
+
+5. Added the use of Transfer Bootstrap Exptecation (TBE) in IQTREE analyses.
+
+# New in vAMPirus version 2.0.0 and up
 
 1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 
@@ -64,7 +68,7 @@ The vAMPirus program contains two different pipelines:
 
 ![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV3_11_21_22.png)
 
-2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. NOTE- stats option has changed on 2/19/21; you only need to add "--stats" to the launch commmand without "run"
+2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. Red line represents path for nucleotide sequences, blue represents path for protein sequences.
 
 
 ![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV3_11_21_22.png)
