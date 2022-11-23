@@ -148,12 +148,12 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 <br>
 ```{bash load_datasets_bash, include=FALSE}
 if [ `ls *_ASV_Grouping.csv | wc -l` -ge 1 ];then
-  cat *_ASV_Grouping.csv >asv_medfile.csv
+  cat *_ASV_Grouping.csv >asv_medfile-data.csv
   mv *_ASV_Groupingcounts.csv asv_groupcounts.csv
   cat asv_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
   mv *_ASV_Group_Reps_iq.treefile grouptree.txt
 elif [ `ls *_AminoType_Grouping.csv | wc -l` -ge 1 ];then
-  cat *_AminoType_Grouping.csv >amino_medfile.csv
+  cat *_AminoType_Grouping.csv >amino_medfile-data.csv
   mv *_AminoType_Groupingcounts.csv amino_groupcounts.csv
   cat amino_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
   mv *_AminoType_Group_Reps_iq.treefile grouptree.txt
@@ -175,7 +175,7 @@ if [ `ls -1 *_quicker_taxbreakdown.csv | wc -l` -ge 1 ];then
 fi
 if [ `ls -1 *_phyloGroupingcounts.csv | wc -l` -ge 1 ];then
     mv *_phyloGroupingcounts.csv phylogroupcounts.csv
-    ln -s ./phylogroupcounts.csv deseq_phylogroupcounts.csv
+    #ln -s ./phylogroupcounts.csv deseq_phylogroupcounts.csv
     cp *_phylogroup.csv ./phygroup.csv
 fi
 
@@ -1355,11 +1355,11 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 <br>
 
 ```{bash bash_med_table, include=FALSE}
-if [[ $(ls | grep -wc "asv_medfile.csv") -eq 1 ]];then
-  awk -F "," '{print $2}' asv_medfile.csv | sort | uniq | sort -g >group.list
+if [[ $(ls | grep -wc "asv_medfile-data.csv") -eq 1 ]];then
+  awk -F "," '{print $2}' asv_medfile-data.csv | sort | uniq | sort -g >group.list
   for x in $(cat group.list);do
     echo "${x}" >> ${x}.col
-    grep -w "$x" asv_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
+    grep -w "$x" asv_medfile-data.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
   paste -d "," *.col > asv_medtable.csv
   #ln -s ./asv_medtable.csv deseq_medtable.csv
@@ -1368,12 +1368,12 @@ else
     echo "Not MED"
 fi
 
-if [[ $(ls | grep -wc "amino_medfile.csv") -eq 1 ]];then
-  awk -F "," '{print $2}' amino_medfile.csv | sort | awk -F "Group" '{print $2}' | sort -n | uniq > group.list
+if [[ $(ls | grep -wc "amino_medfile-data.csv") -eq 1 ]];then
+  awk -F "," '{print $2}' amino_medfile-data.csv | sort | awk -F "Group" '{print $2}' | sort -n | uniq > group.list
   for x in $(cat group.list);do
     gr="Group"${x}""
     echo "${gr}" > ${x}.col
-    grep -w "$gr" amino_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
+    grep -w "$gr" amino_medfile-data.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
   paste -d "," *.col > amino_medtable.csv
   #ln -s ./amino_medtable.csv deseq_medtable.csv
@@ -1385,7 +1385,7 @@ fi
 
 ```{r med_table, echo=FALSE}
 if (params$asvMED == "true" && params$type == "ASV"){
-    #med_group=read.csv("asv_medfile.csv", header = F)
+    #med_group=read.csv("asv_medfile-data.csv", header = F)
     #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
     # change name of sequence to med peak or something
     #paged_table(med_group,options = list(rows.print = 20))
@@ -1396,7 +1396,7 @@ if (params$asvMED == "true" && params$type == "ASV"){
 }
 
 if (params$aminoMED == "true" && params$type == "AminoType"){
-  #med_group=read.csv("amino_medfile.csv", header = F)
+  #med_group=read.csv("amino_medfile-data.csv", header = F)
   #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
   #paged_table(med_group,options = list(rows.print = 20))
   med_group=read.csv("amino_medtable.csv", header = T)

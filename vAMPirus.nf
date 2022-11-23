@@ -5877,8 +5877,8 @@ if (params.DataCheck || params.Analyze) {
 
                     label 'norm_cpus'
 
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReports", mode: "copy", overwrite: true
-                    publishDir "${params.workingdir}/${params.outdir}/Analyze/DiversityResults", mode: "copy", overwrite: true, ppattern: '*.csv'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/FinalReports", mode: "copy", overwrite: true, pattern: '*.html'
+                    publishDir "${params.workingdir}/${params.outdir}/Analyze/ReportResults", mode: "copy", overwrite: true, pattern: '*-data.csv'
 
                     conda (params.condaActivate ? "${params.vampdir}/bin/yamls/R.yml" : null)
 
