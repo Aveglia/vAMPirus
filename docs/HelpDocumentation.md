@@ -1570,7 +1570,7 @@ Stats tests included with "--stats":
 
 Usage:
 
-        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV] [--asvMED] [--aminoMED] [--stats]
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV] [--asvMED] [--aminoMED] [--asvTClust] [--aminoTClust] [--stats]
 
 
 --Help options--
@@ -1739,9 +1739,9 @@ Usage:
 
         --asvc                          Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
 
-    --amino_countphylo                  Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (aminoC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for aminoC, it will overide aminoc.
+        --aminoC                        Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (aminoC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for aminoC, it will overide aminoc.
 
-    --aminoc                            Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
+        --aminoc                        Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
 
 
 --Sequence alignment options - Using musclev5 you can decide if you would like to perform single replicate alignment or Ensemble alignment methods (read more here: https://drive5.com/muscle)--
@@ -1772,11 +1772,11 @@ NOTE: if srep and ensemble below are either both true or both false, vAMPirus wi
 
 --Counts table generation--
 
-        --asvcountID                    Similarity ID to use for ASV counts
+        --exact                         Use --search_exact algorithm in vsearch to generate ASV counts tables. Change to "true" below or use --exact in the launch command.
 
-        --
+        --id                            If not using --search_exact (exact = false above), you will use --usearch_global. Set the minimum percent ID (97% = ".97") to count as a hit in counts table generation.
 
-
+        --minLencount                   Minimum length of query read to be used in ASV/ncASV counts table generation with vsearch
 
         --ProtCountID                   Minimum amino acid sequence similarity for hit to count
 
@@ -1784,25 +1784,37 @@ NOTE: if srep and ensemble below are either both true or both false, vAMPirus wi
 
         --ProtCountsBit                 Minimum bitscore for hit to be counted
 
-
 --Taxonomy inference parameters--
 
-        --dbname                       Specify name of database to use for analysis
+    Parameters for diamond command
 
-        --dbdir                        Path to Directory where database is being stored
+        --measurement                   Set which measurement to use for a minimum threshold in taxonomy inference - must be either "evalue" or "bitscore"
 
-        --headers                      Set taxonomy database header format -> headers= "NCBI" to toggle use of NCBI header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
+        --evalue                        Set maximum e-value for hits to be counted
 
-        --dbanno                       Path to directory hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using.
+        --bitscore                      Set minimum bitscore for best hit in taxonomy assignment (default = 30)
 
-        --lca                          Set --lca T if you would like to add taxonomic classification to taxonomy results - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
+        --minID                         Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
 
-        --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
+        --minaln                        Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
 
-        --minID                        Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+        --sensitivity                   Set sensitivity parameters for DIAMOND aligner (read more here: https://github.com/bbuchfink/diamond/wiki; default = ultra-sensitive)
 
-        --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+        Database information
 
+        --dbname                        Specify name of database to use for analysis
+
+        --dbdir                         Path to Directory where database is being stored - vAMPirus will look here to make sure the database with the name provided above is present and built
+
+        --dbtype                        Set database type (NCBI or RVDB). Lets vAMPirus know which sequence header format is being used and must be set to NCBI when using RefSeq or Non-Redundant databases. -> dbtype="NCBI" to toggle use of RefSeq header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers (see manual)
+
+    Classification settings - if planning on inferring LCA from RVDB annotation files OR using NCBI taxonomy files, confirm options below are accurate.
+
+        --dbanno                        Path to directory RVDB hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using RVDB LCA.
+
+        --lca                       Set lca="T" if you would like to add "Least Common Ancestor" classifications to taxonomy results using information provided by RVDB annotation files (works when using NCBI or RVDB databases) - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
+
+        --ncbitax                   DIAMOND taxonomy inference using NCBI taxmap files (can be downloaded using the startup script using the option -t); set to "true" for this to run (ONLY WORKS WITH dbtype="NCBI")
 
 --Phylogeny analysis parameters--
 
@@ -1818,9 +1830,13 @@ NOTE: if srep and ensemble below are either both true or both false, vAMPirus wi
 
         --ModelTaa=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with amino acid sequences
 
+        --crit                         Choose best model from ModelTest-NG based on BIC, AIC, or AICc (select one)
+
         --parametric                   Set to use parametric bootstrapping in IQTREE analyses
 
         --nonparametric                Set to use parametric bootstrapping in IQTREE analyses
+
+        --tbe                          Set to use the Transfer Bootstrap Expectation (TBE; https://www.nature.com/articles/s41586-018-0043-0) in IQTREE analyses
 
         --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
 
