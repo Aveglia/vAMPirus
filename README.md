@@ -10,7 +10,7 @@
 ## UPDATE: On 11/27/22 we have updated vAMPirus to v2.1.0
 
 # Table of contents
-* [New in vAMPirus version 2.0.3](#New-in-vAMPirus-version-2.0.3)
+* [New in vAMPirus version 2.1.0](#New-in-vAMPirus-version-2.1.0)
 * [Quick intro](#Quick-intro)
   * [Contact/support](#Contact/support)
 * [Getting started](#Getting-started)
