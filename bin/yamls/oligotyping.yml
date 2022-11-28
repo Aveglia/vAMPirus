@@ -1,0 +1,25 @@
+# You can use this file to create a conda environment for this pipeline:
+#   conda env create -f env.yml
+name: vAMPirus_treecluster
+channels:
+  - conda-forge
+  - bioconda
+  - anaconda
+  - defaults
+  - genomedk
+dependencies:
+  - python=3.6
+  - blast
+  - r-base
+  - r-ggplot2
+  - r-vegan
+  - r-gplots
+  - r-gtools
+  - r-reshape
+  - r-optparse
+  - r-pheatmap
+  - r-rcolorbrewer
+  - r-compute.es
+  - pip
+  - pip:
+    - oligotyping

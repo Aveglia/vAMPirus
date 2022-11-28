@@ -21,14 +21,14 @@ vampirus_startup.sh -h [-d 1|2|3|4] [-s]
                                                     3 - Download only the complete NCBI NR protein database
                                                     4 - Download all three databases
 
-        [ -s ]                       Set this option to skip conda installation and environment set up (you can use if you plan to run with Singularity and the vAMPirus Docker container)
+        [ -s ]                       Set this option to skip conda installation (you can use if you plan to run with Singularity and the vAMPirus Docker container)
 
 
-1. Run vampirus_startup.sh to install Miniconda3, build the vAMPirus conda environment, and install Nextflow:
+1. Run vampirus_startup.sh to install Miniconda3 and and install Nextflow:
 
         bash vampirus_startup.sh
 
-2. Run vampirus_startup.sh to install Miniconda3, build the vAMPirus conda environment, donwload the RVDB database and install Nextflow:
+2. Run vampirus_startup.sh to install Miniconda3, download the RVDB database and install Nextflow:
 
         bash vampirus_startup.sh -d 1
 

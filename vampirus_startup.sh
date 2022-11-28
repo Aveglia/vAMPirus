@@ -91,21 +91,7 @@ conda_c() {
         #ver=$( conda -V | awk '{print $2}' | cut -f 1,2 -d "." )
         vern=4.8
         if toolversion conda '>=' $vern;then
-            echo -e "\n\t -- Conda is installed (v4.8 or higher). Checking environment... --\n"
-            #Check environment
-            check_env=$( conda info -e | grep -c "vAMPirus" )
-	        if [ "$check_env" -eq 0 ];then
-                echo -e "\n\t -- vAMPirus environment has not been created. Checking environment file... --\n"
-                if [ -f vampirus_env.yml ];then
-                    echo -e "\n\t -- vAMPirus environment file found. Creating environment... --\n"
-                    conda env create -f vampirus_env.yml
-                else
-                    echo -e "\n\t\e[31m -- ERROR: vAMPirus environment file not found \(vAMPirus_env.yml\). Make sure you are running this from the vAMPirus program directory. --\e[39m\n"
-                    exit 0
-                fi
-            elif [ "$check_env" -eq 1 ];then
-                echo -e "\n\t -- vAMPirus environment is installed and ready to be used --\n"
-            fi
+            echo -e "\n\t -- Conda is installed (v4.8 or higher)."
         fi
     else
         echo -e "\n\t -- Conda is not intalled."
@@ -120,8 +106,9 @@ conda_c() {
                 rm Miniconda3*.sh
                 source_c
                 if [ -f vampirus_env.yml ];then
-                    echo -e "\n\t -- vAMPirus environment file found. Creating environment... --\n"
+                    echo -e "\n\t -- vAMPirus environment file found. Creating environments... --\n"
                     conda env create -f vampirus_env.yml
+                    conda env create -f vampirus_deseq_env.yml
                 else
                     echo -e "\n\t\e[31m -- ERROR: vAMPirus environment file not found (vAMPirus_env.yml). Please check requirements and rerun the pre-check --\e[39m\n"
                     exit 0
@@ -206,14 +193,14 @@ if [[ $DATABASE -eq 1 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
-        echo "Database installation: RVDB version 21.0 (latest as of 2021-02)"
-        curl -o U-RVDBv21.0-prot.fasta.xz  https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot.fasta.xz
-        xz -d U-RVDBv21.0-prot.fasta.xz
-        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
-        unzip U-RVDBv21.0-prot-hmm-txt.zip
+        echo "Database installation: RVDB version 23.0 (latest as of 2021-02)"
+        curl -o U-RVDBv24.1-prot.fasta.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot.fasta.xz
+        xz -d U-RVDBv24.1-prot.fasta.xz
+        curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
+        tar -xvf U-RVDBv24.1-prot-hmm-txt.tar.xz
         mv annot ./RVDBannot/
         echo "Editing confiration file for you now..."
-        sed 's/DATABASENAME/U-RVDBv21.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
+        sed 's/DATABASENAME/U-RVDBv23.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
         sed "s|DATABASEANNOT|${dir}/RVDBannot|g" tmp2.config | sed 's/TYPE/RVDB/g' > tmp3.config
         rm tmp1.config
@@ -225,19 +212,22 @@ elif [[ $DATABASE -eq 2 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
-        echo "Database installation: Viral RefSeq database version 2.0 (latest as of 2020-07)"
+        echo "Database installation: Viral RefSeq database (latest as of 2022-01-06)"
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         curl -o viral.1.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.protein.faa.gz
         curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.protein.faa.gz
+        curl -o viral.4.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.4.protein.faa.gz
         gunzip viral.1.protein.faa.gz
         cat viral.1.protein.faa >> complete_virus_refseq_prot.fasta
         gunzip viral.2.protein.faa.gz
         cat viral.2.protein.faa >> complete_virus_refseq_prot.fasta
         gunzip viral.3.protein.faa.gz
         cat viral.3.protein.faa >> complete_virus_refseq_prot.fasta
+        gunzip viral.4.protein.faa.gz
+        cat viral.4.protein.faa >> complete_virus_refseq_prot.fasta
         rm viral.*.protein.faa
-        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
-        unzip U-RVDBv21.0-prot-hmm-txt.zip
+        curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
+        tar -xvf U-RVDBv24.1-prot-hmm-txt.tar.xz
         mv annot ./RVDBannot
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/complete_virus_refseq_prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
@@ -253,8 +243,8 @@ then    mkdir "$mypwd"/Databases
         echo "Database installation: NCBI NR protein database (should be the most up to date at time of running this script)"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         gunzip NCBI_nr_proteindb.faa.gz
-        curl -o U-RVDBv21.0-prot-hmm-txt.zip https://rvdb-prot.pasteur.fr/files/U-RVDBv21.0-prot-hmm-txt.zip
-        unzip U-RVDBv21.0-prot-hmm-txt.zip
+        curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
+        tar -xvf U-RVDBv24.1-prot-hmm-txt.tar.xz
         mv annot ./RVDBannot
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/NCBI_nr_proteindb.faa/g' "$mypwd"/vampirus.config > tmp1.config
@@ -272,10 +262,13 @@ then    mkdir "$mypwd"/Databases
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         curl -o viral.1.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.protein.faa.gz
         curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.protein.faa.gz
-        curl -o U-RVDBv19.0-prot.fasta.bz2 https://rvdb-prot.pasteur.fr/files/U-RVDBv19.0-prot.fasta.bz2
+        curl -o viral.4.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.4.protein.faa.gz
+        curl -o U-RVDBv24.1-prot.fasta.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot.fasta.xz
         sed "s|DATABASEDIR|${dir}|g" "$mypwd"/vampirus.config > tmp1.config
         cat tmp1.config > "$mypwd"/vampirus.config
         rm tmp1.config
+        curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
+        tar -xvf U-RVDBv24.1-prot-hmm-txt.tar.xz
         echo "Databases downloaded, make sure you update the config file with the one you would like to use and decompress the database before running."
 elif [[ $DATABASE != "" ]]
 then    echo "Error: Database download signaled but not given a value between 1-4"
@@ -296,8 +289,6 @@ echo "--------------------------------------------------------------------------
 
 cd "$mypwd"
 echo "Ok, everything downloaded. To test installation, check out the EXAMPLE_COMMANDS.txt file within "$mypwd" for instructions for testing the installation and running vAMPirus with your own data."
-chmod a+x "$mypwd"/bin/virtualribosomev2/*
-chmod a+x "$mypwd"/bin/muscle5.0.1278_linux64
 
 
 if [[ $(ls "$mypwd"| grep -wc "EXAMPLE_COMMANDS.txt") -eq 0 ]]

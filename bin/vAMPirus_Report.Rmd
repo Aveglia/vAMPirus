@@ -45,7 +45,6 @@ library(vegan)
 library(tidyverse)
 library(scales)
 library(cowplot)
-library(dplyr)
 library(ggtree)
 library(plotly)
 library(knitr)
@@ -149,19 +148,20 @@ if (params$skipReadProcessing == "true" || params$skipMerging == "true" ) {
 <br>
 ```{bash load_datasets_bash, include=FALSE}
 if [ `ls *_ASV_Grouping.csv | wc -l` -ge 1 ];then
-  cat *_ASV_Grouping.csv >asv_medfile.csv
+  cat *_ASV_Grouping.csv >asv_medfile-data.csv
   mv *_ASV_Groupingcounts.csv asv_groupcounts.csv
   cat asv_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
   mv *_ASV_Group_Reps_iq.treefile grouptree.txt
 elif [ `ls *_AminoType_Grouping.csv | wc -l` -ge 1 ];then
-  cat *_AminoType_Grouping.csv >amino_medfile.csv
+  cat *_AminoType_Grouping.csv >amino_medfile-data.csv
   mv *_AminoType_Groupingcounts.csv amino_groupcounts.csv
   cat amino_groupcounts.csv | awk -F "," '{print $1","$2}' >tree_group.csv
   mv *_AminoType_Group_Reps_iq.treefile grouptree.txt
 fi
 cat *_counts.csv >counts.csv
 cat *_PercentID.matrix >matrix.txt
-if [ `ls -1 *_summary_for_plot.csv| wc -l` -ge 1 ];then
+
+if [ `ls -1 *summary_for_plot.csv | wc -l` -ge 1 ];then
   cat *_summary_for_plot.csv >sum.csv
 else
   echo "Taxonomy analysis was skipped" >tax.txt
@@ -176,8 +176,10 @@ if [ `ls -1 *_quicker_taxbreakdown.csv | wc -l` -ge 1 ];then
 fi
 if [ `ls -1 *_phyloGroupingcounts.csv | wc -l` -ge 1 ];then
     mv *_phyloGroupingcounts.csv phylogroupcounts.csv
+    #ln -s ./phylogroupcounts.csv deseq_phylogroupcounts.csv
     cp *_phylogroup.csv ./phygroup.csv
 fi
+
 ```
 ```{r load_datasets, include=FALSE}
 sample_name="counts.csv"
@@ -284,6 +286,8 @@ sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis
 sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
 sh
 
+write.csv(shannondata5_2, file=paste(params$projtag, "shannon-data.csv", sep="_"), row.names = F)
+
 if (params$stats == "true" ) {
     shannonaov <- aov(index ~ treatment, data= shannondata5_2)
     st <- shapiro.test(resid(shannonaov))
@@ -351,6 +355,8 @@ s <- plot_ly(simpsondata5_2, x=~treatment, y=~index, color=~treatment, colors=my
 s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
 s
+
+write.csv(simpsondata5_2, file=paste(params$projtag, "simpson-data.csv", sep="_"), row.names = F)
 
 if (params$stats == "true" ) {
     simpsonaov <- aov(index ~ treatment, data= simpsondata5_2)
@@ -420,6 +426,8 @@ ri <- plot_ly(richdata5_2, x=~treatment, y=~index, color=~treatment, colors=myco
 ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
 ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
 ri
+
+write.csv(richdata5_2, file=paste(params$projtag, "richness-data.csv", sep="_"), row.names = F)
 
 if (params$stats == "true" ) {
     richaov <- aov(index ~ treatment, data= richdata5_2)
@@ -494,6 +502,8 @@ cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), 
 cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
 cen
 
+write.csv(df2, file=paste(params$projtag, "distance-to-centroid-data.csv", sep="_"), row.names = F)
+
 if (params$stats == "true" ) {
     adn <- adonis(bray.distance~data5$treatment)
     adn
@@ -518,45 +528,51 @@ if (params$stats == "true" ) {
 ##NMDS
 datax <- decostand(raredata, method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 
-MDS <- metaMDS(sqrt(datax),
-               distance = "bray",autotransform = FALSE,
-               k = 2,
-               maxit = 999,
-               trymax = params$try,
-               wascores = TRUE)
+if (nrow(datax) > 2) {
+    MDS <- metaMDS(sqrt(datax),
+                   distance = "bray",autotransform = FALSE,
+                   k = 2,
+                   maxit = 999,
+                   trymax = params$try,
+                   wascores = TRUE)
 
-if (MDS$converged == "TRUE") {
+    if (MDS$converged == "TRUE") {
 
-data.scores <- as.data.frame(scores(MDS))
-data.scores$sample <- data5$sample
-data.scores.2 <- merge(data.scores, metadata, by="sample")
+    data.scores <- as.data.frame(scores(MDS))
+    data.scores$sample <- data5$sample
+    data.scores.2 <- merge(data.scores, metadata, by="sample")
 
-p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
-  geom_point(size=2)+
-  theme_classic()+
-  theme(legend.title = element_blank())
+    p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
+      geom_point(size=2)+
+      theme_classic()+
+      theme(legend.title = element_blank())
 
-fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
-fff <- fff %>% layout(legend=list(y=.5))
-fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
-fff
+    fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
+    fff <- fff %>% layout(legend=list(y=.5))
+    fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
+    fff
 
-} else {
-print("NMDS did not converge. Printing PCoA")
-#calculate bray curtis distance
-bcdist <- vegdist(datax, "bray")
-res <- pcoa(bcdist)
-#res$values
-#biplot(res) #to make the boring 2D PCoA
-comp <- as.data.frame(res$vectors)
-comp$sample <- data5$sample
-comp2 <- merge(comp, metadata, by="sample")
-fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
-fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
-                      yaxis = list(title = "PCoA 2"))
-fig <- fig %>% layout(legend=list(y=.5))
-fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PCoA', height= 500, width= 800, scale= 1))
-fig
+    write.csv(data.scores.2, file=paste(params$projtag, "MDS2d-data.csv", sep="_"), row.names = F)
+
+    } else {
+    print("NMDS did not converge. Printing PCoA")
+    #calculate bray curtis distance
+    bcdist <- vegdist(datax, "bray")
+    res <- pcoa(bcdist)
+    #res$values
+    #biplot(res) #to make the boring 2D PCoA
+    comp <- as.data.frame(res$vectors)
+    comp$sample <- data5$sample
+    comp2 <- merge(comp, metadata, by="sample")
+    fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+    fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                          yaxis = list(title = "PCoA 2"))
+    fig <- fig %>% layout(legend=list(y=.5))
+    fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PCoA', height= 500, width= 800, scale= 1))
+    fig
+
+    write.csv(comp2, file=paste(params$projtag, "PCoA2d-data.csv", sep="_"), row.names = F)
+    }
 }
 ```
 
@@ -570,42 +586,48 @@ fig
 <br>
 
 ```{r nmds3d, echo=FALSE}
-MDS3 <- metaMDS(sqrt(datax),
-               distance = "bray",autotransform = FALSE,
-               k = 3,
-               maxit = 999,
-               trymax = params$try,
-               wascores = TRUE)
+if (nrow(datax) > 2) {
+    MDS3 <- metaMDS(sqrt(datax),
+                   distance = "bray",autotransform = FALSE,
+                   k = 3,
+                   maxit = 999,
+                   trymax = params$try,
+                   wascores = TRUE)
 
-if (MDS3$converged == "TRUE") {
+    if (MDS3$converged == "TRUE") {
 
-data.scores3 <- as.data.frame(scores(MDS3))
-data.scores3$sample <- data5$sample
-data.scores.3 <- merge(data.scores3, metadata, by="sample")
-p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
-        color=~treatment, colors=mycol,
-        mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
-        marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
-        )
-p3d <- p3d %>% layout(legend=list(y=.5))
-p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
-p3d
+    data.scores3 <- as.data.frame(scores(MDS3))
+    data.scores3$sample <- data5$sample
+    data.scores.3 <- merge(data.scores3, metadata, by="sample")
+    p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
+            color=~treatment, colors=mycol,
+            mode = 'markers', symbol = ~treatment, symbols = c('square','circle'),
+            marker = list(opacity = .8,line=list(color = 'darkblue',width = 1))
+            )
+    p3d <- p3d %>% layout(legend=list(y=.5))
+    p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
+    p3d
 
-} else {
-print("NMDS did not converge. Printing PCoA")
-#calculate bray curtis distance
-bcdist <- vegdist(datax, "bray")
-res <- pcoa(bcdist)
-comp <- as.data.frame(res$vectors)
-comp$sample <- data5$sample
-comp2 <- merge(comp, metadata, by="sample")
-fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, z = ~Axis.3, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
-fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
-                      yaxis = list(title = "PCoA 2"),
-                      zaxis = list(title = "PCoA 3"))
-fig <- fig %>% layout(legend=list(y=.5))
-fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
-fig
+    write.csv(data.scores.3, file=paste(params$projtag, "MDS3d-data.csv", sep="_"), row.names = F)
+
+    } else {
+    print("NMDS did not converge. Printing PCoA")
+    #calculate bray curtis distance
+    bcdist <- vegdist(datax, "bray")
+    res <- pcoa(bcdist)
+    comp <- as.data.frame(res$vectors)
+    comp$sample <- data5$sample
+    comp2 <- merge(comp, metadata, by="sample")
+    fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, z = ~Axis.3, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+    fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                          yaxis = list(title = "PCoA 2"),
+                          zaxis = list(title = "PCoA 3"))
+    fig <- fig %>% layout(legend=list(y=.5))
+    fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
+    fig
+
+    write.csv(comp2, file=paste(params$projtag, "PCoA3d-data.csv", sep="_"), row.names = F)
+    }
 }
 ```
 
@@ -630,6 +652,8 @@ ddd <- ddd %>% layout(type='bar',barmode = 'stack')
 ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
 ddd <- ddd %>% config(toImageButtonOptions=list(format='svg',filename='Relative_abundance', height= 500, width= 800, scale= 1))
 ddd
+
+write.csv(datalong, file=paste(params$projtag, "relative-abundance-data.csv", sep="_"), row.names = F)
 ```
 
 
@@ -742,7 +766,7 @@ if (params$skipPhylogeny == "true") {
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
     treelist=read.csv("tree_group.csv")
     metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'OTU_ID'))
-    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID))
+    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = id, color = GroupID)) + geom_treescale(y=-50, offset=10)
     gg = ggplotly(p2, tooltip = c("label","GroupID"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_MED_colors', height= 500, width= 800, scale= 1))
     gg
@@ -756,7 +780,7 @@ if (params$skipPhylogeny == "true") {
     colnames(taxMap) <- c("label","tax")
     taxMap
     taxDF <- merge(metat, taxMap, by="label")
-    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax))
+    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax)) + geom_treescale(y=-50, offset=10)
     gg = ggplotly(p2, tooltip = c("label","tax"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Tax_colors', height= 500, width= 800, scale= 1))
     gg
@@ -770,7 +794,7 @@ if (params$skipPhylogeny == "true") {
     colnames(taxMap) <- c("label","tax")
     taxMap
     taxDF <- merge(metat, taxMap, by="label")
-    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax))
+    p2 <- p1 + geom_point(data = taxDF, aes(x = x, y = y, label = label, color = tax)) + geom_treescale(y=-50, offset=10)
     gg = ggplotly(p2, tooltip = c("label","tax"))
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_Phygroup_colors', height= 500, width= 800, scale= 1))
     gg
@@ -781,7 +805,7 @@ if (params$skipPhylogeny == "true") {
     id <- tree$tip.label
     dat <- tibble::tibble(id = id)
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
-    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color = id))
+    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color = id)) + geom_treescale(y=-50, offset=10)
     gg = ggplotly(p2, tooltip = "label")
     gg <- gg %>% config(toImageButtonOptions=list(format='svg',filename='Tree_id_colors', height= 500, width= 800, scale= 1))
     gg
@@ -796,6 +820,7 @@ This tree is a maximum likelihood tree made with IQTREE2 and the parameters you 
 # Phylogeny-based Clustering Summary Table
 ```{bash bash_phy_table, include=FALSE}
 if [[ $(ls | grep -c "_phylogroup.csv") -eq 1 ]];then
+  name=$( ls *_counts.csv | awk -F "_counts.csv" '{print $1}')
   awk -F "," '{print $2}' *_phylogroup.csv | sort | uniq | sort -g >group.list
   for x in $(cat group.list);do
     echo "${x}" >> ${x}.col
@@ -803,6 +828,7 @@ if [[ $(ls | grep -c "_phylogroup.csv") -eq 1 ]];then
   done
   paste -d "," *.col > phylogroup.csv
   rm *.col
+  cp phylogroup.csv ./"$name"-phylogroup.csv
 else
     echo "Not phylogeny based clustering"
 fi
@@ -888,6 +914,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
   ddd <- ddd %>% layout(legend = list(x=10,y=.5), xaxis=list(title = "Sample"), yaxis=list(title = "Relative abundance"))
   ddd <- ddd %>% config(toImageButtonOptions=list(format='svg',filename='Relative_abundance', height= 500, width= 800, scale= 1))
   ddd
+
+  write.csv(datalong, file=paste(params$projtag, "phylogroup-relative-abundance-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -941,6 +969,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
     sh
+
+    write.csv(shannondata5_2, file=paste(params$projtag, "phylogroup-shannon-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1016,6 +1046,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
     s
+
+    write.csv(simpsondata5_2, file=paste(params$projtag, "phylogroup-simpson-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1091,6 +1123,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
     ri
+
+    write.csv(richdata5_2, file=paste(params$projtag, "phylogroup-richness-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1170,6 +1204,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
     cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
     cen
+
+    write.csv(df2, file=paste(params$projtag, "phylogroup-distancetocentroid-data.csv", sep="_"), row.names = F)
 }
 ```
 ```{r phylo_distance2b, echo=FALSE}
@@ -1197,9 +1233,9 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 <br>
 ```{r phylo_nmds2d, echo=FALSE}
 if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
-    ##NMDS
-    datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
-
+##NMDS
+datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
+if (nrow(datax) > 2) {
     MDS <- metaMDS(sqrt(datax),
                    distance = "bray",autotransform = FALSE,
                    k = 2,
@@ -1227,6 +1263,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
     fff
 
+    write.csv(data.scores.2, file=paste(params$projtag, "phylogroup-MDS2d-data.csv", sep="_"), row.names = F)
+
     } else {
       print("NMDS did not converge. Printing PCoA")
       #calculate bray curtis distance
@@ -1243,6 +1281,9 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
       fig <- fig %>% layout(legend=list(y=.5))
       fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
       fig
+
+      write.csv(comp2, file=paste(params$projtag, "phylogroup-PCoA2d-data.csv", sep="_"), row.names = F)
+    }
     }
 }
 ```
@@ -1258,6 +1299,7 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 
 ```{r phylo_nmds3d, echo=FALSE}
 if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
+    if (nrow(datax) > 2) {
     MDS3 <- metaMDS(sqrt(datax),
                    distance = "bray",autotransform = FALSE,
                    k = 3,
@@ -1279,6 +1321,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
     p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
     p3d
 
+    write.csv(data.scores.3, file=paste(params$projtag, "phylogroup-MDS3d-data.csv", sep="_"), row.names = F)
+
     } else {
       print("NMDS did not converge. Printing PCoA")
       #calculate bray curtis distance
@@ -1294,6 +1338,9 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
       fig <- fig %>% layout(legend=list(y=.5))
       fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
       fig
+
+      write.csv(comp2, file=paste(params$projtag, "phylogroup-PCoA3d-data.csv", sep="_"), row.names = F)
+    }
     }
 }
 ```
@@ -1309,26 +1356,28 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 <br>
 
 ```{bash bash_med_table, include=FALSE}
-if [[ $(ls | grep -wc "asv_medfile.csv") -eq 1 ]];then
-  awk -F "," '{print $2}' asv_medfile.csv | sort | uniq | sort -g >group.list
+if [[ $(ls | grep -wc "asv_medfile-data.csv") -eq 1 ]];then
+  awk -F "," '{print $2}' asv_medfile-data.csv | sort | uniq | sort -g >group.list
   for x in $(cat group.list);do
     echo "${x}" >> ${x}.col
-    grep -w "$x" asv_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
+    grep -w "$x" asv_medfile-data.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
   paste -d "," *.col > asv_medtable.csv
+  #ln -s ./asv_medtable.csv deseq_medtable.csv
   rm *.col
 else
     echo "Not MED"
 fi
 
-if [[ $(ls | grep -wc "amino_medfile.csv") -eq 1 ]];then
-  awk -F "," '{print $2}' amino_medfile.csv | sort | awk -F "Group" '{print $2}' | sort -n | uniq > group.list
+if [[ $(ls | grep -wc "amino_medfile-data.csv") -eq 1 ]];then
+  awk -F "," '{print $2}' amino_medfile-data.csv | sort | awk -F "Group" '{print $2}' | sort -n | uniq > group.list
   for x in $(cat group.list);do
     gr="Group"${x}""
     echo "${gr}" > ${x}.col
-    grep -w "$gr" amino_medfile.csv | awk -F "," '{print $1}' | sort >> ${x}.col
+    grep -w "$gr" amino_medfile-data.csv | awk -F "," '{print $1}' | sort >> ${x}.col
   done
   paste -d "," *.col > amino_medtable.csv
+  #ln -s ./amino_medtable.csv deseq_medtable.csv
   rm *.col
 else
       echo "Not MED"
@@ -1337,7 +1386,7 @@ fi
 
 ```{r med_table, echo=FALSE}
 if (params$asvMED == "true" && params$type == "ASV"){
-    #med_group=read.csv("asv_medfile.csv", header = F)
+    #med_group=read.csv("asv_medfile-data.csv", header = F)
     #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
     # change name of sequence to med peak or something
     #paged_table(med_group,options = list(rows.print = 20))
@@ -1348,7 +1397,7 @@ if (params$asvMED == "true" && params$type == "ASV"){
 }
 
 if (params$aminoMED == "true" && params$type == "AminoType"){
-  #med_group=read.csv("amino_medfile.csv", header = F)
+  #med_group=read.csv("amino_medfile-data.csv", header = F)
   #colnames(med_group) <- c("SequenceID", "Group", "Sequence")
   #paged_table(med_group,options = list(rows.print = 20))
   med_group=read.csv("amino_medtable.csv", header = T)
@@ -1529,6 +1578,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     sh <- sh %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     sh <- sh %>% config(toImageButtonOptions=list(format='svg',filename='ShannonDiv', height= 500, width= 800, scale= 1))
     sh
+    write.csv(shannondata5_2, file=paste(params$projtag, "MEDgroup-shannon-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1604,6 +1654,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     s <- s %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     s <- s %>% config(toImageButtonOptions=list(format='svg',filename='SimpsonDiv', height= 500, width= 800, scale= 1))
     s
+    write.csv(simpsondata5_2, file=paste(params$projtag, "MEDgroup-simpson-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1679,6 +1730,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     ri <- ri %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Index"), xaxis=list(title = "Treatment"))
     ri <- ri %>% config(toImageButtonOptions=list(format='svg',filename='SpeciesRich', height= 500, width= 800, scale= 1))
     ri
+    write.csv(richdata5_2, file=paste(params$projtag, "MEDgroup-richness-data.csv", sep="_"), row.names = F)
 }
 ```
 
@@ -1758,6 +1810,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     cen <- cen %>% layout(legend = list(x=10,y=.5), yaxis=list(title = "Distance"), xaxis=list(title = "Treatment"))
     cen <- cen %>% config(toImageButtonOptions=list(format='svg',filename='Dispersion', height= 500, width= 800, scale= 1))
     cen
+    write.csv(df2, file=paste(params$projtag, "MEDgroup-distancetocentroid-data.csv", sep="_"), row.names = F)
 }
 ```
 ```{r med_distance2b, echo=FALSE}
@@ -1785,52 +1838,57 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 <br>
 ```{r med_nmds2d, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
-    ##NMDS
-    datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
+##NMDS
+datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 
-    MDS <- metaMDS(sqrt(datax),
-                   distance = "bray",autotransform = FALSE,
-                   k = 2,
-                   maxit = 999,
-                   trymax = params$try,
-                   wascores = TRUE)
+if (nrow(datax) > 2) {
+        MDS <- metaMDS(sqrt(datax),
+                       distance = "bray",autotransform = FALSE,
+                       k = 2,
+                       maxit = 999,
+                       trymax = params$try,
+                       wascores = TRUE)
 
-    if (MDS$converged == "TRUE") {
+        if (MDS$converged == "TRUE") {
 
-    data.scores <- as.data.frame(scores(MDS))
-    data.scores$sample <- meddata5$sample
-    data.scores.2 <- merge(data.scores, metadata, by="sample")
+        data.scores <- as.data.frame(scores(MDS))
+        data.scores$sample <- meddata5$sample
+        data.scores.2 <- merge(data.scores, metadata, by="sample")
 
-    p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
-      geom_point(size=2)+
-      theme_classic()+
-      theme(legend.title = element_blank())
+        p <- ggplot(data.scores.2, aes(x=NMDS1, y=NMDS2,color=treatment))+
+          geom_point(size=2)+
+          theme_classic()+
+          theme(legend.title = element_blank())
 
-    #fff <- ggplotly(p)
-    #fff <- fff %>% layout(legend=list(y=.5))
-    #fff
+        #fff <- ggplotly(p)
+        #fff <- fff %>% layout(legend=list(y=.5))
+        #fff
 
-    fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
-    fff <- fff %>% layout(legend=list(y=.5))
-    fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
-    fff
+        fff <-plot_ly(data.scores.2, x=~NMDS1, y=~NMDS2, color=~treatment, colors=mycol, text = ~paste("Sample: ", sample))
+        fff <- fff %>% layout(legend=list(y=.5))
+        fff <- fff %>% config(toImageButtonOptions=list(format='svg',filename='2Dnmds', height= 500, width= 800, scale= 1))
+        fff
 
-    } else {
-      print("NMDS did not converge. Printing PCoA")
-      #calculate bray curtis distance
-      bcdist <- vegdist(datax, "bray")
-      res <- pcoa(bcdist)
-      #res$values
-      #biplot(res) #to make the boring 2D PCoA
-      comp <- as.data.frame(res$vectors)
-      comp$sample <- data5$sample
-      comp2 <- merge(comp, metadata, by="sample")
-      fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
-      fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
-                            yaxis = list(title = "PCoA 2"))
-      fig <- fig %>% layout(legend=list(y=.5))
-      fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
-      fig
+        write.csv(data.scores.2, file=paste(params$projtag, "MEDgroup-MDS2d-data.csv", sep="_"), row.names = F)
+
+        } else {
+          print("NMDS did not converge. Printing PCoA")
+          #calculate bray curtis distance
+          bcdist <- vegdist(datax, "bray")
+          res <- pcoa(bcdist)
+          #res$values
+          #biplot(res) #to make the boring 2D PCoA
+          comp <- as.data.frame(res$vectors)
+          comp$sample <- data5$sample
+          comp2 <- merge(comp, metadata, by="sample")
+          fig <- plot_ly(comp2, x = ~Axis.1, y = ~Axis.2, color= ~treatment, text = ~paste("Sample: ", sample,"<br>Treatment: ",treatment))
+          fig <- fig %>% layout(xaxis = list(title = "PCoA 1"),
+                                yaxis = list(title = "PCoA 2"))
+          fig <- fig %>% layout(legend=list(y=.5))
+          fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='2D_PostMED_PCoA', height= 500, width= 800, scale= 1))
+          fig
+          write.csv(comp2, file=paste(params$projtag, "MEDgroup-PCoA2d-data.csv", sep="_"), row.names = F)
+        }
     }
 }
 ```
@@ -1846,7 +1904,8 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 
 ```{r med_nmds3d, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
-    MDS3 <- metaMDS(sqrt(datax),
+    if (nrow(datax) > 2) {
+        MDS3 <- metaMDS(sqrt(datax),
                    distance = "bray",autotransform = FALSE,
                    k = 3,
                    maxit = 999,
@@ -1867,6 +1926,8 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
     p3d <- p3d %>% config(toImageButtonOptions=list(format='svg',filename='3Dnmds', height= 500, width= 800, scale= 1))
     p3d
 
+    write.csv(data.scores.3, file=paste(params$projtag, "MEDgroup-MDS3d-data.csv", sep="_"), row.names = F)
+
     } else {
       print("NMDS did not converge. Printing PCoA")
       #calculate bray curtis distance
@@ -1882,6 +1943,9 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
       fig <- fig %>% layout(legend=list(y=.5))
       fig <- fig %>% config(toImageButtonOptions=list(format='svg',filename='3D_PCoA', height= 500, width= 800, scale= 1))
       fig
+
+      write.csv(comp2, file=paste(params$projtag, "MEDgroup-PCoA3d-data.csv", sep="_"), row.names = F)
+    }
     }
 }
 ```
@@ -1911,22 +1975,26 @@ if (params$skipPhylogeny == "true") {
     #cdat <- tibble::tibble(dcolor = c(1:247))
     metat <- p1$data %>% dplyr::inner_join(dat, c('label' = 'id'))
 
-    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color=label))
+    p2 <- p1 + geom_point(data = metat, aes(x = x, y = y, label = id, color=label)) + geom_treescale(y=-50, offset=10)
     ggplotly(p2, tooltip = "label")
 
     treelist=read.csv("tree_group.csv")
     colnames(treelist) <- c("GroupID","ID")
 
     metat2 <- metat %>% dplyr::inner_join(treelist, c('label' = 'GroupID'))
-    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = ID, color = label))
+    p2 <- p1 + geom_point(data = metat2, aes(x = x, y = y, label = ID, color = label)) + geom_treescale(y=-50, offset=10)
     ggplotly(p2, tooltip = "label")
 
 }
 ```
 This tree is a maximum likelihood tree made with the representative sequences from the MED groups formed in the oligotyping analysis using IQTREE2 and the parameters you specified in the vampirus.config file. Also, this is an interactive tree, you can zoom in and hover on nodes to know the sequence ID. For a better visualization of this tree, you can find the *.treefile with bootstrap support values within the results directory and visualize using programs like FigTree or ITOL.
+
 <br>
 <br>
 <br>
+<br>
+
+
 <br>
 <br>
 <br>

@@ -3,7 +3,7 @@
 
 # Introduction to vAMPirus
 
-Viruses are the most abundant biological entities on the planet and with advances in next-generation sequencing technologies, there has been significant effort in deciphering the global virome and its impact in nature (Suttle 2007; Breitbart 2019). A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program that is integrated with the Nextflow workflow manager facilitation easy scalability and standardization of analyses.
+Viruses are the most abundant biological entities on the planet and with advances in next-generation sequencing technologies, there has been significant effort in deciphering the global virome and its impact in nature (Suttle 2007; Breitbart 2019). A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program that is integrated with the Nextflow workflow manager facilitating easy scalability and standardization of analyses.
 
 ![vAMPirus general workflow](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vAMPirus_generalflow.png)
 
@@ -11,23 +11,36 @@ The vAMPirus program contains two different pipelines:
 
 1. DataCheck pipeline: provides the user an interactive html report file containing information regarding sequencing success per sample as well as a preliminary look into the clustering behavior of the data which can be leveraged by the user to inform analyses
 
-![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV2.png)
+![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV3_11_21_22.png)
 
-2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. NOTE- stats option has changed on 2/19/21; you only need to add "--stats" to the launch commmand without "run"
+2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. Red line represents path for nucleotide sequences, blue represents path for protein sequences.
 
-![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV2.png)
+![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV3_11_21_22.png)
 
 ## Contact/support
 
 If you have a feature request or any feedback/questions, feel free to email vAMPirusHelp@gmail.com or you can open an Issue on GitHub.
 
-## Changes in version 2.0.2
+# New in vAMPirus version 2.1.0
+
+1. Supports single-end read libraries as input.
+
+2. Changed to have process-specific Conda evironments and Singularity/Docker containers (should help with stability).
+
+3. Added output of R-based analyses performed during Report generation.
+
+4. Use of Alignment Ensemble approach from musclev5 for high confidence sequence alignments
+
+5. Added the use of Transfer Bootstrap Exptecation (TBE) in IQTREE analyses.
+
+
+## Changes in version 2.0.0 and up
 
 1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 
 2. Added further taxonomic classification of sequences using the RVDB annotation database and/or NCBI taxonomy files (see manual for more info).
 
-3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for more accurate virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
+3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for higher confidence virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
 
 4. Added multiple primer pair removal to deal with multiplexed amplicon libraries.
 
@@ -406,7 +419,7 @@ To set up and install vAMPirus dependencies, simply move to the vAMPirus directo
 >You can make the vampirus_startup.sh scrip an exectuable with -> chmod +x vampirus_startup.sh ; ./vampirus_startup.sh
 
 
-The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and will build the vAMPirus conda environment and the installation is complete.
+The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and the installation is complete.
 
 You can also use the startup script to install different databases to use for vAMPirus analyses, these include:
 
@@ -773,9 +786,19 @@ This launch command will run all aspects of the vAMPirus workflow on your data a
 
 ### Sequencing reads
 
-Input can be raw or processed compressed or non-compressed fastq files with names containing "\_R1" or "\_R2". You can specify the directory containing your reads in line 20 of the vampirus.config file.
+Input can be raw or processed compressed or non-compressed fastq files with names containing "_R1" or "_R2". You can specify the directory containing your reads in line 20 of the vampirus.config file. New in 2.1.0 you can now input single-end libraries as well.
 
-NOTE: Sample names are extracted from read library names by using the string to the left of the "\_R" in the filename automatically.
+NOTE: Sample names are extracted from read library names by using the string to the left of the "_R" in the filename automatically. So:
+
+            Example files in a "reads" directory:
+
+                set reads="/PATH/TO/reads/*_R{1,2}*" in the vampirus.config
+
+                example library names:
+                    exampleA_R1.fastq
+                    exampleA_R2.fastq
+
+                Nextflow with recognize that exampleA is one sample.
 
 ### Metadata file
 
@@ -1038,8 +1061,8 @@ A major, and sometimes difficult, step in analyzing virus amplicon sequence data
  vAMPirus relies on vsearch using the UNOISE3 algorithm to generate Amplicon Sequencing Variants (ASVs) from dereplicated amplicon reads. ASVs are always generated by default and there are two parameters that the user can specify either in the launch command or by editing the configuration file at lines 45-49:
 
      // ASV generation and clustering parameters
-         // Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
-             alpha="1"
+         // Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation
+             alpha="2"
          // Minimum size or representation for sequence to be considered in ASV generation
              minSize="8"
 
@@ -1049,7 +1072,7 @@ Launch command to produce only ASV-related analyses:
 
     nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --stats --skipAminoTyping
 
-### ASV filtering (experimental)
+### ASV filtering
 
 New to version 2 you can now filter ASVs to remove sequences that belong to taxonomic groups that are not of interest for a given run.
 
@@ -1143,6 +1166,30 @@ Example launch command:
 
           nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --pcASV --clusterAAIDlist .85,.90,.96 --stats
 
+## Sequence alignment
+
+Accurate sequence alignment is crucial for downsteam analyses (MED, TreeCluster, model testing, phylogenies) and to produce the highest confidence alignments vAMPirus employs musclev5 and its alighnment Ensemble approach. Read more here: https://drive5.com/muscle/
+
+Using musclev5 you can decide if you would like to perform single replicate alignment or Ensemble alignment methods (read more here: https://drive5.com/muscle)
+
+NOTE: if srep and ensemble below are either both true or both false, vAMPirus will default to doing single rep with the default muscle parameters
+
+    // Single replicate alignment options
+        // Set this = to "true" for single replicate sequence alignment with musclev5 -- if < 300 sequences, muscle will use MPC algorithm; > 300 sequences muscle will use Super5 algorithm
+            srep="false"
+        // Set guide tree permutation for muscle (default for muscle is none; other options include "abc, acb, bca")
+            perm="none"
+        // Set the pertubation seed "0, 1, 2 ..." (default for muscle is 0 = don't perterb)
+            pert="0"
+
+    // Ensemble alignment options
+        // Set this = to "true" for Ensemble sequence alignent approach
+            ensemble="true"
+        // Set "stratified" or "diversified" in ensemble alignment command -- When extracting best alignment from ensemble, diversified input is recommended
+            fied="diversified"
+        // Number of replicates for ensemble alignment -- Default for stratified is 4; for diversified is 100
+            N="100"
+
 ## Minimum Entropy Decomposition (EXPERIMENTAL) - Oligotyping - https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/
 
 In vAMPirus v2, we added the ability for the user to use the oligotyping program employing the Minimum Entropy Decomposition (MED) algorithm developed by Eren et al. 2015 (read more about MED here - https://www.nature.com/articles/ismej2014195#citeas) to cluster ASV or AminoType sequences.
@@ -1161,7 +1208,7 @@ There are two ways to utilize MED within the vAMPirus pipeline:
 
                 Example -> Entropy value table from the DataCheck report shows I have 23 ASV sequence positions that have Shannon entropy values above 0.1 and I would like to oligotype using all of these high entropy positions.
 
-                          To use these 23 positions for MED clustering of ASVs, all I need to do is add the options "--asvMED" (signals use of MED on ASV sequences) and "--asvC 23" (specifies the number of high entropy positions to be used for MED - could also be done by editing "asvC="23"" in config file) to the launch command:
+                          To use these 23 positions for MED clustering of ASVs, all I need to do is add the options "--asvMED" (signals use of MED on ASV sequences) and "--asvc 23" (specifies the number of high entropy positions to be used for MED - could also be done by editing "asvc="23"" in config file) to the launch command:
 
                                 nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --Analyze --asvMED --asvC 23
 
@@ -1182,12 +1229,17 @@ MED related options within the configuration file:
 
         // Minimum Entropy Decomposition (MED) parameters for clustering (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
 
-            // If you plan to do MED on ASVs using the option "--asvMED" you can set here the number of entropy peak positions or a comma separated list of biologically meaningful positons (e.g. 35,122,21) for oligotyping to take into consideration. vAMPirus will automatically detect a comma separated list of positions, however, if you want to use a single specific position, make "asvSingle="true"".
+        // If you plan to do MED on ASVs using the option "--asvMED" you can set here the number of entopy peak positions or for oligotyping to take into consideration.
+            // Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (asvC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for asvC, it will overide asvc.
                 asvC=""
-                asvSingle=""
-            // If you plan to do MED on ASVs using the option "--aminoMED"  you can set here the number of entropy peak positions or a comma separated list of biologically meaningful positons (e.g. 35,122,21) for oligotyping to take into consideration. vAMPirus will automatically detect a comma separated list of positions, however, if you want to use a single specific position, make "aminoSingle="true"".
+            // Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
+                asvc=""
+
+        // If you plan to do MED on ASVs using the option "--aminoMED" you can set here the number of positions for oligotyping to take into consideration.
+            // Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (aminoC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for aminoC, it will overide aminoc.
                 aminoC=""
-                aminoSingle=""
+            // Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
+                aminoc=""
 
 ## Phylogeny-based clustering of ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)
 
@@ -1215,6 +1267,8 @@ To signal the use of phylogeny-based clustering, add "--asvTClust" to cluster AS
 
           // TreeCluster command options for AminoType clustering (--aminoTClust) -- (Example: aminoTCopp"-option1 A -option2 B -option3 C -option4 D") - See TreeCluster paper and github page to determine the best options
               aminoTCopp="-t 0.045 -m max_clade -s 0.5"
+
+NOTE:: If planning to use this approach, it is recommended to use the ensemble sequence alignment approach ith musclev5
 
 ## Counts tables and percent ID matrices
 
@@ -1265,7 +1319,7 @@ By default IQTREE will determine the best model to use with ModelFinder Plus.
 
 ### Bootstrapping
 
-IQ-TREE is capable of performing parametric or non-parametric bootstrapping. You can specify which one using "--parametric" or "--nonparametric" and to set how many bootstraps to perform, you would use "--boots #ofbootstraps" or edit lime 114 in the vampirus.config file.
+IQ-TREE is capable of performing parametric or non-parametric bootstrapping. You can specify which one using "--parametric" or "--nonparametric" and to set how many bootstraps to perform, you would use "--boots #ofbootstraps" or edit lime 114 in the vampirus.config file. New in vAMPirus 2.1.0 you can have IQTREE use Transfer Bootstrap Expectation (TBE) which was developed for trees with a large number of sequences.
 
 Here is an example for creating a tree using the model determined by ModelTest-NG, non-parametric bootstrapping and 500 bootstraps:
 
@@ -1550,11 +1604,11 @@ Stats tests included with "--stats":
 12. Post-Minimum Entropy Decomposition Analyses (combination of above)
 
 
-# All of the options
+# All of the options -- Can also be reviewed in the vampirus.config
 
-UUsage:
+Usage:
 
-        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV] [--asvMED] [--aminoMED] [--stats]
+        nextflow run vAMPirus.nf -c vampirus.config -profile [conda|singularity] --[Analyze|DataCheck] [--ncASV] [--pcASV] [--asvMED] [--aminoMED] [--asvTClust] [--aminoTClust] [--stats]
 
 
 --Help options--
@@ -1571,18 +1625,25 @@ UUsage:
         --DataCheck                     Assess how data performs with during processing and clustering
 
 
+--Other important to know about, but not mandatory, arguments--
+
 --ASV clustering arguments--
 
         --ncASV                          Set this option to have vAMPirus cluster nucleotide amplicon sequence variants (ASVs) into nucleotide-based operational taxonomic units (ncASVs) - See options below to define a single percent similarity or a list
 
         --pcASV                          Set this option to have vAMPirus cluster nucleotide and translated ASVs into protein-based operational taxonomic units (pcASVs) - See options below to define a single percent similarity or a list
 
-
---Minimum Entropy Decomposition arguments--
+--Oligotyping Minimum Entropy Decomposition arguments--
 
         --asvMED                        Set this option to perform Minimum Entropy Decomposition on ASV sequences, see manual for more information. You will need to set a value for --asvC to perform this analysis
 
         --aminoMED                     Set this option to perform Minimum Entropy Decomposition on AminoType sequences, see manual for more information. You will need to set a value for --aminoC to perform this analysis
+
+--TreeCluster arguments--
+
+        --asvTClust                     Phylogeny-based ASV clustering parameters using the program TreeCluster (https://github.com/niemasd/TreeCluster)
+
+        --aminoTClust                   Phylogeny-based AminoType clustering parameters using the program TreeCluster (https://github.com/niemasd/TreeCluster)
 
 --Skip options--
 
@@ -1621,6 +1682,14 @@ UUsage:
         --outdir                        Name of results directory containing all output from the chosen pipeline (will be made within the working directory)
 
 
+--Quality filter/trimming options--
+
+        --avQ                          Average read quality - forward or reverse reads will be discarded if average base quality across the read is below the number set below (25 is a good start)
+
+        --mN                            Maximum number of "N"s acceptable in the forward or reverse reads (default for fastp is 5)
+
+        --trimq                         Minmum base quality to be trimmed (fastp default is 15)
+
 --Merged read length filtering--
 
         --minLen                        Minimum merged read length - reads below the specified maximum read length will be used for counts only
@@ -1650,7 +1719,7 @@ UUsage:
 
     Single primer set removal-
 
-        --GlobTrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
+        --gtrim                      Set this option to perform global trimming to reads to remove primer sequences. Example usage "--GlobTrim #basesfromforward,#basesfromreverse"
 
         --fwd                           Forward primer sequence for reads to be detected and removed from reads (must specify reverse sequence if providing forward)
 
@@ -1663,11 +1732,34 @@ UUsage:
         --primers                       Use this option to set the path to a fasta file with all of the primer sequences to be detected and removed from reads
 
 
---Amplicon Sequence Variant (ASV) genration and clustering--
+--Amplicon Sequence Variant (ASV) genration--
 
         --alpha                         Alpha value for denoising - the higher the alpha the higher the chance of false positives in ASV generation (1 or 2)
 
         --minSize                       Minimum size or representation in the dataset for sequence to be considered in ASV generation
+
+--ASV filtering parameters - You can set the filtering to run with the command
+
+        --filter                        Use this option to signal ASV filtering suing the databases below
+
+        --filtDB                        Path to database containing sequences that if ASVs match, are then removed prior to any analyses. Keep empty if only using a "keep" database.
+
+        --keepDB                        Path to database containing sequences that if ASVs match to, are kept for final ASV file to be used in susequent analyses. Keep empty if only using a "filter" database.
+
+        --keepnohit                     Keep any sequences without hits - for yes, set keepnohit to ="true". All sequences without an alignment will kept if no "keep" database provided.
+
+
+--Parameters for diamond command for ASV filtering--
+
+        --filtminID                     Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+
+        --filtminaln                    Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+
+        --filtsensitivity               Set sensitivity parameters for DIAMOND aligner (read more here: https://github.com/bbuchfink/diamond/wiki; default = ultra-sensitive)
+
+        --filtevalue                    Set the max e-value for best hit to be recorded
+
+--ASV clustering options--
 
         --clusterNuclID                 With --ncASV set, use this option to set a single percent similarity to cluster nucleotide ASV sequences into ncASVs by [ Example: --clusterNuclID .97 ]
 
@@ -1679,15 +1771,50 @@ UUsage:
 
         --minAA                         With --pcASV set, use this option to set the expected or minimum amino acid sequence length of open reading frames within your amplicon sequences
 
---Minimum Entropy Decomposition--
+--Minimum Entropy Decomposition (MED) parameters for clustering (https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)--
 
-        --asvC                          Number of high entropy positions to use for ASV MED analysis and generate "Groups"
+        --asvC                          Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (asvC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for asvC, it will overide asvc.
 
-        --aminoC                        Number of high entropy positions to use for AminoType MED analysis and generate "Groups"
+        --asvc                          Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
+
+        --aminoC                        Decomposition of sequences based on specific positions in sequences -- either a single (asvC="1"; meaning decompose sequences based on position 1) or a comma seperated list of biologically meaningful positons (aminoC="35,122,21"; meaning decompose sequences based on positions 35, 122, 21). If value given for aminoC, it will overide aminoc.
+
+        --aminoc                        Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
+
+
+--Sequence alignment options - Using musclev5 you can decide if you would like to perform single replicate alignment or Ensemble alignment methods (read more here: https://drive5.com/muscle)--
+
+NOTE: if srep and ensemble below are either both true or both false, vAMPirus will default to doing single rep with the default muscle parameters
+
+        Single replicate alignment options
+
+        --srep                          Use this option to make srep = "true" signalling single replicate sequence alignment with musclev5 -- if < 300 sequences, muscle will use MPC algorithm; > 300 sequences muscle will use Super5 algorithm
+
+        --perm                          Set guide tree permutation for muscle (default for muscle is none; other options include "abc, acb, bca")
+
+        --pert                          Set the pertubation seed "0, 1, 2 ..." (default for muscle is 0 = don't perterb)
+
+        Ensemble alignment options
+
+        --ensemble                      Use this option to make ensemble = "true" signalling Ensemble sequence alignent approach
+
+        --fied                          Set "stratified" or "diversified" in ensemble alignment command -- When extracting best alignment from ensemble, diversified input is recommended
+
+        --N                             Number of replicates for ensemble alignment -- Default for stratified is 4; for diversified is 100
+
+--Phylogeny-based ASV/AminoType clustering parameters using the program TreeCluster (https://github.com/niemasd/TreeCluster)--
+
+        --asvTCopp                      TreeCluster command options for ASV clustering (--asvTClust) -- (Example: "-option1 A -option2 B -option3 C -option4 D") - See TreeCluster paper and github page to determine the best options (a good start is what is below)
+
+        --aminoTcopp                    TreeCluster command options for AminoType clustering (--aminoTClust) -- (Example: "-option1 A -option2 B -option3 C -option4 D") - See TreeCluster paper and github page to determine the best options
 
 --Counts table generation--
 
-        --asvcountID                    Similarity ID to use for ASV counts
+        --exact                         Use --search_exact algorithm in vsearch to generate ASV counts tables. Change to "true" below or use --exact in the launch command.
+
+        --id                            If not using --search_exact (exact = false above), you will use --usearch_global. Set the minimum percent ID (97% = ".97") to count as a hit in counts table generation.
+
+        --minLencount                   Minimum length of query read to be used in ASV/ncASV counts table generation with vsearch
 
         --ProtCountID                   Minimum amino acid sequence similarity for hit to count
 
@@ -1695,25 +1822,37 @@ UUsage:
 
         --ProtCountsBit                 Minimum bitscore for hit to be counted
 
-
 --Taxonomy inference parameters--
 
-        --dbname                       Specify name of database to use for analysis
+    Parameters for diamond command
 
-        --dbdir                        Path to Directory where database is being stored
+        --measurement                   Set which measurement to use for a minimum threshold in taxonomy inference - must be either "evalue" or "bitscore"
 
-        --headers                      Set taxonomy database header format -> headers= "NCBI" to toggle use of NCBI header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers
+        --evalue                        Set maximum e-value for hits to be counted
 
-        --dbanno                       Path to directory hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using.
+        --bitscore                      Set minimum bitscore for best hit in taxonomy assignment (default = 30)
 
-        --lca                          Set --lca T if you would like to add taxonomic classification to taxonomy results - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
+        --minID                         Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
 
-        --bitscore                     Set minimum bitscore to allow for best hit in taxonomy assignment
+        --minaln                        Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
 
-        --minID                        Set minimum percent amino acid similarity for best hit to be counted in taxonomy assignment
+        --sensitivity                   Set sensitivity parameters for DIAMOND aligner (read more here: https://github.com/bbuchfink/diamond/wiki; default = ultra-sensitive)
 
-        --minaln                       Set minimum amino acid alignment length for best hit to be counted in taxonomy assignment
+        Database information
 
+        --dbname                        Specify name of database to use for analysis
+
+        --dbdir                         Path to Directory where database is being stored - vAMPirus will look here to make sure the database with the name provided above is present and built
+
+        --dbtype                        Set database type (NCBI or RVDB). Lets vAMPirus know which sequence header format is being used and must be set to NCBI when using RefSeq or Non-Redundant databases. -> dbtype="NCBI" to toggle use of RefSeq header format; set to "RVDB" to signal the use of Reverence Viral DataBase (RVDB) headers (see manual)
+
+    Classification settings - if planning on inferring LCA from RVDB annotation files OR using NCBI taxonomy files, confirm options below are accurate.
+
+        --dbanno                        Path to directory RVDB hmm annotation .txt file - see manual for information on this. Leave as is if not planning on using RVDB LCA.
+
+        --lca                       Set lca="T" if you would like to add "Least Common Ancestor" classifications to taxonomy results using information provided by RVDB annotation files (works when using NCBI or RVDB databases) - example: "ASV1, Viruses::Duplodnaviria::Heunggongvirae::Peploviricota::Herviviricetes::Herpesvirales::Herpesviridae::Gammaherpesvirinae::Macavirus"
+
+        --ncbitax                   DIAMOND taxonomy inference using NCBI taxmap files (can be downloaded using the startup script using the option -t); set to "true" for this to run (ONLY WORKS WITH dbtype="NCBI")
 
 --Phylogeny analysis parameters--
 
@@ -1729,9 +1868,13 @@ UUsage:
 
         --ModelTaa=false               Signal for IQ-TREE to use model determined by ModelTest-NG for all IQTREE analyses with amino acid sequences
 
+        --crit                         Choose best model from ModelTest-NG based on BIC, AIC, or AICc (select one)
+
         --parametric                   Set to use parametric bootstrapping in IQTREE analyses
 
         --nonparametric                Set to use parametric bootstrapping in IQTREE analyses
+
+        --tbe                          Set to use the Transfer Bootstrap Expectation (TBE; https://www.nature.com/articles/s41586-018-0043-0) in IQTREE analyses
 
         --boots                        Number of bootstraps (recommended 1000 for parametric and 100 for non-parametric)
 

@@ -23,14 +23,29 @@
 * [Running vAMPirus](#Running-vAMPirus)
 * [Who to cite](#Who-to-cite)
 
+# Introduction to vAMPirus
 
-# New in vAMPirus version 2.0.3
+Viruses are the most abundant biological entities on the planet and with advances in next-generation sequencing technologies, there has been significant effort in deciphering the global virome and its impact in nature (Suttle 2007; Breitbart 2019). A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program that is integrated with the Nextflow workflow manager facilitating easy scalability and standardization of analyses.
+
+# New in vAMPirus version 2.1.0
+
+1. Supports single-end read libraries as input.
+
+2. Changed to have process-specific Conda evironments and Singularity/Docker containers (should help with stability).
+
+3. Added output of R-based analyses performed during Report generation.
+
+4. Use of Alignment Ensemble approach from musclev5 for high confidence sequence alignments
+
+5. Added the use of Transfer Bootstrap Exptecation (TBE) in IQTREE analyses.
+
+# New in vAMPirus version 2.0.0 and up
 
 1. Reduced redundancy of processes and the volume of generated result files per full run (Example - read processing only done once if running DataCheck then Analyze).
 
 2. Added further taxonomic classification of sequences using the RVDB annotation database and/or NCBI taxonomy files (see manual for more info).
 
-3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for more accurate virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
+3. Replaced the used of MAFFT with muscle v5 (Edgar 2021) for higher confidence virus gene alignments (see https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full).
 
 4. Added multiple primer pair removal to deal with multiplexed amplicon libraries.
 
@@ -42,7 +57,7 @@
 
 8. Color nodes on phylogenetic trees based on Taxonomy or Minimum Entropy Decomposition results or TreeClustering results.
 
-8. PCoA plots added to Analyze  report if NMDS does not converge.
+8. PCoA plots added to Analyze report if NMDS does not converge.
 
 # Quick intro
 
@@ -53,12 +68,12 @@ The vAMPirus program contains two different pipelines:
 
 1. DataCheck pipeline: provides the user an interactive html report file containing information regarding sequencing success per sample as well as a preliminary look into the clustering behavior of the data which can be leveraged by the user to inform future analyses
 
-![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV2.png)
+![vAMPirus DataCheck](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_datacheckV3_11_21_22.png)
 
-2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. NOTE- stats option has changed on 2/19/21; you only need to add "--stats" to the launch commmand without "run"
+2. Analyze pipeline: a comprehensive analysis of the provided data producing a wide range of results and outputs which includes an interactive report with figures and statistics. Red line represents path for nucleotide sequences, blue represents path for protein sequences.
 
 
-![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV2.png)
+![vAMPirus Analyze](https://raw.githubusercontent.com/Aveglia/vAMPirusExamples/main/vampirusflow_analyzeV3_11_21_22.png)
 
 
 NOTE => This is a more brief overview of how to install and set up vAMPirus, for more detail see the [manual](https://github.com/Aveglia/vAMPirus/blob/master/docs/HelpDocumentation.md).
@@ -92,16 +107,16 @@ If you have a feature request or any feedback/questions, feel free to email vAMP
 
 ### Installing dependencies (see Who to cite section)
 
-If you plan on using Conda to run vAMPirus, all dependencies will be installed as a Conda environment automatically with the vampirus_startup.sh script.
+New in v3.0.0 the dependencies of vAMPirus will be set up by Nextflow upon the initial launch of a vAMPirus pipeline regardless if you plan to use Conda or Singularity/Docker.
 
-If you plan to use a container engine like Singularity, the dependencies of vAMPirus have been built as a Docker container (aveglia/vAMPirus) that's stored in the vAMPirus directory and will be set up by Nextflow upon the initial launch of a vAMPirus pipeline.
+Run the start up script to set paths automatically in the configuration file, install Conda, and install any databases.
 
 
 # Installing vAMPirus
 
 ## Windows OS users
 
-vAMPirus has been set up and tested on Windows 10 using Ubuntu Sandbox (https://wiki.ubuntu.com/WSL) which is a new feature of Windows 10 - See Windows Subsystem for Linux -> https://docs.microsoft.com/en-us/windows/wsl/about
+vAMPirus has been set up and tested on Windows 10 using Ubuntu Sandbox (https://wiki.ubuntu.com/WSL) which is a feature of Windows 10 - See Windows Subsystem for Linux -> https://docs.microsoft.com/en-us/windows/wsl/about
 
 All you will need to do is set up the subsystem with whatever flavor of Linux you favor and then you can follow the directions for installation and running as normal.
 
@@ -155,7 +170,7 @@ The startup script provided in the vAMPirus program directory will install Conda
 
 
 ### vAMPirus startup script
-To set up and install vAMPirus dependencies, simply move to the vAMPirus directory and run the vampirus_startup.sh script.
+To set up and install vAMPirus dependencies (e.g., Conda, Nextflow), simply move to the vAMPirus directory and run the vampirus_startup.sh script.
 
     cd ./vAMPirus; bash vampirus_startup.sh -h
 
@@ -163,7 +178,7 @@ To set up and install vAMPirus dependencies, simply move to the vAMPirus directo
 >You can make the vampirus_startup.sh scrip an exectuable with -> chmod +x vampirus_startup.sh ; ./vampirus_startup.sh
 
 
-The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and will build the vAMPirus conda environment and the installation is complete.
+The start up script will check your system for Nextflow and Anaconda/Miniconda (can be skipped) and if they are not present, the script will ask if you would like to install these programs. If you answer with 'y', the script will install the missing programs and the installation is complete.
 
 You can also use the startup script to install different databases to use for vAMPirus analyses, these include:
 
@@ -203,7 +218,7 @@ and if we wanted to do the same thing as above but skip the Conda check/installa
 
     bash vampirus_startup.sh -d 2 -s
 
-NOTE -> if you end up installing Miniconda3 using the script you should close and re-open the terminal window after everything is completed.
+NOTE -> if you end up installing Miniconda3 using the script you might have to close and re-open the terminal window after everything is completed.
 
 **NEW in version 2.0.0 -> the startup script will automatically download annotation information from RVDB to infer Lowest Common Ancestor (LCA) information for hits during taxonomy assignment. You can also use "-t" to download NCBI taxonomy files to infer taxonomy using the DIAMOND taxonomy classification feature.
 
@@ -312,3 +327,5 @@ If you do use vAMPirus for your analyses, please cite the following ->
 16. Oligotyping - A. Murat Eren, Gary G. Borisy, Susan M. Huse, Jessica L. Mark Welch (2014). Oligotyping analysis of the human oral microbiome. Proceedings of the National Academy of Sciences Jul 2014, 111 (28) E2875-E2884; DOI: 10.1073/pnas.1409644111
 
 17. Balaban M, Moshiri N, Mai U, Jia X, Mirarab S (2019). "TreeCluster: Clustering biological sequences using phylogenetic trees." PLoS ONE. 14(8):e0221068. doi:10.1371/journal.pone.0221068
+
+18. Wernersson R. Virtual Ribosome--a comprehensive DNA translation tool with support for integration of sequence feature annotation. Nucleic Acids Res. 2006 Jul 1;34(Web Server issue):W385-8. doi: 10.1093/nar/gkl252. PMID: 16845033; PMCID: PMC1538826.

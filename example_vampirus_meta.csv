@@ -5,3 +5,4 @@ Sample3,Treatment1
 Sample4,Treatment2
 Sample5,Treatment2
 Sample6,Treatment2
+###this is an example file; check sample names would be "sample_name"_R1.fastq.gz "sample_name"_R2.fastq.gz
