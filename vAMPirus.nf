@@ -1377,6 +1377,9 @@ if (params.DataCheck || params.Analyze) {
         script:
             """
 	        vsearch --uchime3_denovo ${fasta} --relabel ASV --nonchimeras ${params.projtag}_ASVs.fasta
+            if [[ ${params.filter} == "true" ]]
+            then    mv ${params.projtag}_ASVs.fasta ${params.projtag}_unfiltered_ASVs.fasta
+            fi
             """
     }
 
@@ -1394,6 +1397,7 @@ if (params.DataCheck || params.Analyze) {
             conda (params.condaActivate ? "-c conda-forge bioconda::diamond=2.0.15=hb97b32f_1 bioconda::seqtk=1.3=h7132678_4" : null)
 
             container (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container ? "https://depot.galaxyproject.org/singularity/mulled-v2-b650c9790d7ca81a2448038cd6bbb974b925ecf2:00a620a1a2f7f99fcc9bb6e73d2cf216ac34bda1-0" : "quay.io/biocontainers/mulled-v2-b650c9790d7ca81a2448038cd6bbb974b925ecf2:00a620a1a2f7f99fcc9bb6e73d2cf216ac34bda1-0")
+
 
             input:
                 file(asv) from asvforfilt
@@ -5054,7 +5058,7 @@ if (params.DataCheck || params.Analyze) {
                     script:
                         mtag="ID=" + nid
                         """
-                        name=\$( echo ${potus} | awk -F ".fasta" '{print \$1}')
+                      name=\$( echo ${potus} | awk -F ".fasta" '{print \$1}')
                     	vsearch --usearch_global ${merged} --db ${potus} --id .${nid} --minseqlength ${params.minLencount} --threads ${task.cpus} --otutabout \${name}_counts.txt --biomout \${name}_counts.biome
                     	cat \${name}_counts.txt | tr "\t" "," >\${name}_count.csv
                     	sed 's/#OTU ID/OTU_ID/g' \${name}_count.csv >\${name}_counts.csv
