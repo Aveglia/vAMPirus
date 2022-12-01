@@ -193,14 +193,14 @@ if [[ $DATABASE -eq 1 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
-        echo "Database installation: RVDB version 23.0 (latest as of 2021-02)"
+        echo "Database installation: RVDB version 24.1 (latest as of 2022-08)"
         curl -o U-RVDBv24.1-prot.fasta.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot.fasta.xz
         xz -d U-RVDBv24.1-prot.fasta.xz
         curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
         tar -xvf U-RVDBv24.1-prot-hmm-txt.tar.xz
         mv annot ./RVDBannot/
         echo "Editing confiration file for you now..."
-        sed 's/DATABASENAME/U-RVDBv23.0-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
+        sed 's/DATABASENAME/U-RVDBv24.1-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
         sed "s|DATABASEDIR|${dir}|g" tmp1.config > tmp2.config
         sed "s|DATABASEANNOT|${dir}/RVDBannot|g" tmp2.config | sed 's/TYPE/RVDB/g' > tmp3.config
         rm tmp1.config
@@ -212,7 +212,7 @@ elif [[ $DATABASE -eq 2 ]]
 then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
-        echo "Database installation: Viral RefSeq database (latest as of 2022-01-06)"
+        echo "Database installation: Viral RefSeq database (latest as of 2022-11)"
         curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         curl -o viral.1.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.protein.faa.gz
         curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.protein.faa.gz
