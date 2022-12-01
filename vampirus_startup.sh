@@ -197,7 +197,7 @@ then    mkdir "$mypwd"/Databases
         curl -o U-RVDBv24.1-prot.fasta.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot.fasta.xz
         xz -d U-RVDBv24.1-prot.fasta.xz
         curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
-        tar -xvf U-RVDBv24.1-prot-hmm-txt.tar.xz
+        tar -xJf U-RVDBv24.1-prot-hmm-txt.tar.xz
         mv annot ./RVDBannot/
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/U-RVDBv24.1-prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
@@ -227,7 +227,7 @@ then    mkdir "$mypwd"/Databases
         cat viral.4.protein.faa >> complete_virus_refseq_prot.fasta
         rm viral.*.protein.faa
         curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
-        tar -xvf U-RVDBv24.1-prot-hmm-txt.tar.xz
+        tar -xJf U-RVDBv24.1-prot-hmm-txt.tar.xz
         mv annot ./RVDBannot
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/complete_virus_refseq_prot.fasta/g' "$mypwd"/vampirus.config > tmp1.config
@@ -244,7 +244,7 @@ then    mkdir "$mypwd"/Databases
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
         gunzip NCBI_nr_proteindb.faa.gz
         curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
-        tar -xvf U-RVDBv24.1-prot-hmm-txt.tar.xz
+        tar -xJf U-RVDBv24.1-prot-hmm-txt.tar.xz
         mv annot ./RVDBannot
         echo "Editing confiration file for you now..."
         sed 's/DATABASENAME/NCBI_nr_proteindb.faa/g' "$mypwd"/vampirus.config > tmp1.config
@@ -268,7 +268,7 @@ then    mkdir "$mypwd"/Databases
         cat tmp1.config > "$mypwd"/vampirus.config
         rm tmp1.config
         curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
-        tar -xvf U-RVDBv24.1-prot-hmm-txt.tar.xz
+        tar -xJf U-RVDBv24.1-prot-hmm-txt.tar.xz
         echo "Databases downloaded, make sure you update the config file with the one you would like to use and decompress the database before running."
 elif [[ $DATABASE != "" ]]
 then    echo "Error: Database download signaled but not given a value between 1-4"
