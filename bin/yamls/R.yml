@@ -12,7 +12,7 @@ dependencies:
   - r-knitr=1.39
   - r-rmarkdown=2.14
   - r-kableextra=1.3.4
-  - r-vegan=2.6_2
+  - r-vegan=2.6_4
   - r-tidyverse=1.3.2
   - r-cowplot=1.1.1
   - r-scales=1.2.0
