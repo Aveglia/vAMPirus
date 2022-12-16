@@ -416,7 +416,7 @@ if (params$stats == "true" ) {
 <br>
 ```{r diversity_analysis3, echo=FALSE}
 mind5<-min(data5$sum)
-index <- rarefy(data5[,2:cols], sample=mind5)
+index <- rarefy(data5[,2:cols], sample=0.95*mind5)
 rarerichnessdata5 <- as.data.frame(index)
 rarerichnessdata5$sample <-data5$sample
 richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
@@ -488,7 +488,7 @@ if (params$stats == "true" ) {
 ```{r distance, echo=FALSE}
 ##Distance
 intermediate <- raredata
-bray.distance <- vegdist(sqrt(intermediate), method="bray")
+bray.distance <- vegdist(intermediate, method="bray")
 
 ##Dispersion
 disper <- betadisper(bray.distance, group = metadata$treatment, type="centroid")
@@ -529,8 +529,8 @@ if (params$stats == "true" ) {
 datax <- decostand(raredata, method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 
 if (nrow(datax) > 2) {
-    MDS <- metaMDS(sqrt(datax),
-                   distance = "bray",autotransform = FALSE,
+    MDS <- metaMDS(datax,
+                   distance = "bray",autotransform = TRUE,
                    k = 2,
                    maxit = 999,
                    trymax = params$try,
@@ -587,8 +587,8 @@ if (nrow(datax) > 2) {
 
 ```{r nmds3d, echo=FALSE}
 if (nrow(datax) > 2) {
-    MDS3 <- metaMDS(sqrt(datax),
-                   distance = "bray",autotransform = FALSE,
+    MDS3 <- metaMDS(datax,
+                   distance = "bray",autotransform = TRUE,
                    k = 3,
                    maxit = 999,
                    trymax = params$try,
@@ -1113,7 +1113,7 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 ```{r phy_diversity_analysis3a, echo=FALSE}
 if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     mind5<-min(phydata5$sum)
-    index <- rarefy(phydata5[,2:cols], sample=mind5)
+    index <- rarefy(phydata5[,2:cols], sample=0.95*mind5)
     rarerichnessdata5 <- as.data.frame(index)
     rarerichnessdata5$sample <-phydata5$sample
     richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
@@ -1236,8 +1236,8 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 ##NMDS
 datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 if (nrow(datax) > 2) {
-    MDS <- metaMDS(sqrt(datax),
-                   distance = "bray",autotransform = FALSE,
+    MDS <- metaMDS(datax,
+                   distance = "bray",autotransform = TRUE,
                    k = 2,
                    maxit = 999,
                    trymax = params$try,
@@ -1300,8 +1300,8 @@ if (nrow(datax) > 2) {
 ```{r phylo_nmds3d, echo=FALSE}
 if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     if (nrow(datax) > 2) {
-    MDS3 <- metaMDS(sqrt(datax),
-                   distance = "bray",autotransform = FALSE,
+    MDS3 <- metaMDS(datax,
+                   distance = "bray",autotransform = TRUE,
                    k = 3,
                    maxit = 999,
                    trymax = params$try,
@@ -1720,7 +1720,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 ```{r med_diversity_analysis3a, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     mind5<-min(meddata5$sum)
-    index <- rarefy(meddata5[,2:cols], sample=mind5)
+    index <- rarefy(meddata5[,2:cols], sample=0.95*mind5)
     rarerichnessdata5 <- as.data.frame(index)
     rarerichnessdata5$sample <-meddata5$sample
     richdata5_2 <- merge(rarerichnessdata5, metadata, by="sample")
@@ -1842,8 +1842,8 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 datax <- decostand(raredata,method="total") #method 'total' normalizes data to sum up to 1 --data5[,2:cols]
 
 if (nrow(datax) > 2) {
-        MDS <- metaMDS(sqrt(datax),
-                       distance = "bray",autotransform = FALSE,
+        MDS <- metaMDS(datax,
+                       distance = "bray",autotransform = TRUE,
                        k = 2,
                        maxit = 999,
                        trymax = params$try,
@@ -1905,8 +1905,8 @@ if (nrow(datax) > 2) {
 ```{r med_nmds3d, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     if (nrow(datax) > 2) {
-        MDS3 <- metaMDS(sqrt(datax),
-                   distance = "bray",autotransform = FALSE,
+        MDS3 <- metaMDS(datax,
+                   distance = "bray",autotransform = TRUE,
                    k = 3,
                    maxit = 999,
                    trymax = params$try,
