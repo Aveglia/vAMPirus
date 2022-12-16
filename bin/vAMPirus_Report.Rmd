@@ -505,7 +505,7 @@ cen
 write.csv(df2, file=paste(params$projtag, "distance-to-centroid-data.csv", sep="_"), row.names = F)
 
 if (params$stats == "true" ) {
-    adn <- adonis(bray.distance~data5$treatment)
+    adn <- adonis2(bray.distance~data5$treatment)
     adn
 } else {
     print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
@@ -1211,7 +1211,7 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
 ```{r phylo_distance2b, echo=FALSE}
 if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type == "ASV" || params$type == "AminoType")) {
     if (params$stats == "true" ) {
-        adn <- adonis(bray.distance~phydata5$treatment)
+        adn <- adonis2(bray.distance~phydata5$treatment)
         adn
     } else {
         print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
@@ -1816,7 +1816,7 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
 ```{r med_distance2b, echo=FALSE}
 if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "ASV" || params$type == "AminoType")){
     if (params$stats == "true" ) {
-        adn <- adonis(bray.distance~meddata5$treatment)
+        adn <- adonis2(bray.distance~meddata5$treatment)
         adn
     } else {
         print("Stats skipped. To toggle on use \"--stats run\" in vAMPirus launch command")
