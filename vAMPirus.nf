@@ -3330,7 +3330,7 @@ if (params.DataCheck || params.Analyze) {
                 asv_treeclust = Channel.value('skipping')
             }
 
-            if (!params.skipPhylogeny || params.asvTClust) {
+            if (params.asvTClust && !params.skipPhylogeny) {
 
                 process ASV_PhyloClustering {
 
@@ -4192,7 +4192,7 @@ if (params.DataCheck || params.Analyze) {
 
                   }
 
-                  if (!params.skipPhylogeny || params.asvTClust) {
+                  if (!params.skipPhylogeny || params.aminoTClust) {
 
                       process AminoType_Phylogeny_step5 {
 
@@ -4303,7 +4303,7 @@ if (params.DataCheck || params.Analyze) {
                 }
             }
 
-            if (params.aminoTClust) {
+            if (params.aminoTClust && !params.skipPhylogeny) {
 
                 process AminoType_PhyloClustering {
 
