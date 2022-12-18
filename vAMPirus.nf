@@ -4198,7 +4198,7 @@ if (params.DataCheck || params.Analyze) {
 
                             label 'norm_cpus'
 
-                            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/ASVs/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
+                            publishDir "${params.workingdir}/${params.outdir}/Analyze/Analyses/AminoTypes/Phylogeny/IQ-TREE", mode: "copy", overwrite: true, pattern: '*iq*'
 
                             conda (params.condaActivate ? "-c conda-forge bioconda::iqtree=2.2.0.3=hb97b32f_1" : null)
 
