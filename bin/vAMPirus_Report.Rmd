@@ -536,9 +536,9 @@ if (nrow(datax) > 2) {
                    trymax = params$try,
                    wascores = TRUE)
 
-    if (MDS$converged == "TRUE") {
+    if (MDS$converged != "0") {
 
-    data.scores <- as.data.frame(scores(MDS))
+    data.scores <- as.data.frame(scores(MDS)$sites)
     data.scores$sample <- data5$sample
     data.scores.2 <- merge(data.scores, metadata, by="sample")
 
@@ -594,9 +594,9 @@ if (nrow(datax) > 2) {
                    trymax = params$try,
                    wascores = TRUE)
 
-    if (MDS3$converged == "TRUE") {
+    if (MDS3$converged != "0") {
 
-    data.scores3 <- as.data.frame(scores(MDS3))
+    data.scores3 <- as.data.frame(scores(MDS3)$sites)
     data.scores3$sample <- data5$sample
     data.scores.3 <- merge(data.scores3, metadata, by="sample")
     p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
@@ -1243,9 +1243,9 @@ if (nrow(datax) > 2) {
                    trymax = params$try,
                    wascores = TRUE)
 
-    if (MDS$converged == "TRUE") {
+    if (MDS$converged != "0") {
 
-    data.scores <- as.data.frame(scores(MDS))
+    data.scores <- as.data.frame(scores(MDS)$sites)
     data.scores$sample <- phydata5$sample
     data.scores.2 <- merge(data.scores, metadata, by="sample")
 
@@ -1307,9 +1307,9 @@ if ((params$asvTClust == "true" || params$aminoTClust == "true") && (params$type
                    trymax = params$try,
                    wascores = TRUE)
 
-    if (MDS3$converged == "TRUE") {
+    if (MDS3$converged != "0") {
 
-    data.scores3 <- as.data.frame(scores(MDS3))
+    data.scores3 <- as.data.frame(scores(MDS3)$sites)
     data.scores3$sample <- phydata5$sample
     data.scores.3 <- merge(data.scores3, metadata, by="sample")
     p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
@@ -1849,9 +1849,9 @@ if (nrow(datax) > 2) {
                        trymax = params$try,
                        wascores = TRUE)
 
-        if (MDS$converged == "TRUE") {
+        if (MDS$converged != "0") {
 
-        data.scores <- as.data.frame(scores(MDS))
+        data.scores <- as.data.frame(scores(MDS)$sites)
         data.scores$sample <- meddata5$sample
         data.scores.2 <- merge(data.scores, metadata, by="sample")
 
@@ -1912,9 +1912,9 @@ if ((params$asvMED == "true" || params$aminoMED == "true") && (params$type == "A
                    trymax = params$try,
                    wascores = TRUE)
 
-    if (MDS3$converged == "TRUE") {
+    if (MDS3$converged != "0") {
 
-    data.scores3 <- as.data.frame(scores(MDS3))
+    data.scores3 <- as.data.frame(scores(MDS3)$sites)
     data.scores3$sample <- meddata5$sample
     data.scores.3 <- merge(data.scores3, metadata, by="sample")
     p3d <- plot_ly(data.scores.3, x=~NMDS1, y=~NMDS2, z=~NMDS3, text=~paste("Sample: ", sample),
