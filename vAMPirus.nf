@@ -4325,8 +4325,8 @@ if (params.DataCheck || params.Analyze) {
 
                       script:
                           """
-                          TreeCluster.py -i ${tree} ${params.asvTCopp} > ${params.projtag}_AminoType_treeclustering.out
-                          TreeCluster.py -i ${tree} ${params.asvTCopp} -v > ${params.projtag}_AminoType_treeclustering_verbose.out
+                          TreeCluster.py -i ${tree} ${params.aminoTCopp} > ${params.projtag}_AminoType_treeclustering.out
+                          TreeCluster.py -i ${tree} ${params.aminoTCopp} -v > ${params.projtag}_AminoType_treeclustering_verbose.out
                           #create headless treeclustering.out
                           tail -n +2 ${params.projtag}_AminoType_treeclustering.out | sed 's/-1/0X/g' > headless.treeout
                           #extracting singletons
