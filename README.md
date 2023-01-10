@@ -7,7 +7,12 @@
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
-## UPDATE: On 11/27/22 we have updated vAMPirus to v2.1.0 -- 12/16/22 -> We noticed there were some changes in the new version of vegan which we updated to in v2.1.0. We are working to fix the issue but the reports should be generated without error, if you experience an error, you can still find the files used to generate results within the results directories. You can also use --skipReport to skip the report generation all together.
+## RECENT UPDATES: 
+1/10/22 -> Updated code to produce the NMDS plot in the report, still not fully tested but changes should prevent errors from using deprecated code.
+
+12/16/22 -> We noticed there were some changes in the new version of vegan which we updated to in v2.1.0. We are working to fix the issue but the reports should be generated without error, if you experience an error, you can still find the files used to generate results within the results directories. You can also use --skipReport to skip the report generation all together.
+
+11/27/22 -> we have updated vAMPirus to v2.1.0  
 
 # Table of contents
 * [New in vAMPirus version 2.1.0](#New-in-vAMPirus-version-2.1.0)
