@@ -8,7 +8,9 @@
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
 ## RECENT UPDATES:
-1/10/22 -> Updated code to produce the NMDS plot in the report, still not fully tested but changes should prevent errors from using deprecated code.
+1/20/23 -> We have created the vAMPirus Analysis Repository community on Zenodo for everyone to upload their non-read files used for their vAMPirus analyses. This is an initiative to increase shareability and reproducibility of virus amplicon sequencing analyses. 
+
+1/10/23 -> Updated code to produce the NMDS plot in the report, still not fully tested but changes should prevent errors from using deprecated code.
 
 12/16/22 -> We noticed there were some changes in the new version of vegan which we updated to in v2.1.0. We are working to fix the issue but the reports should be generated without error, if you experience an error, you can still find the files used to generate results within the results directories. You can also use --skipReport to skip the report generation all together.
 
