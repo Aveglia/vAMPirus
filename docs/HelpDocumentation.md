@@ -94,8 +94,8 @@ You should also include any other files you used for the analysis which could be
 
 As mentioned above, the readme.txt file that you include in the compressed file should include a description of your files and some general instructions for reproducing your analysis. Here is the template readme.txt you should use when preparing your upload:
 
----------------------------------------------
-"In this directory you will find all necessary non-read files used to run the analyses and generate the results described in:
+---------------------------------------------'
+In this directory you will find all necessary non-read files used to run the analyses and generate the results described in:
 
 	Associated work: CITATION OF WORK HERE
 
@@ -112,8 +112,8 @@ To run the same analysis using vAMPirus v1.0.1:
 	2. Edit configurarion file with paths to any metadata files/databases
 	3. Run vAMPirus with the following launch command:
 
-		nextflow run vAMPirus.nf -c vAMPirus.config -profile "profile" --Analyze"
------------------------------------------------
+		nextflow run vAMPirus.nf -c vAMPirus.config -profile "profile" --Analyze
+-----------------------------------------------'
 
 Once you have this together, you place all your files into a directory and compress it prior to uploading to Zenodo
 
