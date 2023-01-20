@@ -1,5 +1,56 @@
 ![vAMPirus logo](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vamplogo.png)
 
+# Table of contents
+
+* [Introduction to vAMPirus](Introduction-to-vAMPirus)
+    * [Contact/support](Contact/support)
+* [New in vAMPirus version 2.1.0](New-in-vAMPirus-version-2.1.0)
+    * [Changes in version 2.0.0 and up](Changes-in-version-2.0.0-and-up)
+    * [Who to cite](Who-to-cite)
+* [Getting started with vAMPirus](Getting-started-with-vAMPirus)
+    * [General order of operations](General-order-of-operations)
+    * [Windows OS users](Windows-OS-users)
+        * [Enable WSL on your Windows 10 computer](Enable-WSL-on-your-Windows-10-computer)
+            * [Installing Conda for your Ubuntu WSL](Installing-Conda-for-your-Ubuntu-WSL)
+    * [MacOS users](MacOS-users)
+        * [Installing and running the VM on MacOS](Installing-and-running-the-VM-on-MacOS)
+    * [Installing vAMPirus]
+        * [Cloning the repository](Cloning-the-repository--skip-if-you-generated-the-Vagrant-virtual-environment-)
+        * [Setting up vAMPirus dependencies and checking installation](Setting-up-vAMPirus-dependencies-and-checking-installation)
+        * [Databases](Databases)
+        * [Using Singularity](Using-Singularity)
+    * [Running vAMPirus](Running-vAMPirus)
+        * [Testing vAMPirus installation](Testing-vAMPirus-installation)
+        * [Resuming analyses](Resuming-test-analyses-if-you-ran-into-an-error)
+* [Things to know before running vAMPirus](Things-to-know-before-running-vAMPirus)
+    * [The Nextflow workflow manager and the "launch command"](The-Nextflow-workflow-manager-and-the-"launch-command")
+        * [Nextflow](Nextflow)
+        * [The "launch" command](The-"launch"-command)
+    * [The Nextflow monitoring screen](The-Nextflow-monitoring-screen)
+    * [The Nextflow "-resume" feature](The-Nextflow-"-resume"-feature)
+    * [Understanding the vAMPirus config file and setting parameters](Understanding-the-vAMPirus-config-file-and-setting-parameters)
+* [Running the vAMPirus workflow](Running-the-vAMPirus-workflow)
+    * [Recommended order of operations](Recommended-order-of-operations)
+    * [Getting started quickly](For-the-impatient)
+    * [Necessary input](Necessary-input)
+    * [The mandatory arguments](The-mandatory-arguments)
+* [Breaking it down: The vAMPirus workflow](Breaking-it-down:-The-vAMPirus-workflow)
+    * [Read processing](Read-processing)
+    * [Amplicon Sequence Variants, AminoTypes and Clustering](Amplicon-Sequence-Variants,-AminoTypes-and-Clustering)
+    * [Sequence alignment](Sequence-alignment)
+    * [Minimum Entropy Decomposition (oligotyping)](Minimum-Entropy-Decomposition--EXPERIMENTAL----Oligotyping---https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
+    * [Phylogeny-based clustering of ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)](Phylogeny-based-clustering-of-ASV-or-AminoType-sequences-with-TreeCluster-(https://github.com/niemasd/TreeCluster;-https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068))
+    * [Counts tables and percent ID matrices](Counts-tables-and-percent-ID-matrices)
+    * [Phylogenetic analysis and model testing](Phylogenetic-analysis-and-model-testing)
+    * [Taxonomy Inference](Taxonomy-Inference)
+    * [EMBOSS Analyses](EMBOSS-Analyses)
+    * [Statistical tests](Statistical-tests)
+* [vAMPirus output](vAMPirus-output)
+    * [Pipeline performance information](Pipeline-performance-information---${working_directory}/${outdir}/PipelinePerformance/)
+    * [Output of read processing](Output-of-read-processing---${working_directory}/${outdir}/ReadProcessing)
+    * [Output of "--DataCheck"](Output-of-"--DataCheck"---${working_directory}/${outdir}/DataCheck)
+    * [Output of "--Analyze"](Output-of-"--Analyze"---${working_directory}/${outdir}/Analyze)
+* [Usage examples](Usage-examples)
 
 # Introduction to vAMPirus
 
@@ -92,6 +143,7 @@ If you do use vAMPirus for your analyses, please cite the following ->
 
 17. Balaban M, Moshiri N, Mai U, Jia X, Mirarab S (2019). "TreeCluster: Clustering biological sequences using phylogenetic trees." PLoS ONE. 14(8):e0221068. doi:10.1371/journal.pone.0221068
 
+18. Wernersson R. Virtual Ribosome--a comprehensive DNA translation tool with support for integration of sequence feature annotation. Nucleic Acids Res. 2006 Jul 1;34(Web Server issue):W385-8. doi: 10.1093/nar/gkl252. PMID: 16845033; PMCID: PMC1538826.
 
 # Getting started with vAMPirus
 
@@ -112,7 +164,6 @@ If you do use vAMPirus for your analyses, please cite the following ->
 7. Launch the Analyze pipeline to perform a comprehensive analysis with your dataset
 
 8. Explore results directories and produced final reports
-
 
 ## Windows OS users
 
@@ -378,7 +429,7 @@ You should then see a notification of it being transferred 100%
 
 ## Installing vAMPirus
 
-### Cloning the repository (skip if you generated the Vagrant virtual environment)
+### Cloning the repository -skip if you generated the Vagrant virtual environment-
 
 Clone the most recent version of vAMPirus from github using:
 
@@ -526,7 +577,7 @@ Using the yum package manager ->
        sudo yum -y install singularity
 
 
-## Running vAMpirus
+## Running vAMPirus
 
 ### Testing vAMPirus installation
 
@@ -1190,7 +1241,7 @@ NOTE: if srep and ensemble below are either both true or both false, vAMPirus wi
         // Number of replicates for ensemble alignment -- Default for stratified is 4; for diversified is 100
             N="100"
 
-## Minimum Entropy Decomposition (EXPERIMENTAL) - Oligotyping - https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/
+## Minimum Entropy Decomposition -EXPERIMENTAL- - Oligotyping - https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/
 
 In vAMPirus v2, we added the ability for the user to use the oligotyping program employing the Minimum Entropy Decomposition (MED) algorithm developed by Eren et al. 2015 (read more about MED here - https://www.nature.com/articles/ismej2014195#citeas) to cluster ASV or AminoType sequences.
 
@@ -1241,7 +1292,9 @@ MED related options within the configuration file:
             // Decomposition of sequences based on the top "x" amount of sequence positions with the highest entropy values. So if asvc = 10 it will decompose based on positions with the top ten highest entropy values.
                 aminoc=""
 
-## Phylogeny-based clustering of ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)
+## Phylogeny-based clustering of ASV or AminoType sequences with TreeCluster
+
+See https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068
 
 New in version 2.0.1, you can now use the program TreeCluster to cluster ASV or AminoType sequences based on phylogenetic relationship.
 
