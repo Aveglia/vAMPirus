@@ -7,12 +7,12 @@
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
-## RECENT UPDATES: 
+## RECENT UPDATES:
 1/10/22 -> Updated code to produce the NMDS plot in the report, still not fully tested but changes should prevent errors from using deprecated code.
 
 12/16/22 -> We noticed there were some changes in the new version of vegan which we updated to in v2.1.0. We are working to fix the issue but the reports should be generated without error, if you experience an error, you can still find the files used to generate results within the results directories. You can also use --skipReport to skip the report generation all together.
 
-11/27/22 -> we have updated vAMPirus to v2.1.0  
+11/27/22 -> we have updated vAMPirus to v2.1.0
 
 # Table of contents
 * [New in vAMPirus version 2.1.0](#New-in-vAMPirus-version-2.1.0)
@@ -31,6 +31,14 @@
 # Introduction to vAMPirus
 
 Viruses are the most abundant biological entities on the planet and with advances in next-generation sequencing technologies, there has been significant effort in deciphering the global virome and its impact in nature (Suttle 2007; Breitbart 2019). A common method for studying viruses in the lab or environment is amplicon sequencing, an economic and effective approach for investigating virus diversity and community dynamics. The highly targeted nature of amplicon sequencing allows in-depth characterization of genetic variants within a specific taxonomic grouping facilitating both virus discovery and screening within samples. Although, the high volume of amplicon data produced combined with the highly variable nature of virus evolution across different genes and virus-types can make it difficult to scale and standardize analytical approaches. Here we present vAMPirus (https://github.com/Aveglia/vAMPirus.git), an automated and easy-to-use virus amplicon sequencing analysis program that is integrated with the Nextflow workflow manager facilitating easy scalability and standardization of analyses.
+
+# vAMPirus Analysis Repository -- Zenodo Community
+
+"Reproducibility and research integrity are essential tenets of every scientific study and discovery. They serve as proof that an established and documented work can be verified, repeated, and reproduced.." - Diaba-Nuhoho and Amponsah-Offeh 2021 (https://tinyurl.com/279recr3)
+
+To  promote and simplify the sharing and reproduction of vAMPirus analyses we have created a Zenodo Community 'vAMPirus Analysis Repository' (zenodo.org/communities/vampirusrepo) that is meant to be a central location for all vAMPirus analyses described in a published report/preprint/manuscript. Here investigators will archive and share the non-read files in a compressed folder required to reproduce their virus amplicon analyses.
+
+For the benefit of the field and science as a whole, we recommend uploading all non-read files needed to reproduce your analysis. For more information see the manual here: https://github.com/Aveglia/vAMPirus/blob/master/docs/HelpDocumentation.md#vampirus-analysis-repository----zenodo-community
 
 # New in vAMPirus version 2.1.0
 
