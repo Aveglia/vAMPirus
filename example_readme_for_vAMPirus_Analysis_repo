@@ -1,0 +1,18 @@
+In this directory you will find all necessary non-read files used to run the analyses and generate the results described in:
+
+	Associated work: CITATION OF WORK HERE
+
+
+This file includes:
+
+	1. file1 -> this is the metadata/database file(s) used for the vAMPirus analysis
+	2. vAMPirus.config -> the configuration file used for the vAMPirus analysis
+    ... Any other files included
+
+To run the same analysis using vAMPirus v1.0.1:
+
+	1. INSTRUCTIONS FOR OBTAINING SEQUENCING DATA HERE
+	2. Edit configurarion file with paths to any metadata files/databases
+	3. Run vAMPirus with the following launch command:
+
+		nextflow run vAMPirus.nf -c vAMPirus.config -profile "profile" --Analyze
