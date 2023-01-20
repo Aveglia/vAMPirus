@@ -1,9 +1,10 @@
 ![vAMPirus logo](https://raw.githubusercontent.com/Aveglia/vAMPirus/master/example_data/conf/vamplogo.png)
 
-# Table of contents
+# Table of contents (scroll down menu in top left)
 
 * [Introduction to vAMPirus](Introduction-to-vAMPirus)
     * [Contact/support](Contact/support)
+* [vAMPirus Analysis Repository -- Zenodo Community](vAMPirus-Analysis-Repository----Zenodo-Community)
 * [New in vAMPirus version 2.1.0](New-in-vAMPirus-version-2.1.0)
     * [Changes in version 2.0.0 and up](Changes-in-version-2.0.0-and-up)
     * [Who to cite](Who-to-cite)
@@ -14,7 +15,7 @@
             * [Installing Conda for your Ubuntu WSL](Installing-Conda-for-your-Ubuntu-WSL)
     * [MacOS users](MacOS-users)
         * [Installing and running the VM on MacOS](Installing-and-running-the-VM-on-MacOS)
-    * [Installing vAMPirus]
+    * [Installing vAMPirus](Installing-vAMPirus)
         * [Cloning the repository](Cloning-the-repository--skip-if-you-generated-the-Vagrant-virtual-environment-)
         * [Setting up vAMPirus dependencies and checking installation](Setting-up-vAMPirus-dependencies-and-checking-installation)
         * [Databases](Databases)
@@ -38,8 +39,8 @@
     * [Read processing](Read-processing)
     * [Amplicon Sequence Variants, AminoTypes and Clustering](Amplicon-Sequence-Variants,-AminoTypes-and-Clustering)
     * [Sequence alignment](Sequence-alignment)
-    * [Minimum Entropy Decomposition (oligotyping)](Minimum-Entropy-Decomposition--EXPERIMENTAL----Oligotyping---https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/)
-    * [Phylogeny-based clustering of ASV or AminoType sequences with TreeCluster (https://github.com/niemasd/TreeCluster; https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068)](Phylogeny-based-clustering-of-ASV-or-AminoType-sequences-with-TreeCluster-(https://github.com/niemasd/TreeCluster;-https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0221068))
+    * [Minimum Entropy Decomposition (oligotyping)](Minimum-Entropy-Decomposition--EXPERIMENTAL--Oligotyping---)
+    * [Phylogeny-based clustering of ASV or AminoType sequences with TreeCluster](Phylogeny-based-clustering-of-ASV-or-AminoType-sequences-with-TreeCluster)
     * [Counts tables and percent ID matrices](Counts-tables-and-percent-ID-matrices)
     * [Phylogenetic analysis and model testing](Phylogenetic-analysis-and-model-testing)
     * [Taxonomy Inference](Taxonomy-Inference)
@@ -71,6 +72,74 @@ The vAMPirus program contains two different pipelines:
 ## Contact/support
 
 If you have a feature request or any feedback/questions, feel free to email vAMPirusHelp@gmail.com or you can open an Issue on GitHub.
+
+# vAMPirus Analysis Repository -- Zenodo Community
+
+"Reproducibility and research integrity are essential tenets of every scientific study and discovery. They serve as proof that an established and documented work can be verified, repeated, and reproduced.." - Diaba-Nuhoho and Amponsah-Offeh 2021 (https://tinyurl.com/279recr3)
+
+To  promote and simplify the sharing and reproduction of vAMPirus analyses we have created a Zenodo Community 'vAMPirus Analysis Repository' (zenodo.org/communities/vampirusrepo) that is meant to be a central location for all vAMPirus analyses described in a published report/preprint/manuscript. Here investigators will archive and share the non-read files in a compressed folder required to reproduce their virus amplicon analyses.
+
+For the benefit of the field and science as a whole, we recommend uploading all non-read files needed to reproduce your analysis.
+
+## Instructions for uploading your files to vAMPirus Analysis Repository
+
+Your compressed (.zip or tar.gz) file should include at minimum:
+
+    1. The vAMPirus configuration file used for your analysis
+    2. A readme.txt that includes a short description of each file included and general instructions for obtaining data and running the analysis
+
+You should also include any other files you used for the analysis which could be your metadata file and any databases used for taxonomy or ASV filtering.
+
+### The readme.txt
+
+As mentioned above, the readme.txt file that you include in the compressed file should include a description of your files and some general instructions for reproducing your analysis. Here is the template readme.txt you should use when preparing your upload:
+
+---------------------------------------------
+In this directory you will find all necessary non-read files used to run the analyses and generate the results described in:
+
+	Associated work: CITATION OF WORK HERE
+
+
+This file includes:
+
+	1. file1 -> this is the metadata/database file(s) used for the vAMPirus analysis
+	2. vAMPirus.config -> the configuration file used for the vAMPirus analysis
+    ... Any other files included
+
+To run the same analysis using vAMPirus v1.0.1:
+
+	1. INSTRUCTIONS FOR OBTAINING SEQUENCING DATA HERE
+	2. Edit configurarion file with paths to any metadata files/databases
+	3. Run vAMPirus with the following launch command:
+
+		nextflow run vAMPirus.nf -c vAMPirus.config -profile "profile" --Analyze
+-----------------------------------------------
+
+Once you have this together, you place all your files into a directory and compress it prior to uploading to Zenodo
+
+### Uploading your files to vAMPirus Analysis Repository on Zenodo
+
+To upload your file to the vAMPirus Analysis Repository you will need a Zenodo account, which is easy and quick to set up. Once you have that, you are good to move forward.
+
+You can review previous submissions here: https://zenodo.org/communities/vampirusrepo/
+
+You can either hit the "Upload" button there or you can follow this link to upload your file to the community: https://zenodo.org/deposit/new?c=vampirusrepo
+
+Once you get to the upload portal here are some general instructions/things to consider/rules for information to include:
+
+1. The first step is to upload your compressed file. You can drag and drop your file or "Choose file" to upload, then make sure you then click "Start upload" in the top right section.
+
+2. Next, just make sure that the community you are uploading to is the correct one (you should see vAMPirus Analysis Repository with the vAMPirus logo)
+
+3. Next, edit the basic information, here are the most important for you upload, but please add as much information you want/feel is appropriate:
+        Title -> This should be "vAMPirus Analysy - TITLE OF YOUR STUDY"
+        Authors -> this should include at minimum the first author, submitting author, and final author. You can include all authors if you would like.
+        Description -> In this area you should include a brief description of what the upload is and what study it is associated with.
+        Version -> on the first submission, you can put this as "1.0.0". If there are changes in the analysis after revisions you can update the original upload.
+
+And that is basically it, you can add any other info you feel appropriate!
+
+Let us know if you have any questions, thank you for sharing your methods and contributing your science to the community!!
 
 # New in vAMPirus version 2.1.0
 
@@ -1241,7 +1310,9 @@ NOTE: if srep and ensemble below are either both true or both false, vAMPirus wi
         // Number of replicates for ensemble alignment -- Default for stratified is 4; for diversified is 100
             N="100"
 
-## Minimum Entropy Decomposition -EXPERIMENTAL- - Oligotyping - https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/
+## Minimum Entropy Decomposition -EXPERIMENTAL- Oligotyping -
+
+See -> https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/
 
 In vAMPirus v2, we added the ability for the user to use the oligotyping program employing the Minimum Entropy Decomposition (MED) algorithm developed by Eren et al. 2015 (read more about MED here - https://www.nature.com/articles/ismej2014195#citeas) to cluster ASV or AminoType sequences.
 
