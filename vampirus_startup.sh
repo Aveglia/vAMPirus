@@ -213,19 +213,8 @@ then    mkdir "$mypwd"/Databases
         cd "$mypwd"/Databases
         dir="$(pwd)"
         echo "Database installation: Viral RefSeq database (latest as of 2022-11)"
-        curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         curl -o viral.1.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.protein.faa.gz
-        curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.protein.faa.gz
-        curl -o viral.4.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.4.protein.faa.gz
         gunzip viral.1.protein.faa.gz
-        cat viral.1.protein.faa >> complete_virus_refseq_prot.fasta
-        gunzip viral.2.protein.faa.gz
-        cat viral.2.protein.faa >> complete_virus_refseq_prot.fasta
-        gunzip viral.3.protein.faa.gz
-        cat viral.3.protein.faa >> complete_virus_refseq_prot.fasta
-        gunzip viral.4.protein.faa.gz
-        cat viral.4.protein.faa >> complete_virus_refseq_prot.fasta
-        rm viral.*.protein.faa
         curl -o U-RVDBv24.1-prot-hmm-txt.tar.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot-hmm-txt.tar.xz
         tar -xJf U-RVDBv24.1-prot-hmm-txt.tar.xz
         mv annot ./RVDBannot
@@ -259,10 +248,7 @@ then    mkdir "$mypwd"/Databases
         dir="$(pwd)"
         echo "Database installation: We want 'em all! Might take a little while....'"
         curl -o NCBI_nr_proteindb.faa.gz https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz
-        curl -o viral.2.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.2.protein.faa.gz
         curl -o viral.1.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.protein.faa.gz
-        curl -o viral.3.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.3.protein.faa.gz
-        curl -o viral.4.protein.faa.gz https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.4.protein.faa.gz
         curl -o U-RVDBv24.1-prot.fasta.xz https://rvdb-prot.pasteur.fr/files/U-RVDBv24.1-prot.fasta.xz
         sed "s|DATABASEDIR|${dir}|g" "$mypwd"/vampirus.config > tmp1.config
         cat tmp1.config > "$mypwd"/vampirus.config
