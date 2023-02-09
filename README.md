@@ -8,6 +8,8 @@
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
 ## RECENT UPDATES:
+2/9/23 -> vAMPirus preprint has been released, check it out here: https://www.authorea.com/users/584435/articles/623635-vampirus-a-versatile-amplicon-processing-and-analysis-program-for-studying-viruses
+
 1/20/23 -> We have created the vAMPirus Analysis Repository community on Zenodo for everyone to upload their non-read files used for their vAMPirus analyses. This is an initiative to increase shareability and reproducibility of virus amplicon sequencing analyses. 
 
 1/10/23 -> Updated code to produce the NMDS plot in the report, still not fully tested but changes should prevent errors from using deprecated code.
