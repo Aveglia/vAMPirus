@@ -311,7 +311,7 @@ For example if the analysis launched with the command from Example 6 above was i
 
 If you do use vAMPirus for your analyses, please cite the following ->
 
-1. vAMPirus - Veglia A.J., Rivera Vicéns R.E., Grupstra C.G.B., Howe-Kerr L.I., Correa A.M.S. (2021) vAMPirus: An automated, comprehensive virus amplicon sequencing analysis program (Version v1.0.1). Zenodo. http://doi.org/10.5281/zenodo.4549851
+1. vAMPirus - Alex Veglia, Ramón E. Rivera-Vicéns, Carsten Grupstra, et al. vAMPirus: A versatile amplicon processing and analysis program for studying viruses. Authorea. February 09, 2023. DOI: 10.22541/au.167592965.50010700/v1
 
 2. DIAMOND - Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi:10.1038/nmeth.3176
 
