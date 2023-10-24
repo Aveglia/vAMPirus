@@ -8,6 +8,8 @@
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
 ## RECENT UPDATES:
+10/23/2023 -> vAMPirus manuscript is currently in revision in Molecular Ecology Resources and there are plans to update the framework within the next year. Please note to run the vAMPirus.nf script you will not be able to use the most recent version of Nextflow (v23). You can download version 22 and it will run perfectly fine still. As always, please let us know if you run into any issues.
+
 2/9/23 -> vAMPirus preprint has been released, check it out here: https://www.authorea.com/users/584435/articles/623635-vampirus-a-versatile-amplicon-processing-and-analysis-program-for-studying-viruses
 
 1/20/23 -> We have created the vAMPirus Analysis Repository community on Zenodo for everyone to upload their non-read files used for their vAMPirus analyses. This is an initiative to increase shareability and reproducibility of virus amplicon sequencing analyses. 
