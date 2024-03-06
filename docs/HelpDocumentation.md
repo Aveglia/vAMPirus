@@ -1316,15 +1316,46 @@ See -> https://merenlab.org/2012/05/11/oligotyping-pipeline-explained/
 
 In vAMPirus v2, we added the ability for the user to use the oligotyping program employing the Minimum Entropy Decomposition (MED) algorithm developed by Eren et al. 2015 (read more about MED here - https://www.nature.com/articles/ismej2014195#citeas) to cluster ASV or AminoType sequences.
 
-The MED algorithm provides an alternative way of clustering marker gene sequences using "information theory-guided decomposition" - "By employing Shannon entropy, MED uses only the information-rich nucleotide positions across reads and iteratively partitions large datasets while omitting stochastic variation." -Eren et al. 2015
+The MED algorithm provides an alternative way of grouping and differentiating marker gene sequences using "information theory-guided decomposition" - "By employing Shannon entropy, MED uses only the information-rich nucleotide positions across reads and iteratively partitions large datasets while omitting stochastic variation." -Eren et al. 2015
 
 When you run the DataCheck pipeline with your dataset, the report will include a figure and table that breakdown the Shannon Entropy analysis results for both ASVs and AminoTypes. The figure visualizes entropy values per sequence position revealing positions or regions of high entropy. The table beneath the figure breaks down the number of positions with entropy values above "0.x". Although, if you know the positions on your sequence that have the potential to contain biologically or ecologically meaningful mutations, you can specify decomposition based on these positions.
 
 If you decide to use MED, vAMPirus will run all the same analyses that would be done with the ASV or AminoType sequences (e.g. diversity analyses, statistics) and be appended results to the ASV or AminoType report. The ASV or AminoType sequence nodes on the phylogenetic tree will also be colored based on which MED group they were assigned to.
 
-To add MED analysis to either the DataCheck or Analyze run you must add "--asvMED" and/or "--aminoMED" to the launch command (see examples below).
+To add MED analysis to either the DataCheck or Analyze run you must add "--asvMED" and/or "--aminoMED" to the launch command (see considerations and examples below).
 
-There are two ways to utilize MED within the vAMPirus pipeline:
+Considerations when using MED on your data:
+
+Early Applications and Collective Learning in Viral Amplicon Data Analysis:
+As the integration of Minimum Entropy Decomposition (MED) with aminotyping in the vAMPirus platform represents a novel application within the realm of virus amplicon sequencing, it's important to acknowledge the pioneering stage of this endeavor. The broader adoption of MED in microbial ecology, while substantial, has not yet resulted in a wealth of resources specifically tailored for viral applications. This scenario underscores the pioneering role of vAMPirus in offering guidance and support for leveraging MED in the analysis of viral sequences.
+
+Given this nascent stage, the journey into applying MED and aminotyping for virus amplicon data is one of collective exploration and learning within the scientific community. Researchers embarking on this path are encouraged to approach the analysis with an open mind and a willingness to delve into uncharted territories. As we navigate these early applications, the field will evolve through shared experiences, discoveries, and the development of best practices.
+
+In light of this, researchers might find it beneficial to actively seek out external resources or engage with experts in related areas. These actions can enrich the understanding and application of MED in virus amplicon sequencing, contributing to a growing body of knowledge and expertise. Remember, the exploration of MED's utility in virology is a collaborative endeavor, and as a field, we will learn and advance together. Embracing this perspective, users of vAMPirus are not only applying an advanced tool to their research but also contributing to the broader scientific understanding of viral diversity and its implications. Keep in mind the pioneering nature of this work and seek collaboration, share insights, and remain open to learning from the collective experiences of the scientific community.
+
+Adaptation for Viral Sequences:
+Although MED was initially designed with bacterial communities in mind, its application extends to the realm of virology within vAMPirus. However, given the distinct genetic dynamics and diversity of viruses compared to bacteria, researchers should exercise caution. Understanding the method's original context and considering how viral sequences' variability and conservation levels might influence entropy-based partitioning are important steps in adapting MED for viral analyses.
+
+Navigating Limited Viral-Specific Resources:
+The broader adoption of MED in microbial ecology does not directly translate to an abundance of resources tailored for viral applications. This scarcity underscores the importance of vAMPirus in providing guidance and support for applying MED to virus amplicon sequencing. Researchers new to using MED for viral analyses may need to seek out additional resources or consult with experts when necessary.
+
+Capturing Viral Diversity:
+A notable feature of MED is its ability to illuminate the rare biosphere by discerning minor, yet potentially significant, differences among closely related taxa. This sensitivity is a double-edged sword in virology, where the rare biosphere's full diversity is paramount yet challenging to capture. Users should be aware that while MED excels in delineating fine-scale diversity, its focus on specific nucleotide positions could, in some cases, lead to underrepresentation of low-abundance sequences. Ensuring a balanced view of viral community composition may require complementary analyses.
+
+Understanding Protein Function for Effective Application of MED and Aminotyping:
+Incorporating Minimum Entropy Decomposition (MED) with aminotyping into the vAMPirus platform significantly enhances the potential to dissect and understand virus community diversity. To leverage this combination effectively, a deep understanding of the protein encoded by the target gene and the implications of non-synonymous mutations is paramount.
+
+Non-synonymous mutations lead to changes in the amino acid sequence of the protein, potentially altering its function, structure, interaction with host molecules, or immunogenicity. These mutations can have profound effects on viral pathogenicity, transmission, and resistance to treatments. Therefore, recognizing and interpreting these mutations within the context of MED and aminotyping analysis requires a solid foundation in molecular biology and genetics, specifically:
+
+Protein Functionality- Knowledge of the biological role and mechanism of action of the protein under study is crucial. Understanding how specific amino acid changes might impact the protein’s function can provide insights into the physiological and ecological significance of the virus variants identified.
+
+Evolutionary Implications- Awareness of how non-synonymous mutations have influenced viral evolution and adaptation can guide the interpretation of MED and aminotyping results. This includes understanding the selective pressures that might favor certain mutations over others in different environmental or host contexts.
+
+Disease Association- For pathogens, correlating specific mutations with changes in disease manifestation, severity, or treatment outcomes can be particularly informative. This association helps in identifying clinically relevant virus variants.
+
+Experimental Validation- Whenever possible, coupling MED and aminotyping analyses with experimental validation of the predicted effects of non-synonymous mutations on protein function can provide a more comprehensive understanding of their implications.
+
+Anyway... there are two ways to utilize MED within the vAMPirus pipeline:
 
         (1) Decomposition based on all sequence positions with an entropy value above "0.x" - Useful approach to preliminarily test influence of MED on your sequences
 
