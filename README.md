@@ -8,6 +8,8 @@
 [![release](https://img.shields.io/github/v/release/Aveglia/vAMPirus?label=release&logo=github)](https://github.com/Aveglia/vAMPirus/releases/latest)
 
 ## RECENT UPDATES:
+5/23/24 -> vAMPirus manuscript is out now! Check it out is Molecular Ecology Resources -- https://onlinelibrary.wiley.com/doi/10.1111/1755-0998.13978
+
 10/23/2023 -> vAMPirus manuscript is currently in revision in Molecular Ecology Resources and there are plans to update the framework within the next year. Please note to run the vAMPirus.nf script you will not be able to use the most recent version of Nextflow (v23). You can download version 22 and it will run perfectly fine still. As always, please let us know if you run into any issues.
 
 2/9/23 -> vAMPirus preprint has been released, check it out here: https://www.authorea.com/users/584435/articles/623635-vampirus-a-versatile-amplicon-processing-and-analysis-program-for-studying-viruses
@@ -313,7 +315,7 @@ For example if the analysis launched with the command from Example 6 above was i
 
 If you do use vAMPirus for your analyses, please cite the following ->
 
-1. vAMPirus - Alex Veglia, Ramón E. Rivera-Vicéns, Carsten Grupstra, et al. vAMPirus: A versatile amplicon processing and analysis program for studying viruses. Authorea. February 09, 2023. DOI: 10.22541/au.167592965.50010700/v1
+1. vAMPirus - Veglia, A. J., Rivera-Vicéns, R. E., Grupstra, C. G. B., Howe-Kerr, L. I., & Correa, A. M. S. (2024). vAMPirus: A versatile amplicon processing and analysis program for studying viruses. Molecular Ecology Resources, 00, e13978. https://doi.org/10.1111/1755-0998.13978
 
 2. DIAMOND - Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi:10.1038/nmeth.3176
 
